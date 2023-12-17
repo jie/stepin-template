@@ -2,8 +2,8 @@
   <a-config-provider :getPopupContainer="getPopupContainer">
     <ThemeProvider is-root v-bind="themeConfig" :apply-style="false">
       <stepin-view
-        system-name="Stepin"
-        logo-src="@/assets/vite.svg"
+        system-name=""
+        logo-src="@/assets/logo.png"
         :class="`${contentClass}`"
         :user="user"
         :navMode="navigation"
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { reactive, ref } from 'vue';
+  import { reactive, ref, toRaw } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAccountStore, useMenuStore, useSettingStore, storeToRefs } from '@/store';
   import avatar from '@/assets/avatar.png';
@@ -58,13 +58,12 @@
 
   const { navigation, useTabs, theme, contentClass } = storeToRefs(useSettingStore());
   const themeConfig = computed(() => themeList.find((item) => item.key === theme.value)?.config ?? {});
-
   const user = reactive({
     name: 'admin',
     avatar: avatar,
     menuList: [
       { title: '个人中心', key: 'personal', icon: 'UserOutlined', onClick: () => router.push('/profile') },
-      { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
+      // { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
       { type: 'divider' },
       {
         title: '退出登录',

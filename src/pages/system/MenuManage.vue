@@ -113,7 +113,7 @@
     renderMenu: true,
     parent: undefined,
     permission: undefined,
-    cacheable: true,
+    cacheable: false,
   });
 
   const editPath = false;

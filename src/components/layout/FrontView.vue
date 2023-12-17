@@ -4,48 +4,48 @@
   import { ThemeProvider, alert } from 'stepin';
 
   onMounted(() => {
-    alert.info(
-      `<div class="text-text">
-        Stepin is a fast, light framework to Vue3 – try it out today with the
-        <span class="underline">Stepin Template Beta</span>.
-      </div>`,
-      { renderRaw: true, duration: -1 }
-    );
+    // alert.info(
+    //   `<div class="text-text">
+    //     Stepin is a fast, light framework to Vue3 – try it out today with the
+    //     <span class="underline">Stepin Template Beta</span>.
+    //   </div>`,
+    //   { renderRaw: true, duration: -1 }
+    // );
   });
 
   const navList = [
-    {
-      title: 'Products',
-      children: [
-        {
-          title: 'Stepin Template',
-          list: ['Stepin Pro', 'Stepin Style', 'Stepin Admin'],
-        },
-        {
-          title: 'Stepin',
-          list: ['Stepin Vue', 'Stepin React', 'Stepin Angular'],
-        },
-      ],
-    },
-    {
-      title: 'Developers',
-      children: [
-        {
-          title: 'Developers',
-          list: ['Docs', 'Get Started', 'UI Library', 'Community', 'Open Source'],
-        },
-      ],
-    },
-    {
-      title: 'Sponsors',
-    },
-    {
-      title: 'Business',
-      children: [{ title: 'Business', list: ['Contact Us', 'Cooperation', 'Support'] }],
-    },
-    {
-      title: 'About Us',
-    },
+    // {
+    //   title: 'Products',
+    //   children: [
+    //     {
+    //       title: 'Stepin Template',
+    //       list: ['Stepin Pro', 'Stepin Style', 'Stepin Admin'],
+    //     },
+    //     {
+    //       title: 'Stepin',
+    //       list: ['Stepin Vue', 'Stepin React', 'Stepin Angular'],
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: 'Developers',
+    //   children: [
+    //     {
+    //       title: 'Developers',
+    //       list: ['Docs', 'Get Started', 'UI Library', 'Community', 'Open Source'],
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: 'Sponsors',
+    // },
+    // {
+    //   title: 'Business',
+    //   children: [{ title: 'Business', list: ['Contact Us', 'Cooperation', 'Support'] }],
+    // },
+    // {
+    //   title: 'About Us',
+    // },
   ];
 </script>
 <template>
@@ -54,11 +54,10 @@
       <div class="text-text flex-1">
         <div class="front-header flex items-baseline py-md px-xl">
           <router-link to="/home" class="text-xxl text-text hover:text-text">
-            <img src="@/assets/vite.svg" />
-            Stepin
+            <img src="@/assets/logo.png" width="80"/>  &nbsp
           </router-link>
           <div
-            style="width: calc(100% - 430px)"
+            style="width: calc(100% - 100px)"
             class="front-navigation mx-xl flex overflow-hidden items-center text-lg overflow-ellipsis whitespace-nowrap"
           >
             <div
@@ -88,7 +87,7 @@
               </a-popover>
             </div>
           </div>
-          <div>
+          <div style="width: 200px; text-align: right;">
             <router-link
               to="/login"
               class="h-[46px] border-transparent hover:text-text hover:border-transparent text-lg text-text"
@@ -96,11 +95,11 @@
               <LogoutOutlined class="mr-xs" />
               Sign In
             </router-link>
-            <a-button
+            <!-- <a-button
               class="ml-md px-lg border-text hover:border-text hover:bg-text border-2 h-[46px] hover:text-bg-container"
               size="large"
               >Get Started</a-button
-            >
+            > -->
           </div>
         </div>
         <div class="front-content px-xl">

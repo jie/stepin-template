@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-  import { reactive } from 'vue';
+  import { reactive, ref } from 'vue';
   import { StepinHeaderAction } from 'stepin';
   import Notice from '@/components/notice/Notice.vue';
   import DayNightSwitch from '@/components/switch/DayNightSwitch.vue';
   import { BellOutlined } from '@ant-design/icons-vue';
   import Fullscreen from '../fullscreen/Fullscreen.vue';
+  import {i18n} from '@/lang/i18n';
 
   defineEmits<{
     (e: 'showSetting'): void;
@@ -99,9 +100,32 @@
       ],
     },
   ]);
+
+  const langs = {
+    zh: '中文',
+    en: 'English',
+  }
+
+  const getLocale = () => {
+    const locale = localStorage.getItem('locale');
+    if (locale) {
+      return locale;
+    }
+    return 'zh';
+  };
+
+  getLocale()
+
+  const currentLocale = ref(i18n.global.locale)
+
+  const changeLocale = (lang: any) => {
+    localStorage.setItem('locale', lang);
+    currentLocale.value = lang;
+    i18n.global.locale = lang;
+  };
 </script>
 <template>
-  <StepinHeaderAction>
+  <!-- <StepinHeaderAction>
     <a-input placeholder="开始搜索...">
       <template #prefix>
         <search-outlined />
@@ -139,7 +163,19 @@
   </a-popover>
   <StepinHeaderAction>
     <Fullscreen class="-mx-xs -my-sm h-[56px] px-xs py-sm flex items-center" target=".stepin-layout" />
-  </StepinHeaderAction>
+  </StepinHeaderAction> -->
+  <a-popover placement="bottomRight">
+    <StepinHeaderAction>
+      <div class="action-item translate">
+        <translation-outlined /> <span class="text-sm ml-2">{{ langs[currentLocale] }}</span>
+      </div>
+    </StepinHeaderAction>
+    <template #content>
+      <div>
+        <a-button type="text" v-for="lang in Object.keys(langs)" @click="changeLocale(lang)">{{ langs[lang] }}</a-button>
+      </div>
+    </template>
+  </a-popover>
 </template>
 <style scoped lang="less">
   .gitee-logo {

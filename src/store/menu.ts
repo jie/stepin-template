@@ -85,7 +85,7 @@ const toRoutes = (list: MenuProps[]): RouteOption[] => {
     component: item.component,
     children: item.children && toRoutes(item.children),
     meta: {
-      title: item.title,
+      title: item.name,
       permission: item.permission,
       icon: item.icon,
       renderMenu: item.renderMenu,

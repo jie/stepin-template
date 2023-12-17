@@ -1,11 +1,11 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
 import { reactive } from 'vue';
 import routes from './routes';
 import guards from './guards';
 
 const router = createRouter(
   reactive({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes,
   })
 );

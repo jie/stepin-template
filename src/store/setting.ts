@@ -5,8 +5,9 @@ export type Navigation = 'side' | 'head' | 'mix';
 
 export const useSettingStore = defineStore('setting', () => {
   const navigation = ref<Navigation>('side');
-  const useTabs = ref<boolean>(true);
-  const theme = ref('side-dark');
+  const useTabs = ref<boolean>(false);
+  // const theme = ref('side-dark');
+  const theme = ref('light');
   const contentClass = ref('common');
   const filterMenu = ref(false);
 

@@ -11,7 +11,7 @@ import 'stepin/es/style';
 // import 'default-passive-events';
 import '@/theme/index.less';
 import { AuthPlugin, IconfontPlugin } from '@/plugins';
-
+import {i18n} from "@/lang/i18n";
 const app = createApp(App);
 
 app.use(pinia);
@@ -19,6 +19,7 @@ app.use(router);
 app.use(stepin, { router });
 app.use(AuthPlugin, { action: 'disable' });
 // iconfont 插件。url为你的 iconfont 图标资源地址（你的iconfont 仓库可获取此地址）
+app.use(i18n)
 app.use(IconfontPlugin, { url: '//at.alicdn.com/t/c/font_3805284_ulvha6ct7d.js' });
 app.config.errorHandler = function (err) {
   console.error('未捕获的异常，', err);
