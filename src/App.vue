@@ -1,6 +1,6 @@
 <template>
   <a-config-provider :getPopupContainer="getPopupContainer">
-    <ThemeProvider is-root v-bind="themeConfig" :apply-style="false">
+    <ThemeProvider is-root v-bind="themeConfig" :apply-style="false" :size="size" :font="font">
       <stepin-view
         system-name=""
         logo-src="@/assets/logo.png"
@@ -57,25 +57,37 @@
   useMenuStore().getMenuList();
 
   const { navigation, useTabs, theme, contentClass } = storeToRefs(useSettingStore());
+  console.log('theme:', toRaw(theme))
+  console.log('contentClass:', toRaw(contentClass))
   const themeConfig = computed(() => themeList.find((item) => item.key === theme.value)?.config ?? {});
+  console.log('themeConfig:', toRaw(themeConfig))
   const user = reactive({
     name: 'admin',
     avatar: avatar,
     menuList: [
       { title: '个人中心', key: 'personal', icon: 'UserOutlined', onClick: () => router.push('/profile') },
-      // { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
+      { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
       { type: 'divider' },
       {
         title: '退出登录',
         key: 'logout',
         icon: 'LogoutOutlined',
-        onClick: () => logout().then(() => router.push('/login')),
+        onClick: () => logout().then(() => router.push('/account/login')),
       },
     ],
   });
 
   function getPopupContainer() {
     return document.querySelector('.stepin-layout');
+  }
+
+  const size = {
+    // 'width-side': '240px',
+    'width-side-collapsed': '96px'
+  }
+
+  const font = {
+    'font-size': '16px'
   }
 </script>
 

@@ -13,23 +13,12 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/front',
-    name: '前端',
+    name: 'front',
     meta: {
       renderMenu: false,
     },
     component: () => import('@/components/layout/FrontView.vue'),
     children: [
-      {
-        path: '/login',
-        name: '登录',
-        meta: {
-          icon: 'LoginOutlined',
-          view: 'blank',
-          target: '_blank',
-          cacheable: false,
-        },
-        component: () => import('@/pages/login'),
-      },
       {
         path: '/home',
         name: '首页',
@@ -38,6 +27,27 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import('@/pages/home'),
       },
+    ],
+  },
+  {
+    path: '/account',
+    name: 'account',
+    meta: {
+      renderMenu: false,
+    },
+    component: () => import('@/components/layout/FrontView.vue'),
+    children: [
+      {
+        path: 'login',
+        name: '登录',
+        meta: {
+          icon: 'LoginOutlined',
+          view: 'blank',
+          target: '_blank',
+          cacheable: false,
+        },
+        component: () => import('@/pages/login'),
+      }
     ],
   },
   {

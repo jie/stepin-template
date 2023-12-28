@@ -1,8 +1,5 @@
 <script lang="ts" setup>
-import AuthorTable from './AuthorTable.vue';
-import ProjectTable from './ProjectTable.vue';
-import MyTable from "@/components/report/table/index.vue"
-import Report from "@/components/report/index.vue"
+import Report from "@/components/report_designer/index.vue"
 import { ref } from "vue"
 const items = [
   { title: "text title", desc:"text desc", type: "container", key: "1", children: [
@@ -16,9 +13,6 @@ const items = [
 </script>
 <template>
   <div class="table w-full h-full">
-    <!-- <AuthorTable />
-    <ProjectTable class="mt-4" /> -->
-    <!-- <MyTable /> -->
     <Report title="My Report" summary="My summary" :items="items" />
   </div>
 </template>

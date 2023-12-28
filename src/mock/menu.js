@@ -22,12 +22,12 @@ const presetList = [
     icon: 'TableOutlined',
     badge: '',
     target: '_self',
-    path: '/report',
+    path: '/workspace/report',
     component: '@/pages/report',
     renderMenu: true,
     parent: null,
     permission: null,
-    cacheable: true,
+    cacheable: false,
   },
   {
     id: 3,
@@ -36,24 +36,80 @@ const presetList = [
     icon: 'TableOutlined',
     badge: '',
     target: '_self',
-    path: '/template',
+    path: '/workspace/template',
     component: '@/pages/template',
     renderMenu: true,
     parent: null,
     permission: null,
-    cacheable: true,
+    cacheable: false,
   },
   {
     id: 4,
-    name: 'personal',
-    title: '个人中心',
-    path: '/personal',
-    icon: 'ProfileOutlined',
-    permission: null,
-    component: '@/pages/personal',
+    name: 'category',
+    title: '分类',
+    icon: 'TableOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/category',
+    component: '@/pages/category',
     renderMenu: true,
     parent: null,
+    permission: null,
+    cacheable: false,
   },
+  {
+    id: 5,
+    name: 'staff',
+    title: '成员',
+    icon: 'TableOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/staff',
+    component: '@/pages/staff',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  {
+    id: 5,
+    name: 'role',
+    title: '权限',
+    icon: 'TableOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/role',
+    component: '@/pages/role',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  {
+    id: 5,
+    name: 'settings',
+    title: '系统设置',
+    icon: 'SettingOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/settings',
+    component: '@/pages/template',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  // {
+  //   id: 4,
+  //   name: 'personal',
+  //   title: '个人中心',
+  //   path: '/personal',
+  //   icon: 'ProfileOutlined',
+  //   permission: null,
+  //   component: '@/pages/personal',
+  //   renderMenu: true,
+  //   parent: null,
+  // },
   // {
   //   id: 6,
   //   name: 'system',
@@ -124,15 +180,15 @@ const presetList = [
 ];
 
 function getMenuList() {
-  const menuStr = localStorage.getItem('stepin-menu');
-  let menuList = [];
-  if (!menuStr) {
-    menuList = presetList;
-    localStorage.setItem('stepin-menu', JSON.stringify(menuList));
-  } else {
-    menuList = JSON.parse(menuStr);
-  }
-  return menuList;
+  // const menuStr = localStorage.getItem('stepin-menu');
+  // let menuList = [];
+  // if (!menuStr) {
+  //   menuList = presetList;
+  //   localStorage.setItem('stepin-menu', JSON.stringify(menuList));
+  // } else {
+  //   menuList = JSON.parse(menuStr);
+  // }
+  return presetList;
 }
 
 function saveMenu(menu) {
