@@ -1,158 +1,71 @@
 <template>
-  <a-table :columns="columns" :data-source="data" bordered size="middle" :scroll="{ x: 'calc(700px + 50%)', y: 240 }">
+  <a-table :columns="columns" :data-source="rows" bordered size="middle" :scroll="{ x: 'calc(700px + 50%)', y: 240 }">
     <template #bodyCell="{ text, record, index, column }">
-      <template v-if="record.fieldOptions">
-        <!-- <a-input v-model:value="column.name" placeholder="" /> -->
-        <a-input v-if="record.fieldOptions[column.key] && record.fieldOptions[column.key]['fieldType'] == 'input'"
-          v-model:value="record.fieldOptions[column.key].value"
-          :placeholder="record.fieldOptions[column.key].placeholder" />
-        <div v-else>2</div>
-      </template>
-      <template v-else>{{ text }}</template>
+      <a-input v-model:value="record.fieldOptions[column.key].value" :placeholder="record.fieldOptions[column.key].placeholder" />
     </template>
   </a-table>
-
 </template>
-<script lang="ts">
+<script lang="ts" setup>
+import { defineEmits, defineProps, ref } from 'vue';
 import type { TableColumnsType } from 'ant-design-vue';
-import { defineComponent } from 'vue';
-type TableDataType = {
-  key: number;
-  name: string;
-  age: number;
-  street: string;
-  building: string;
-  number: number;
-  companyAddress: string;
-  companyName: string;
-  gender: string;
-};
-const columns: TableColumnsType = [
+import { toRaw } from 'vue';
+const props = defineProps(["item"])
+
+// extends TableColumnsType
+type MyTableColumnsType = TableColumnsType & {
+  fieldType: string,
+}
+
+const columns = ref<MyTableColumnsType>([{
+  title: 'Name',
+  dataIndex: 'name',
+  key: 'name',
+  width: 100,
+  fixed: 'left',
+  fieldType: 'input',
+  children: []
+},])
+
+const rows = ref([
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    width: 100,
-    fixed: 'left',
-  },
-  {
-    title: 'Other',
-    children: [
-      {
-        title: 'Age',
-        dataIndex: 'age',
-        key: 'age',
-        width: 200,
-      },
-      {
-        title: 'Address',
-        children: [
-          {
-            title: 'Street',
-            dataIndex: 'street',
-            key: 'street',
-            width: 200,
-          },
-          {
-            title: 'Block',
-            children: [
-              {
-                title: 'Building',
-                dataIndex: 'building',
-                key: 'building',
-                width: 100,
-              },
-              {
-                title: 'Door No.',
-                dataIndex: 'number',
-                key: 'number',
-                width: 100,
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'Company',
-    children: [
-      {
-        title: 'Company Address',
-        dataIndex: 'companyAddress',
-        key: 'companyAddress',
-        width: 200,
-      },
-      {
-        title: 'Company Name',
-        dataIndex: 'companyName',
-        key: 'companyName',
-      },
-    ],
-  },
-  {
-    title: 'Gender',
-    dataIndex: 'gender',
-    key: 'gender',
-    width: 80,
-    fixed: 'right',
-  },
-];
-//   const data = [...Array(100)].map((_, i) => ({
-//     key: i,
-//     name: 'John Brown',
-//     age: i + 1,
-//     street: 'Lake Park',
-//     building: 'C',
-//     number: 2035,
-//     companyAddress: 'Lake Street 42',
-//     companyName: 'SoftLake Co',
-//     gender: 'M',
-//   }));
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 1,
-    street: 'Lake Park',
-    building: 'C',
-    number: 2035,
-    companyAddress: 'Lake Street 42',
-    companyName: 'SoftLake Co',
-    gender: 'M',
+    name: 'Name',
     fieldOptions: {
       name: {
         fieldType: "input",
-        value: "yang",
-        placeholder: "Please input your name"
-      }
-    }
-  },
-  {
-    key: '2',
-    name: 'John Brown',
-    age: 1,
-    street: 'Lake Park',
-    building: 'C',
-    number: 2035,
-    companyAddress: 'Lake Street 42',
-    companyName: 'SoftLake Co',
-    gender: 'M',
-    fieldOptions: {
-      age: {
-        fieldType: "input",
-        value: "yang",
-        placeholder: "Please input your name"
+        value: "",
+        placeholder: ""
       }
     }
   }
-]
-export default defineComponent({
-  setup() {
-    return {
-      data,
-      columns,
-    };
-  },
-});
+])
+
+const getTableData = () => {
+  return {
+    columns,
+    rows
+  }
+}
+
+const updateTableData = (data: any) => {
+  console.log('updatetabledata:', data)
+  columns.value = JSON.parse(JSON.stringify(data.columns))
+  if (data.rows && data.rows.length != 0) {
+    console.log('data.rows:', toRaw(data.rows))
+    rows.value = JSON.parse(JSON.stringify(data.rows))
+  }
+
+}
+
+const addRow = (row: any) => {
+  console.log('addRow:', row)
+  rows.value.push(row)
+}
+
+defineExpose({
+  getTableData,
+  updateTableData,
+  addRow,
+  props
+})
+
 </script>
