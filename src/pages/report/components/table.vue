@@ -5,61 +5,64 @@
   import dayjs from 'dayjs';
   import { Dayjs } from 'dayjs';
   import { EditFilled } from '@ant-design/icons-vue';
-  import { roles } from '@/pages/constants';
+
   const columns = [
     {
-      title: 'STAFF',
+      title: 'Report',
       dataIndex: 'name',
     },
-    { title: 'ROLES', dataIndex: 'roles' },
+    { title: 'CUSTOMER', dataIndex: 'customer' },
+    { title: 'WORKER', dataIndex: 'worker' },
+    { title: 'CATEGORY', dataIndex: 'category' },
     { title: 'STATUS', dataIndex: 'status' },
-    { title: 'CREATED', dataIndex: 'time' },
+    { title: 'EMPLOYED', dataIndex: 'time' },
     { title: 'OPERATION', dataIndex: 'edit', width: 200 },
   ];
 
-  type Staff = {
+  type Report = {
     name?: string;
-    email?: string;
-    avatar?: string;
-    roles?: string[];
+    customer?: string;
+    worker?: string;
+    category?:string;
+    template?: string;
     status?: number;
     time?: Dayjs;
     _edit?: boolean;
     _isNew?: boolean;
   };
 
-  const staffs = reactive<Staff[]>([
+  const authors = reactive<Report[]>([
     {
-      name: '管理员1',
-      email: '1126263215@qq.com',
-      avatar: '/src/assets/avatar/face-1.jpg',
+      name: '2023-12-21岳阳宝丽纺织品有限公司',
+      customer: '荣恰',
+      category: '纺织品',
+      worker: '钟晓平',
       status: 1,
       time: dayjs(),
-      roles: ['1'],
     },
     {
-      name: '审核员2',
-      email: '1126263215@qq.com',
-      avatar: '/src/assets/avatar/face-2.jpg',
+      name: '2023-12-23宁海南航电器',
+      customer: '三问家居',
+      category: '电器',
+      worker: '许忠周',
       status: 0,
       time: dayjs(),
-      roles: ['2'],
     },
     {
-      name: '客户3',
-      email: '1126263215@qq.com',
-      avatar: '/src/assets/avatar/face-3.jpg',
+      name: '2023-12-24嵊州三健网业有限公司',
+      customer: 'KasutU',
+      category: '药品',
+      worker: '杜心良',
       status: 1,
       time: dayjs(),
-      roles: ['3'],
     },
     {
-      name: '检验员4',
-      email: '1126263215@qq.com',
-      avatar: '/src/assets/avatar/face-4.jpg',
+      name: '2023-12-29福建省创翔鞋业有限公司',
+      customer: '世达外贸',
+      category: '鞋类',
+      worker: 'Mahesh Krishnan',
       status: 0,
       time: dayjs(),
-      roles: ['4'],
     },
   ]);
 
@@ -70,16 +73,14 @@
 
   const showModal = ref(false);
 
-  const newStaff = (staff?: Staff) => {
-    if (!staff) {
-      staff = { _isNew: true };
+  const newAuthor = (record?: Report) => {
+    if (!record) {
+      record = { _isNew: true };
     }
-    staff.name = undefined;
-    staff.email = undefined;
-    staff.avatar = undefined;
-    staff.status = 0;
-    staff.time = dayjs();
-    return staff;
+    record.name = undefined;
+    record.status = 0;
+    record.time = dayjs();
+    return record;
   };
 
   const copyObject = (target: any, source?: any) => {
@@ -89,10 +90,10 @@
     Object.keys(target).forEach((key) => (target[key] = source[key]));
   };
 
-  const form = reactive<Staff>(newStaff());
+  const form = reactive<Report>(newAuthor());
 
   function reset() {
-    return newStaff(form);
+    return newAuthor(form);
   }
 
   function cancel() {
@@ -104,9 +105,9 @@
 
   const formLoading = ref(false);
 
-  async function extractImg(file: Blob, staff: Staff) {
+  async function extractImg(file: Blob, record: Report) {
     await getBase64(file).then((res) => {
-      staff.avatar = res;
+      record.avatar = res;
     });
   }
 
@@ -114,9 +115,11 @@
     formLoading.value = true;
     formModel.value
       ?.validateFields()
-      .then((res: Staff) => {
+      .then((res: Report) => {
+        res.department = res?.position?.[0];
+        res.jobs = res?.position?.[1];
         if (form._isNew) {
-          staffs.push({ ...res });
+          authors.push({ ...res });
         } else {
           copyObject(editRecord.value, res);
         }
@@ -131,13 +134,13 @@
       });
   }
 
-  const editRecord = ref<Staff>();
+  const editRecord = ref<Report>();
 
   /**
    * 编辑
    * @param record
    */
-  function edit(record: Staff) {
+  function edit(record: Report) {
     editRecord.value = record;
     copyObject(form, record);
     showModal.value = true;
@@ -146,18 +149,12 @@
   type Status = 0 | 1;
 
   const StatusDict = {
-    0: 'disable',
-    1: 'enable',
+    0: 'offline',
+    1: 'online',
   };
-
-const getRoleName = (id: string) => {
-  const role = roles.find((role) => role.id === id);
-  return role?.name;
-};
-
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
+  <a-modal :title="form._isNew ? '新增作者' : '编辑作者'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
       <a-form-item label="头像" required name="avatar">
         <a-upload :show-upload-list="false" :beforeUpload="(file: File) => extractImg(file, form)">
@@ -176,16 +173,38 @@ const getRoleName = (id: string) => {
       <a-form-item required label="邮箱" name="email">
         <a-input v-model:value="form.email" />
       </a-form-item>
-      <a-form-item label="角色" required name="roles">
-        <a-select v-model:value="form.roles" mode="multiple" :options="roles" :fieldNames="{label: 'name', value: 'id'}"/>
+      <a-form-item required label="岗位" name="position">
+        <a-cascader
+          v-model:value="form.position"
+          :options="[
+            {
+              label: 'IT部',
+              value: 'IT部',
+              children: [
+                {
+                  label: '前端开发',
+                  value: '前端开发',
+                },
+                {
+                  label: '后端开发',
+                  value: '后端开发',
+                },
+                {
+                  label: 'UI设计师',
+                  value: 'UI设计师',
+                },
+              ],
+            },
+          ]"
+        />
       </a-form-item>
       <a-form-item required label="状态" name="status">
         <a-select
           style="width: 90px"
           v-model:value="form.status"
           :options="[
-            { label: 'disable', value: 0 },
-            { label: 'enable', value: 1 },
+            { label: 'offline', value: 0 },
+            { label: 'online', value: 1 },
           ]"
         />
       </a-form-item>
@@ -196,10 +215,10 @@ const getRoleName = (id: string) => {
   </a-modal>
 
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="staffs" :pagination="false">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="authors" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>成员</h4>
+        <h4>报告</h4>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />
@@ -210,15 +229,16 @@ const getRoleName = (id: string) => {
     </template>
     <template #bodyCell="{ column, text, record }">
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
-        <img class="w-12 rounded" :src="record.avatar" />
-        <div class="flex-col flex justify-evenly ml-2">
+        <div class="flex-col flex justify-evenly">
           <span class="text-title font-bold">{{ text }}</span>
-          <span class="text-xs text-subtext">{{ record.email }}</span>
         </div>
       </div>
-      <div class="" v-else-if="column.dataIndex === 'roles'">
+      <div class="" v-else-if="column.dataIndex === 'position'">
+        <div class="text-title font-bold">
+          {{ record.jobs }}
+        </div>
         <div class="text-subtext">
-            <a-tag color="#108ee9" v-for="role in record.roles">{{ getRoleName(role) }}</a-tag>
+          {{ record.department }}
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
@@ -248,6 +268,18 @@ const getRoleName = (id: string) => {
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <DeleteFilled />
                   删除
+                </a>
+              </a-menu-item>
+              <a-menu-item key="1">
+                <a @click="edit(record)" rel="noopener noreferrer">
+                  <VerifiedOutlined />
+                  审核报告
+                </a>
+              </a-menu-item>
+              <a-menu-item key="1">
+                <a @click="edit(record)" rel="noopener noreferrer">
+                  <MailOutlined />
+                  发送邮件给客户
                 </a>
               </a-menu-item>
             </a-menu>

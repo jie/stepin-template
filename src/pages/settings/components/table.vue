@@ -3,72 +3,19 @@ import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
-import { Dayjs } from 'dayjs';
-import { EditFilled, DeleteFilled, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
-
+import { EditFilled } from '@ant-design/icons-vue';
+import {Role, permissions, roles} from '@/pages/constants';
 const columns = [
   {
-    title: '名称',
+    title: 'KEY',
     dataIndex: 'name',
   },
-  { title: '分类', dataIndex: 'position' },
-  { title: '状态', dataIndex: 'status' },
-  { title: '创建时间', dataIndex: 'time' },
-  { title: '操作', dataIndex: 'edit', width: 200 },
+  { title: 'VALUE', dataIndex: 'value' },
+  { title: 'CREATED', dataIndex: 'time' },
+  { title: 'OPERATION', dataIndex: 'edit', width: 200 },
 ];
 
-type Author = {
-  name?: string;
-  email?: string;
-  avatar?: string;
-  department?: string;
-  jobs?: string;
-  position?: string[];
-  role?: string;
-  status?: number;
-  time?: Dayjs;
-  _edit?: boolean;
-  _isNew?: boolean;
-};
 
-const authors = reactive<Author[]>([
-  {
-    name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-1.jpg',
-    jobs: 'developer',
-    department: 'Technical',
-    status: 1,
-    time: dayjs(),
-  },
-  {
-    name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-2.jpg',
-    jobs: 'developer',
-    department: 'Technical',
-    status: 0,
-    time: dayjs(),
-  },
-  {
-    name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-3.jpg',
-    jobs: 'developer',
-    department: 'Technical',
-    status: 1,
-    time: dayjs(),
-  },
-  {
-    name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-4.jpg',
-    jobs: 'developer',
-    department: 'Technical',
-    status: 0,
-    time: dayjs(),
-  },
-]);
 
 function addNew() {
   showModal.value = true;
@@ -77,19 +24,15 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newAuthor = (author?: Author) => {
-  if (!author) {
-    author = { _isNew: true };
+const newRecord = (record?: Role) => {
+  if (!record) {
+    record = { _isNew: true };
   }
-  author.name = undefined;
-  author.email = undefined;
-  author.avatar = undefined;
-  author.position = [];
-  author.department = undefined;
-  author.jobs = undefined;
-  author.status = 0;
-  author.time = dayjs();
-  return author;
+  record.name = undefined;
+  record.status = 0;
+  record.permissions = [];
+  record.time = dayjs();
+  return record;
 };
 
 const copyObject = (target: any, source?: any) => {
@@ -99,10 +42,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(target).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<Author>(newAuthor());
+const form = reactive<Role>(newRecord());
 
 function reset() {
-  return newAuthor(form);
+  return newRecord(form);
 }
 
 function cancel() {
@@ -114,9 +57,9 @@ const formModel = ref<FormInstance>();
 
 const formLoading = ref(false);
 
-async function extractImg(file: Blob, author: Author) {
+async function extractImg(file: Blob, record: Role) {
   await getBase64(file).then((res) => {
-    author.avatar = res;
+    record.avatar = res;
   });
 }
 
@@ -124,11 +67,9 @@ function submit() {
   formLoading.value = true;
   formModel.value
     ?.validateFields()
-    .then((res: Author) => {
-      res.department = res?.position?.[0];
-      res.jobs = res?.position?.[1];
+    .then((res: Role) => {
       if (form._isNew) {
-        authors.push({ ...res });
+        roles.push({ ...res });
       } else {
         copyObject(editRecord.value, res);
       }
@@ -143,30 +84,28 @@ function submit() {
     });
 }
 
-const editRecord = ref<Author>();
+const editRecord = ref<Role>();
 
 /**
  * 编辑
  * @param record
  */
-function edit(record: Author) {
+function edit(record: Role) {
   editRecord.value = record;
   copyObject(form, record);
-  form.position = [form.department!, form.jobs!];
   showModal.value = true;
 }
 
 type Status = 0 | 1;
 
 const StatusDict = {
-  0: 'offline',
-  1: 'online',
+  0: 'disable',
+  1: 'enable',
 };
 
-
-const design = (record: Author) => {
-  
-}
+const getPermissionName = (slug: string) => {
+  return permissions.find((item) => item.slug === slug).name;
+};
 
 </script>
 <template>
@@ -186,36 +125,14 @@ const design = (record: Author) => {
       <a-form-item label="名称" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="邮箱" name="email">
-        <a-input v-model:value="form.email" />
-      </a-form-item>
-      <a-form-item required label="岗位" name="position">
-        <a-cascader v-model:value="form.position" :options="[
-            {
-              label: 'IT部',
-              value: 'IT部',
-              children: [
-                {
-                  label: '前端开发',
-                  value: '前端开发',
-                },
-                {
-                  label: '后端开发',
-                  value: '后端开发',
-                },
-                {
-                  label: 'UI设计师',
-                  value: 'UI设计师',
-                },
-              ],
-            },
-          ]" />
+      <a-form-item label="权限" required name="permissions">
+        <a-select v-model:value="form.permissions" mode="multiple" :options="permissions" :fieldNames="{label: 'name', value: 'slug'}"/>
       </a-form-item>
       <a-form-item required label="状态" name="status">
         <a-select style="width: 90px" v-model:value="form.status" :options="[
-            { label: 'offline', value: 0 },
-            { label: 'online', value: 1 },
-          ]" />
+          { label: 'disable', value: 0 },
+          { label: 'enable', value: 1 },
+        ]" />
       </a-form-item>
       <a-form-item label="日期" name="time">
         <a-date-picker v-model:value="form.time" />
@@ -224,10 +141,10 @@ const design = (record: Author) => {
   </a-modal>
 
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="authors" :pagination="false">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="roles" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>模版</h4>
+        <h4>设置</h4>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />
@@ -238,18 +155,13 @@ const design = (record: Author) => {
     </template>
     <template #bodyCell="{ column, text, record }">
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
-        <img class="w-12 rounded" :src="record.avatar" />
         <div class="flex-col flex justify-evenly ml-2">
           <span class="text-title font-bold">{{ text }}</span>
-          <span class="text-xs text-subtext">{{ record.email }}</span>
         </div>
       </div>
-      <div class="" v-else-if="column.dataIndex === 'position'">
-        <div class="text-title font-bold">
-          {{ record.jobs }}
-        </div>
+      <div class="" v-else-if="column.dataIndex === 'permissions'">
         <div class="text-subtext">
-          {{ record.department }}
+          <a-tag color="#108ee9" v-for="permission in record.permissions">{{ getPermissionName(permission) }}</a-tag>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
@@ -263,13 +175,6 @@ const design = (record: Author) => {
         {{ text?.format('YYYY-MM-DD') }}
       </template>
       <template v-else-if="column.dataIndex === 'edit'">
-        <!-- <a-button :disabled="showModal" type="link" @click="edit(record)">
-          <template #icon>
-            <EditFilled />
-          </template>
-          编辑
-        </a-button> -->
-
         <a-dropdown>
           <a class="ant-dropdown-link" @click.prevent>
             <SettingOutlined />
@@ -288,17 +193,9 @@ const design = (record: Author) => {
                   删除
                 </a>
               </a-menu-item>
-              <a-menu-divider />
-              <a-menu-item key="3">
-                <a @click="design(record)" rel="noopener noreferrer">
-                  <ExperimentOutlined />
-                  模版设计
-                </a>
-              </a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
-
       </template>
       <div v-else class="text-subtext">
         {{ text }}

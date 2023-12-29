@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-  import Table from './components/table.vue';
+  import AuthorTable from './components/table.vue';
 </script>
 <template>
   <div class="table w-full">
-    <Table />
+    <AuthorTable />
   </div>
 </template>

@@ -176,12 +176,27 @@ const getPermissionName = (slug: string) => {
         {{ text?.format('YYYY-MM-DD') }}
       </template>
       <template v-else-if="column.dataIndex === 'edit'">
-        <a-button :disabled="showModal" type="link" @click="edit(record)">
-          <template #icon>
-            <EditFilled />
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click.prevent>
+            <SettingOutlined />
+          </a>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="0">
+                <a @click="edit(record)" rel="noopener noreferrer">
+                  <EditFilled />
+                  编辑
+                </a>
+              </a-menu-item>
+              <a-menu-item key="1">
+                <a @click="edit(record)" rel="noopener noreferrer">
+                  <DeleteFilled />
+                  删除
+                </a>
+              </a-menu-item>
+            </a-menu>
           </template>
-          编辑
-        </a-button>
+        </a-dropdown>
       </template>
       <div v-else class="text-subtext">
         {{ text }}

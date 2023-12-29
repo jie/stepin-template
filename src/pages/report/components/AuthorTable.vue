@@ -228,7 +228,7 @@
   <a-table v-bind="$attrs" :columns="columns" :dataSource="authors" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>成员表格</h4>
+        <h4>报告</h4>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />
