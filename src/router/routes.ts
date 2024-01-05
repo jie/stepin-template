@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
     name: 'home',
     redirect: '/home',
     meta: {
-      title: '首页',
+      title: 'index',
       renderMenu: false,
       icon: 'CreditCardOutlined',
     },
@@ -21,11 +21,29 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '/home',
-        name: '首页',
+        name: 'home',
         meta: {
           view: 'blank',
         },
         component: () => import('@/pages/home'),
+      },
+    ],
+  },
+  {
+    path: '/workspace',
+    name: 'workspace',
+    meta: {
+      renderMenu: false,
+    },
+    // component: () => import('@/components/layout/FrontView.vue'),
+    children: [
+      {
+        path: 'design',
+        name: 'design',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/designer'),
       },
     ],
   },
@@ -38,8 +56,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/layout/FrontView.vue'),
     children: [
       {
-        path: 'login',
-        name: '登录',
+        path: '/account/login',
+        name: 'login',
         meta: {
           icon: 'LoginOutlined',
           view: 'blank',
@@ -47,6 +65,17 @@ const routes: RouteRecordRaw[] = [
           cacheable: false,
         },
         component: () => import('@/pages/login'),
+      },
+      {
+        path: '/account/regist',
+        name: 'regist',
+        meta: {
+          icon: 'RegisterOutlined',
+          view: 'blank',
+          target: '_blank',
+          cacheable: false,
+        },
+        component: () => import('@/pages/regist'),
       }
     ],
   },

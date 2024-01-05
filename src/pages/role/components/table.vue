@@ -3,7 +3,7 @@ import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
-import { EditFilled } from '@ant-design/icons-vue';
+import { EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
 import {Role, permissions, roles} from '@/pages/constants';
 const columns = [
   {
@@ -13,7 +13,7 @@ const columns = [
   { title: 'PERMISSIONS', dataIndex: 'permissions', width: 400 },
   { title: 'STATUS', dataIndex: 'status' },
   { title: 'CREATED', dataIndex: 'time' },
-  { title: 'OPERATION', dataIndex: 'edit', width: 200 },
+  { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
 
@@ -112,17 +112,6 @@ const getPermissionName = (slug: string) => {
 <template>
   <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item label="头像" required name="avatar">
-        <a-upload :show-upload-list="false" :beforeUpload="(file: File) => extractImg(file, form)">
-          <img class="h-8 p-0.5 rounded border border-dashed border-border" v-if="form.avatar" :src="form.avatar" />
-          <a-button v-else type="dashed">
-            <template #icon>
-              <UploadOutlined />
-            </template>
-            上传
-          </a-button>
-        </a-upload>
-      </a-form-item>
       <a-form-item label="名称" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
@@ -177,14 +166,20 @@ const getPermissionName = (slug: string) => {
       </template>
       <template v-else-if="column.dataIndex === 'edit'">
         <a-dropdown>
-          <a class="ant-dropdown-link" @click.prevent>
+          <span class="ant-dropdown-link cursor-pointer" @click.prevent>
             <SettingOutlined />
-          </a>
+          </span>
           <template #overlay>
             <a-menu>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
-                  <EditFilled />
+                  <ReadOutlined />
+                  查看
+                </a>
+              </a-menu-item>
+              <a-menu-item key="0">
+                <a @click="edit(record)" rel="noopener noreferrer">
+                  <EditOutlined />
                   编辑
                 </a>
               </a-menu-item>

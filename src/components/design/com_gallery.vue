@@ -1,6 +1,6 @@
 <template>
     <div class="p-10 flex flex-wrap">
-        <div v-for="item in items" class="com">
+        <div v-for="item in items" class="com" @click="onClickAddComponent(item)">
             <div class="flex-1 text-center" style="font-size: 30px;">
                 <component :is="item.icon"/>
                 <div style="font-size: 14px;color: #333">{{ item.type }}</div>
@@ -16,6 +16,7 @@ import { BorderOutlined, FieldStringOutlined, TableOutlined, ExpandOutlined, Che
 // const item = {
 //     icon: BorderOutlined
 // }
+
 const items = ref([
     {
         name: 'Input',
@@ -66,6 +67,16 @@ const items = ref([
         })
     }
 ])
+
+
+const onClickAddComponent = (com:any) => {
+    emits('add-component', {com:com})
+}
+
+
+const emits = defineEmits(["add-component"])
+
+
 </script>
 
 <style scoped>

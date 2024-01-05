@@ -14,9 +14,25 @@ interface NaviGuard {
   after?: NavigationHookAfter;
 }
 
+const publicPages = [
+  '/account/login',
+  '/account/regist',
+  '/home',
+]
+
+const isPublicPage = (path: string) => {
+  for(let page of publicPages) {
+    if (path.startsWith(page)) {
+      return true
+    }
+  }
+}
+
 const loginGuard: NavigationGuard = function (to, from) {
   const account = useAccountStore();
-  if (!http.checkAuthorization() && !/^\/(login|home)?$/.test(to.fullPath)) {
+  // if (!http.checkAuthorization() && !/^\/(login|home)?$/.test(to.fullPath)) {
+  if (!http.checkAuthorization() && !isPublicPage(to.fullPath)) {
+    console.log('1111')
     return '/account/login';
     // account.setLogged(false);
   }

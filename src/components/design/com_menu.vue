@@ -1,24 +1,24 @@
 <template>
     <a-dropdown placement="bottom">
-        <a class="ant-dropdown-link" @click.prevent>
+        <span class="ant-dropdown-link" @click.prevent>
             <SettingOutlined />
-        </a>
+        </span>
         <template #overlay>
             <a-menu>
                 <a-menu-item>
-                    <a href="javascript:;" @click="onClickEdit(props.item)">
+                    <span @click="onClickEdit(props.item)">
                         <EditOutlined /> Edit
-                    </a>
+                    </span>
                 </a-menu-item>
                 <a-menu-item>
-                    <a href="javascript:;" @click="onClickRemove(props.item)">
+                    <span @click="onClickRemove(props.item)">
                         <DeleteOutlined /> Remove
-                    </a>
+                    </span>
                 </a-menu-item>
                 <a-menu-item>
-                    <a href="javascript:;" @click="onClickAdd(props.item)">
+                    <span @click="onClickAdd(props.item)">
                         <PlusOutlined /> Add
-                    </a>
+                    </span>
                 </a-menu-item>
             </a-menu>
         </template>

@@ -4,7 +4,7 @@
   import { reactive, ref } from 'vue';
   import dayjs from 'dayjs';
   import { Dayjs } from 'dayjs';
-  import { EditFilled } from '@ant-design/icons-vue';
+  import { DeleteOutlined, EditFilled, EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
   import { roles } from '@/pages/constants';
   const columns = [
     {
@@ -14,7 +14,7 @@
     { title: 'ROLES', dataIndex: 'roles' },
     { title: 'STATUS', dataIndex: 'status' },
     { title: 'CREATED', dataIndex: 'time' },
-    { title: 'OPERATION', dataIndex: 'edit', width: 200 },
+    { title: 'OP', dataIndex: 'edit', width: 40 },
   ];
 
   type Staff = {
@@ -200,12 +200,34 @@ const getRoleName = (id: string) => {
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>成员</h4>
-        <a-button type="primary" @click="addNew" :loading="formLoading">
-          <template #icon>
-            <PlusOutlined />
-          </template>
-          新增
-        </a-button>
+        <div class="flex">
+            <div class="mr-4">
+              <span class="mr-2">状态</span>
+              <a-select ref="select"  style="width: 120px" allowClear>
+                <a-select-option value="jack">Jack</a-select-option>
+                <a-select-option value="lucy">Lucy</a-select-option>
+                <a-select-option value="disabled" disabled>Disabled</a-select-option>
+                <a-select-option value="Yiminghe">yiminghe</a-select-option>
+              </a-select>
+            </div>
+            <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">\
+              <template #addonBefore>
+                关键词
+              </template>
+            </a-input>
+            <a-button class="mr-2">
+              <template #icon>
+                <SearchOutlined />
+              </template>
+              搜索
+            </a-button>
+            <a-button type="primary" @click="addNew" :loading="formLoading">
+              <template #icon>
+                <PlusOutlined />
+              </template>
+              新增
+            </a-button>
+          </div>
       </div>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -233,20 +255,26 @@ const getRoleName = (id: string) => {
       </template>
       <template v-else-if="column.dataIndex === 'edit'">
         <a-dropdown>
-          <a class="ant-dropdown-link" @click.prevent>
+          <span class="ant-dropdown-link" @click.prevent>
             <SettingOutlined />
-          </a>
+          </span>
           <template #overlay>
             <a-menu>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
-                  <EditFilled />
+                  <ReadOutlined />
+                  查看
+                </a>
+              </a-menu-item>
+              <a-menu-item key="0">
+                <a @click="edit(record)" rel="noopener noreferrer">
+                  <EditOutlined />
                   编辑
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
                 <a @click="edit(record)" rel="noopener noreferrer">
-                  <DeleteFilled />
+                  <DeleteOutlined />
                   删除
                 </a>
               </a-menu-item>

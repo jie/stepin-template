@@ -36,11 +36,7 @@
         </a-form-item>
         <a-button htmlType="submit" class="h-[40px] w-full" type="primary" :loading="loading"> 登录 </a-button>
         <a-divider></a-divider>
-        <div class="terms">
-          登录即代表您同意我们的
-          <span class="font-bold">用户条款 </span>、<span class="font-bold"> 数据使用协议 </span>、以及
-          <span class="font-bold">Cookie使用协议</span>。
-        </div>
+        <div class="text-center">还未成为用户？<span><router-link :to="{name: 'regist'}">注册</router-link></span></div>
       </a-form>
     </div>
   </ThemeProvider>

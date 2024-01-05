@@ -76,7 +76,7 @@
 <script lang="ts" setup>
 import { notification } from 'ant-design-vue';
 import { defineProps, defineExpose, ref, toRaw } from 'vue';
-import Table from "@/components/report/table/index.vue"
+import Table from "./index.vue"
 import type { TreeSelectProps } from 'ant-design-vue';
 const props = defineProps(["index", "item"])
 const columns = ref<string>();

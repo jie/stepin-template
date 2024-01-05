@@ -4,67 +4,45 @@ import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
-import { EditFilled, DeleteFilled, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
+import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
+import router from '@/router';
 
 const columns = [
   {
     title: '名称',
     dataIndex: 'name',
   },
-  { title: '分类', dataIndex: 'position' },
   { title: '状态', dataIndex: 'status' },
   { title: '创建时间', dataIndex: 'time' },
-  { title: '操作', dataIndex: 'edit', width: 200 },
+  { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
-type Author = {
+type ReportTemplate = {
   name?: string;
-  email?: string;
-  avatar?: string;
-  department?: string;
-  jobs?: string;
-  position?: string[];
-  role?: string;
   status?: number;
   time?: Dayjs;
   _edit?: boolean;
   _isNew?: boolean;
 };
 
-const authors = reactive<Author[]>([
+const authors = reactive<ReportTemplate[]>([
   {
     name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-1.jpg',
-    jobs: 'developer',
-    department: 'Technical',
     status: 1,
     time: dayjs(),
   },
   {
     name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-2.jpg',
-    jobs: 'developer',
-    department: 'Technical',
     status: 0,
     time: dayjs(),
   },
   {
     name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-3.jpg',
-    jobs: 'developer',
-    department: 'Technical',
     status: 1,
     time: dayjs(),
   },
   {
     name: 'Li Zhi',
-    email: '1126263215@qq.com',
-    avatar: '/src/assets/avatar/face-4.jpg',
-    jobs: 'developer',
-    department: 'Technical',
     status: 0,
     time: dayjs(),
   },
@@ -77,19 +55,14 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newAuthor = (author?: Author) => {
-  if (!author) {
-    author = { _isNew: true };
+const newReportTemplate = (reportTemplate?: ReportTemplate) => {
+  if (!reportTemplate) {
+    reportTemplate = { _isNew: true };
   }
-  author.name = undefined;
-  author.email = undefined;
-  author.avatar = undefined;
-  author.position = [];
-  author.department = undefined;
-  author.jobs = undefined;
-  author.status = 0;
-  author.time = dayjs();
-  return author;
+  reportTemplate.name = undefined;
+  reportTemplate.status = 0;
+  reportTemplate.time = dayjs();
+  return reportTemplate;
 };
 
 const copyObject = (target: any, source?: any) => {
@@ -99,10 +72,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(target).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<Author>(newAuthor());
+const form = reactive<ReportTemplate>(newReportTemplate());
 
 function reset() {
-  return newAuthor(form);
+  return newReportTemplate(form);
 }
 
 function cancel() {
@@ -114,19 +87,12 @@ const formModel = ref<FormInstance>();
 
 const formLoading = ref(false);
 
-async function extractImg(file: Blob, author: Author) {
-  await getBase64(file).then((res) => {
-    author.avatar = res;
-  });
-}
 
 function submit() {
   formLoading.value = true;
   formModel.value
     ?.validateFields()
-    .then((res: Author) => {
-      res.department = res?.position?.[0];
-      res.jobs = res?.position?.[1];
+    .then((res: ReportTemplate) => {
       if (form._isNew) {
         authors.push({ ...res });
       } else {
@@ -143,16 +109,15 @@ function submit() {
     });
 }
 
-const editRecord = ref<Author>();
+const editRecord = ref<ReportTemplate>();
 
 /**
  * 编辑
  * @param record
  */
-function edit(record: Author) {
+function edit(record: ReportTemplate) {
   editRecord.value = record;
   copyObject(form, record);
-  form.position = [form.department!, form.jobs!];
   showModal.value = true;
 }
 
@@ -164,58 +129,27 @@ const StatusDict = {
 };
 
 
-const design = (record: Author) => {
-  
+const design = (record: ReportTemplate) => {
+  router.push({
+    name: 'design',
+    query: {
+      id: "1",
+    },
+  });
 }
 
 </script>
 <template>
   <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item label="头像" required name="avatar">
-        <a-upload :show-upload-list="false" :beforeUpload="(file: File) => extractImg(file, form)">
-          <img class="h-8 p-0.5 rounded border border-dashed border-border" v-if="form.avatar" :src="form.avatar" />
-          <a-button v-else type="dashed">
-            <template #icon>
-              <UploadOutlined />
-            </template>
-            上传
-          </a-button>
-        </a-upload>
-      </a-form-item>
       <a-form-item label="名称" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="邮箱" name="email">
-        <a-input v-model:value="form.email" />
-      </a-form-item>
-      <a-form-item required label="岗位" name="position">
-        <a-cascader v-model:value="form.position" :options="[
-            {
-              label: 'IT部',
-              value: 'IT部',
-              children: [
-                {
-                  label: '前端开发',
-                  value: '前端开发',
-                },
-                {
-                  label: '后端开发',
-                  value: '后端开发',
-                },
-                {
-                  label: 'UI设计师',
-                  value: 'UI设计师',
-                },
-              ],
-            },
-          ]" />
-      </a-form-item>
       <a-form-item required label="状态" name="status">
         <a-select style="width: 90px" v-model:value="form.status" :options="[
-            { label: 'offline', value: 0 },
-            { label: 'online', value: 1 },
-          ]" />
+          { label: 'offline', value: 0 },
+          { label: 'online', value: 1 },
+        ]" />
       </a-form-item>
       <a-form-item label="日期" name="time">
         <a-date-picker v-model:value="form.time" />
@@ -228,28 +162,40 @@ const design = (record: Author) => {
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>模版</h4>
-        <a-button type="primary" @click="addNew" :loading="formLoading">
-          <template #icon>
-            <PlusOutlined />
-          </template>
-          新增
-        </a-button>
+        <div class="flex">
+          <div class="mr-4">
+            <span class="mr-2">模版状态</span>
+            <a-select ref="select" style="width: 120px" allowClear>
+              <a-select-option value="jack">Jack</a-select-option>
+              <a-select-option value="lucy">Lucy</a-select-option>
+              <a-select-option value="disabled" disabled>Disabled</a-select-option>
+              <a-select-option value="Yiminghe">yiminghe</a-select-option>
+            </a-select>
+          </div>
+          <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">\
+              <template #addonBefore>
+                关键词
+              </template>
+            </a-input>
+            <a-button class="mr-2">
+              <template #icon>
+                <SearchOutlined />
+              </template>
+              搜索
+            </a-button>
+          <a-button type="primary" @click="addNew" :loading="formLoading">
+            <template #icon>
+              <PlusOutlined />
+            </template>
+            新增
+          </a-button>
+        </div>
       </div>
     </template>
     <template #bodyCell="{ column, text, record }">
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
-        <img class="w-12 rounded" :src="record.avatar" />
-        <div class="flex-col flex justify-evenly ml-2">
+        <div class="flex-col flex justify-evenly">
           <span class="text-title font-bold">{{ text }}</span>
-          <span class="text-xs text-subtext">{{ record.email }}</span>
-        </div>
-      </div>
-      <div class="" v-else-if="column.dataIndex === 'position'">
-        <div class="text-title font-bold">
-          {{ record.jobs }}
-        </div>
-        <div class="text-subtext">
-          {{ record.department }}
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
@@ -263,28 +209,27 @@ const design = (record: Author) => {
         {{ text?.format('YYYY-MM-DD') }}
       </template>
       <template v-else-if="column.dataIndex === 'edit'">
-        <!-- <a-button :disabled="showModal" type="link" @click="edit(record)">
-          <template #icon>
-            <EditFilled />
-          </template>
-          编辑
-        </a-button> -->
-
         <a-dropdown>
-          <a class="ant-dropdown-link" @click.prevent>
+          <span class="ant-dropdown-link cursor-pointer" @click.prevent>
             <SettingOutlined />
-          </a>
+          </span>
           <template #overlay>
             <a-menu>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
-                  <EditFilled />
+                  <ReadOutlined />
+                  查看
+                </a>
+              </a-menu-item>
+              <a-menu-item key="0">
+                <a @click="edit(record)" rel="noopener noreferrer">
+                  <EditOutlined />
                   编辑
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
                 <a @click="edit(record)" rel="noopener noreferrer">
-                  <DeleteFilled />
+                  <DeleteOutlined />
                   删除
                 </a>
               </a-menu-item>

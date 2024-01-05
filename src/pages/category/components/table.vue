@@ -3,7 +3,7 @@ import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
-import { EditFilled } from '@ant-design/icons-vue';
+import { DeleteOutlined, EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
 const columns = [
     {
         title: 'ID',
@@ -13,7 +13,7 @@ const columns = [
     { title: 'STATUS', dataIndex: 'status' },
     { title: 'REMARK', dataIndex: 'remark' },
     { title: 'CREATED', dataIndex: 'create_at' },
-    { title: 'OPERATION', dataIndex: 'edit', width: 200 },
+    { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
 
@@ -289,20 +289,26 @@ const records = ref<Category[]>([
             </template>
             <template v-else-if="column.dataIndex === 'edit'">
                 <a-dropdown>
-                    <a class="ant-dropdown-link" @click.prevent>
+                    <span class="ant-dropdown-link cursor-pointer" @click.prevent>
                         <SettingOutlined />
-                    </a>
+                    </span>
                     <template #overlay>
                         <a-menu>
                             <a-menu-item key="0">
                                 <a @click="edit(record)" rel="noopener noreferrer">
-                                    <EditFilled />
+                                    <ReadOutlined />
+                                    查看
+                                </a>
+                            </a-menu-item>
+                            <a-menu-item key="0">
+                                <a @click="edit(record)" rel="noopener noreferrer">
+                                    <EditOutlined />
                                     编辑
                                 </a>
                             </a-menu-item>
                             <a-menu-item key="1">
                                 <a @click="edit(record)" rel="noopener noreferrer">
-                                    <DeleteFilled />
+                                    <DeleteOutlined />
                                     删除
                                 </a>
                             </a-menu-item>

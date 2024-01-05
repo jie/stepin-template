@@ -10,8 +10,8 @@ export function formatMoney(value: number, fixed: number = 0) {
     value < 10000
       ? value
       : value < 100000000
-      ? value / 10000
-      : value / 100000000;
+        ? value / 10000
+        : value / 100000000;
   let format: string = value.toFixed(fixed);
   const _val = format.split('.');
   const _int = _val[0],
@@ -35,4 +35,27 @@ export function formatThousand(value: number, fixed: number = 0): string {
     numbers.push(_int.substring(i - 3 < 0 ? 0 : i - 3, i));
   }
   return numbers.reverse().join(',') + ((_dec && `.${_dec}`) ?? '');
+}
+
+
+export const formatStatusColor = (status: string) => {
+  console.log('status', status)
+  switch (status) {
+    case '0':
+      return 'red';
+    case '1':
+      return 'blue';
+    case '2':
+      return 'blue';
+    case '3':
+      return 'green';
+    case '4':
+      return 'green';
+    case '5':
+      return 'green';
+    case '6':
+      return 'purple';
+    case '100':
+      return 'gray';
+  }
 }
