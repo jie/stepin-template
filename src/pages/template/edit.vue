@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Report from "@/components/report/index.vue"
+import Report from "@/components/report/index"
 import { ref } from "vue"
 const items = [
   { title: "text title", desc:"text desc", type: "container", key: "1", children: [

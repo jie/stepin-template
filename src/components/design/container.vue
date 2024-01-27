@@ -1,6 +1,6 @@
 <template>
   <a-row type="flex">
-    <a-col :flex="child.size" v-for="child in props.item.children">
+    <a-col :flex="child.size" v-for="child in props.item?.data?.children">
       <div v-if="child.type == 'text'">
         <reportText :item="child" />
       </div>

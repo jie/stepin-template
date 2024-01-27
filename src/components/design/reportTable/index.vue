@@ -53,7 +53,6 @@ const updateTableData = (data: any) => {
     console.log('data.rows:', toRaw(data.rows))
     rows.value = JSON.parse(JSON.stringify(data.rows))
   }
-
 }
 
 const addRow = (row: any) => {

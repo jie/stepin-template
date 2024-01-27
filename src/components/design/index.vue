@@ -28,56 +28,56 @@
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-if="item.type == 'text'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportText :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'input'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportInput :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'radio'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportRadio :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'checkbox'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportCheckbox :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'image'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportImage :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'image_upload'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportImageUpload :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'table'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportTable :item="item" ref="itemRefs"></reportTable>
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'container'">
           <div class="options">
-            <ComMenu :item="item" v-on:on-edit-component="onEditCom" />
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)" />
           </div>
           <reportContainer :item="item" ref="itemRefs"></reportContainer>
         </div>
@@ -94,7 +94,6 @@
     </template>
     <TableEditor ref="tableEditor" v-if="currentEditItem.type == 'table'" />
     <InputEditor ref="inputEditor" v-else-if="currentEditItem.type == 'input'" />
-    <TextEditor ref="textEditor" v-else-if="currentEditItem.type == 'text'" />
     <TextEditor ref="textEditor" v-else-if="currentEditItem.type == 'text'" />
     <RadioEditor ref="radioEditor" v-else-if="currentEditItem.type == 'radio'" />
     <CheckboxEditor ref="checkboxEditor" v-else-if="currentEditItem.type == 'checkbox'" />
@@ -120,6 +119,11 @@ import { EditOutlined, SettingOutlined, DeleteOutlined, PlusOutlined } from '@an
 import TableEditor from './reportTable/table_editor.vue'
 import TextEditor from "./reportText/text_editor.vue"
 import InputEditor from "./reportInput/input_editor.vue"
+import RadioEditor from "./reportRadio/radio_editor.vue"
+import CheckboxEditor from "./reportCheckbox/checkbox_editor.vue"
+import ImageEditor from "./reportImage/image_editor.vue"
+import ImageUploadEditor from "./reportImageUpload/image_upload_editor.vue"
+import ContainerEditor from "./reportContainer/container_editor.vue"
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
@@ -138,44 +142,73 @@ const afterVisibleChange = (bool: boolean) => {
   console.log('visible', bool);
 };
 const tableEditor = ref(null)
+const inputEditor = ref(null)
 const itemRefs = ref([])
 const currentEditItem = ref(null)
+const currentEditRef = ref(null)
 const onOpenEditor = (item: any) => {
   editDrawerVisible.value = true;
   drawerTitle.value = `${item.type} - Editor`;
-  console.log('key:', item.key)
+  console.log('onOpenEditor:', item)
+  console.log('item.type:', item.type)
+  console.log('currentEditItem:', toRaw(currentEditItem.value))
   setTimeout(() => {
-    const itemRef = itemRefs.value.find(r => r?.props?.item?.key == item.key)
-    let { columns, rows } = itemRef.getTableData()
-    tableEditor.value.initializeData(item.key, columns.value, rows.value)
-  }, 3000)
+    // const itemRef = itemRefs.value.find(r => r?.props?.item?.key == item.key)
+    switch (item.type) {
+      case 'table':
+        // tableEditor.value.initializeData(item.key, itemRef.getTableData())
+        console.log('table')
+        tableEditor.value.initializeData(item)
+        currentEditRef.value = tableEditor.value
+        break;
+      case 'text':
+        break;
+      case 'input':
+        console.log('input1')
+        currentEditRef.value = inputEditor.value
+        inputEditor.value.initializeData(item)
+        break;
+      case 'radio':
+        break;
+      case 'checkbox':
+        break;
+      case 'image':
+        break;
+      case 'image_upload':
+        break;
+      case 'container':
+        break;
+      default:
+        break;
+    }
+    // console.log('itemRef:', toRaw(itemRef))
+    // let { columns, rows } = itemRef.getTableData()
+    // tableEditor.value.initializeData(item.key, columns.value, rows.value)
+  },3000)
 };
 
-const props = defineProps({
-  title: {
-    type: String,
-    required: true
-  },
-  summary: {
-    type: String,
-    default: ''
-  },
-  // headerImage: {
-  //     type: Object as PropType<HeadImage>,
-  //     default: () => ({ url: '', style: {} })
-  // },
-  items: {
-    type: Array,
-    default: () => []
-  }
-})
+// const props = defineProps({
+//   title: {
+//     type: String,
+//     required: true
+//   },
+//   summary: {
+//     type: String,
+//     default: ''
+//   },
+//   items: {
+//     type: Array,
+//     default: () => []
+//   }
+// })
 console.log('reportTemplate:', toRaw(reportTemplateStore.reportTemplate))
 const initializeReport = () => {
 
 }
 
 const onApply = () => {
-  let exportData = tableEditor.value.exportData()
+  console.log('onApply:', toRaw(currentEditRef.value))
+  let exportData = currentEditRef.value.exportData()
   console.log('data:', exportData)
   const itemRef = itemRefs.value.find(r => r?.props?.item?.key == exportData.key)
   console.log('itemRef:', itemRef)
@@ -185,8 +218,8 @@ const onApply = () => {
 
 const onEditCom = (item: any) => {
   console.log('onEditCom:', item)
-  onOpenEditor(item)
   currentEditItem.value = item
+  onOpenEditor(item)
 }
 
 const onClickOpenGalleryDrawer = () => {
@@ -219,6 +252,9 @@ const onAddComponent = (com:any) => {
   galleryDrawerVisible.value = false
 }
 
+const onClose = ()=>{
+  console.log('onClose')
+}
 </script>
 
 <style scoped>

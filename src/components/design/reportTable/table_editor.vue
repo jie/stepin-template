@@ -51,7 +51,8 @@
         </a-form>
       </div>
       <div class="p-5">
-        <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">Add New Item</a-button>
+        <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">Add New
+          Item</a-button>
         <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>Add Child
           Item</a-button>
         <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">Edit Item</a-button>
@@ -174,13 +175,13 @@ function findNode(data, value) {
 
 function createRow(row: any, columns: any) {
   for (let col of columns) {
-    if(Object.keys(row).indexOf(col.key) == -1){
+    if (Object.keys(row).indexOf(col.key) == -1) {
       row[col.key] = ""
     }
     if (!row.fieldOptions) {
       row.fieldOptions = {}
     }
-    if(row.fieldOptions[col.key] == undefined) {
+    if (row.fieldOptions[col.key] == undefined) {
       row.fieldOptions[col.key] = {
         fieldType: col.fieldType,
         value: "",
@@ -271,15 +272,18 @@ const onFinishFailed = () => {
 function convertColumnToTreeData(arr) {
   console.log('convertColumnToTreeData:', toRaw(arr))
   let newArr = []
-  for (let item of arr) {
-    newArr.push({
-      label: item.title,
-      value: item.key,
-      data: item,
-      fieldType: item.fieldType,
-      children: item.children && item.children.length > 0 ? convertColumnToTreeData(item.children) : []
-    })
+  if (arr && arr.length !== 0) {
+    for (let item of arr) {
+      newArr.push({
+        label: item.title,
+        value: item.key,
+        data: item,
+        fieldType: item.fieldType,
+        children: item.children && item.children.length > 0 ? convertColumnToTreeData(item.children) : []
+      })
+    }
   }
+
   return newArr
 }
 
@@ -293,18 +297,20 @@ function convertColumnToTableData(arr) {
       dataIndex: item.value,
       width: item.data.width,
       fieldType: item.data.fieldType,
-      children: item.children && item.children.length > 0 ? convertColumnToTableData(item.children) : []
+      children: item.children && item.children.length > 0 ? convertColumnToTableData(item.children) : [],
+      fieldOptions: {}
     })
   }
   return newArr
 }
 
 
-const initializeData = (key: string, _columns: any, _rows: any) => {
-  treeData.value = convertColumnToTreeData(_columns)
+const initializeData = (item: any) => {
+  console.log('initializeData:', toRaw(item))
+  treeData.value = convertColumnToTreeData(item?.data?.columns)
   console.log('treeData.value:', toRaw(treeData.value))
-  editKey.value = key
-  rows.value = _rows
+  editKey.value = item.key
+  rows.value = item?.data?.rows || []
 }
 
 const exportData = () => {
@@ -312,7 +318,7 @@ const exportData = () => {
   let data = presetTable.value.getTableData()
   console.log('export--data:', toRaw(data))
   let { columns, rows } = presetTable.value.getTableData()
-  return { key: editKey.value, data: {columns: columns.value, rows: rows.value} }
+  return { key: editKey.value, data: { columns: columns.value, rows: rows.value } }
 }
 
 
