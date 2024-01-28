@@ -1,8 +1,8 @@
 <template>
     <div>
-        <div> edit {{ props.item.title }}</div>
+        <div>{{ props?.item?.title }}</div>
         <div>
-            <a-radio-group v-model:value="checkedOption" :options="options" />
+            <a-radio-group v-model:value="checkedList" :options="props?.item?.data?.options" />
         </div>
     </div>
 
@@ -12,29 +12,17 @@ import { defineProps, ref, PropType } from 'vue'
 const props = defineProps({
     item: {
         type: Object,
-    },
-    options: {
-        type: [Array] as PropType<Option[]>,
     }
 })
-
-const defaultOptions = [
-    { label: 'Option 1', value: 'Option 1' },
-    { label: 'Option 2', value: 'Option 2' }
-]
 
 type Option = {
     label: string;
     value: string;
 }
 
-const options = ref<Option[]>([])
-const checkedOption = ref<Option>()
+const checkedList = ref<Option[]>([])
 
-const initialize = () => {
-    options.value = props.options || defaultOptions
-    checkedOption.value = props.item.value || ""
-}
-
-initialize()
+defineExpose({
+    props
+})
 </script>

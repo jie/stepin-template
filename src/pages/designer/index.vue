@@ -21,33 +21,33 @@ const items = [
   //     ]
   //   }
   // },
-  { title: "input", desc: "input desc", type: "input" },
-  { title: "radio", desc: "radio desc", type: "radio" },
-  { title: "checkbox", desc: "checkbox desc", type: "checkbox" },
-  { title: "image", desc: "image desc", type: "image" },
-  { title: "image_upload", desc: "image_upload desc", type: "image_upload" },
-  {
-    title: "table", desc: "table desc", type: "table", data: {
-      columns: [{
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
-        width: 100,
-        fixed: 'left',
-        fieldType: 'input',
-        children: []
-      }], rows: [{
-        name: 'Name',
-        fieldOptions: {
-          name: {
-            fieldType: "input",
-            value: "",
-            placeholder: ""
-          }
-        }
-      }]
-    }
-  },
+  // { title: "input", desc: "input desc", type: "input" },
+  // { title: "radio", desc: "radio desc", type: "radio" },
+  // { title: "checkbox", desc: "checkbox desc", type: "checkbox" },
+  // { title: "image", desc: "image desc", type: "image" },
+  // { title: "image_upload", desc: "image_upload desc", type: "image_upload" },
+  // {
+  //   title: "table", desc: "table desc", type: "table", data: {
+  //     columns: [{
+  //       title: 'Name',
+  //       dataIndex: 'name',
+  //       key: 'name',
+  //       width: 100,
+  //       fixed: 'left',
+  //       fieldType: 'input',
+  //       children: []
+  //     }], rows: [{
+  //       name: 'Name',
+  //       fieldOptions: {
+  //         name: {
+  //           fieldType: "input",
+  //           value: "",
+  //           placeholder: ""
+  //         }
+  //       }
+  //     }]
+  //   }
+  // },
 ]
 console.log('items:', ReportTemplateStore)
 const store = ReportTemplateStore()

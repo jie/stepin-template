@@ -9,11 +9,9 @@
 <script lang="ts" setup>
 import { ref } from "vue"
 import BaseForm from "../base_editor.vue"
-const props = defineProps({
-  item: {
-    type: Object,
-  }
-})
+import {
+  ReportInput
+} from "@/types/components"
 
 const baseForm = ref(null)
 const itemData = ref({})
@@ -26,7 +24,7 @@ const initializeData = (item: any) => {
 
 const exportData = () => {
   console.log('baseForm.value.exportData():', baseForm.value.exportData())
-  return baseForm.value.exportData()
+  return new ReportInput(baseForm.value.exportData())
 }
 
 defineExpose({

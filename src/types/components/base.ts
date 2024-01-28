@@ -60,12 +60,14 @@ export class BaseComponent  {
   }
   initialize() {
   }
-
+  generateKey() {
+    this.key = nanoid();
+  }
   getData()  {
 
   }
   beforeAdd() {
-    this.key = nanoid();
+    this.generateKey();
     console.log('beforeAdd', this.key)
   }
   afterAdd(){

@@ -106,6 +106,17 @@ function edit(record: Report) {
   showModal.value = true;
 }
 
+
+const onRangeChange = (value: [Dayjs, Dayjs], dateString: [string, string]) => {
+  console.log('Selected Time: ', value);
+  console.log('Formatted Selected Time: ', dateString);
+};
+
+const onRangeOk = (value: [Dayjs, Dayjs]) => {
+  console.log('onOk: ', value);
+};
+
+
 </script>
 <template>
   <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
@@ -122,6 +133,10 @@ function edit(record: Report) {
       <a-form-item label="日期" name="time">
         <a-date-picker v-model:value="form.time" />
       </a-form-item>
+      <!-- <a-form-item label="检验员提交时间" name="startAt">
+        <a-range-picker :show-time="{ format: 'HH:mm' }" format="YYYY-MM-DD HH:mm"
+          :placeholder="['Start Time', 'End Time']" @change="onRangeChange" @ok="onRangeOk" />
+      </a-form-item> -->
     </a-form>
   </a-modal>
 
