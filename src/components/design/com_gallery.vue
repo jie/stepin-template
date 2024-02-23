@@ -23,7 +23,7 @@ const items = ref([
     type: 'input',
     icon: h(BorderOutlined, {
     }),
-    defaultData: { title: "Here is the title", desc: "Here is the description", type: "input" }
+    defaultData: { title: "Here is the title", sort: "0", desc: "Here is the description", type: "input", data: {value: ""} }
   },
   // {
   //   name: 'Text',
@@ -37,7 +37,7 @@ const items = ref([
     icon: h(CheckCircleOutlined, {
     }),
     defaultData: {
-      title: "Here is the radio", desc: "Here is the description", type: "radio", data: {
+      title: "Here is the radio", sort: "0", desc: "Here is the description", type: "radio", data: {
         options: [
           { label: 'Option 1', value: '1' },
           { label: 'Option 2', value: '2' },
@@ -53,7 +53,7 @@ const items = ref([
     icon: h(CheckSquareOutlined, {
     }),
     defaultData: {
-      title: "Here is the checkbox", desc: "Here is the description", type: "checkbox", data: {
+      title: "Here is the checkbox", sort: "0", desc: "Here is the description", type: "checkbox", data: {
         options: [
           { label: 'Option 1', value: '1' },
           { label: 'Option 2', value: '2' },
@@ -69,20 +69,22 @@ const items = ref([
     icon: h(TableOutlined, {
     }),
     defaultData: {
-      title: "Here is the table", desc: "Here is the description", type: "table", data: {
+      title: "Here is the table", sort: "0", desc: "Here is the description", type: "table", data: {
+        pageSize: 0,
+        addRowCount: 1,
         columns: [{
           title: 'Name',
           dataIndex: 'name',
           key: 'name',
           width: 100,
           fixed: 'left',
-          fieldType: 'input',
+          fieldType: 'text',
           children: []
         }], rows: [{
           name: 'Name',
           fieldOptions: {
             name: {
-              fieldType: "input",
+              fieldType: "text",
               value: "",
               placeholder: ""
             }
@@ -97,17 +99,22 @@ const items = ref([
     icon: h(FileImageOutlined, {
     }),
     defaultData: {
-      title: "Here is the image", desc: "Here is the description", type: "image", data: {
+
+      title: "Here is the image", sort: "0", desc: "Here is the description", type: "image", data: {
         images: [
-          {
-            width: 240,
-            url: "https://aliyuncdn.antdv.com/vue.png"
-          },
-          {
-            width: 240,
-            url: "https://aliyuncdn.antdv.com/logo.png"
-          }
-        ]
+          // {
+          //   width: 240,
+          //   url: "https://aliyuncdn.antdv.com/vue.png"
+          // },
+          // {
+          //   width: 240,
+          //   url: "https://aliyuncdn.antdv.com/logo.png"
+          // }
+        ],
+        accept: "image/*,application/pdf",
+        isFullWidth: true,
+        width: 0,
+        columns: 1
       }
     }
   },
@@ -116,14 +123,14 @@ const items = ref([
     type: 'upload',
     icon: h(UploadOutlined, {
     }),
-    defaultData: { title: "Here is the image upload", desc: "Here is the description", type: "image_upload" }
+    defaultData: { title: "Here is the image upload", sort: "0", desc: "Here is the description", type: "image_upload" }
   },
   // {
   //   name: 'Container',
   //   type: 'container',
   //   icon: h(ExpandOutlined, {
   //   }),
-  //   defaultData: { title: "Here is the Container", desc: "Here is the description", type: "container" }
+  //   defaultData: { title: "Here is the Container", sort: "0", desc: "Here is the description", type: "container" }
   // }
 ])
 

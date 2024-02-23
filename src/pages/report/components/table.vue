@@ -5,9 +5,16 @@ import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
-import { ReportStatuses, reports, Report } from "@/pages/constants";
+import {
+  ReportStatuses, reports, Report, customers,
+  factories,
+  workers,
+  categories
+} from "@/pages/constants";
 import { formatStatusColor } from "@/utils/formatter";
-
+import RemoteSelect from "@/components/remote_select/index.vue"
+import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
+import { db } from '@/hook/dexie_hook';
 const searchKeywords = ref('');
 const onClickSearch = () => {
   console.log(searchKeywords.value);
@@ -40,7 +47,7 @@ const newAuthor = (record?: Report) => {
     record = { _isNew: true };
   }
   record.name = undefined;
-  record.status = 0;
+  record.status = '0';
   record.time = dayjs();
   return record;
 };
@@ -78,11 +85,21 @@ function submit() {
   formModel.value
     ?.validateFields()
     .then((res: Report) => {
-      if (form._isNew) {
-        reports.push({ ...res });
-      } else {
-        copyObject(editRecord.value, res);
-      }
+      console.log('form:', form)
+      // if (form._isNew) {
+      //   reports.push({ ...res });
+      // } else {
+      //   copyObject(editRecord.value, res);
+      // }
+      console.log('submit:', res)
+      db.addReportItem({
+        name: form.name,
+        status: form.status,
+        inspect_date: form.inspect_date,
+        customer: form.customer,
+        workers: form.workers,
+        category: form.category
+      })
       showModal.value = false;
       reset();
     })
@@ -107,36 +124,40 @@ function edit(record: Report) {
 }
 
 
-const onRangeChange = (value: [Dayjs, Dayjs], dateString: [string, string]) => {
-  console.log('Selected Time: ', value);
-  console.log('Formatted Selected Time: ', dateString);
-};
+const queryReportTemplate = async () => {
 
-const onRangeOk = (value: [Dayjs, Dayjs]) => {
-  console.log('onOk: ', value);
-};
-
+}
 
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
-    <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item label="名称" required name="name">
+  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel" width="660px">
+    <a-form ref="formModel" :model="form" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
+      <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="状态" name="status">
-        <a-select style="width: 90px" v-model:value="form.status" :options="[
-          { label: 'offline', value: 0 },
-          { label: 'online', value: 1 },
-        ]" />
+      <a-form-item required label="Status" name="status">
+        <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions"/>
       </a-form-item>
-      <a-form-item label="日期" name="time">
-        <a-date-picker v-model:value="form.time" />
+      <a-form-item label="Inspect Date" name="inspect_date">
+        <a-date-picker v-model:value="form.inspect_date" style="width: 100%" />
       </a-form-item>
-      <!-- <a-form-item label="检验员提交时间" name="startAt">
-        <a-range-picker :show-time="{ format: 'HH:mm' }" format="YYYY-MM-DD HH:mm"
-          :placeholder="['Start Time', 'End Time']" @change="onRangeChange" @ok="onRangeOk" />
-      </a-form-item> -->
+      <a-form-item label="Category" name="category">
+        <a-select v-model:value="form.category">
+          <a-select-option  :value="c.id" v-for="c in categories">{{ c.name }}</a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item label="Workers" name="workers">
+        <RemoteSelect type="workers" v-model:value="form.workers" :rows="workers" searchKey="name" :isMultiple="true"/>
+      </a-form-item>
+      <a-form-item label="Customer" name="customer">
+        <RemoteSelect type="customer" v-model:value="form.customer" :rows="customers" searchKey="name"/>
+      </a-form-item>
+      <a-form-item label="Factory" name="factory">
+        <RemoteSelect type="factory" v-model:value="form.factory" :rows="factories" searchKey="name" />
+      </a-form-item>
+      <a-form-item label="Template" name="report_template">
+        <RemoteSelect type="report_template" v-model:value="form.report_template" searchKey="name" />
+      </a-form-item>
     </a-form>
   </a-modal>
 
@@ -218,7 +239,7 @@ const onRangeOk = (value: [Dayjs, Dayjs]) => {
             </template>
           </a-badge>
         </template>
-        <template v-else-if="column.dataIndex === 'time'">
+        <template v-else-if="column.dataIndex === 'inspect_date'">
           {{ text?.format('YYYY-MM-DD') }}
         </template>
         <template v-else-if="column.dataIndex === 'edit'">
@@ -264,8 +285,7 @@ const onRangeOk = (value: [Dayjs, Dayjs]) => {
         </template>
         <div v-else class="text-subtext">
           {{ text }}
-        </div>
-      </template>
-    </a-table>
-  </div>
-</template>
+      </div>
+    </template>
+  </a-table>
+</div></template>

@@ -24,6 +24,7 @@
     "clipboard": "^2.0.8",
     "dayjs": "^1.11.6",
     "default-passive-events": "^2.0.0",
+    "dexie": "^3.2.5",
     "echarts": "^5.3.3",
     "enquire.js": "^2.1.6",
     "js-cookie": "^2.2.1",

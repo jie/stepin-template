@@ -79,8 +79,6 @@ export class BaseComponent  {
   afterDel(){
     
   }
-  // create a object method
-
 }
 
 

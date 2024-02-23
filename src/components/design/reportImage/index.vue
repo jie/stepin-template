@@ -1,23 +1,40 @@
 <template>
     <div>
-        <div>{{ props.item.title }}</div>
-        <div>
-            <a-image-preview-group>
-                <a-image :width="item.width" :src="item.url" v-for="item in props?.item?.data?.images" style="border: 1px solid #999"/>
+        <BaseSlot :item="props?.item">
+            <a-image-preview-group v-if="props?.item?.data?.isFullWidth">
+                <a-image width="100%" :src="item.url" v-for="item in props?.item?.data?.images" style="border: 1px solid #999"/> 1
             </a-image-preview-group>
-        </div>
+            <a-image-preview-group v-else-if="props?.item?.data?.columns != 1">
+                <a-image :width="`${100/props?.item?.data?.columns}%`" :src="item.url" v-for="item in props?.item?.data?.images" style="padding-right: 10px; padding-bottom: 10px"/>
+            </a-image-preview-group>
+            <a-image-preview-group v-else>
+                <a-image :width="props?.item?.data?.width" :src="item.url" v-for="item in props?.item?.data?.images" style="border: 1px solid #999"/>
+            </a-image-preview-group>
+        </BaseSlot>
     </div>
 </template>
 <script lang="ts" setup>
+import BaseSlot from "../base_slot.vue"
 import { defineProps, ref, PropType } from 'vue'
+import { ReportTemplateStore } from "@/store/reportTemplate"
+const reportTemplateStore = ReportTemplateStore()
 const props = defineProps({
     item: {
         type: Object,
     },
 })
 
+const exportData = () => {
+  return reportTemplateStore.reportTemplate.items.find((item: any) => item.key == props.item.key)
+}
+
+const exportValue = () => {
+    return itemValue.value
+}
+
 
 defineExpose({
-    props
+    props,
+    exportData
 })
 </script>

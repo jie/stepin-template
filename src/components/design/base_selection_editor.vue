@@ -15,6 +15,9 @@
           <a-form-item label="Description" name="desc">
             <a-textarea v-model:value="baseData.desc" />
           </a-form-item>
+          <a-form-item label="Sort" name="sort">
+            <a-input-number v-model:value="baseData.sort" />
+          </a-form-item>
           <a-form-item label="Is Required" name="required">
             <a-switch v-model:checked="baseData.required" />
           </a-form-item>
@@ -73,6 +76,11 @@ const initializeData = (item: ComponentType) => {
   baseData.value.key = item.key
   baseData.value.sort = item.sort
   baseData.value.desc = item.desc
+  baseData.value.data.options = item.data.options
+}
+
+const exportData = () => {
+  return baseData.value
 }
 
 const addOption = () => {
@@ -101,6 +109,7 @@ const delOption = (value:string) => {
 } 
 
 defineExpose({
-  initializeData
+  initializeData,
+  exportData
 })
 </script>

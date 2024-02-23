@@ -12,11 +12,18 @@
             <PlusOutlined />
           </template> Add Component
         </a-button>
-        <a-button @click="onClickOpenReportSettingDrawer">
+        <a-button class="mr-2" @click="onClickOpenReportSettingDrawer">
           <template #icon>
             <SettingOutlined />
           </template> Settings
         </a-button>
+        <a-popconfirm title="Save report template?" @confirm="onClickSaveReportTemplate">
+          <a-button type="primary">
+            <template #icon>
+              <SaveOutlined />
+            </template> Save
+          </a-button>
+        </a-popconfirm>
       </div>
       <div class="title">
         <div>{{ reportTemplateStore.reportTemplate.title }}</div>
@@ -74,7 +81,7 @@
           <reportImageUpload :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
-          @click="onSetCurrentCom(item)" v-else-if="item.type == 'table'">
+         v-else-if="item.type == 'table'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
               v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
@@ -95,7 +102,7 @@
     </div>
   </div>
 
-  <a-drawer v-model:visible="editDrawerVisible" class="custom-class" style="color: red" width="60%" :title="drawerTitle"
+  <a-drawer v-model:visible="editDrawerVisible" class="custom-class"  width="60%" :title="drawerTitle"
     placement="right" @after-visible-change="afterVisibleChange">
     <template #extra>
       <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
@@ -103,26 +110,30 @@
     </template>
     <a-spin :spinning="isDrawerLoading">
       <div>
-        <TableEditor ref="tableEditor" v-if="currentEditItem.type == 'table'" />
-        <InputEditor ref="inputEditor" v-else-if="currentEditItem.type == 'input'" />
-        <TextEditor ref="textEditor" v-else-if="currentEditItem.type == 'text'" />
-        <RadioEditor ref="radioEditor" v-else-if="currentEditItem.type == 'radio'" />
-        <CheckboxEditor ref="checkboxEditor" v-else-if="currentEditItem.type == 'checkbox'" />
-        <ImageEditor ref="imageEditor" v-else-if="currentEditItem.type == 'image'" />
-        <ImageUploadEditor ref="imageUploadEditor" v-else-if="currentEditItem.type == 'image_upload'" />
-        <ContainerEditor ref="containerEditor" v-else-if="currentEditItem.type == 'container'" />
+        <TableEditor ref="tableEditor" v-if="currentEditItem?.type == 'table'" />
+        <InputEditor ref="inputEditor" v-else-if="currentEditItem?.type == 'input'" />
+        <TextEditor ref="textEditor" v-else-if="currentEditItem?.type == 'text'" />
+        <RadioEditor ref="radioEditor" v-else-if="currentEditItem?.type == 'radio'" />
+        <CheckboxEditor ref="checkboxEditor" v-else-if="currentEditItem?.type == 'checkbox'" />
+        <ImageEditor ref="imageEditor" v-else-if="currentEditItem?.type == 'image'" />
+        <ImageUploadEditor ref="imageUploadEditor" v-else-if="currentEditItem?.type == 'image_upload'" />
+        <ContainerEditor ref="containerEditor" v-else-if="currentEditItem?.type == 'container'" />
       </div>
     </a-spin>
 
   </a-drawer>
 
-  <a-drawer v-model:visible="galleryDrawerVisible" class="custom-class" style="color: red" width="600" title="Gallery"
+  <a-drawer v-model:visible="galleryDrawerVisible" class="custom-class"  width="600" title="Gallery"
     placement="right">
     <ComGallery v-on:add-component="onAddComponent" />
   </a-drawer>
-  <a-drawer v-model:visible="reportSettingDrawerVisible" class="custom-class" style="color: red" width="600"
+  <a-drawer v-model:visible="reportSettingDrawerVisible" class="custom-class"  width="600"
     title="Settings" placement="right">
-    <ReportSetting />
+    <template #extra>
+      <a-button style="margin-right: 8px" @click="onCloseSetting">Cancel</a-button>
+      <a-button type="primary" @click="onConfirmSetting">Confirm</a-button>
+    </template>
+    <ReportSetting ref="reportSetting"/>
   </a-drawer>
 </template>
 <script lang="ts" setup>
@@ -158,12 +169,16 @@ import {
   ReportContainer,
 } from "@/types/components"
 import { ReportTemplateStore } from "@/store/reportTemplate"
+import {db} from "@/hook/dexie_hook"
+import { useRoute, useRouter } from "vue-router";
+import dayjs from 'dayjs';
 const reportTemplateStore = ReportTemplateStore()
-
+const router = useRouter()
 type HeadImage = {
   url: string,
   style: object
 }
+const reportSetting = ref(null)
 const drawerTitle = ref<string>('');
 const editDrawerVisible = ref<boolean>(false);
 const galleryDrawerVisible = ref<boolean>(false);
@@ -235,33 +250,27 @@ const onOpenEditor = (item: any) => {
   }, 800)
 };
 
-// const props = defineProps({
-//   title: {
-//     type: String,
-//     required: true
-//   },
-//   summary: {
-//     type: String,
-//     default: ''
-//   },
-//   items: {
-//     type: Array,
-//     default: () => []
-//   }
-// })
-console.log('reportTemplate:', toRaw(reportTemplateStore.reportTemplate))
-const initializeReport = () => {
-
-}
-
 const onApply = () => {
   let exportData = currentEditRef.value.exportData()
+  console.log('exportData2:', toRaw(exportData))
   // itemRef.updateTableData(exportData.data)
   reportTemplateStore.reportTemplate.items = reportTemplateStore.reportTemplate.items.map((c: any, index: number) => {
     if (c.key == exportData.key) {
-      return currentEditRef.value.exportData()
+      return JSON.parse(JSON.stringify(exportData))
     }
     return c
+  })
+  // let index;
+  // for(let i = 0; i < reportTemplateStore.reportTemplate.items.length; i++) {
+  //   if (reportTemplateStore.reportTemplate.items[i].key == exportData.key) {
+  //     index = i
+  //     break
+  //   }
+  // }
+  // reportTemplateStore.reportTemplate.items[index] = exportData
+  // sort items by sort
+  reportTemplateStore.reportTemplate.items.sort((a: any, b: any) => {
+    return a.sort - b.sort
   })
   editDrawerVisible.value = false;
 }
@@ -311,6 +320,7 @@ const onAddComponent = (com: any) => {
     console.log('newItem:', toRaw(newItem))
     reportTemplateStore.addComponent(newItem)
       galleryDrawerVisible.value = false
+    console.log('all-items:', toRaw(reportTemplateStore.reportTemplate.items))
 
   }
 }
@@ -332,6 +342,7 @@ const onAddAfterComponent = (item: any) => {
       newItem = new ReportInput(item)
       break
     case "table":
+      console.log('item-table:', toRaw(item))
       newItem = new ReportTable(item)
       break
     case "image":
@@ -368,7 +379,13 @@ const onClickOpenReportSettingDrawer = () => {
 }
 
 const onClickPreview = () => {
-
+  let url = router.resolve({
+    name: 'public_report',
+    params: {
+      reportId: reportTemplateStore.reportTemplate.id
+    }
+  })
+  window.open(url.href, '_blank')
 }
 
 const onSetCurrentCom = (item: any) => {
@@ -377,17 +394,37 @@ const onSetCurrentCom = (item: any) => {
     currentEditItem.value = null
   } else {
     currentEditItem.value = item
-
   }
   // console.log('currentEditItem.value:', currentEditItem)
 }
 
-
-
-
 const onClose = () => {
   console.log('onClose')
+  editDrawerVisible.value = false
 }
+
+const onCloseSetting = () => {
+  reportSettingDrawerVisible.value = false
+}
+
+const onConfirmSetting = () => {
+  console.log('onConfirmSetting')
+  let data =  reportSetting.value.exportData()
+  console.log('data:', data)
+  reportSettingDrawerVisible.value = false
+}
+
+const onClickSaveReportTemplate = async () => {
+  console.log('saveData:', toRaw(reportTemplateStore.reportTemplate))
+  await db.updateReportTemplate(JSON.parse(JSON.stringify({
+    id: reportTemplateStore.reportTemplate.id,
+    title: reportTemplateStore.reportTemplate.title,
+    summary: reportTemplateStore.reportTemplate.summary,
+    settings: reportTemplateStore.reportTemplate.settings,
+    items: reportTemplateStore.reportTemplate.items,
+  })))
+}
+
 </script>
 
 <style scoped>

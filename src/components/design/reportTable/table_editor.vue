@@ -1,20 +1,21 @@
 <template>
-  <div style="color: #333">
+  <div>
     <div class="mt-6">
-      <div class="pb-6">
-        <h3 class="" style="text-align:center; font-size:120%">Settings</h3>
-      </div>
+      <BaseForm ref="baseForm" />
       <div>
         <a-form :model="TableSettings" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }"
           autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed">
-          <a-form-item label="Has Add Button" name="hasAddRowButtonForUser">
-            <a-switch v-model:checked="TableSettings.hasAddRowButtonForUser" />
+          <a-form-item label="Has Add Button" name="hasAddRowButton">
+            <a-switch v-model:checked="TableSettings.hasAddRowButton" />
           </a-form-item>
           <a-form-item label="Width" name="width">
             <a-input v-model:value="TableSettings.tableWidth" />
           </a-form-item>
           <a-form-item label="Height" name="height">
             <a-input v-model:value="TableSettings.tableHeight" />
+          </a-form-item>
+          <a-form-item label="Page Size" name="pageSize">
+            <a-input v-model:value="TableSettings.pageSize" />
           </a-form-item>
         </a-form>
       </div>
@@ -48,14 +49,16 @@
           <a-form-item label="Width" name="width">
             <a-input-number v-model:value="itemParam.width" placeholder="Basic usage" />
           </a-form-item>
+          <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
+            <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">Add New
+              Item</a-button>
+            <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>Add
+              Child
+              Item</a-button>
+            <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">Edit
+              Item</a-button>
+          </a-form-item>
         </a-form>
-      </div>
-      <div class="p-5">
-        <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">Add New
-          Item</a-button>
-        <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>Add Child
-          Item</a-button>
-        <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">Edit Item</a-button>
       </div>
     </div>
     <div class="mt-6">
@@ -65,9 +68,31 @@
       <div>
         <a-form :model="TableSettings" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }"
           autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed">
-          <Table ref="presetTable"></Table>
-          <a-button type="primary" class="mr-2" @click="onClickAddPresetRow">Add Rows</a-button>
+          <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
+            <Table ref="presetTable" :item="currentItem" mode="preview" v-on:edit-table-row="editTableRow"></Table>
+          </a-form-item>
+          <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
+            <a-button type="primary" class="mr-2" @click="onClickAddPresetRow">Add Rows</a-button>
+            <a-popconfirm title="Confirm delete row？" ok-text="Yes" cancel-text="No" @confirm="onClickDelPresetRow">
+              <a-button type="danger" class="mr-2">Delete Rows</a-button>
+            </a-popconfirm>
+          </a-form-item>
         </a-form>
+        <a-modal v-model:visible="rowEditDialogVisible" title="Edit Row" ok-text="Confirm" cancel-text="Cancel"
+          @ok="onRowEditFinish" @onCancel="cancelRowEditModal" :z-index="1001">
+          <a-form :model="rowItemParam" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }"
+            autocomplete="off">
+            <a-form-item label="Text" name="text">
+              <a-input v-model:value="rowItemParam.text" />
+            </a-form-item>
+            <a-form-item label="Type" name="fieldType">
+              <a-radio-group v-model:value="rowItemParam.fieldType" button-style="solid">
+                <a-radio-button value="text">Text</a-radio-button>
+                <a-radio-button value="input">Input</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-form>
+        </a-modal>
       </div>
     </div>
   </div>
@@ -78,16 +103,28 @@
 import { notification } from 'ant-design-vue';
 import { defineProps, defineExpose, ref, toRaw } from 'vue';
 import Table from "./index.vue"
+import BaseForm from "../base_editor.vue"
 import type { TreeSelectProps } from 'ant-design-vue';
-const props = defineProps(["index", "item"])
-const columns = ref<string>();
+import { ReportTable } from '@/types/components';
+
+const currentItem = ref<any>()
+const baseForm = ref(null)
+const columns = ref<any>();
 const rows = ref([])
 const editKey = ref<string>();
 const presetTable = ref();
+const rowEditDialogVisible = ref(false)
+const rowItemParam = ref<any>({
+  rowIndex: 0,
+  key: '',
+  text: '',
+  fieldType: '',
+})
 const itemParam = ref<any>({
   title: '',
   dataIndex: '',
   key: '',
+  text: '',
   width: 100,
   fieldType: '',
   fixed: 'center',
@@ -95,9 +132,10 @@ const itemParam = ref<any>({
 
 
 const TableSettings = ref<any>({
-  hasAddRowButtonForUser: true,
+  hasAddRowButton: false,
   tableHeight: 300,
-  tableWidth: "100%"
+  tableWidth: "100%",
+  pageSize: 0
 })
 
 const resetItemParam = () => {
@@ -105,6 +143,7 @@ const resetItemParam = () => {
     title: '',
     dataIndex: '',
     key: '',
+    text: '',
     fieldType: 'text',
     width: 100,
     fixed: 'center',
@@ -124,20 +163,20 @@ const onTreeSelect = () => {
 }
 
 const treeData = ref<TreeSelectProps['treeData']>([
-  {
-    label: 'Name',
-    value: 'name',
-    data: {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      width: 100,
-      fixed: 'center',
-      fieldType: 'text',
-    },
-    children: [
-    ],
-  },
+  // {
+  //   label: 'Name',
+  //   value: 'name',
+  //   data: {
+  //     title: 'Name',
+  //     dataIndex: 'name',
+  //     key: 'name',
+  //     width: 100,
+  //     fixed: 'center',
+  //     fieldType: 'text',
+  //   },
+  //   children: [
+  //   ],
+  // },
 ]);
 
 
@@ -206,9 +245,9 @@ const onClickAdd = () => {
     let node = findNode(treeData.value, columns.value)
     if (node.value == itemParam.value.key) {
       notification["error"]({
-        message: 'Notification Title',
+        message: 'Field key already exists',
         description:
-          'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
+          'Field key already exists. Please use a different key.',
       });
       return
     }
@@ -232,9 +271,9 @@ const onClickChildAdd = () => {
   console.log('node:', node)
   if (node.value == itemParam.value.key) {
     notification["error"]({
-      message: 'Notification Title',
+      message: 'Field key already exists',
       description:
-        'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
+        'Field key already exists. Please use a different key.',
     });
     return
   }
@@ -253,7 +292,8 @@ const onClickChildAdd = () => {
   presetTable.value.updateTableData({ columns: convertColumnToTableData(treeData.value), rows: rows.value })
 }
 const onClickEdit = () => {
-  editNode(treeData.value, columns.value, itemParam.value.key, itemParam.value.title, copyJson(itemParam.value, 'dataIndex', itemParam.value.key))
+  let editJson = copyJson(itemParam.value, 'dataIndex', itemParam.value.key)
+  editNode(treeData.value, columns.value, itemParam.value.key, itemParam.value.title, editJson)
   resetItemParam()
   columns.value = ""
   updateRowsWhenUpdateColumn()
@@ -294,6 +334,7 @@ function convertColumnToTableData(arr) {
     newArr.push({
       title: item.label,
       key: item.value,
+      text: item.text,
       dataIndex: item.value,
       width: item.data.width,
       fieldType: item.data.fieldType,
@@ -311,38 +352,127 @@ const initializeData = (item: any) => {
   console.log('treeData.value:', toRaw(treeData.value))
   editKey.value = item.key
   rows.value = item?.data?.rows || []
+  console.log('data:', toRaw(item?.data))
+
+  setTimeout(() => {
+
+    let { _columns, _rows } = item?.data
+    console.log('_columns:', toRaw(_columns))
+    if (_columns && _columns.length != 0) {
+      itemParam.title = _columns[0].title
+      itemParam.dataIndex = _columns[0].dataIndex
+      itemParam.key = _columns[0].key
+      itemParam.text = _columns[0].text
+      itemParam.width = _columns[0].width
+      itemParam.fieldType = _columns[0].fieldType
+      itemParam.fixed = _columns[0].fixed
+    }
+
+    baseForm.value.initializeData(item)
+    TableSettings.value.hasAddRowButton = item?.data?.hasAddRowButton
+    TableSettings.tableHeight = item?.data?.heigth
+    TableSettings.tableWidth = item?.data?.width
+    TableSettings.pageSize = item?.data?.pageSize
+    currentItem.value = item
+  }, 1000)
+
 }
 
 const exportData = () => {
   console.log("editKey.value:", editKey.value)
   let data = presetTable.value.getTableData()
   console.log('export--data:', toRaw(data))
-  let { columns, rows } = presetTable.value.getTableData()
-  return { key: editKey.value, data: { columns: columns.value, rows: rows.value } }
+  let tableData = {
+    columns: data.columns,
+    rows: data.rows, pageSize: TableSettings.value.pageSize,
+    addRowCount: TableSettings.value.hasAddRowButton ? data.rows.length : 0,
+    hasAddRowButton: TableSettings.value.hasAddRowButton
+  }
+  let result = new ReportTable(baseForm.value.exportData())
+  result.data = tableData
+  console.log('result:', result)
+  return result
 }
 
-
+// const exportData = () => {
+//   console.log('baseForm.value.exportData():', baseForm.value.exportData())
+//   return new ReportInput(baseForm.value.exportData())
+// }
 
 
 const onClickAddPresetRow = () => {
-  console.log('onClickAddPresetRow')
-  let { _, rows } = presetTable.value.getTableData()
+  // let { _, rows } = presetTable.value.getTableData()
   let row = {}
   createRow(row, convertColumnToTableData(treeData.value))
   rows.value.push(row)
   presetTable.value.updateTableData({ columns: convertColumnToTableData(treeData.value), rows: rows.value })
 }
 
+const onClickDelPresetRow = () => {
+  presetTable.value.deleteSelectedRows()
+}
+
+
+
 
 const updateRowsWhenUpdateColumn = () => {
-  console.log('updateRowsWhenUpdateColumn')
   let newRows = JSON.parse(JSON.stringify(rows.value))
   for (let row of newRows) {
     createRow(row, convertColumnToTableData(treeData.value))
   }
-  console.log('newRows:', toRaw(newRows))
   rows.value = newRows
 }
+
+const editTableRow = (rowVal: any) => {
+  // console.log('editTableRow:', text, record, index, column)
+  // let { columns, rows } = presetTable.value.getTableData()
+  // let row = rows.value[index]
+  // let col = columns.value[column]
+  // console.log('row:', toRaw(row))
+  // console.log('col:', toRaw(col))
+  // let fieldOptions = row.fieldOptions[col.key]
+  // console.log('fieldOptions:', toRaw(fieldOptions))
+  // baseForm.value.initializeData(fieldOptions)
+  console.log('*******************')
+  console.log('rows5:', toRaw(rows.value))
+  console.log('columns5:', toRaw(columns.value))
+  console.log(toRaw(rowVal.text))
+  console.log(toRaw(rowVal.record))
+  console.log(toRaw(rowVal.index))
+  console.log(toRaw(rowVal.column))
+  rowItemParam.value.rowIndex = rowVal.index
+  rowItemParam.value.key = rowVal.column.key
+  rowItemParam.value.text = rowVal.text
+  rowItemParam.value.fieldType = rowVal.record.fieldOptions[rowVal.column.key].fieldType
+  rowEditDialogVisible.value = true
+}
+
+const onRowEditFinish = () => {
+  // rows.value[rowItemParam.rowIndex].text = rowItemParam.text
+  // rows.value[rowItemParam.rowIndex].fieldType = 
+  console.log('rows2:', toRaw(rows.value))
+  console.log('columns2:', toRaw(columns.value))
+  console.log('dataIndex:', toRaw(rowItemParam.value))
+  rows.value[rowItemParam.value.rowIndex][rowItemParam.value.key] = rowItemParam.value.text
+  rows.value[rowItemParam.value.rowIndex].fieldOptions[rowItemParam.value.key].fieldType = rowItemParam.value.fieldType
+  resetRowEdit()
+  rowEditDialogVisible.value = false
+}
+
+const cancelRowEditModal = () => {
+  resetRowEdit()
+  rowEditDialogVisible.value = false
+}
+
+const resetRowEdit = () => {
+  rowItemParam.value = {
+    rowIndex: 0,
+    key: '',
+    text: '',
+    fieldType: '',
+  }
+}
+
 
 defineExpose({
   initializeData,

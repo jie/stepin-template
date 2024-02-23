@@ -19,8 +19,8 @@
                     </a-popconfirm>
                 </a-menu-item>
                 <a-menu-item>
-                    <span @click="onClickAdd(props.item)" class="block">
-                        <PlusOutlined /> Add
+                    <span @click="onClickDuplicate(props.item)" class="block">
+                        <CopyOutlined /> Duplicate
                     </span>
                 </a-menu-item>
             </a-menu>
@@ -40,7 +40,7 @@ const onClickDel = (item: any) => {
 
     emits('onDelComponent', item)
 }
-const onClickAdd = (item: any) => {
+const onClickDuplicate = (item: any) => {
     emits('onAddComponent', item)
 }
 </script>

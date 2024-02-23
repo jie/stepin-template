@@ -1,79 +1,92 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
-import { reactive, ref } from 'vue';
+import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
 import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import router from '@/router';
-
+import { db } from '@/hook/dexie_hook'
+import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
 const columns = [
   {
     title: '名称',
     dataIndex: 'name',
   },
   { title: '状态', dataIndex: 'status' },
-  { title: '创建时间', dataIndex: 'time' },
+  { title: '创建时间', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
 type ReportTemplate = {
+  id?: string;
   name?: string;
-  status?: number;
-  time?: Dayjs;
-  _edit?: boolean;
-  _isNew?: boolean;
+  status?: string;
+  create_at?: string;
 };
 
-const authors = reactive<ReportTemplate[]>([
-  {
-    name: 'Li Zhi',
-    status: 1,
-    time: dayjs(),
-  },
-  {
-    name: 'Li Zhi',
-    status: 0,
-    time: dayjs(),
-  },
-  {
-    name: 'Li Zhi',
-    status: 1,
-    time: dayjs(),
-  },
-  {
-    name: 'Li Zhi',
-    status: 0,
-    time: dayjs(),
-  },
-]);
+const Ctl = reactive({
+  records: [] as ReportTemplate[],
+  page: 1,
+  pagesize: 10,
+  total: 0,
+  isNew: false
+});
+
+const createTimeRef = ref<Dayjs>(dayjs());
+
+
+const initializeData = async () => {
+  let result = await db.paginateReportTemplate(Ctl.page, Ctl.pagesize)
+  Ctl.records = result.data.map((item: any) => {
+    return {
+      id: item.id,
+      name: item.name,
+      status: item.status,
+      create_at: item.create_at
+    }
+  })
+  Ctl.total = result.total
+  console.log('Ctl.records:', toRaw(Ctl.records))
+}
+
+initializeData()
 
 function addNew() {
   showModal.value = true;
-  form._isNew = true;
+  Ctl.isNew = true;
 }
 
 const showModal = ref(false);
 
 const newReportTemplate = (reportTemplate?: ReportTemplate) => {
+  createTimeRef.value = dayjs()
+  let create_at = createTimeRef.value.format('YYYY-MM-DD HH:mm:ss')
   if (!reportTemplate) {
-    reportTemplate = { _isNew: true };
+
+    return <ReportTemplate>{
+      id: '',
+      name: '',
+      status: '1',
+      create_at: create_at
+    }
+  } else {
+    reportTemplate.name = '';
+    reportTemplate.status = '1';
+    reportTemplate.create_at = create_at;
+    return reportTemplate;
   }
-  reportTemplate.name = undefined;
-  reportTemplate.status = 0;
-  reportTemplate.time = dayjs();
-  return reportTemplate;
 };
 
 const copyObject = (target: any, source?: any) => {
   if (!source) {
     return target;
   }
-  Object.keys(target).forEach((key) => (target[key] = source[key]));
+  Object.keys(source).forEach((key) => (target[key] = source[key]));
 };
 
 const form = reactive<ReportTemplate>(newReportTemplate());
-
+console.log('form:', form)
 function reset() {
   return newReportTemplate(form);
 }
@@ -88,18 +101,31 @@ const formModel = ref<FormInstance>();
 const formLoading = ref(false);
 
 
-function submit() {
+async function submit() {
   formLoading.value = true;
   formModel.value
     ?.validateFields()
-    .then((res: ReportTemplate) => {
-      if (form._isNew) {
-        authors.push({ ...res });
+    .then(async (res: ReportTemplate) => {
+      if (Ctl.isNew === true) {
+
+        await db.addReportTemplate({
+          name: form.name,
+          status: form.status,
+          create_at: form.create_at
+        })
+
       } else {
-        copyObject(editRecord.value, res);
+        console.log('form:', form)
+        await db.updateReportTemplate({
+          id: form.id,
+          name: form.name,
+          status: form.status,
+          create_at: form.create_at
+        })
       }
       showModal.value = false;
       reset();
+      initializeData()
     })
     .catch((e) => {
       console.error(e);
@@ -116,73 +142,72 @@ const editRecord = ref<ReportTemplate>();
  * @param record
  */
 function edit(record: ReportTemplate) {
+  console.log('edit-record:', record)
+  createTimeRef.value = dayjs(record.create_at)
+  Ctl.isNew = false;
   editRecord.value = record;
+  console.log('record1:', record)
   copyObject(form, record);
+  console.log('form:', form)
   showModal.value = true;
 }
 
-type Status = 0 | 1;
 
-const StatusDict = {
-  0: 'offline',
-  1: 'online',
-};
-
-
-const design = (record: ReportTemplate) => {
+const goDesign = (record: ReportTemplate) => {
   router.push({
     name: 'design',
     query: {
-      id: "1",
+      id: record.id,
     },
   });
 }
 
+const deleteRecord = async (record: ReportTemplate) => {
+  console.log('record:', record)
+  await db.delReportTemplate(record.id)
+  initializeData()
+}
+
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
+  <a-modal :title="Ctl.isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
       <a-form-item label="名称" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
       <a-form-item required label="状态" name="status">
-        <a-select style="width: 90px" v-model:value="form.status" :options="[
-          { label: 'offline', value: 0 },
-          { label: 'online', value: 1 },
-        ]" />
+        <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions" />
       </a-form-item>
-      <a-form-item label="日期" name="time">
-        <a-date-picker v-model:value="form.time" />
+      <a-form-item label="日期" name="create_at">
+        <a-date-picker v-model:value="createTimeRef" format="YYYY-MM-DD HH:mm:ss" :locale="locale" style="width:100%" />
       </a-form-item>
     </a-form>
   </a-modal>
 
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="authors" :pagination="false">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="Ctl.records" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>模版</h4>
         <div class="flex">
           <div class="mr-4">
-            <span class="mr-2">模版状态</span>
-            <a-select ref="select" style="width: 120px" allowClear>
-              <a-select-option value="jack">Jack</a-select-option>
-              <a-select-option value="lucy">Lucy</a-select-option>
-              <a-select-option value="disabled" disabled>Disabled</a-select-option>
-              <a-select-option value="Yiminghe">yiminghe</a-select-option>
+            <span class="mr-2">状态</span>
+            <a-select ref="select" style="width: 200px" allowClear>
+              <a-select-option value="0">Unapproved</a-select-option>
+              <a-select-option value="1">Approved</a-select-option>
             </a-select>
           </div>
           <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">\
-              <template #addonBefore>
-                关键词
-              </template>
-            </a-input>
-            <a-button class="mr-2">
-              <template #icon>
-                <SearchOutlined />
-              </template>
-              搜索
-            </a-button>
+            <template #addonBefore>
+              关键词
+            </template>
+          </a-input>
+          <a-button class="mr-2">
+            <template #icon>
+              <SearchOutlined />
+            </template>
+            搜索
+          </a-button>
           <a-button type="primary" @click="addNew" :loading="formLoading">
             <template #icon>
               <PlusOutlined />
@@ -201,12 +226,12 @@ const design = (record: ReportTemplate) => {
       <template v-else-if="column.dataIndex === 'status'">
         <a-badge class="text-subtext" :color="'green'">
           <template #text>
-            <span class="text-subtext">{{ StatusDict[text as Status] }}</span>
+            <span class="text-subtext">{{ ApproveStatus[text] }}</span>
           </template>
         </a-badge>
       </template>
-      <template v-else-if="column.dataIndex === 'time'">
-        {{ text?.format('YYYY-MM-DD') }}
+      <template v-else-if="column.dataIndex === 'create_at'">
+        {{ text }}
       </template>
       <template v-else-if="column.dataIndex === 'edit'">
         <a-dropdown>
@@ -228,14 +253,16 @@ const design = (record: ReportTemplate) => {
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a @click="edit(record)" rel="noopener noreferrer">
-                  <DeleteOutlined />
-                  删除
-                </a>
+                <a-popconfirm title="删除" content="确认删除吗？" okText="确认" cancelText="取消" @confirm="deleteRecord(record)">
+                  <a rel="noopener noreferrer">
+                    <DeleteOutlined />
+                    删除
+                  </a>
+                </a-popconfirm>
               </a-menu-item>
               <a-menu-divider />
               <a-menu-item key="3">
-                <a @click="design(record)" rel="noopener noreferrer">
+                <a @click="goDesign(record)" rel="noopener noreferrer">
                   <ExperimentOutlined />
                   模版设计
                 </a>

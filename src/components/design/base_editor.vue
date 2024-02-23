@@ -15,6 +15,9 @@
           <a-form-item label="Description" name="desc">
             <a-textarea v-model:value="baseData.desc" />
           </a-form-item>
+          <a-form-item label="Sort" name="sort">
+            <a-input-number v-model:value="baseData.sort" />
+          </a-form-item>
           <a-form-item label="Is Required" name="required">
             <a-switch v-model:checked="baseData.required" />
           </a-form-item>

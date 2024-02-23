@@ -48,6 +48,27 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/public',
+    name: 'public',
+    meta: {
+      renderMenu: false,
+    },
+    component: () => import('@/components/layout/BlankView.vue'),
+    children: [
+      {
+        path: '/public/report/:reportId',
+        name: 'public_report',
+        meta: {
+          icon: 'LoginOutlined',
+          view: 'blank',
+          target: '_blank',
+          cacheable: false,
+        },
+        component: () => import('@/pages/public_report/index.vue'),
+      },
+    ]
+  },
+  {
     path: '/account',
     name: 'account',
     meta: {

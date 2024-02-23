@@ -168,277 +168,354 @@ export const permissions = reactive<Permission[]>([
 ])
 
 export type Report = {
+  id?:string;
   name?: string;
-  customer?: string;
-  worker?: string;
-  category?: string;
-  template?: string;
+  customer?: any;
+  workers?: any[];
+  factory?: any;
+  company?: any;
+  category?: any;
+  report_template?: any;
   status?: string;
-  time?: Dayjs;
+  inspect_date?: Dayjs;
   _edit?: boolean;
   _isNew?: boolean;
 };
 
 
+export const customers = reactive([
+  {
+    id: '1',
+    name: '岳阳宝丽纺织品有限公司'
+  },
+  {
+    id: '2',
+    name: '宁海南航电器'
+  },
+  {
+    id: '3',
+    name: '嵊州三健网业有限公司'
+  },
+  {
+    id: '4',
+    name: '福建省创翔鞋业有限公司'
+  }
+])
 
-export const reports = reactive<Report[]>([
+
+export const factories = reactive([
   {
-    name: '2023-12-20岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '0',
-    time: dayjs(),
+    id: '1',
+    name: '岳阳宝丽纺织品工厂'
   },
   {
-    name: '2023-12-21岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '1',
-    time: dayjs(),
+    id: '2',
+    name: '宁海南航电器工厂'
   },
   {
-    name: '2023-12-23宁海南航电器',
-    customer: '三问家居',
-    category: '电器',
-    worker: '许忠周',
-    status: '2',
-    time: dayjs(),
+    id: '3',
+    name: '嵊州三健网业工厂'
   },
   {
-    name: '2023-12-24嵊州三健网业有限公司',
-    customer: 'KasutU',
-    category: '药品',
-    worker: '杜心良',
-    status: '3',
-    time: dayjs(),
+    id: '4',
+    name: '福建省创翔工厂'
+  }
+])
+
+export const workers = reactive([{
+  id: '1',
+  name: '钟晓平'
+}, {
+  id: '2',
+  name: '许忠周'
+}, {
+  id: '3',
+  name: '杜心良',
+}, {
+  id: '4',
+  name: 'Mahesh Krishnan'
+}])
+
+export const categories = reactive([
+  {
+    id: '1',
+    name: '纺织品'
   },
   {
-    name: '2023-12-25福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '4',
-    time: dayjs(),
+    id: '2',
+    name: '电器'
   },
   {
-    name: '2023-12-26福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '5',
-    time: dayjs(),
+    id: '3',
+    name: '药品'
   },
   {
-    name: '2023-12-27福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '6',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-28福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '100',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-20岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '0',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-21岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '1',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-23宁海南航电器',
-    customer: '三问家居',
-    category: '电器',
-    worker: '许忠周',
-    status: '2',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-24嵊州三健网业有限公司',
-    customer: 'KasutU',
-    category: '药品',
-    worker: '杜心良',
-    status: '3',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-25福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '4',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-26福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '5',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-27福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '6',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-28福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '100',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-20岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '0',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-21岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '1',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-23宁海南航电器',
-    customer: '三问家居',
-    category: '电器',
-    worker: '许忠周',
-    status: '2',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-24嵊州三健网业有限公司',
-    customer: 'KasutU',
-    category: '药品',
-    worker: '杜心良',
-    status: '3',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-25福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '4',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-26福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '5',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-27福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '6',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-28福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '100',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-20岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '0',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-21岳阳宝丽纺织品有限公司',
-    customer: '荣恰',
-    category: '纺织品',
-    worker: '钟晓平',
-    status: '1',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-23宁海南航电器',
-    customer: '三问家居',
-    category: '电器',
-    worker: '许忠周',
-    status: '2',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-24嵊州三健网业有限公司',
-    customer: 'KasutU',
-    category: '药品',
-    worker: '杜心良',
-    status: '3',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-25福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '4',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-26福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '5',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-27福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '6',
-    time: dayjs(),
-  },
-  {
-    name: '2023-12-28福建省创翔鞋业有限公司',
-    customer: '世达外贸',
-    category: '鞋类',
-    worker: 'Mahesh Krishnan',
-    status: '100',
-    time: dayjs(),
-  },
-]);
+    id: '4',
+    name: '鞋类'
+  }
+])
+
+
+export const reports = reactive<Report[]>(
+//   [
+//   {
+//     name: '2023-12-20岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '0',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-21岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '1',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-23宁海南航电器',
+//     customer: '三问家居',
+//     category: '电器',
+//     workers: '许忠周',
+//     status: '2',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-24嵊州三健网业有限公司',
+//     customer: 'KasutU',
+//     category: '药品',
+//     workers: '杜心良',
+//     status: '3',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-25福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '4',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-26福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '5',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-27福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '6',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-28福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '100',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-20岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '0',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-21岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '1',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-23宁海南航电器',
+//     customer: '三问家居',
+//     category: '电器',
+//     workers: '许忠周',
+//     status: '2',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-24嵊州三健网业有限公司',
+//     customer: 'KasutU',
+//     category: '药品',
+//     workers: '杜心良',
+//     status: '3',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-25福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '4',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-26福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '5',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-27福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '6',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-28福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '100',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-20岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '0',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-21岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '1',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-23宁海南航电器',
+//     customer: '三问家居',
+//     category: '电器',
+//     workers: '许忠周',
+//     status: '2',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-24嵊州三健网业有限公司',
+//     customer: 'KasutU',
+//     category: '药品',
+//     workers: '杜心良',
+//     status: '3',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-25福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '4',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-26福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '5',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-27福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '6',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-28福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '100',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-20岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '0',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-21岳阳宝丽纺织品有限公司',
+//     customer: '荣恰',
+//     category: '纺织品',
+//     workers: '钟晓平',
+//     status: '1',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-23宁海南航电器',
+//     customer: '三问家居',
+//     category: '电器',
+//     workers: '许忠周',
+//     status: '2',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-24嵊州三健网业有限公司',
+//     customer: 'KasutU',
+//     category: '药品',
+//     workers: '杜心良',
+//     status: '3',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-25福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '4',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-26福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '5',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-27福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '6',
+//     time: dayjs(),
+//   },
+//   {
+//     name: '2023-12-28福建省创翔鞋业有限公司',
+//     customer: '世达外贸',
+//     category: '鞋类',
+//     workers: 'Mahesh Krishnan',
+//     status: '100',
+//     time: dayjs(),
+//   },
+// ]
+);
 
 
 

@@ -1,27 +1,31 @@
 <template>
   <div class="clearfix">
-    <div v-if="props?.item?.title">{{ props?.item?.title }}</div>
-    <div>
-      <a-image-preview-group sty>
-        <a-image :width="240" :src="item.url" v-for="item in fileList" style="padding: 10px;" />
-      </a-image-preview-group>
-    </div>
-    <a-upload v-model:file-list="fileList" action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-      list-type="picture-card" @preview="handlePreview" :show-upload-list="false">
-      <div v-if="fileList.length < 8">
-        <plus-outlined />
-        <div style="margin-top: 8px">Upload</div>
+
+    <BaseSlot :item="props?.item">
+      <div>
+        <a-image-preview-group>
+          <a-image :width="240" :src="item.url" v-for="item in fileList" style="padding: 10px;" />
+        </a-image-preview-group>
       </div>
-    </a-upload>
-    <a-modal :visible="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
-      <img alt="example" style="width: 100%" :src="previewImage" />
-    </a-modal>
-    <div v-if="props?.item?.desc">{{ props?.item?.desc }}</div>
+      <a-upload v-model:file-list="fileList" action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+        list-type="picture-card" @preview="handlePreview" :show-upload-list="false" :accept="props?.item?.data?.accept">
+        <div v-if="fileList.length < 8">
+          <plus-outlined />
+          <div style="margin-top: 8px">Upload</div>
+        </div>
+      </a-upload>
+      <a-modal :visible="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
+        <img alt="example" style="width: 100%" :src="previewImage" />
+      </a-modal>
+    </BaseSlot>
+
   </div>
 </template>
 <script lang="ts" setup>
+import BaseSlot from "../base_slot.vue"
 import { PlusOutlined } from '@ant-design/icons-vue';
 import { defineComponent, ref } from 'vue';
+import {getBase64} from "@/utils/file"
 import type { UploadProps } from 'ant-design-vue';
 
 const props = defineProps({
@@ -29,15 +33,6 @@ const props = defineProps({
     type: Object,
   },
 });
-
-function getBase64(file: File) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-}
 
 
 const previewVisible = ref(false);
@@ -95,6 +90,15 @@ const handlePreview = async (file: UploadProps['fileList'][number]) => {
   previewVisible.value = true;
   previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
 };
+
+const exportData = () => {
+  return props.item
+}
+
+defineExpose({
+  props,
+  exportData
+})
 
 </script>
 <style>

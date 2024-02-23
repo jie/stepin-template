@@ -2,6 +2,7 @@ import { defineStore, storeToRefs } from 'pinia';
 import http from './http';
 import { ref, watch } from 'vue';
 import { BaseComponent } from '@/types/components/base';
+import { nanoid } from "nanoid";
 // import { Response } from '@/types';
 // import { RouteOption } from '@/router/interface';
 // import { addRoutes, removeRoute } from '@/router/dynamicRoutes';
@@ -12,10 +13,15 @@ import { BaseComponent } from '@/types/components/base';
 // import { useLoadingStore } from '@/store';
 
 
+interface ReportTemplateSettings {
+  allowSelectImageFromAlbum?: boolean;
+}
 
 export interface ReportTemplate {
+  id?: string;
   title?: string;
   summary?: string;
+  settings?: ReportTemplateSettings;
   items?: BaseComponent[];
   currentEditComponent?: BaseComponent;
 }
