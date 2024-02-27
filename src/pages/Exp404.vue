@@ -18,7 +18,6 @@
     loading: Boolean,
   });
   const route = useRoute();
-
   const { pageLoading } = storeToRefs(useLoadingStore());
 
   const router = useRouter();

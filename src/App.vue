@@ -46,8 +46,7 @@
 
   // 获取个人信息
   profile().then((response) => {
-    const { account } = response;
-    user.name = account.username;
+    user.name = response.name;
     // user.avatar = account.avatar;
   });
 

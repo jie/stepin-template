@@ -174,10 +174,8 @@ import { useRoute, useRouter } from "vue-router";
 import dayjs from 'dayjs';
 const reportTemplateStore = ReportTemplateStore()
 const router = useRouter()
-type HeadImage = {
-  url: string,
-  style: object
-}
+const emits = defineEmits(["on-save-template"])
+
 const reportSetting = ref(null)
 const drawerTitle = ref<string>('');
 const editDrawerVisible = ref<boolean>(false);
@@ -416,14 +414,24 @@ const onConfirmSetting = () => {
 
 const onClickSaveReportTemplate = async () => {
   console.log('saveData:', toRaw(reportTemplateStore.reportTemplate))
-  await db.updateReportTemplate(JSON.parse(JSON.stringify({
+  // await db.updateReportTemplate(JSON.parse(JSON.stringify({
+  //   id: reportTemplateStore.reportTemplate.id,
+  //   title: reportTemplateStore.reportTemplate.title,
+  //   summary: reportTemplateStore.reportTemplate.summary,
+  //   settings: reportTemplateStore.reportTemplate.settings,
+  //   items: reportTemplateStore.reportTemplate.items,
+  // })))
+
+  emits("on-save-template", {data: JSON.parse(JSON.stringify({
     id: reportTemplateStore.reportTemplate.id,
     title: reportTemplateStore.reportTemplate.title,
     summary: reportTemplateStore.reportTemplate.summary,
     settings: reportTemplateStore.reportTemplate.settings,
     items: reportTemplateStore.reportTemplate.items,
-  })))
+  }))})
+  
 }
+
 
 </script>
 

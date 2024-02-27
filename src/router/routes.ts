@@ -38,12 +38,52 @@ const routes: RouteRecordRaw[] = [
     // component: () => import('@/components/layout/FrontView.vue'),
     children: [
       {
-        path: 'design',
-        name: 'design',
+        path: 'report',
+        name: 'report',
         meta: {
           renderMenu: true,
          },
-        component: () => import('@/pages/designer'),
+        component: () => import('@/pages/report'),
+      },
+      {
+        path: 'template',
+        name: 'template',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/template'),
+      },
+      {
+        path: 'category',
+        name: 'category',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/category'),
+      },
+      {
+        path: 'user',
+        name: 'user',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/user'),
+      },
+      {
+        path: 'role',
+        name: 'role',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/role'),
+      },
+      {
+        path: 'settings',
+        name: 'settings',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/settings'),
       },
     ],
   },

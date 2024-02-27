@@ -5,7 +5,7 @@ import NProgress from 'nprogress';
 
 const http = createHttp({
   timeout: 10000,
-  baseURL: 'api',
+  baseURL: '',
   withCredentials: true,
   xsrfCookieName: 'Authorization',
   xsrfHeaderName: 'Authorization',

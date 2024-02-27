@@ -1,6 +1,6 @@
 import { defineStore, storeToRefs } from 'pinia';
 import http from './http';
-import { ref, watch } from 'vue';
+import { ref, toRaw, watch } from 'vue';
 import { Response } from '@/types';
 import { RouteOption } from '@/router/interface';
 import { addRoutes, removeRoute } from '@/router/dynamicRoutes';
@@ -9,6 +9,187 @@ import { RouteRecordRaw, RouteMeta } from 'vue-router';
 import { useAuthStore } from '@/plugins';
 import router from '@/router';
 import { useLoadingStore } from '@/store';
+import routes from '@/router/routes';
+
+const presetList = [
+  // {
+  //   id: 1,
+  //   name: 'workplace',
+  //   title: '工作台1',
+  //   icon: 'DashboardOutlined',
+  //   badge: 'new',
+  //   target: '_self',
+  //   path: '/workplace',
+  //   component: '@/pages/workplace',
+  //   renderMenu: true,
+  //   parent: null,
+  //   permission: null,
+  //   cacheable: true,
+  // },
+  {
+    id: 2,
+    name: 'report',
+    title: '报告',
+    icon: 'ProfileOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/report',
+    component: '@/pages/report',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  {
+    id: 3,
+    name: 'template',
+    title: '报告',
+    icon: 'ProjectOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/template',
+    component: '@/pages/template',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  {
+    id: 4,
+    name: 'category',
+    title: '分类',
+    icon: 'PartitionOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/category',
+    component: '@/pages/category',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  {
+    id: 5,
+    name: 'user',
+    title: '成员',
+    icon: 'UserOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/user',
+    component: '@/pages/user',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  {
+    id: 6,
+    name: 'role',
+    title: '权限',
+    icon: 'UsergroupAddOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/role',
+    component: '@/pages/role',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+  {
+    id: 5,
+    name: 'settings',
+    title: '系统设置',
+    icon: 'SettingOutlined',
+    badge: '',
+    target: '_self',
+    path: '/workspace/settings',
+    component: '@/pages/settings',
+    renderMenu: true,
+    parent: null,
+    permission: null,
+    cacheable: false,
+  },
+
+  // {
+  //   id: 4,
+  //   name: 'personal',
+  //   title: '个人中心',
+  //   path: '/personal',
+  //   icon: 'ProfileOutlined',
+  //   permission: null,
+  //   component: '@/pages/personal',
+  //   renderMenu: true,
+  //   parent: null,
+  // },
+  // {
+  //   id: 6,
+  //   name: 'system',
+  //   title: '系统配置',
+  //   icon: 'SettingOutlined',
+  //   badge: '',
+  //   target: '_self',
+  //   path: '/system',
+  //   component: '@/components/layout/BlankView.vue',
+  //   renderMenu: true,
+  //   parent: null,
+  //   permission: null,
+  //   cacheable: true,
+  // },
+  // {
+  //   id: 8,
+  //   name: 'menu',
+  //   title: '菜单管理',
+  //   badge: '12',
+  //   target: '_self',
+  //   path: '/system/menu',
+  //   component: '@/pages/system',
+  //   renderMenu: true,
+  //   parent: 'system',
+  //   permission: null,
+  //   cacheable: true,
+  // },
+  // {
+  //   id: 7,
+  //   name: 'user',
+  //   title: '用户管理',
+  //   target: '_self',
+  //   path: '/system/user',
+  //   component: '@/pages/user',
+  //   renderMenu: true,
+  //   parent: 'system',
+  //   permission: null,
+  //   cacheable: true,
+  // },
+  // {
+  //   id: 9,
+  //   name: 'bilibili',
+  //   title: 'B站',
+  //   icon: 'BoldOutlined',
+  //   badge: 'iframe',
+  //   target: '_self',
+  //   path: '/bilibili',
+  //   component: 'iframe',
+  //   renderMenu: true,
+  //   permission: 'edit',
+  //   cacheable: true,
+  //   link: 'https://www.bilibili.com',
+  // },
+  // {
+  //   id: 10,
+  //   name: 'github',
+  //   title: 'Github',
+  //   icon: 'GithubOutlined',
+  //   badge: 'link',
+  //   target: '_blank',
+  //   path: '/github',
+  //   component: 'link',
+  //   renderMenu: true,
+  //   parent: null,
+  //   cacheable: true,
+  //   link: 'https://github.com/stepui/stepin-template',
+  // },
+];
 
 export interface MenuProps {
   id?: number;
@@ -115,20 +296,30 @@ export const useMenuStore = defineStore('menu', () => {
   checkMenuPermission();
 
   watch(filterMenu, checkMenuPermission);
-
+  // use remote menu
+  // async function getMenuList() {
+  //   const { setPageLoading } = useLoadingStore();
+  //   setPageLoading(true);
+  //   return http
+  //     .request<MenuProps[], Response<MenuProps[]>>('/menu', 'GET')
+  //     .then((res) => {
+  //       // const { data } = res;
+  //       let data = presetList
+  //       menuList.value = data;
+  //       console.log('menuList:', toRaw(menuList.value))
+  //       addRoutes(toRoutes(data));
+  //       console.log('routes:', toRaw(routes))
+  //       checkMenuPermission();
+  //       return data;
+  //     })
+  //     .finally(() => setPageLoading(false));
+  // }
+  // use local menu
   async function getMenuList() {
-    const { setPageLoading } = useLoadingStore();
-    setPageLoading(true);
-    return http
-      .request<MenuProps[], Response<MenuProps[]>>('/menu', 'GET')
-      .then((res) => {
-        const { data } = res;
-        menuList.value = data;
-        addRoutes(toRoutes(data));
-        checkMenuPermission();
-        return data;
-      })
-      .finally(() => setPageLoading(false));
+    menuList.value = presetList;
+    addRoutes(toRoutes(presetList));
+    checkMenuPermission();
+    return presetList
   }
 
   async function addMenu(menu: MenuProps) {

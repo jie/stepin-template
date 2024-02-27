@@ -9,6 +9,7 @@
 
   const router = useRouter();
   function onLoginSuccess() {
+    console.log('111')
     router.push('/workspace/report');
   }
 </script>

@@ -1,69 +1,80 @@
 import { defineStore } from 'pinia';
 import http from './http';
-import { ref, watch } from 'vue';
-import { BaseComponent } from '@/types/components/base';
-import { nanoid } from "nanoid";
-import {getSessionInfo} from '@/utils/session'
+import { getSessionInfo } from '@/utils/session'
 import { useLoadingStore } from '@/store';
-import {Pagination} from "@/types"
-
-interface ReportTemplateSettings {
-  allowSelectImageFromAlbum?: boolean;
-}
+import { Pagination } from "@/types"
+import { openNotification, successNotification } from '@/utils/notification';
 
 
-
-export interface ReportTemplate {
+export interface ReportUser {
   id?: string;
-  title?: string;
-  summary?: string;
-  settings?: ReportTemplateSettings;
-  items?: BaseComponent[];
-  currentEditComponent?: BaseComponent;
+  name?: string;
+  email?: string;
+  phone?: string;
+  mobile?: string;
+  remark?: string;
+  status?: string;
+  roles?: Array<string>;
+  is_admin?: boolean;
+  is_enable?: boolean;
+  create_at?: string;
+  avatar?: string;
 }
 
 
-export const ReportTemplateStore = defineStore('reportTemplate', {
+export const ReportUserStore = defineStore('reportUser', {
   state: () => {
-    return { 
-      reportTemplate: {} as ReportTemplate, 
-      entities: <ReportTemplate>[], 
+    return {
+      reportReportUser: {} as ReportUser,
+      entities: <ReportUser>[],
       pagination: {} as Pagination,
-      queryArgs: {status: "", keyword: ""},
+      queryArgs: { status: "", keyword: "" },
     }
   },
   getters: {
 
   },
   actions: {
-    initReportTemplate(data: ReportTemplate) {
-      this.reportTemplate = data;
-    },
-    addComponents(coms: BaseComponent[]) {
-      for(let com of coms) {
-        this.addComponent(com);
-      }
-    },
-    addComponent(com: BaseComponent) {
-      com.beforeAdd();
-      this.reportTemplate.items?.push(com);
-      com.afterAdd();
-    },
-    delComponent(com: BaseComponent) {
-      com.beforeDel();
-      // remove com from reportTemplate.items by com.key
-      this.reportTemplate.items?.splice(this.reportTemplate.items?.findIndex((item) => item.key === com.key), 1);
-      com.afterDel();
-    },
-    setCurrentEditComponent(com: BaseComponent) {
-      this.reportTemplate.currentEditComponent = com;
-    },
-    async apiSaveTemplate(data: ReportTemplate) {
+    async apiSaveReportUser(data: ReportUser) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_template/save', 'post_json', data, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/report_api/report_user/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.status) {
+            successNotification("Saved")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to save", description: response.data?.message || "Fail to save" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiUpdateReportUser(data: ReportUser) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      return http
+        .request('/platform/report_api/report_user/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.status) {
+            successNotification("Updated")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to update", description: response.data?.message || "Fail to update" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiDeleteReportUser(id: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      return http
+        .request('/platform/report_api/report_user/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -73,37 +84,7 @@ export const ReportTemplateStore = defineStore('reportTemplate', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdateTemplate(data: ReportTemplate) {
-      const { setPageLoading } = useLoadingStore();
-      setPageLoading(true)
-      let session = getSessionInfo()
-      return http
-        .request('/platform/report_api/report_template/update', 'post_json', data, {headers: {rsessionid: session.sessionid}})
-        .then((response) => {
-          if (response.data?.data) {
-            return response.data?.data;
-          } else {
-            return Promise.reject(response);
-          }
-        })
-        .finally(() => setPageLoading(false));
-    },
-    async apiDeleteTemplate(id: string) {
-      const { setPageLoading } = useLoadingStore();
-      setPageLoading(true)
-      let session = getSessionInfo()
-      return http
-        .request('/platform/report_api/report_template/delete', 'post_json', {id: id}, {headers: {rsessionid: session.sessionid}})
-        .then((response) => {
-          if (response.data?.data) {
-            return response.data?.data;
-          } else {
-            return Promise.reject(response);
-          }
-        })
-        .finally(() => setPageLoading(false));
-    },
-    async apiQueryTemplate() {
+    async apiQueryReportUser() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -112,7 +93,7 @@ export const ReportTemplateStore = defineStore('reportTemplate', {
         ...this.queryArgs
       }
       return http
-        .request('/platform/report_api/report_template/query', 'post_json', bodyJson, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/report_api/report_user/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -125,13 +106,13 @@ export const ReportTemplateStore = defineStore('reportTemplate', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiGetTemplate(id:string) {
+    async apiGetReportUser(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
-      let bodyJson = {id: id }
+      let bodyJson = { id: id }
       return http
-        .request('/platform/report_api/report_template/get', 'post_json', bodyJson, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/report_api/report_user/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -141,11 +122,11 @@ export const ReportTemplateStore = defineStore('reportTemplate', {
         })
         .finally(() => setPageLoading(false));
     },
-    async changePage(args:any) {
+    async changePage(args: any) {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryTemplate()
+      this.apiQueryReportUser()
     }
   },
 })

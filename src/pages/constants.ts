@@ -33,6 +33,7 @@ export type Role = {
 };
 
 export type Permission = {
+  id?: string;
   name?: string;
   slug?: string;
   sort?: string;
@@ -48,7 +49,7 @@ export const roles = reactive<Role[]>([
   {
     name: '审核员',
     status: 0,
-    permissions: ['report:list', 'report:edit', 'report:verify', 'report:delete', 'report:email_customer', 'template:list', 'template:edit', 'template:delete', 'category:list', 'category:edit', 'category:delete', 'staff:list', 'staff:edit', 'staff:delete', 'role:list', 'role:edit', 'role:delete'],
+    permissions: ['report:list', 'report:edit', 'report:verify', 'report:delete', 'report:email_customer', 'template:list', 'template:edit', 'template:delete', 'category:list', 'category:edit', 'category:delete', 'user:list', 'user:edit', 'user:delete', 'role:list', 'role:edit', 'role:delete'],
     time: dayjs(),
     id: "2"
   },
@@ -72,99 +73,87 @@ export const roles = reactive<Role[]>([
 
 export const permissions = reactive<Permission[]>([
   {
-    name: '查看报告列表',
-    slug: 'report:list',
-    sort: 'report'
+    "id": "65db5231029d1d4a55472f22",
+    "name": "查看报告列表",
+    "slug": "report:list"
   },
   {
-    name: '查看报告详情',
-    slug: 'report:view',
-    sort: 'report'
+    "id": "65db5240029d1d4a55472f23",
+    "name": "查看报告详情",
+    "slug": "report:view"
   },
   {
-    name: '修改报告',
-    slug: 'report:edit',
-    sort: 'report'
+    "id": "65db5268029d1d4a55472f24",
+    "name": "修改报告",
+    "slug": "report:edit"
   },
   {
-    name: '审核报告',
-    slug: 'report:verify',
-    sort: 'report'
+    "id": "65db527a029d1d4a55472f25",
+    "name": "审核报告",
+    "slug": "report:verify"
   },
   {
-    name: '删除报告',
-    slug: 'report:delete',
-    sort: 'report'
+    "id": "65db5296029d1d4a55472f26",
+    "name": "删除报告",
+    "slug": "report:delete"
   },
   {
-    name: '发送报告给客户',
-    slug: 'report:email_customer',
-    sort: 'report'
+    "id": "65db52a7029d1d4a55472f27",
+    "name": "发送报告给客户",
+    "slug": "report:email_customer"
   },
   // template
-  {
-    name: '查看模版列表',
-    slug: 'template:list',
-    sort: 'template'
-  },
-  {
-    name: '修改模版',
-    slug: 'template:edit',
-    sort: 'template'
-  },
-  {
-    name: '删除模版',
-    slug: 'template:delete',
-    sort: 'template'
-  },
-  // category
-  {
-    name: '查看分类列表',
-    slug: 'category:list',
-    sort: 'category'
-  },
-  {
-    name: '修改分类',
-    slug: 'category:edit',
-    sort: 'category'
-  },
-  {
-    name: '删除分类',
-    slug: 'category:delete',
-    sort: 'category'
-  },
-  // staff
-  {
-    name: '查看成员列表',
-    slug: 'staff:list',
-    sort: 'staff'
-  },
-  {
-    name: '修改成员',
-    slug: 'staff:edit',
-    sort: 'staff'
-  },
-  {
-    name: '删除成员',
-    slug: 'staff:delete',
-    sort: 'staff'
-  },
-  // role
-  {
-    name: '查看角色列表',
-    slug: 'role:list',
-    sort: 'role'
-  },
-  {
-    name: '修改成员',
-    slug: 'role:edit',
-    sort: 'role'
-  },
-  {
-    name: '删除成员',
-    slug: 'role:delete',
-    sort: 'role'
-  },
+  // {
+  //   "name": "查看模版列表",
+  //   "slug": "template:list"
+  // },
+  // {
+  //   "name": "修改模版",
+  //   "slug": "template:edit"
+  // },
+  // {
+  //   "name": "删除模版",
+  //   "slug": "template:delete"
+  // },
+  // // category
+  // {
+  //   "name": "查看分类列表",
+  //   "slug": "category:list"
+  // },
+  // {
+  //   "name": "修改分类",
+  //   "slug": "category:edit"
+  // },
+  // {
+  //   "name": "删除分类",
+  //   "slug": "category:delete"
+  // },
+  // // user
+  // {
+  //   "name": "查看成员列表",
+  //   "slug": "user:list"
+  // },
+  // {
+  //   "name": "修改成员",
+  //   "slug": "user:edit"
+  // },
+  // {
+  //   "name": "删除成员",
+  //   "slug": "user:delete"
+  // },
+  // // role
+  // {
+  //   "name": "查看角色列表",
+  //   "slug": "role:list"
+  // },
+  // {
+  //   "name": "修改成员",
+  //   "slug": "role:edit"
+  // },
+  // {
+  //   "name": "删除成员",
+  //   "slug": "role:delete"
+  // },
 ])
 
 export type Report = {

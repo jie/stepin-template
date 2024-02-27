@@ -4,7 +4,11 @@ import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
-import {Role, permissions, roles} from '@/pages/constants';
+import {permissions, roles} from '@/pages/constants';
+import { ReportRoleStore, ReportRole } from '@/store/role';
+import { ApproveStatusOptions, ApproveStatus } from '@/utils/constant';
+
+const roleStore = ReportRoleStore();
 const columns = [
   {
     title: 'ROLE',
@@ -12,7 +16,7 @@ const columns = [
   },
   { title: 'PERMISSIONS', dataIndex: 'permissions', width: 400 },
   { title: 'STATUS', dataIndex: 'status' },
-  { title: 'CREATED', dataIndex: 'time' },
+  { title: 'CREATED', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
@@ -20,20 +24,18 @@ const columns = [
 
 function addNew() {
   showModal.value = true;
-  form._isNew = true;
+  roleStore.isNew = true;
 }
 
 const showModal = ref(false);
 
-const newAuthor = (author?: Role) => {
-  if (!author) {
-    author = { _isNew: true };
-  }
-  author.name = undefined;
-  author.status = 0;
-  author.permissions = [];
-  author.time = dayjs();
-  return author;
+const newRole = (role?: ReportRole) => {
+  roleStore.isNew = true
+  role.name = "";
+  role.status = "";
+  role.permissions = [];
+  role.create_at = null;
+  return role;
 };
 
 const copyObject = (target: any, source?: any) => {
@@ -43,10 +45,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(target).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<Role>(newAuthor());
+const form = reactive<ReportRole>(newRole({}));
 
 function reset() {
-  return newAuthor(form);
+  return newRole(form);
 }
 
 function cancel() {
@@ -58,24 +60,29 @@ const formModel = ref<FormInstance>();
 
 const formLoading = ref(false);
 
-async function extractImg(file: Blob, author: Role) {
+async function extractImg(file: Blob, author: ReportRole) {
   await getBase64(file).then((res) => {
     author.avatar = res;
   });
 }
 
 function submit() {
+  // console.log('form.permissions:', form.permissions)
+  // return 
   formLoading.value = true;
   formModel.value
     ?.validateFields()
-    .then((res: Role) => {
-      if (form._isNew) {
-        roles.push({ ...res });
+    .then(async (res: ReportRole) => {
+      if (roleStore.isNew) {
+        // roles.push({ ...res });
+        await roleStore.apiSaveReportRole({name: form.name, status: form.status, permissions: form.permissions})
       } else {
-        copyObject(editRecord.value, res);
+        await roleStore.apiUpdateReportRole({id: form.id, name: form.name, status: form.status, permissions: form.permissions})
+        // copyObject(editRecord.value, res);
       }
       showModal.value = false;
       reset();
+      initializeData()
     })
     .catch((e) => {
       console.error(e);
@@ -85,61 +92,56 @@ function submit() {
     });
 }
 
-const editRecord = ref<Role>();
+const editRecord = ref<ReportRole>();
 
 /**
- * 编辑
+ * Edit
  * @param record
  */
-function edit(record: Role) {
+function edit(record: ReportRole) {
   editRecord.value = record;
   copyObject(form, record);
+  console.log('permissions:', record.permissions)
+  form.permissions = record.permissions.map(c=>c.id)
   showModal.value = true;
 }
 
-type Status = 0 | 1;
 
-const StatusDict = {
-  0: 'disable',
-  1: 'enable',
+const getPermissionName = (key: string) => {
+  return permissions.find((item) => item.key === key).name;
 };
 
-const getPermissionName = (slug: string) => {
-  return permissions.find((item) => item.slug === slug).name;
+const initializeData = async () => {
+  roleStore.apiQueryReportRole()
 };
+
+initializeData()
 
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
+  <a-modal :title="form._isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item label="名称" required name="name">
+      <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item label="权限" required name="permissions">
-        <a-select v-model:value="form.permissions" mode="multiple" :options="permissions" :fieldNames="{label: 'name', value: 'slug'}"/>
+      <a-form-item label="Permission" required name="permissions">
+        <a-select v-model:value="form.permissions" mode="multiple" :options="permissions" :fieldNames="{label: 'name', value: 'id'}"/>
       </a-form-item>
-      <a-form-item required label="状态" name="status">
-        <a-select style="width: 90px" v-model:value="form.status" :options="[
-          { label: 'disable', value: 0 },
-          { label: 'enable', value: 1 },
-        ]" />
-      </a-form-item>
-      <a-form-item label="日期" name="time">
-        <a-date-picker v-model:value="form.time" />
+      <a-form-item required label="Status" name="status">
+        <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions" />
       </a-form-item>
     </a-form>
   </a-modal>
-
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="roles" :pagination="false">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="roleStore.entities" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>角色</h4>
+        <h4>Roles</h4>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />
           </template>
-          新增
+          Create
         </a-button>
       </div>
     </template>
@@ -151,18 +153,18 @@ const getPermissionName = (slug: string) => {
       </div>
       <div class="" v-else-if="column.dataIndex === 'permissions'">
         <div class="text-subtext">
-          <a-tag color="#108ee9" v-for="permission in record.permissions">{{ getPermissionName(permission) }}</a-tag>
+          <a-tag color="#108ee9" v-for="permission in record.permissions">{{ permission.name }}</a-tag>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
         <a-badge class="text-subtext" :color="'green'">
           <template #text>
-            <span class="text-subtext">{{ StatusDict[text as Status] }}</span>
+            <span class="text-subtext">{{ ApproveStatus[text] }}</span>
           </template>
         </a-badge>
       </template>
-      <template v-else-if="column.dataIndex === 'time'">
-        {{ text?.format('YYYY-MM-DD') }}
+      <template v-else-if="column.dataIndex === 'create_at'">
+        {{ dayjs(text)?.format('YYYY-MM-DD HH:mm') }}
       </template>
       <template v-else-if="column.dataIndex === 'edit'">
         <a-dropdown>
@@ -180,7 +182,7 @@ const getPermissionName = (slug: string) => {
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <EditOutlined />
-                  编辑
+                  Edit
                 </a>
               </a-menu-item>
               <a-menu-item key="1">

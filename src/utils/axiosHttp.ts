@@ -125,14 +125,24 @@ function createAxiosHttp(config: AxiosRequestConfig): AxiosHttp {
           return _axios.request({ url, method: 'GET', params, ..._axios.defaults });
       }
     },
-    setAuthorization(token: string, expires: number | Date, name?: string): void {
-      Cookie.set(name ?? _axios.defaults.xsrfCookieName!, token, { expires });
+    // setAuthorization(token: string, expires: number | Date, name?: string): void {
+    //   Cookie.set(name ?? _axios.defaults.xsrfCookieName!, token, { expires });
+    // },
+    // removeAuthorization(name?: string): void {
+    //   Cookie.remove(name ?? _axios.defaults.xsrfCookieName!);
+    // },
+    // checkAuthorization(name?: string | undefined): boolean {
+    //   return Boolean(Cookie.get(name ?? _axios.defaults.xsrfCookieName!));
+    // },
+    setAuthorization(session: any, expires: number | Date, name?: string): void {
+      localStorage.setItem("report_session", JSON.stringify(session))
     },
     removeAuthorization(name?: string): void {
-      Cookie.remove(name ?? _axios.defaults.xsrfCookieName!);
+      localStorage.removeItem('report_session');
     },
     checkAuthorization(name?: string | undefined): boolean {
-      return Boolean(Cookie.get(name ?? _axios.defaults.xsrfCookieName!));
+      let session = localStorage.getItem('report_session');
+      return session ? true : false;
     },
   };
 }

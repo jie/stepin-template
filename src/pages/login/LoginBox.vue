@@ -17,11 +17,11 @@
         </div>
         <a-divider>Or</a-divider> -->
         <h2 class="">登录</h2>
-        <a-form-item :required="true" name="username">
+        <a-form-item :required="true" name="email">
           <a-input
-            v-model:value="form.username"
-            autocomplete="new-username"
-            placeholder="请输入用户名或邮箱: admin"
+            v-model:value="form.email"
+            autocomplete="new-email"
+            placeholder="请输入登录邮箱"
             class="login-input h-[40px]"
           />
         </a-form-item>
@@ -29,7 +29,7 @@
           <a-input
             v-model:value="form.password"
             autocomplete="new-password"
-            placeholder="请输入登录密码: 888888"
+            placeholder="请输入登录密码"
             class="login-input h-[40px]"
             type="password"
           />
@@ -47,13 +47,13 @@
   import { ThemeProvider } from 'stepin';
 
   export interface LoginFormProps {
-    username: string;
+    email: string;
     password: string;
   }
   const loading = ref(false);
 
   const form = reactive({
-    username: undefined,
+    email: undefined,
     password: undefined,
   });
 
@@ -66,7 +66,7 @@
   function login(params: LoginFormProps) {
     loading.value = true;
     accountStore
-      .login(params.username, params.password)
+      .login(params.email, params.password)
       .then((res) => {
         emit('success', params);
       })

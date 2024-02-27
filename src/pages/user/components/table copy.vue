@@ -5,7 +5,11 @@
   import dayjs from 'dayjs';
   import { Dayjs } from 'dayjs';
   import { DeleteOutlined, EditFilled, EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
+  import { ReportUser, ReportUserStore } from "@/store/user"
   import { roles } from '@/pages/constants';
+  import {ApproveStatusOptions, ApproveStatus} from "@/utils/constant"
+
+  const userStore = ReportUserStore()
   const columns = [
     {
       title: 'STAFF',
@@ -17,23 +21,12 @@
     { title: 'OP', dataIndex: 'edit', width: 40 },
   ];
 
-  type Staff = {
-    name?: string;
-    email?: string;
-    avatar?: string;
-    roles?: string[];
-    status?: number;
-    time?: Dayjs;
-    _edit?: boolean;
-    _isNew?: boolean;
-  };
-
-  const staffs = reactive<Staff[]>([
+  const staffs = reactive<ReportUser[]>([
     {
       name: '管理员1',
       email: '1126263215@qq.com',
       avatar: '/src/assets/avatar/face-1.jpg',
-      status: 1,
+      status: "1",
       time: dayjs(),
       roles: ['1'],
     },
@@ -70,7 +63,7 @@
 
   const showModal = ref(false);
 
-  const newStaff = (staff?: Staff) => {
+  const newStaff = (staff?: ReportUser) => {
     if (!staff) {
       staff = { _isNew: true };
     }
@@ -89,7 +82,7 @@
     Object.keys(target).forEach((key) => (target[key] = source[key]));
   };
 
-  const form = reactive<Staff>(newStaff());
+  const form = reactive<ReportUser>(newStaff());
 
   function reset() {
     return newStaff(form);
@@ -104,7 +97,7 @@
 
   const formLoading = ref(false);
 
-  async function extractImg(file: Blob, staff: Staff) {
+  async function extractImg(file: Blob, staff: ReportUser) {
     await getBase64(file).then((res) => {
       staff.avatar = res;
     });
@@ -114,7 +107,7 @@
     formLoading.value = true;
     formModel.value
       ?.validateFields()
-      .then((res: Staff) => {
+      .then((res: ReportUser) => {
         if (form._isNew) {
           staffs.push({ ...res });
         } else {
@@ -131,13 +124,13 @@
       });
   }
 
-  const editRecord = ref<Staff>();
+  const editRecord = ref<ReportUser>();
 
   /**
-   * 编辑
+   * Edit
    * @param record
    */
-  function edit(record: Staff) {
+  function edit(record: ReportUser) {
     editRecord.value = record;
     copyObject(form, record);
     showModal.value = true;
@@ -155,42 +148,62 @@ const getRoleName = (id: string) => {
   return role?.name;
 };
 
+
+const deleteRecord = async (record: ReportUser) => {
+  console.log('record:', record)
+  // await db.delReportTemplate(record.id)
+  // initializeData()
+}
+
+const onClickSearch = async () => {
+  templateStore.queryArgs.keyword = searchKeywords.value
+  console.log('templateStore.queryArgs.keyword:', templateStore.queryArgs.keyword)
+  templateStore.apiQueryTemplate()
+}
+
+const initializeData = async () => {
+  await userStore.apiQueryReportUser()
+}
+
+
+initializeData()
+
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
+  <a-modal :title="form._isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item label="头像" required name="avatar">
+      <a-form-item label="Avatar" name="avatar">
         <a-upload :show-upload-list="false" :beforeUpload="(file: File) => extractImg(file, form)">
           <img class="h-8 p-0.5 rounded border border-dashed border-border" v-if="form.avatar" :src="form.avatar" />
           <a-button v-else type="dashed">
             <template #icon>
               <UploadOutlined />
             </template>
-            上传
+            Upload
           </a-button>
         </a-upload>
       </a-form-item>
-      <a-form-item label="姓名" required name="name">
+      <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="邮箱" name="email">
+      <a-form-item required label="E-mail" name="email">
         <a-input v-model:value="form.email" />
       </a-form-item>
-      <a-form-item label="角色" required name="roles">
+      <a-form-item label="Mobile" name="mobile">
+        <a-input v-model:value="form.mobile" />
+      </a-form-item>
+      <a-form-item label="Phone" name="phone">
+        <a-input v-model:value="form.phone" />
+      </a-form-item>
+      <a-form-item label="Role" required name="roles">
         <a-select v-model:value="form.roles" mode="multiple" :options="roles" :fieldNames="{label: 'name', value: 'id'}"/>
       </a-form-item>
-      <a-form-item required label="状态" name="status">
+      <a-form-item required label="Status" name="status">
         <a-select
-          style="width: 90px"
+          style="width: 100%"
           v-model:value="form.status"
-          :options="[
-            { label: 'disable', value: 0 },
-            { label: 'enable', value: 1 },
-          ]"
+          :options="ApproveStatusOptions"
         />
-      </a-form-item>
-      <a-form-item label="日期" name="time">
-        <a-date-picker v-model:value="form.time" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -199,10 +212,10 @@ const getRoleName = (id: string) => {
   <a-table v-bind="$attrs" :columns="columns" :dataSource="staffs" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>成员</h4>
+        <h4>Users</h4>
         <div class="flex">
             <div class="mr-4">
-              <span class="mr-2">状态</span>
+              <span class="mr-2">Status</span>
               <a-select ref="select"  style="width: 120px" allowClear>
                 <a-select-option value="jack">Jack</a-select-option>
                 <a-select-option value="lucy">Lucy</a-select-option>
@@ -212,20 +225,20 @@ const getRoleName = (id: string) => {
             </div>
             <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">\
               <template #addonBefore>
-                关键词
+                Keywords
               </template>
             </a-input>
             <a-button class="mr-2">
               <template #icon>
                 <SearchOutlined />
               </template>
-              搜索
+              Search
             </a-button>
             <a-button type="primary" @click="addNew" :loading="formLoading">
               <template #icon>
                 <PlusOutlined />
               </template>
-              新增
+              Create
             </a-button>
           </div>
       </div>
@@ -263,19 +276,19 @@ const getRoleName = (id: string) => {
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <ReadOutlined />
-                  查看
+                  View
                 </a>
               </a-menu-item>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <EditOutlined />
-                  编辑
+                  Edit
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <DeleteOutlined />
-                  删除
+                  Delete
                 </a>
               </a-menu-item>
             </a-menu>

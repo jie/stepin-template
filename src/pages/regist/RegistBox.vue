@@ -17,10 +17,10 @@
               class="login-input h-[40px]"
             />
           </a-form-item>
-          <a-form-item :required="true" name="username" label="Username">
+          <a-form-item :required="true" name="email" label="Username">
             <a-input
-              v-model:value="form.username"
-              autocomplete="new-username"
+              v-model:value="form.email"
+              autocomplete="new-email"
               placeholder="请输入用户名"
               class="login-input h-[40px]"
             />
@@ -70,13 +70,13 @@
     import { ThemeProvider } from 'stepin';
   
     export interface LoginFormProps {
-      username: string;
+      email: string;
       password: string;
     }
     const loading = ref(false);
   
     const form = reactive({
-      username: undefined,
+      email: undefined,
       password: undefined,
     });
   
@@ -89,7 +89,7 @@
     function login(params: LoginFormProps) {
       loading.value = true;
       accountStore
-        .login(params.username, params.password)
+        .login(params.email, params.password)
         .then((res) => {
           emit('success', params);
         })

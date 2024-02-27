@@ -8,9 +8,12 @@ import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } fro
 import router from '@/router';
 import { db } from '@/hook/dexie_hook'
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
-import { ReportTemplateStore } from "@/store/reportTemplate"
+import { ReportUserStore, ReportUser } from "@/store/user"
+import { ReportRoleStore } from "@/store/role"
+import {getSessionInfo} from '@/utils/session'
 const isViewForm = ref(false)
-const templateStore = ReportTemplateStore()
+const userStore = ReportUserStore()
+const roleStore = ReportRoleStore()
 const searchKeywords = ref("")
 const columns = [
   {
@@ -22,15 +25,9 @@ const columns = [
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
-type ReportTemplate = {
-  id?: string;
-  name?: string;
-  status?: string;
-  create_at?: string;
-};
 
 const Ctl = reactive({
-  records: [] as ReportTemplate[],
+  records: [] as ReportUser[],
   page: 1,
   pagesize: 10,
   total: 0,
@@ -41,21 +38,10 @@ const createTimeRef = ref<Dayjs>(dayjs());
 
 
 const initializeData = async () => {
-  // let result = await db.paginateReportTemplate(Ctl.page, Ctl.pagesize)
-  // Ctl.records = result.data.map((item: any) => {
-  //   return {
-  //     id: item.id,
-  //     name: item.name,
-  //     status: item.status,
-  //     create_at: item.create_at
-  //   }
-  // })
-  // Ctl.total = result.total
-  // console.log('Ctl.records:', toRaw(Ctl.records))
-
-    let result = await templateStore.apiQueryTemplate()
+    let result = await userStore.apiQueryReportUser()
     console.log('result:', result)
-
+    roleStore.pagination = { page: 1, pagesize: 1000 }
+    roleStore.apiQueryReportRole()
 }
 
 initializeData()
@@ -68,22 +54,35 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newReportTemplate = (reportTemplate?: ReportTemplate) => {
+const newReportUser = (reportUser?: ReportUser) => {
   createTimeRef.value = dayjs()
   let create_at = createTimeRef.value.format('YYYY-MM-DD HH:mm:ss')
-  if (!reportTemplate) {
+  if (!reportUser) {
 
-    return <ReportTemplate>{
+    return <ReportUser>{
       id: '',
       name: '',
+      email: '',
+      phone: '',
+      mobile: '',
+      remark: '',
+      avatar: '',
+      roles: [],
       status: '1',
       create_at: create_at
     }
   } else {
-    reportTemplate.name = '';
-    reportTemplate.status = '1';
-    reportTemplate.create_at = create_at;
-    return reportTemplate;
+    reportUser.name = '';
+    reportUser.email = '';
+    reportUser.phone = '';
+    reportUser.mobile = '';
+    reportUser.name = '';
+    reportUser.remark = '';
+    reportUser.avatar = '';
+    reportUser.status = '1';
+    reportUser.roles = [];
+    reportUser.create_at = create_at;
+    return reportUser;
   }
 };
 
@@ -94,10 +93,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(source).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<ReportTemplate>(newReportTemplate());
+const form = reactive<ReportUser>(newReportUser());
 console.log('form:', form)
 function reset() {
-  return newReportTemplate(form);
+  return newReportUser(form);
 }
 
 function cancel() {
@@ -111,10 +110,23 @@ const formLoading = ref(false);
 
 
 async function submit() {
+  let session = getSessionInfo()
+  console.log('session:', session)
   formLoading.value = true;
+  let formValue = {
+    name: form.name,
+    email: form.email,
+    phone: form.phone,
+    mobile: form.mobile,
+    remark: form.remark,
+    status: form.status,
+    avatar: form.avatar,
+    roles: form.roles,
+    org_id:session.user_data.org_id,
+  } 
   formModel.value
     ?.validateFields()
-    .then(async (res: ReportTemplate) => {
+    .then(async (res: ReportUser) => {
       if (Ctl.isNew === true) {
 
         // await db.addReportTemplate({
@@ -122,7 +134,7 @@ async function submit() {
         //   status: form.status,
         //   create_at: form.create_at
         // })
-        await templateStore.apiSaveTemplate({name: form.name, status: form.status})
+        await userStore.apiSaveReportUser(formValue)
 
       } else {
         // console.log('form:', form)
@@ -132,7 +144,7 @@ async function submit() {
         //   status: form.status,
         //   create_at: form.create_at
         // })
-        await templateStore.apiUpdateTemplate({id: form.id, name: form.name, status: form.status})
+        await userStore.apiUpdateReportUser({id: form.id, ...formValue})
       }
       showModal.value = false;
       reset();
@@ -146,13 +158,13 @@ async function submit() {
     });
 }
 
-const editRecord = ref<ReportTemplate>();
+const editRecord = ref<ReportUser>();
 
 /**
  * 编辑
  * @param record
  */
-function edit(record: ReportTemplate) {
+function edit(record: ReportUser) {
   isViewForm.value = false
   createTimeRef.value = dayjs(record.create_at)
   Ctl.isNew = false;
@@ -160,7 +172,7 @@ function edit(record: ReportTemplate) {
   copyObject(form, record);
   showModal.value = true;
 }
-function view(record: ReportTemplate) {
+function view(record: ReportUser) {
   createTimeRef.value = dayjs(record.create_at)
   Ctl.isNew = false;
   editRecord.value = record;
@@ -170,7 +182,7 @@ function view(record: ReportTemplate) {
 }
 
 
-const goDesign = (record: ReportTemplate) => {
+const goDesign = (record: ReportUser) => {
   router.push({
     name: 'design',
     query: {
@@ -179,18 +191,22 @@ const goDesign = (record: ReportTemplate) => {
   });
 }
 
-const deleteRecord = async (record: ReportTemplate) => {
+const deleteRecord = async (record: ReportUser) => {
   console.log('record:', record)
-  await db.delReportTemplate(record.id)
+  // await db.delReportUser(record.id)
   initializeData()
 }
 
 const onClickSearch = async () => {
-  templateStore.queryArgs.keyword = searchKeywords.value
-  console.log('templateStore.queryArgs.keyword:', templateStore.queryArgs.keyword)
-  templateStore.apiQueryTemplate()
+  userStore.queryArgs.keyword = searchKeywords.value
+  console.log('userStore.queryArgs.keyword:', userStore.queryArgs.keyword)
+  userStore.apiQueryReportUser()
 }
-
+async function extractImg(file: Blob, user: ReportUser) {
+    await getBase64(file).then((res) => {
+      user.avatar = res;
+    });
+  }
 
 </script>
 <template>
@@ -200,24 +216,51 @@ const onClickSearch = async () => {
       :cancel-button-props="{ disabled: isViewForm }"
   >
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
+      <a-form-item label="Avatar" name="avatar">
+        <a-upload :show-upload-list="false" :beforeUpload="(file: File) => extractImg(file, form)">
+          <img class="h-8 p-0.5 rounded border border-dashed border-border" v-if="form.avatar" :src="form.avatar" />
+          <a-button v-else type="dashed">
+            <template #icon>
+              <UploadOutlined />
+            </template>
+            Upload
+          </a-button>
+        </a-upload>
+      </a-form-item>
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
+      <a-form-item required label="E-mail" name="email">
+        <a-input v-model:value="form.email" />
+      </a-form-item>
+      <a-form-item label="Mobile" name="mobile">
+        <a-input v-model:value="form.mobile" />
+      </a-form-item>
+      <a-form-item label="Phone" name="phone">
+        <a-input v-model:value="form.phone" />
+      </a-form-item>
+      <a-form-item label="Role" required name="roles">
+        <a-select v-model:value="form.roles" mode="multiple" :options="roleStore.entities" :fieldNames="{label: 'name', value: 'id'}"/>
+      </a-form-item>
       <a-form-item required label="Status" name="status">
-        <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions" />
+        <a-select
+          style="width: 100%"
+          v-model:value="form.status"
+          :options="ApproveStatusOptions"
+        />
       </a-form-item>
     </a-form>
   </a-modal>
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="templateStore.entities" @change="templateStore.changePage" :pagination="{
-    current: templateStore.pagination.page, pageSize: templateStore.pagination.pagesize, total: templateStore.pagination.total, showSizeChanger:true, showQuickJumper: true} ">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="userStore.entities" @change="userStore.changePage" :pagination="{
+    current: userStore.pagination.page, pageSize: userStore.pagination.pagesize, total: userStore.pagination.total, showSizeChanger:true, showQuickJumper: true} ">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>Templates</h4>
         <div class="flex">
           <div class="mr-4">
-            <span class="mr-2">Status {{ templateStore.queryArgs.status }}</span>
-            <a-select ref="select" style="width: 200px" v-model:value="templateStore.queryArgs.status" allowClear>
+            <span class="mr-2">Status</span>
+            <a-select ref="select" style="width: 200px" v-model:value="userStore.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>
@@ -283,13 +326,6 @@ const onClickSearch = async () => {
                     Delete
                   </a>
                 </a-popconfirm>
-              </a-menu-item>
-              <a-menu-divider />
-              <a-menu-item key="3">
-                <a @click="goDesign(record)" rel="noopener noreferrer">
-                  <ExperimentOutlined />
-                  Template Design
-                </a>
               </a-menu-item>
             </a-menu>
           </template>

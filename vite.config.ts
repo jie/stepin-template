@@ -26,21 +26,21 @@ const prodRollupOptions = {
 export default ({ command, mode }) => {
   // 获取环境变量
   const env = loadEnv(mode, process.cwd());
+  console.log('env:', env)
   console.log(mode);
 
   return defineConfig({
     server: {
       proxy: {
-        '/api': {
+        '/platform/report_api': {
           target: env.VITE_API_URL,
           ws: true,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          rewrite: (path) => path.replace(/^\/platform\/report_api/, ''),
         },
       },
       hmr: true,
     },
-
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
