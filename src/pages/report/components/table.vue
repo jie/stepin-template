@@ -147,7 +147,7 @@ const queryReportTemplate = async () => {
         </a-select>
       </a-form-item>
       <a-form-item label="Workers" name="workers">
-        <RemoteSelect type="workers" v-model:value="form.workers" :rows="workers" searchKey="name" :isMultiple="true"/>
+        <RemoteSelect type="worker" v-model:value="form.workers" :rows="workers" searchKey="name" :isMultiple="true"/>
       </a-form-item>
       <a-form-item label="Customer" name="customer">
         <RemoteSelect type="customer" v-model:value="form.customer" :rows="customers" searchKey="name"/>
@@ -156,7 +156,7 @@ const queryReportTemplate = async () => {
         <RemoteSelect type="factory" v-model:value="form.factory" :rows="factories" searchKey="name" />
       </a-form-item>
       <a-form-item label="Template" name="report_template">
-        <RemoteSelect type="report_template" v-model:value="form.report_template" searchKey="name" />
+        <RemoteSelect type="template" v-model:value="form.report_template" searchKey="name" />
       </a-form-item>
     </a-form>
   </a-modal>

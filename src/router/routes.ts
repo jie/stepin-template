@@ -78,12 +78,28 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/company'),
       },
       {
+        path: 'company_contact',
+        name: 'company_contact',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/company_contact'),
+      },
+      {
         path: 'factory',
         name: 'factory',
         meta: {
           renderMenu: true,
          },
         component: () => import('@/pages/factory'),
+      },
+      {
+        path: 'factory_contact',
+        name: 'factory_contact',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/factory_contact'),
       },
       {
         path: 'role',

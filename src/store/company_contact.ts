@@ -6,26 +6,28 @@ import { Pagination } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
 
 
-export interface ReportCompany {
+export interface ReportCompanyContact {
   id?: string;
-  shortname?: string;
   org_id?: string;
   name?: string;
+  email?: string;
+  phone?: string;
+  mobile?: string;
   remark?: string;
   status?: string;
-  is_customer?: boolean;
-  is_factory?: boolean;
+  company?: any;
+  company_id?: string;
   is_enable?: boolean;
   create_at?: string;
   avatar?: string;
 }
 
 
-export const ReportCompanyStore = defineStore('reportCompany', {
+export const ReportCompanyContactStore = defineStore('reportCompanyContact', {
   state: () => {
     return {
-      reportReportCompany: {} as ReportCompany,
-      entities: <ReportCompany>[],
+      reportReportCompany: {} as ReportCompanyContact,
+      entities: <ReportCompanyContact>[],
       pagination: {} as Pagination,
       queryArgs: { status: "", keyword: "", is_factory: false, is_customer: true },
     }
@@ -34,12 +36,12 @@ export const ReportCompanyStore = defineStore('reportCompany', {
 
   },
   actions: {
-    async apiSaveReportCompany(data: ReportCompany) {
+    async apiSaveReportCompanyContact(data: ReportCompanyContact) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_company/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_company_contact/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Saved")
@@ -51,12 +53,12 @@ export const ReportCompanyStore = defineStore('reportCompany', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdateReportCompany(data: ReportCompany) {
+    async apiUpdateReportCompanyContact(data: ReportCompanyContact) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_company/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_company_contact/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Updated")
@@ -68,12 +70,12 @@ export const ReportCompanyStore = defineStore('reportCompany', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiDeleteReportCompany(id: string) {
+    async apiDeleteReportCompanyContact(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_company/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_company_contact/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -83,7 +85,7 @@ export const ReportCompanyStore = defineStore('reportCompany', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryReportCompany() {
+    async apiQueryReportCompanyContact() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -94,7 +96,7 @@ export const ReportCompanyStore = defineStore('reportCompany', {
       bodyJson.is_customer = true
       bodyJson.is_factory = false
       return http
-        .request('/platform/report_api/report_company/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_company_contact/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -107,38 +109,13 @@ export const ReportCompanyStore = defineStore('reportCompany', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryByIdsReportCompany(ids: string[]) {
-      const { setPageLoading } = useLoadingStore();
-      setPageLoading(true)
-      let session = getSessionInfo()
-      let bodyJson = {
-        ids: ids
-      }
-      bodyJson.is_customer = true
-      bodyJson.is_factory = false
-      return http
-        .request('/platform/report_api/report_company/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
-        .then((response) => {
-          console.log('response:', response)
-          if (response.data?.data) {
-            this.pagination.total = response.data?.data?.total
-            this.pagination.pagesize = response.data?.data?.total
-            this.pagination.page = 1
-            this.entities = response.data?.data?.entities
-            return response.data?.data;
-          } else {
-            return Promise.reject(response);
-          }
-        })
-        .finally(() => setPageLoading(false));
-    },
-    async apiGetReportCompany(id: string) {
+    async apiGetReportCompanyContact(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       let bodyJson = { id: id }
       return http
-        .request('/platform/report_api/report_company/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_company_contact/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -152,7 +129,7 @@ export const ReportCompanyStore = defineStore('reportCompany', {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryReportCompany()
+      this.apiQueryReportCompanyContact()
     }
   },
 })

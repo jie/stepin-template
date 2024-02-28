@@ -1,6 +1,6 @@
 <template>
     <div class="flex">
-        <div class="flex-1" v-if="props?.value"><a-button type="text">{{ displayValue }}</a-button></div>
+        <div class="flex-1" v-if="props?.value"> <Spin v-if="displayLoadingRef" /><a-button type="text">{{ displayValue }}</a-button></div>
         <a-button @click="showSearchDialog">Choose</a-button>
         <a-modal v-model:visible="modelVisible" title="Title" :confirm-loading="confirmLoading" @ok="handleOk">
             <a-form ref="formRef">
@@ -19,14 +19,31 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { db } from '@/hook/dexie_hook'
+import { ReportCompanyStore } from '@/store/company'
+import { ReportCompanyContactStore } from '@/store/company_contact'
+import { ReportFactoryStore } from '@/store/factory'
+import { ReportFactoryContactStore } from '@/store/factory_contact'
+import { ReportUserStore } from '@/store/user'
+import Spin from "@/components/spin/index.vue";
+const userStore = ReportUserStore()
+const companyStore = ReportCompanyStore()
+const factoryStore = ReportFactoryStore()
+const companyContactStore = ReportCompanyContactStore()
+const factoryContactStore = ReportFactoryContactStore()
 const open = ref<boolean>(false);
 const confirmLoading = ref<boolean>(false);
-const props = defineProps(['value', 'key', 'searchKey', 'searchLabel', 'isMultiple', 'columns', 'rows'])
+const props = defineProps(['type', 'value', 'key', 'searchKey', 'searchLabel', 'isMultiple', 'columns', 'rows'])
 const emit = defineEmits(['update:value'])
 const searchValueRef = ref<string>('')
 const tableColumns = ref([])
+const searchResult = ref<any[]>([])
+const selectedRowKeys = ref([])
+const modelVisible = ref<boolean>(false)
+const displayLoadingRef = ref<boolean>(false)
+
+
 const showModal = () => {
     modelVisible.value = true;
 };
@@ -58,11 +75,7 @@ const initializeData = () => {
     }
 }
 
-
-const searchResult = ref<any[]>([])
-const selectedRowKeys = ref([])
-const modelVisible = ref<boolean>(false)
-const onSelectChange = (keys) => {
+const onSelectChange = (keys: any[]) => {
     console.log('selectedRowKeys changed: ', keys);
     selectedRowKeys.value = keys;
 };
@@ -71,7 +84,11 @@ const handleOk = () => {
     setTimeout(() => {
         modelVisible.value = false;
         confirmLoading.value = false;
-        emit('update:value', selectedRowKeys.value)
+        if(props.isMultiple) {
+            emit('update:value', selectedRowKeys.value)
+        } else {
+            emit('update:value', selectedRowKeys.value[0])
+        }
     }, 1000);
 };
 const showSearchDialog = () => {
@@ -79,14 +96,81 @@ const showSearchDialog = () => {
     showModal()
 }
 
-const onSearch = () => {
-    if (props.rows) {
-        return
-    }
-    db.paginateReportTemplate(1, 10, { key: props.searchKey, value: searchValueRef.value }).then((res) => {
-        searchResult.value = res.data
-    })
+const onSearch = async () => {
+    // if (props.rows) {
+    //     return
+    // }
+    // db.paginateReportTemplate(1, 10, { key: props.searchKey, value: searchValueRef.value }).then((res) => {
+    //     searchResult.value = res.data
+    // })
+    await queryEntities()
 }
+
+const queryEntities = async () => {
+    switch(props.type) {
+        case 'template':
+            break
+        case 'worker':
+            break
+        case 'user':
+            break
+        case 'company':
+            companyStore.pagination.page = 1
+            companyStore.pagination.pagesize = 10
+            companyStore.queryArgs.keyword = searchValueRef.value
+            await companyStore.apiQueryReportCompany()
+            searchResult.value = companyStore.entities
+            break
+        case 'factory':
+            break
+        case 'company_contact':
+            break
+        case 'factory_contact':
+            break
+        default:
+            break
+    }
+}
+
+const getEntity = async (ids: string[]) => {
+    displayLoadingRef.value = true
+    switch(props.type) {
+        case 'template':
+            break
+        case 'worker':
+            break
+        case 'user':
+            break
+        case 'company':
+            console.log('ids:', ids)
+            if(ids) {
+                await companyStore.apiQueryByIdsReportCompany(ids)
+                searchResult.value = companyStore.entities
+                selectedRowKeys.value = ids
+                console.log('selectedRowKeys.value:', selectedRowKeys.value)
+            } else {
+                searchResult.value = []
+            }
+
+            break
+        case 'factory':
+            break
+        case 'company_contact':
+            break
+        case 'factory_contact':
+            break
+        default:
+            break
+    }
+    setTimeout(() => {
+        displayLoadingRef.value = false
+    }, 500)
+}
+
 initializeData()
 
+
+defineExpose({
+    getEntity
+})
 </script>
