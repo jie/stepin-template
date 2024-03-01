@@ -1,6 +1,8 @@
 <template>
     <div class="flex">
-        <div class="flex-1" v-if="props?.value"> <Spin v-if="displayLoadingRef" /><a-button type="text">{{ displayValue }}</a-button></div>
+        <div class="flex-1" v-if="props?.value">
+            <Spin v-if="displayLoadingRef" /><a-button type="text">{{ displayValue }}</a-button>
+        </div>
         <a-button @click="showSearchDialog">Choose</a-button>
         <a-modal v-model:visible="modelVisible" title="Title" :confirm-loading="confirmLoading" @ok="handleOk">
             <a-form ref="formRef">
@@ -26,12 +28,14 @@ import { ReportCompanyContactStore } from '@/store/company_contact'
 import { ReportFactoryStore } from '@/store/factory'
 import { ReportFactoryContactStore } from '@/store/factory_contact'
 import { ReportUserStore } from '@/store/user'
+import { ReportTemplateStore } from '@/store/reportTemplate'
 import Spin from "@/components/spin/index.vue";
 const userStore = ReportUserStore()
 const companyStore = ReportCompanyStore()
 const factoryStore = ReportFactoryStore()
 const companyContactStore = ReportCompanyContactStore()
 const factoryContactStore = ReportFactoryContactStore()
+const reportTemplateStore = ReportTemplateStore()
 const open = ref<boolean>(false);
 const confirmLoading = ref<boolean>(false);
 const props = defineProps(['type', 'value', 'key', 'searchKey', 'searchLabel', 'isMultiple', 'columns', 'rows'])
@@ -84,7 +88,7 @@ const handleOk = () => {
     setTimeout(() => {
         modelVisible.value = false;
         confirmLoading.value = false;
-        if(props.isMultiple) {
+        if (props.isMultiple) {
             emit('update:value', selectedRowKeys.value)
         } else {
             emit('update:value', selectedRowKeys.value[0])
@@ -107,7 +111,7 @@ const onSearch = async () => {
 }
 
 const queryEntities = async () => {
-    switch(props.type) {
+    switch (props.type) {
         case 'template':
             break
         case 'worker':
@@ -127,6 +131,14 @@ const queryEntities = async () => {
             break
         case 'factory_contact':
             break
+        case 'report_template':
+            reportTemplateStore.pagination.page = 1
+            reportTemplateStore.pagination.pagesize = 10
+            reportTemplateStore.queryArgs.keyword = searchValueRef.value
+            await reportTemplateStore.apiQueryTemplate()
+            searchResult.value = reportTemplateStore.entities
+            break
+            break
         default:
             break
     }
@@ -134,7 +146,7 @@ const queryEntities = async () => {
 
 const getEntity = async (ids: string[]) => {
     displayLoadingRef.value = true
-    switch(props.type) {
+    switch (props.type) {
         case 'template':
             break
         case 'worker':
@@ -143,7 +155,7 @@ const getEntity = async (ids: string[]) => {
             break
         case 'company':
             console.log('ids:', ids)
-            if(ids) {
+            if (ids) {
                 await companyStore.apiQueryByIdsReportCompany(ids)
                 searchResult.value = companyStore.entities
                 selectedRowKeys.value = ids
@@ -158,6 +170,17 @@ const getEntity = async (ids: string[]) => {
         case 'company_contact':
             break
         case 'factory_contact':
+            break
+        case 'report_template':
+            if (ids) {
+                await reportTemplateStore.apiQueryByIds(ids)
+                searchResult.value = reportTemplateStore.entities
+                selectedRowKeys.value = ids
+                console.log('selectedRowKeys.value:', selectedRowKeys.value)
+            } else {
+                searchResult.value = []
+            }
+
             break
         default:
             break

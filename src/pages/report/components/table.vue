@@ -1,12 +1,11 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
-import { reactive, ref } from 'vue';
+import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
-import { Dayjs } from 'dayjs';
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import {
-  ReportStatuses, reports, Report, customers,
+  ReportStatuses, customers,
   factories,
   workers,
   categories
@@ -15,10 +14,14 @@ import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
 import { db } from '@/hook/dexie_hook';
+import { ReportStore, Report } from '@/store/report'
+import { DayjsDateRangeSchema } from '@/types'
+import { ReportCategoryStore } from '@/store/category'
+const store = ReportStore()
+const categoryStore = ReportCategoryStore()
 const searchKeywords = ref('');
-const onClickSearch = () => {
-  console.log(searchKeywords.value);
-}
+const reportTemplateSelectRef = ref(null)
+const searchDateRangeRef = ref<DayjsDateRangeSchema>()
 const columns = [
   {
     title: 'Report',
@@ -26,12 +29,12 @@ const columns = [
     fixed: 'left',
     width: 260,
   },
-  { title: 'DATE', dataIndex: 'time', width: 80 },
-  { title: 'CUSTOMER', dataIndex: 'customer', width: 200 },
-  { title: 'WORKER', dataIndex: 'worker', width: 200 },
+  { title: 'DATE', dataIndex: 'inspect_date', width: 120 },
+  { title: 'CUSTOMER', dataIndex: 'company', width: 200 },
+  { title: 'WORKERS', dataIndex: 'workers', width: 200 },
   { title: 'CATEGORY', dataIndex: 'category', width: 160 },
   { title: 'STATUS', dataIndex: 'status', width: 120 },
-  { title: 'OP', dataIndex: 'edit', width: 40 },
+  { title: 'OP', dataIndex: 'edit', width: 50 },
 ];
 
 
@@ -84,7 +87,7 @@ function submit() {
   formLoading.value = true;
   formModel.value
     ?.validateFields()
-    .then((res: Report) => {
+    .then(async (res: Report) => {
       console.log('form:', form)
       // if (form._isNew) {
       //   reports.push({ ...res });
@@ -92,15 +95,61 @@ function submit() {
       //   copyObject(editRecord.value, res);
       // }
       console.log('submit:', res)
-      db.addReportItem({
-        name: form.name,
-        status: form.status,
-        inspect_date: form.inspect_date,
-        customer: form.customer,
-        workers: form.workers,
-        category: form.category
-      })
+      console.log('submit:', toRaw(form))
+      // db.addReportItem({
+      //   name: form.name,
+      //   status: form.status,
+      //   inspect_date: form.inspect_date,
+      //   customer: form.customer,
+      //   workers: form.workers,
+      //   category: form.category
+      // })
+      if (!form.id) {
+        if (form.order_id) {
+          await store.apiSaveReport({
+            name: form.name,
+            order_id: form.order_id,
+            report_template_id: form.report_template_id
+          })
+        } else {
+          await store.apiSaveReport({
+            name: form.name,
+            report_template_id: form.report_template_id,
+            category_id: form.category_id,
+            company_contact_id: form.company_contact_id,
+            factory_contact_id: form.factory_contact_id,
+            workers: form.workers,
+            users: form.users,
+            factory_id: form.factory_id,
+            company_id: form.company_id,
+          })
+        }
+      } else {
+        if (form.order_id) {
+          await store.apiUpdateReport({
+            id: form.id,
+            name: form.name,
+            order_id: form.order_id,
+            report_template_id: form.report_template_id
+          })
+        } else {
+          await store.apiUpdateReport({
+            name: form.name,
+            report_template_id: form.report_template_id,
+            category_id: form.category_id,
+            company_contact_id: form.company_contact_id,
+            factory_contact_id: form.factory_contact_id,
+            workers: form.workers,
+            users: form.users,
+            factory_id: form.factory_id,
+            company_id: form.company_id,
+          })
+        }
+      }
+
+
       showModal.value = false;
+      initializeData()
       reset();
     })
     .catch((e) => {
@@ -114,23 +163,50 @@ function submit() {
 const editRecord = ref<Report>();
 
 /**
- * 编辑
+ * Edit
  * @param record
  */
-function edit(record: Report) {
+function edit(record: any) {
   editRecord.value = record;
   copyObject(form, record);
+  console.log('record:', toRaw(record))
+  console.log('form:', toRaw(form))
+  form.id = record.id
+  form.order_id = record?.order?.id
+  form.report_template_id = record?.report_template?.id
   showModal.value = true;
+  setTimeout(() => {
+    reportTemplateSelectRef.value?.getEntity([form.report_template_id])
+  }, 1000)
+}
+
+const deleteRecord = async (record: Report) => {
+  console.log('record:', record)
+  await store.apiDeleteReport(record.id)
+  initializeData()
 }
 
 
-const queryReportTemplate = async () => {
+const onClickSearch = async () => {
+  store.queryArgs.keyword = searchKeywords.value
+  console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
+  if (searchDateRangeRef.value) {
+    store.queryArgs.inspect_start = searchDateRangeRef.value[0].format('YYYY-MM-DD')
+    store.queryArgs.inspect_end = searchDateRangeRef.value[1].format('YYYY-MM-DD')
+  }
+  store.apiQueryReport()
+}
+
+const initializeData = async () => {
+  await store.apiQueryReport()
+  await categoryStore.apiQueryParent()
 
 }
+initializeData()
 
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel" width="660px">
+  <!-- <a-modal :title="form._isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel" width="660px">
     <a-form ref="formModel" :model="form" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
@@ -155,66 +231,150 @@ const queryReportTemplate = async () => {
       <a-form-item label="Factory" name="factory">
         <RemoteSelect type="factory" v-model:value="form.factory" :rows="factories" searchKey="name" />
       </a-form-item>
+      <a-form-item label="Category" name="category">
+        <a-tree-select v-model:value="store.queryArgs.category_id" show-search style="width: 100%"
+          :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" placeholder="Please select" allow-clear
+          tree-default-expand-all :tree-data="categoryStore.entities" :field-names="{
+            children: 'children',
+            label: 'name',
+            value: 'id',
+          }" tree-node-filter-prop="name">
+        </a-tree-select>
+      </a-form-item>
       <a-form-item label="Template" name="report_template">
         <RemoteSelect type="template" v-model:value="form.report_template" searchKey="name" />
+      </a-form-item>
+    </a-form>
+  </a-modal> -->
+
+  <a-modal :title="form._isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel"
+    width="660px">
+    <a-form ref="formModel" :model="form" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
+      <a-form-item label="Name" name="name">
+        <a-input v-model:value="form.name" />
+      </a-form-item>
+      <a-form-item label="Order ID" name="order">
+        <a-input v-model:value="form.order_id" />
+      </a-form-item>
+      <a-form-item label="Template" name="report_template">
+        <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
+          searchKey="name" />
       </a-form-item>
     </a-form>
   </a-modal>
 
   <!-- 成员表格 -->
   <div style="width: 100%">
-    <a-table v-bind="$attrs" :columns="columns" :dataSource="reports"
-      :pagination="{ position: 'bottomCenter', 'page-size': 5, 'total': 32, 'show-size-changer': true, 'show-quick-jumper': true }"
-      :scroll="{ y: 600 }">
+    <a-table v-bind="$attrs" :loading="store.loading" :columns="columns" :dataSource="store.entities" :pagination="{
+      current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger: true, showQuickJumper: true
+    }" :scroll="{ y: 600 }">
       <template #title>
-        <div class="flex justify-between pr-4">
-          <h4>报告</h4>
-          <div class="flex">
+        <div class="">
+          <h4>Report</h4>
+          <a-row type="flex" style="width: 100%" :gutter="[16, 16]">
+            <a-col :span="6">
+              <div>
+                <span class="mr-2">Date</span>
+                <div><a-range-picker v-model:value="searchDateRangeRef" allowClear style="width: 100%;" /></div>
+              </div>
+            </a-col>
+            <a-col :span="6">
+              <div>
+                <span class="mr-2">Customer</span>
+                <a-input v-model:value="store.queryArgs.company_name" allowClear>
+                </a-input>
+              </div>
+            </a-col>
+            <a-col :span="6">
+              <div class="">
+                <span class="mr-2">Workers</span>
+                <a-input v-model:value="store.queryArgs.worker_name" allowClear>
+                </a-input>
+              </div>
+            </a-col>
+            <a-col :span="6">
+              <div class="">
+                <span class="mr-2">Status</span>
+                <div>
+                  <a-select class="w-full" ref="select" v-model:value="store.queryArgs.status" allowClear>
+                    <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label
+                    }}</a-select-option>
+                  </a-select>
+                </div>
+
+              </div>
+            </a-col>
+          </a-row>
+          <a-row type="flex" style="width: 100%;margin-top:10px;" :gutter="[16, 16]">
+            <a-col :span="6">
+              <div class="mr-2">Date</div>
+              <a-tree-select v-model:value="store.queryArgs.category_id" show-search style="width: 100%"
+                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" placeholder="Please select" allow-clear
+                tree-default-expand-all :tree-data="categoryStore.entities" :field-names="{
+                  children: 'children',
+                  label: 'name',
+                  value: 'id',
+                }" tree-node-filter-prop="name">
+              </a-tree-select>
+            </a-col>
+            <a-col :span="6">
+
+            </a-col>
+            <a-col :span="6">
+
+            </a-col>
+            <a-col :span="6">
+              <a-button type="primary" @click="addNew" :loading="formLoading" style="float: right;">
+                <template #icon>
+                  <PlusOutlined />
+                </template>
+                Create
+              </a-button>
+              <a-button class="mr-2" @click="onClickSearch" style="float: right;">
+                <template #icon>
+                  <SearchOutlined />
+                </template>
+                Search
+              </a-button>
+
+            </a-col>
+          </a-row>
+          <!-- <div class="flex">
             <div class="mr-4">
-              <span class="mr-2">客户</span>
-              <a-select ref="select" style="width: 120px" allowClear>
-                <a-select-option value="jack">Jack</a-select-option>
-                <a-select-option value="lucy">Lucy</a-select-option>
-                <a-select-option value="disabled" disabled>Disabled</a-select-option>
-                <a-select-option value="Yiminghe">yiminghe</a-select-option>
-              </a-select>
+              <span class="mr-2">Customer</span>
+              <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">
+              </a-input>
             </div>
             <div class="mr-4">
-              <span class="mr-2">检验员</span>
-              <a-select ref="select" style="width: 120px" allowClear>
-                <a-select-option value="jack">Jack</a-select-option>
-                <a-select-option value="lucy">Lucy</a-select-option>
-                <a-select-option value="disabled" disabled>Disabled</a-select-option>
-                <a-select-option value="Yiminghe">yiminghe</a-select-option>
-              </a-select>
+              <span class="mr-2">Workers</span>
+              <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">
+              </a-input>
             </div>
             <div class="mr-4">
-              <span class="mr-2">报告状态</span>
-              <a-select ref="select" style="width: 120px" allowClear>
-                <a-select-option value="jack">Jack</a-select-option>
-                <a-select-option value="lucy">Lucy</a-select-option>
-                <a-select-option value="disabled" disabled>Disabled</a-select-option>
-                <a-select-option value="Yiminghe">yiminghe</a-select-option>
+              <span class="mr-2">Status</span>
+              <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
+                <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label
+                }}</a-select-option>
               </a-select>
             </div>
-            <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">\
+            <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">
               <template #addonBefore>
-                关键词
+                Keywords
               </template>
             </a-input>
-            <a-button class="mr-2">
+            <a-button class="mr-2" @click="onClickSearch">
               <template #icon>
                 <SearchOutlined />
               </template>
-              搜索
+              Search
             </a-button>
             <a-button type="primary" @click="addNew" :loading="formLoading">
               <template #icon>
                 <PlusOutlined />
               </template>
-              新增
+              Create
             </a-button>
-          </div>
+          </div> -->
 
         </div>
       </template>
@@ -224,12 +384,19 @@ const queryReportTemplate = async () => {
             <span class="text-title font-bold">{{ text }}</span>
           </div>
         </div>
-        <div class="" v-else-if="column.dataIndex === 'position'">
+        <div class="" v-else-if="column.dataIndex === 'company'">
           <div class="text-title font-bold">
-            {{ record.jobs }}
+            {{ record.company.shortname }}
           </div>
-          <div class="text-subtext">
-            {{ record.department }}
+        </div>
+        <div class="" v-else-if="column.dataIndex === 'workers'">
+          <div class="text-title font-bold">
+            {{ record.workers }}
+          </div>
+        </div>
+        <div class="" v-else-if="column.dataIndex === 'category'">
+          <div class="text-title font-bold">
+            {{ record.category.name }}
           </div>
         </div>
         <template v-else-if="column.dataIndex === 'status'">
@@ -240,7 +407,7 @@ const queryReportTemplate = async () => {
           </a-badge>
         </template>
         <template v-else-if="column.dataIndex === 'inspect_date'">
-          {{ text?.format('YYYY-MM-DD') }}
+          {{ text }}
         </template>
         <template v-else-if="column.dataIndex === 'edit'">
           <a-dropdown>
@@ -252,31 +419,35 @@ const queryReportTemplate = async () => {
                 <a-menu-item key="0">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <ReadOutlined />
-                    查看
+                    View
                   </a>
                 </a-menu-item>
                 <a-menu-item key="0">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <EditOutlined />
-                    编辑
+                    Edit
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
-                  <a @click="edit(record)" rel="noopener noreferrer">
-                    <DeleteOutlined />
-                    删除
-                  </a>
+                  <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="Cancel"
+                    @confirm="deleteRecord(record)">
+                    <a rel="noopener noreferrer">
+                      <DeleteOutlined />
+                      Delete
+                    </a>
+                  </a-popconfirm>
+
                 </a-menu-item>
                 <a-menu-item key="1">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
-                    审核报告
+                    Verify
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <MailOutlined />
-                    发送邮件给客户
+                    Send to Customer
                   </a>
                 </a-menu-item>
               </a-menu>
@@ -285,7 +456,8 @@ const queryReportTemplate = async () => {
         </template>
         <div v-else class="text-subtext">
           {{ text }}
-      </div>
-    </template>
-  </a-table>
-</div></template>
+        </div>
+      </template>
+    </a-table>
+  </div>
+</template>

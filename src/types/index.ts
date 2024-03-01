@@ -1,3 +1,5 @@
+import type { Dayjs } from 'dayjs';
+
 export interface LoginForm {
   username: string;
   password: string;
@@ -20,3 +22,5 @@ export interface Pagination {
   totail: number;
   entities: any[]
 }
+
+export type DayjsDateRangeSchema = [Dayjs, Dayjs];

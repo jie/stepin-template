@@ -206,7 +206,7 @@ async function extractImg(file: Blob, Company: ReportCompany) {
   </a-modal>
   <!-- 成员表格 -->
   <a-table v-bind="$attrs" :columns="columns" :dataSource="companyStore.entities" @change="companyStore.changePage" :pagination="{
-    current: companyStore.pagination.page, pageSize: companyStore.pagination.pagesize, total: companyStore.pagination.total, showSizeChanger:true, showQuickJumper: true} ">
+    current: companyStore.pagination.page, pageSize: companyStore.pagination.pagesize, total: companyStore.pagination.total, showSizeChanger:true, showQuickJumper: true}">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>Company</h4>
@@ -273,7 +273,7 @@ async function extractImg(file: Blob, Company: ReportCompany) {
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="删除" content="确认删除吗？" okText="确认" cancelText="取消" @confirm="deleteRecord(record)">
+                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="No" @confirm="deleteRecord(record)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
                     Delete
