@@ -3,9 +3,10 @@ import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
+import StatusDialog from "@/components/status_dialog/index.vue";
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import {
-  ReportStatuses, customers,
+  VerifyStatuses, customers,
   factories,
   workers,
   categories
@@ -15,7 +16,7 @@ import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
 import { db } from '@/hook/dexie_hook';
 import { ReportStore, Report } from '@/store/report'
-import { DayjsDateRangeSchema } from '@/types'
+import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
 const store = ReportStore()
 const categoryStore = ReportCategoryStore()
@@ -45,13 +46,12 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newAuthor = (record?: Report) => {
+const newRecord = (record?: Report) => {
   if (!record) {
     record = { _isNew: true };
   }
   record.name = undefined;
   record.status = '0';
-  record.time = dayjs();
   return record;
 };
 
@@ -62,10 +62,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(target).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<Report>(newAuthor());
+const form = reactive<Report>(newRecord());
 
 function reset() {
-  return newAuthor(form);
+  return newRecord(form);
 }
 
 function cancel() {
@@ -74,6 +74,7 @@ function cancel() {
 }
 
 const formModel = ref<FormInstance>();
+
 
 const formLoading = ref(false);
 
@@ -88,36 +89,18 @@ function submit() {
   formModel.value
     ?.validateFields()
     .then(async (res: Report) => {
-      console.log('form:', form)
-      // if (form._isNew) {
-      //   reports.push({ ...res });
-      // } else {
-      //   copyObject(editRecord.value, res);
-      // }
-      console.log('submit:', res)
-      console.log('submit:', toRaw(form))
-      // db.addReportItem({
-      //   name: form.name,
-      //   status: form.status,
-      //   inspect_date: form.inspect_date,
-      //   customer: form.customer,
-      //   workers: form.workers,
-      //   category: form.category
-      // })
       if (!form.id) {
         if (form.order_id) {
-          await store.apiSaveReport({
+          await store.apiSave({
             name: form.name,
             order_id: form.order_id,
             report_template_id: form.report_template_id
           })
         } else {
-          await store.apiSaveReport({
+          await store.apiSave({
             name: form.name,
             report_template_id: form.report_template_id,
             category_id: form.category_id,
-            company_contact_id: form.company_contact_id,
-            factory_contact_id: form.factory_contact_id,
             workers: form.workers,
             users: form.users,
             factory_id: form.factory_id,
@@ -126,19 +109,17 @@ function submit() {
         }
       } else {
         if (form.order_id) {
-          await store.apiUpdateReport({
+          await store.apiUpdate({
             id: form.id,
             name: form.name,
             order_id: form.order_id,
             report_template_id: form.report_template_id
           })
         } else {
-          await store.apiUpdateReport({
+          await store.apiUpdate({
             name: form.name,
             report_template_id: form.report_template_id,
             category_id: form.category_id,
-            company_contact_id: form.company_contact_id,
-            factory_contact_id: form.factory_contact_id,
             workers: form.workers,
             users: form.users,
             factory_id: form.factory_id,
@@ -182,7 +163,7 @@ function edit(record: any) {
 
 const deleteRecord = async (record: Report) => {
   console.log('record:', record)
-  await store.apiDeleteReport(record.id)
+  await store.apiDelete(record.id)
   initializeData()
 }
 
@@ -194,14 +175,40 @@ const onClickSearch = async () => {
     store.queryArgs.inspect_start = searchDateRangeRef.value[0].format('YYYY-MM-DD')
     store.queryArgs.inspect_end = searchDateRangeRef.value[1].format('YYYY-MM-DD')
   }
-  store.apiQueryReport()
+  store.apiQuery()
 }
+
 
 const initializeData = async () => {
-  await store.apiQueryReport()
+  await store.apiQuery()
   await categoryStore.apiQueryParent()
-
 }
+
+// status form
+const statusForm = reactive<statusFormSchema>({
+  id: "",
+  status: "",
+  reason: ""
+});
+const statusFormModel = ref<FormInstance>()
+
+const statusDialogRef = ref(false)
+const showStatusDialog = (record: Report) => {
+  statusDialogRef.value = true
+  statusForm.reason = record.reason || ''
+  statusForm.id = record.id
+  statusForm.status = record.status
+}
+const statusDialogConfirm = async () => {
+  await store.apiSetStatus(statusForm)
+}
+const statusDialogCancel = () => {
+  statusDialogRef.value = false
+  statusForm.reason = ''
+  statusForm.id = ''
+  statusForm.status = ''
+}
+
 initializeData()
 
 </script>
@@ -262,6 +269,18 @@ initializeData()
       </a-form-item>
     </a-form>
   </a-modal>
+  <!-- 审核dialog -->
+  <a-modal title="Set Status" v-model:visible="statusDialogRef" @ok="statusDialogConfirm" @cancel="statusDialogCancel"
+    width="660px">
+    <a-form ref="statusFormModel" :model="statusForm" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
+      <a-form-item required label="Status" name="status">
+        <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
+      </a-form-item>
+      <a-form-item label="Reason" name="reason">
+        <a-textarea v-model:value="statusForm.reason" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
 
   <!-- 成员表格 -->
   <div style="width: 100%">
@@ -307,7 +326,7 @@ initializeData()
           </a-row>
           <a-row type="flex" style="width: 100%;margin-top:10px;" :gutter="[16, 16]">
             <a-col :span="6">
-              <div class="mr-2">Date</div>
+              <div class="mr-2">Category</div>
               <a-tree-select v-model:value="store.queryArgs.category_id" show-search style="width: 100%"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" placeholder="Please select" allow-clear
                 tree-default-expand-all :tree-data="categoryStore.entities" :field-names="{
@@ -402,7 +421,7 @@ initializeData()
         <template v-else-if="column.dataIndex === 'status'">
           <a-badge class="text-subtext" :color="formatStatusColor(text)">
             <template #text>
-              <span class="text-subtext">{{ ReportStatuses[text] }}</span>
+              <span class="text-subtext">{{ VerifyStatuses[text] }}</span>
             </template>
           </a-badge>
         </template>
@@ -439,7 +458,7 @@ initializeData()
 
                 </a-menu-item>
                 <a-menu-item key="1">
-                  <a @click="edit(record)" rel="noopener noreferrer">
+                  <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
                     Verify
                   </a>

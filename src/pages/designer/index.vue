@@ -58,7 +58,7 @@ const initializeData = async () => {
 
 
 const onSaveTemplate = async (data:any) => {
-  let result = await store.apiUpdateTemplate(data["data"])
+  let result = await store.apiUpdate(data["data"])
   console.log('save-result:', result)
   router.back()
 }

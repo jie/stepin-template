@@ -8,19 +8,24 @@ import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } fro
 import router from '@/router';
 import { db } from '@/hook/dexie_hook'
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
-import { ReportFactoryStore, ReportFactory } from "@/store/factory"
-import {getSessionInfo} from '@/utils/session'
+import { ReportFactoryContactStore, ReportFactoryContact } from "@/store/factory_contact"
+import { ReportCompanyStore } from "@/store/company"
+import { paginationConfig } from 'ant-design-vue/lib/pagination';
+import { getSessionInfo } from '@/utils/session'
+import RemoteSelect from '@/components/remote_select/index.vue'
 const isViewForm = ref(false)
-const factoryStore = ReportFactoryStore()
+const store = ReportFactoryContactStore()
+const companyStore = ReportCompanyStore()
 const searchKeywords = ref("")
+const companyRemoteSelectRef = ref(null)
 const columns = [
   {
     title: 'Name',
     dataIndex: 'name',
   },
   {
-    title: 'Shortcut',
-    dataIndex: 'shortname',
+    title: 'E-mail',
+    dataIndex: 'email',
   },
   { title: 'Status', dataIndex: 'status' },
   { title: 'Create at', dataIndex: 'create_at' },
@@ -29,7 +34,7 @@ const columns = [
 
 
 const Ctl = reactive({
-  records: [] as ReportFactory[],
+  records: [] as ReportFactoryContact[],
   page: 1,
   pagesize: 10,
   total: 0,
@@ -40,7 +45,11 @@ const createTimeRef = ref<Dayjs>(dayjs());
 
 
 const initializeData = async () => {
-    let result = await factoryStore.apiQueryReportFactory()
+  let result = await store.apiQuery()
+  companyStore.pagination.page = 1
+  companyStore.pagination.pagesize = 10
+  let companyResult = await companyStore.apiQuery()
+  console.log('companyResult:', companyResult)
 }
 
 initializeData()
@@ -53,26 +62,32 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newReportFactory = (reportFactory?: ReportFactory) => {
+const newReportCompanyContact = (reportCompanyContact?: ReportFactoryContact) => {
   createTimeRef.value = dayjs()
   let create_at = createTimeRef.value.format('YYYY-MM-DD HH:mm:ss')
-  if (!reportFactory) {
+  if (!reportCompanyContact) {
 
-    return <ReportFactory>{
+    return <ReportFactoryContact>{
       id: '',
-      shortname: '',
+      email: '',
+      mobile: '',
+      phone: '',
       name: '',
       remark: '',
+      company_id: '',
       status: '1',
       create_at: create_at
     }
   } else {
-    reportFactory.name = '';
-    reportFactory.shortname = '';
-    reportFactory.remark = '';
-    reportFactory.status = '1';
-    reportFactory.create_at = create_at;
-    return reportFactory;
+    reportCompanyContact.name = '';
+    reportCompanyContact.email = '';
+    reportCompanyContact.mobile = '';
+    reportCompanyContact.phone = '';
+    reportCompanyContact.remark = '';
+    reportCompanyContact.company_id = '';
+    reportCompanyContact.status = '1';
+    reportCompanyContact.create_at = create_at;
+    return reportCompanyContact;
   }
 };
 
@@ -83,10 +98,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(source).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<ReportFactory>(newReportFactory());
+const form = reactive<ReportFactoryContact>(newReportCompanyContact());
 console.log('form:', form)
 function reset() {
-  return newReportFactory(form);
+  return newReportCompanyContact(form);
 }
 
 function cancel() {
@@ -105,19 +120,22 @@ async function submit() {
   formLoading.value = true;
   let formValue = {
     name: form.name,
-    shortname: form.shortname,
+    email: form.email,
+    mobile: form.mobile,
+    phone: form.phone,
     remark: form.remark,
+    company_id: form.company_id,
     status: form.status,
-    org_id:session.user_data.org_id,
+    org_id: session.user_data.org_id,
     is_customer: true
-  } 
+  }
   formModel.value
     ?.validateFields()
-    .then(async (res: ReportFactory) => {
+    .then(async (res: ReportFactoryContact) => {
       if (Ctl.isNew === true) {
-        await factoryStore.apiSaveReportFactory(formValue)
+        await store.apiSave(formValue)
       } else {
-        await factoryStore.apiUpdateReportFactory({id: form.id, ...formValue})
+        await store.apiUpdate({ id: form.id, ...formValue })
       }
       showModal.value = false;
       reset();
@@ -131,21 +149,27 @@ async function submit() {
     });
 }
 
-const editRecord = ref<ReportFactory>();
+const editRecord = ref<ReportFactoryContact>();
 
 /**
  * 编辑
  * @param record
  */
-function edit(record: ReportFactory) {
+function edit(record: ReportFactoryContact) {
   isViewForm.value = false
   createTimeRef.value = dayjs(record.create_at)
   Ctl.isNew = false;
   editRecord.value = record;
   copyObject(form, record);
+  if(record?.company?.id) {
+    form.company_id = record.company.id
+  }
   showModal.value = true;
+  setTimeout(() => {
+      companyRemoteSelectRef.value?.getEntity([form.company_id])
+    }, 1000)
 }
-function view(record: ReportFactory) {
+function view(record: ReportFactoryContact) {
   createTimeRef.value = dayjs(record.create_at)
   Ctl.isNew = false;
   editRecord.value = record;
@@ -155,7 +179,7 @@ function view(record: ReportFactory) {
 }
 
 
-const goDesign = (record: ReportFactory) => {
+const goDesign = (record: ReportFactoryContact) => {
   router.push({
     name: 'design',
     query: {
@@ -164,56 +188,60 @@ const goDesign = (record: ReportFactory) => {
   });
 }
 
-const deleteRecord = async (record: ReportFactory) => {
+const deleteRecord = async (record: ReportFactoryContact) => {
   console.log('record:', record)
-  // await db.delReportFactory(record.id)
+  // await db.delReportCompanyContact(record.id)
   initializeData()
 }
 
 const onClickSearch = async () => {
-  factoryStore.queryArgs.keyword = searchKeywords.value
-  console.log('factoryStore.queryArgs.keyword:', factoryStore.queryArgs.keyword)
-  factoryStore.apiQueryReportFactory()
+  store.queryArgs.keyword = searchKeywords.value
+  console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
+  store.apiQuery()
 }
-async function extractImg(file: Blob, Factory: ReportFactory) {
-    await getBase64(file).then((res) => {
-      Factory.avatar = res;
-    });
-  }
+async function extractImg(file: Blob, Company: ReportFactoryContact) {
+  await getBase64(file).then((res) => {
+    Company.avatar = res;
+  });
+}
 
 </script>
 <template>
   <a-modal :title="Ctl.isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel"
-  
-      :ok-button-props="{ disabled: isViewForm }"
-      :cancel-button-props="{ disabled: isViewForm }"
-  >
+    :ok-button-props="{ disabled: isViewForm }" :cancel-button-props="{ disabled: isViewForm }">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item label="Shortcut" required name="shortname">
-        <a-input v-model:value="form.shortname" />
+      <a-form-item required label="E-mail" name="email">
+        <a-input v-model:value="form.email" />
+      </a-form-item>
+      <a-form-item label="Mobile" name="mobile">
+        <a-input v-model:value="form.mobile" />
+      </a-form-item>
+      <a-form-item label="Phone" name="phone">
+        <a-input v-model:value="form.phone" />
+      </a-form-item>
+      <a-form-item label="Factory" name="company_id" required>
+        <RemoteSelect ref="companyRemoteSelectRef" type="factory" v-model:value="form.company_id" searchKey="name" />
       </a-form-item>
       <a-form-item required label="Status" name="status">
-        <a-select
-          style="width: 100%"
-          v-model:value="form.status"
-          :options="ApproveStatusOptions"
-        />
+        <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions" />
       </a-form-item>
     </a-form>
   </a-modal>
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="factoryStore.entities" @change="factoryStore.changePage" :pagination="{
-    current: factoryStore.pagination.page, pageSize: factoryStore.pagination.pagesize, total: factoryStore.pagination.total, showSizeChanger:true, showQuickJumper: true} ">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities"
+    @change="store.changePage" :pagination="{
+      current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger: true, showQuickJumper: true
+    }">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>Factory</h4>
+        <h4>Factory Contact</h4>
         <div class="flex">
           <div class="mr-4">
             <span class="mr-2">Status</span>
-            <a-select ref="select" style="width: 200px" v-model:value="factoryStore.queryArgs.status" allowClear>
+            <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>
@@ -240,7 +268,7 @@ async function extractImg(file: Blob, Factory: ReportFactory) {
     <template #bodyCell="{ column, text, record }">
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
         <div class="flex-col flex justify-evenly">
-          <span class="text-title font-bold">{{  text }}</span>
+          <span class="text-title font-bold">{{ text }}</span>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">

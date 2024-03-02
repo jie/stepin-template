@@ -36,7 +36,7 @@ export const ReportRoleStore = defineStore('reportRole', {
 
   },
   actions: {
-    async apiSaveReportRole(data: ReportRole) {
+    async apiSave(data: ReportRole) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -51,7 +51,7 @@ export const ReportRoleStore = defineStore('reportRole', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdateReportRole(data: ReportRole) {
+    async apiUpdate(data: ReportRole) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -66,7 +66,7 @@ export const ReportRoleStore = defineStore('reportRole', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiDeleteReportRole(id: string) {
+    async apiDelete(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -81,7 +81,7 @@ export const ReportRoleStore = defineStore('reportRole', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryReportRole() {
+    async apiQuery() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -103,7 +103,7 @@ export const ReportRoleStore = defineStore('reportRole', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiGetReportRole(id:string) {
+    async apiGet(id:string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -123,7 +123,7 @@ export const ReportRoleStore = defineStore('reportRole', {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryReportRole()
+      this.apiQuery()
     }
   },
 })

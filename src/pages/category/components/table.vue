@@ -35,7 +35,7 @@ const newRecord = (record?: Category) => {
   record.name = "";
   record.remark = "";
   record.children = [];
-  record.status = "";
+  record.status = "3";
   return record;
 };
 
@@ -83,6 +83,8 @@ function submit() {
     });
 }
 
+
+
 const editRecord = ref<Category>();
 
 /**
@@ -98,8 +100,13 @@ function edit(record: Category) {
 const initializeData = async () => {
   let result = await store.apiQueryParent()
 }
-initializeData()
 
+
+const deleteRecord = async (id:string) => {
+  await store.apiDelete(id)
+  initializeData()
+}
+initializeData()
 </script>
 <template>
   <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
@@ -173,20 +180,23 @@ initializeData()
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <ReadOutlined />
-                  查看
+                  View
                 </a>
               </a-menu-item>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <EditOutlined />
-                  编辑
+                  Edit
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a @click="edit(record)" rel="noopener noreferrer">
-                  <DeleteOutlined />
-                  删除
-                </a>
+                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="No" @confirm="deleteRecord(record)">
+                  <a rel="noopener noreferrer">
+                    <DeleteOutlined />
+                    Delete
+                  </a>
+                </a-popconfirm>
+
               </a-menu-item>
             </a-menu>
           </template>

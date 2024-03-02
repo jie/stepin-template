@@ -4,42 +4,41 @@ import { getSessionInfo } from '@/utils/session'
 import { useLoadingStore } from '@/store';
 import { Pagination } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
+import { inspect } from 'util';
 
 
-export interface ReportCompany {
+export interface ReportSystemConfig {
   id?: string;
-  shortname?: string;
-  org_id?: string;
-  name?: string;
-  remark?: string;
+  date_type?: string;
+  key?: string;
+  value?: any;
+  desc?: string;
   status?: string;
-  is_customer?: boolean;
-  is_factory?: boolean;
-  is_enable?: boolean;
-  create_at?: string;
-  avatar?: string;
+  org_id?: string;
 }
 
 
-export const ReportCompanyStore = defineStore('reportCompany', {
+export const ReportSystemConfigStore = defineStore('report_system_config', {
   state: () => {
     return {
-      reportReportCompany: {} as ReportCompany,
-      entities: <ReportCompany>[],
+      loading: false,
+      isNew: false,
+      reportSystemConfig: {} as ReportSystemConfig,
+      entities: <any>[],
       pagination: {} as Pagination,
-      queryArgs: { status: "", keyword: "" },
+      queryArgs: { status: "", keyword: ""},
     }
   },
   getters: {
 
   },
   actions: {
-    async apiSave(data: ReportCompany) {
+    async apiSave(data: ReportSystemConfig) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_company/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_system_config/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Saved")
@@ -51,12 +50,12 @@ export const ReportCompanyStore = defineStore('reportCompany', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdate(data: ReportCompany) {
+    async apiUpdate(data: ReportSystemConfig) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_company/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_system_config/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Updated")
@@ -73,22 +72,7 @@ export const ReportCompanyStore = defineStore('reportCompany', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_company/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
-        .then((response) => {
-          if (response.data?.data) {
-            return response.data?.data;
-          } else {
-            return Promise.reject(response);
-          }
-        })
-        .finally(() => setPageLoading(false));
-    },
-    async apiSetStatus(record: any) {
-      const { setPageLoading } = useLoadingStore();
-      setPageLoading(true)
-      let session = getSessionInfo()
-      return http
-        .request('/platform/report_api/report_company/set_status', 'post_json', record, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_system_config/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -101,13 +85,14 @@ export const ReportCompanyStore = defineStore('reportCompany', {
     async apiQuery() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
+      this.loading = true
       let session = getSessionInfo()
       let bodyJson = {
         ...this.pagination,
         ...this.queryArgs
       }
       return http
-        .request('/platform/report_api/report_company/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_system_config/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -118,30 +103,7 @@ export const ReportCompanyStore = defineStore('reportCompany', {
             return Promise.reject(response);
           }
         })
-        .finally(() => setPageLoading(false));
-    },
-    async apiQueryByIds(ids: string[]) {
-      const { setPageLoading } = useLoadingStore();
-      setPageLoading(true)
-      let session = getSessionInfo()
-      let bodyJson = {
-        ids: ids
-      }
-      return http
-        .request('/platform/report_api/report_company/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
-        .then((response) => {
-          console.log('response:', response)
-          if (response.data?.data) {
-            this.pagination.total = response.data?.data?.total
-            this.pagination.pagesize = response.data?.data?.total
-            this.pagination.page = 1
-            this.entities = response.data?.data?.entities
-            return response.data?.data;
-          } else {
-            return Promise.reject(response);
-          }
-        })
-        .finally(() => setPageLoading(false));
+        .finally(() => {setPageLoading(false);this.loading = false});
     },
     async apiGet(id: string) {
       const { setPageLoading } = useLoadingStore();
@@ -149,7 +111,7 @@ export const ReportCompanyStore = defineStore('reportCompany', {
       let session = getSessionInfo()
       let bodyJson = { id: id }
       return http
-        .request('/platform/report_api/report_company/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_system_config/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

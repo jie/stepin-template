@@ -24,3 +24,9 @@ export interface Pagination {
 }
 
 export type DayjsDateRangeSchema = [Dayjs, Dayjs];
+
+export interface statusFormSchema {
+  status: string,
+  reason?: string,
+  id: string
+}

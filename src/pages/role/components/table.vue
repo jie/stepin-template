@@ -8,14 +8,13 @@ import {permissions, roles} from '@/pages/constants';
 import { ReportRoleStore, ReportRole } from '@/store/role';
 import { ApproveStatusOptions, ApproveStatus } from '@/utils/constant';
 
-const roleStore = ReportRoleStore();
+const store = ReportRoleStore();
 const columns = [
   {
     title: 'ROLE',
     dataIndex: 'name',
   },
   { title: 'PERMISSIONS', dataIndex: 'permissions', width: 400 },
-  { title: 'STATUS', dataIndex: 'status' },
   { title: 'CREATED', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
@@ -24,15 +23,15 @@ const columns = [
 
 function addNew() {
   showModal.value = true;
-  roleStore.isNew = true;
+  store.isNew = true;
 }
 
 const showModal = ref(false);
 
 const newRole = (role?: ReportRole) => {
-  roleStore.isNew = true
+  store.isNew = true
   role.name = "";
-  role.status = "";
+  role.status = "3";
   role.permissions = [];
   role.create_at = null;
   return role;
@@ -60,25 +59,15 @@ const formModel = ref<FormInstance>();
 
 const formLoading = ref(false);
 
-async function extractImg(file: Blob, author: ReportRole) {
-  await getBase64(file).then((res) => {
-    author.avatar = res;
-  });
-}
-
 function submit() {
-  // console.log('form.permissions:', form.permissions)
-  // return 
   formLoading.value = true;
   formModel.value
     ?.validateFields()
     .then(async (res: ReportRole) => {
-      if (roleStore.isNew) {
-        // roles.push({ ...res });
-        await roleStore.apiSaveReportRole({name: form.name, status: form.status, permissions: form.permissions})
+      if (store.isNew) {
+        await store.apiSave({name: form.name, status: form.status, permissions: form.permissions})
       } else {
-        await roleStore.apiUpdateReportRole({id: form.id, name: form.name, status: form.status, permissions: form.permissions})
-        // copyObject(editRecord.value, res);
+        await store.apiUpdate({id: form.id, name: form.name, status: form.status, permissions: form.permissions})
       }
       showModal.value = false;
       reset();
@@ -107,12 +96,13 @@ function edit(record: ReportRole) {
 }
 
 
-const getPermissionName = (key: string) => {
-  return permissions.find((item) => item.key === key).name;
+const initializeData = async () => {
+  store.apiQuery()
 };
 
-const initializeData = async () => {
-  roleStore.apiQueryReportRole()
+const deleteRecord = async (record: ReportRole) => {
+  await store.apiDelete(record.id)
+  initializeData()
 };
 
 initializeData()
@@ -127,13 +117,10 @@ initializeData()
       <a-form-item label="Permission" required name="permissions">
         <a-select v-model:value="form.permissions" mode="multiple" :options="permissions" :fieldNames="{label: 'name', value: 'id'}"/>
       </a-form-item>
-      <a-form-item required label="Status" name="status">
-        <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions" />
-      </a-form-item>
     </a-form>
   </a-modal>
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="roleStore.entities" :pagination="false">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>Roles</h4>
@@ -176,7 +163,7 @@ initializeData()
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <ReadOutlined />
-                  查看
+                  View
                 </a>
               </a-menu-item>
               <a-menu-item key="0">
@@ -186,10 +173,14 @@ initializeData()
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a @click="edit(record)" rel="noopener noreferrer">
-                  <DeleteFilled />
-                  删除
-                </a>
+                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="Cancel"
+                    @confirm="deleteRecord(record)">
+                    <a rel="noopener noreferrer">
+                      <DeleteOutlined />
+                      Delete
+                    </a>
+                  </a-popconfirm>
+
               </a-menu-item>
             </a-menu>
           </template>

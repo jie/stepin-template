@@ -158,11 +158,11 @@ const deleteRecord = async (record: ReportUser) => {
 const onClickSearch = async () => {
   templateStore.queryArgs.keyword = searchKeywords.value
   console.log('templateStore.queryArgs.keyword:', templateStore.queryArgs.keyword)
-  templateStore.apiQueryTemplate()
+  templateStore.apiQuery()
 }
 
 const initializeData = async () => {
-  await userStore.apiQueryReportUser()
+  await userStore.apiQuery()
 }
 
 

@@ -2,10 +2,9 @@ import { defineStore } from 'pinia';
 import http from './http';
 import { getSessionInfo } from '@/utils/session'
 import { useLoadingStore } from '@/store';
-import { Pagination } from "@/types"
+import { Pagination, statusFormSchema } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
 import { inspect } from 'util';
-
 
 export interface Report {
   id?: string;
@@ -15,15 +14,18 @@ export interface Report {
   report_template_id?: string;
   users?: Array<string>;
   company_id?: string;
-  company_contact_id?: string;
   factory_id?: string;
-  factory_contact_id?: string;
   workers?: Array<string>;
   category_id?: string;
-  address?: any;
   status?: string;
   org_id?: string;
   order_id?: string;
+  country_id?: string;
+  province_id?: boolean;
+  city_id?: boolean;
+  region_id?: boolean;
+  address?: boolean;
+  reason?:string
 }
 
 
@@ -41,7 +43,7 @@ export const ReportStore = defineStore('report', {
 
   },
   actions: {
-    async apiSaveReport(data: Report) {
+    async apiSave(data: Report) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -58,7 +60,7 @@ export const ReportStore = defineStore('report', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdateReport(data: Report) {
+    async apiUpdate(data: Report) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -75,7 +77,7 @@ export const ReportStore = defineStore('report', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiDeleteReport(id: string) {
+    async apiDelete(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -90,7 +92,22 @@ export const ReportStore = defineStore('report', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryReport() {
+    async apiSetStatus(record: statusFormSchema) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      return http
+        .request('/platform/report_api/report/set_status', 'post_json', record, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiQuery() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       this.loading = true
@@ -165,7 +182,7 @@ export const ReportStore = defineStore('report', {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryReport()
+      this.apiQuery()
     }
   },
 })

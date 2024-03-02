@@ -16,6 +16,14 @@ export interface ReportUser {
   status?: string;
   roles?: Array<string>;
   is_admin?: boolean;
+  is_customer?: boolean;
+  is_factory?: boolean;
+  is_worker?: boolean;
+  country_id?: string;
+  province_id?: boolean;
+  city_id?: boolean;
+  region_id?: boolean;
+  address?: boolean;
   is_enable?: boolean;
   create_at?: string;
   avatar?: string;
@@ -35,7 +43,7 @@ export const ReportUserStore = defineStore('reportUser', {
 
   },
   actions: {
-    async apiSaveReportUser(data: ReportUser) {
+    async apiSave(data: ReportUser) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -52,7 +60,7 @@ export const ReportUserStore = defineStore('reportUser', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdateReportUser(data: ReportUser) {
+    async apiUpdate(data: ReportUser) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -69,7 +77,7 @@ export const ReportUserStore = defineStore('reportUser', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiDeleteReportUser(id: string) {
+    async apiDelete(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -84,7 +92,22 @@ export const ReportUserStore = defineStore('reportUser', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryReportUser() {
+    async apiSetStatus(record) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      return http
+        .request('/platform/report_api/report_user/set_status', 'post_json', record, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiQuery() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -106,7 +129,7 @@ export const ReportUserStore = defineStore('reportUser', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiGetReportUser(id: string) {
+    async apiGet(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -126,7 +149,7 @@ export const ReportUserStore = defineStore('reportUser', {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryReportUser()
+      this.apiQuery()
     }
   },
 })

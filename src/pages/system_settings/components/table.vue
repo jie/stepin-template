@@ -4,10 +4,10 @@ import { FormInstance } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
-import { ReportConfigStore, ReportConfig } from '@/store/config';
+import { ReportSystemConfigStore, ReportSystemConfig } from '@/store/system_config';
 import { ApproveStatusOptions, ApproveStatus } from '@/utils/constant';
 
-const store = ReportConfigStore();
+const store = ReportSystemConfigStore();
 const columns = [
   { title: 'Key', dataIndex: 'key', width: 400 },
   { title: 'Value', dataIndex: 'value', width: 400 },
@@ -26,7 +26,7 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newRecord = (role?: ReportConfig) => {
+const newRecord = (role?: ReportSystemConfig) => {
   store.isNew = true
   role.key = "";
   role.value = "";
@@ -44,7 +44,7 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(target).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<ReportConfig>(newRecord({}));
+const form = reactive<ReportSystemConfig>(newRecord({}));
 
 function reset() {
   return newRecord(form);
@@ -59,7 +59,7 @@ const formModel = ref<FormInstance>();
 
 const formLoading = ref(false);
 
-async function extractImg(file: Blob, author: ReportConfig) {
+async function extractImg(file: Blob, author: ReportSystemConfig) {
   await getBase64(file).then((res) => {
     author.avatar = res;
   });
@@ -69,7 +69,7 @@ function submit() {
   formLoading.value = true;
   formModel.value
     ?.validateFields()
-    .then(async (res: ReportConfig) => {
+    .then(async (res: ReportSystemConfig) => {
       if (store.isNew) {
         await store.apiSave({key: form.key, status: form.status, value: form.value, date_type: form.date_type, desc: form.desc, is_enable: form.is_enable})
       } else {
@@ -87,13 +87,13 @@ function submit() {
     });
 }
 
-const editRecord = ref<ReportConfig>();
+const editRecord = ref<ReportSystemConfig>();
 
 /**
  * Edit
  * @param record
  */
-function edit(record: ReportConfig) {
+function edit(record: ReportSystemConfig) {
   store.isNew = false;
   editRecord.value = record;
   copyObject(form, record);
@@ -111,6 +111,7 @@ const deleteRecord = async (id:string) => {
   await store.apiDelete(id)
   initializeData()
 }
+
 
 initializeData()
 
@@ -139,7 +140,7 @@ initializeData()
   <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>Settings</h4>
+        <h4>System settings</h4>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />

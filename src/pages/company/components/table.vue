@@ -9,9 +9,10 @@ import router from '@/router';
 import { db } from '@/hook/dexie_hook'
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
 import { ReportCompanyStore, ReportCompany } from "@/store/company"
-import {getSessionInfo} from '@/utils/session'
+import { getSessionInfo } from '@/utils/session'
+import { statusFormSchema } from "@/types"
 const isViewForm = ref(false)
-const companyStore = ReportCompanyStore()
+const store = ReportCompanyStore()
 const searchKeywords = ref("")
 const columns = [
   {
@@ -19,8 +20,16 @@ const columns = [
     dataIndex: 'name',
   },
   {
-    title: 'Shortcut',
+    title: 'Abbreviation',
     dataIndex: 'shortname',
+  },
+  {
+    title: 'Is Customer',
+    dataIndex: 'is_customer',
+  },
+  {
+    title: 'Is Factory',
+    dataIndex: 'is_factory',
   },
   { title: 'Status', dataIndex: 'status' },
   { title: 'Create at', dataIndex: 'create_at' },
@@ -40,7 +49,7 @@ const createTimeRef = ref<Dayjs>(dayjs());
 
 
 const initializeData = async () => {
-    let result = await companyStore.apiQueryReportCompany()
+  let result = await store.apiQuery()
 }
 
 initializeData()
@@ -64,13 +73,17 @@ const newReportCompany = (reportCompany?: ReportCompany) => {
       name: '',
       remark: '',
       status: '1',
-      create_at: create_at
+      create_at: create_at,
+      is_customer: true,
+      is_factory: false,
     }
   } else {
     reportCompany.name = '';
     reportCompany.shortname = '';
     reportCompany.remark = '';
     reportCompany.status = '1';
+    reportCompany.is_customer = true;
+    reportCompany.is_factory = false;
     reportCompany.create_at = create_at;
     return reportCompany;
   }
@@ -108,16 +121,17 @@ async function submit() {
     shortname: form.shortname,
     remark: form.remark,
     status: form.status,
-    org_id:session.user_data.org_id,
-    is_customer: true
-  } 
+    org_id: session.user_data.org_id,
+    is_customer: form.is_customer,
+    is_factory: form.is_factory,
+  }
   formModel.value
     ?.validateFields()
     .then(async (res: ReportCompany) => {
       if (Ctl.isNew === true) {
-        await companyStore.apiSaveReportCompany(formValue)
+        await store.apiSave(formValue)
       } else {
-        await companyStore.apiUpdateReportCompany({id: form.id, ...formValue})
+        await store.apiUpdate({ id: form.id, ...formValue })
       }
       showModal.value = false;
       reset();
@@ -164,56 +178,93 @@ const goDesign = (record: ReportCompany) => {
   });
 }
 
-const deleteRecord = async (record: ReportCompany) => {
-  console.log('record:', record)
-  // await db.delReportCompany(record.id)
+const deleteRecord = async (id: string) => {
+  await store.apiDelete(id)
   initializeData()
 }
 
 const onClickSearch = async () => {
-  companyStore.queryArgs.keyword = searchKeywords.value
-  console.log('companyStore.queryArgs.keyword:', companyStore.queryArgs.keyword)
-  companyStore.apiQueryReportCompany()
+  store.queryArgs.keyword = searchKeywords.value
+  console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
+  store.apiQuery()
 }
 async function extractImg(file: Blob, Company: ReportCompany) {
-    await getBase64(file).then((res) => {
-      Company.avatar = res;
-    });
-  }
+  await getBase64(file).then((res) => {
+    Company.avatar = res;
+  });
+}
+// status form
+const statusForm = reactive<statusFormSchema>({
+  id: "",
+  status: "",
+  reason: ""
+});
+const statusFormModel = ref<FormInstance>()
+
+const statusDialogRef = ref(false)
+const showStatusDialog = (record: any) => {
+  statusDialogRef.value = true
+  statusForm.reason = record.reason || ''
+  statusForm.id = record.id
+  statusForm.status = record.status
+}
+const statusDialogConfirm = async () => {
+  await store.apiSetStatus(statusForm)
+  statusDialogRef.value = false
+  initializeData()
+}
+const statusDialogCancel = () => {
+  statusDialogRef.value = false
+  statusForm.reason = ''
+  statusForm.id = ''
+  statusForm.status = ''
+}
 
 </script>
 <template>
   <a-modal :title="Ctl.isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel"
-  
-      :ok-button-props="{ disabled: isViewForm }"
-      :cancel-button-props="{ disabled: isViewForm }"
-  >
+    :ok-button-props="{ disabled: isViewForm }" :cancel-button-props="{ disabled: isViewForm }">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item label="Shortcut" required name="shortname">
+      <a-form-item label="Abbreviation" required name="shortname">
         <a-input v-model:value="form.shortname" />
       </a-form-item>
-      <a-form-item required label="Status" name="status">
-        <a-select
-          style="width: 100%"
-          v-model:value="form.status"
-          :options="ApproveStatusOptions"
-        />
+      <a-form-item label="Is Customer" required name="is_customer">
+        <a-switch v-model:checked="form.is_customer" />
+      </a-form-item>
+      <a-form-item label="Is Factory" required name="is_factory">
+        <a-switch v-model:checked="form.is_factory" />
       </a-form-item>
     </a-form>
   </a-modal>
+  <!-- 审核dialog -->
+  <a-modal title="Set Status" v-model:visible="statusDialogRef" @ok="statusDialogConfirm" @cancel="statusDialogCancel"
+    width="660px">
+    <a-form ref="statusFormModel" :model="statusForm" :label-col="{ style: { width: '150px' } }"
+      :wrapper-col="{ span: 14 }">
+      <a-form-item required label="Status" name="status">
+        <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
+      </a-form-item>
+      <a-form-item label="Reason" name="reason">
+        <a-textarea v-model:value="statusForm.reason" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
+
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="companyStore.entities" @change="companyStore.changePage" :pagination="{
-    current: companyStore.pagination.page, pageSize: companyStore.pagination.pagesize, total: companyStore.pagination.total, showSizeChanger:true, showQuickJumper: true}">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" @change="store.changePage"
+    :pagination="{
+      current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger: true, showQuickJumper: true
+    }">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>Company</h4>
         <div class="flex">
           <div class="mr-4">
             <span class="mr-2">Status</span>
-            <a-select ref="select" style="width: 200px" v-model:value="companyStore.queryArgs.status" allowClear>
+            <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>
@@ -240,7 +291,7 @@ async function extractImg(file: Blob, Company: ReportCompany) {
     <template #bodyCell="{ column, text, record }">
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
         <div class="flex-col flex justify-evenly">
-          <span class="text-title font-bold">{{  text }}</span>
+          <span class="text-title font-bold">{{ text }}</span>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
@@ -273,7 +324,14 @@ async function extractImg(file: Blob, Company: ReportCompany) {
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="No" @confirm="deleteRecord(record)">
+                <a @click="showStatusDialog(record)" rel="noopener noreferrer">
+                  <VerifiedOutlined />
+                  Verify
+                </a>
+              </a-menu-item>
+              <a-menu-item key="1">
+                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="No"
+                  @confirm="deleteRecord(record.id)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
                     Delete

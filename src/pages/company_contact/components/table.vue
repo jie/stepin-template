@@ -14,7 +14,7 @@ import { paginationConfig } from 'ant-design-vue/lib/pagination';
 import { getSessionInfo } from '@/utils/session'
 import RemoteSelect from '@/components/remote_select/index.vue'
 const isViewForm = ref(false)
-const companyContactStore = ReportCompanyContactStore()
+const store = ReportCompanyContactStore()
 const companyStore = ReportCompanyStore()
 const searchKeywords = ref("")
 const companyRemoteSelectRef = ref(null)
@@ -45,10 +45,10 @@ const createTimeRef = ref<Dayjs>(dayjs());
 
 
 const initializeData = async () => {
-  let result = await companyContactStore.apiQueryReportCompanyContact()
+  let result = await store.apiQuery()
   companyStore.pagination.page = 1
   companyStore.pagination.pagesize = 10
-  let companyResult = await companyStore.apiQueryReportCompany()
+  let companyResult = await companyStore.apiQuery()
   console.log('companyResult:', companyResult)
 }
 
@@ -133,9 +133,9 @@ async function submit() {
     ?.validateFields()
     .then(async (res: ReportCompanyContact) => {
       if (Ctl.isNew === true) {
-        await companyContactStore.apiSaveReportCompanyContact(formValue)
+        await store.apiSave(formValue)
       } else {
-        await companyContactStore.apiUpdateReportCompanyContact({ id: form.id, ...formValue })
+        await store.apiUpdate({ id: form.id, ...formValue })
       }
       showModal.value = false;
       reset();
@@ -195,9 +195,9 @@ const deleteRecord = async (record: ReportCompanyContact) => {
 }
 
 const onClickSearch = async () => {
-  companyContactStore.queryArgs.keyword = searchKeywords.value
-  console.log('companyContactStore.queryArgs.keyword:', companyContactStore.queryArgs.keyword)
-  companyContactStore.apiQueryReportCompanyContact()
+  store.queryArgs.keyword = searchKeywords.value
+  console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
+  store.apiQuery()
 }
 async function extractImg(file: Blob, Company: ReportCompanyContact) {
   await getBase64(file).then((res) => {
@@ -231,9 +231,9 @@ async function extractImg(file: Blob, Company: ReportCompanyContact) {
     </a-form>
   </a-modal>
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="companyContactStore.entities"
-    @change="companyContactStore.changePage" :pagination="{
-      current: companyContactStore.pagination.page, pageSize: companyContactStore.pagination.pagesize, total: companyContactStore.pagination.total, showSizeChanger: true, showQuickJumper: true
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities"
+    @change="store.changePage" :pagination="{
+      current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger: true, showQuickJumper: true
     }">
     <template #title>
       <div class="flex justify-between pr-4">
@@ -241,7 +241,7 @@ async function extractImg(file: Blob, Company: ReportCompanyContact) {
         <div class="flex">
           <div class="mr-4">
             <span class="mr-2">Status</span>
-            <a-select ref="select" style="width: 200px" v-model:value="companyContactStore.queryArgs.status" allowClear>
+            <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>

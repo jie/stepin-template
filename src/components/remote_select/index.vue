@@ -112,8 +112,6 @@ const onSearch = async () => {
 
 const queryEntities = async () => {
     switch (props.type) {
-        case 'template':
-            break
         case 'worker':
             break
         case 'user':
@@ -122,10 +120,15 @@ const queryEntities = async () => {
             companyStore.pagination.page = 1
             companyStore.pagination.pagesize = 10
             companyStore.queryArgs.keyword = searchValueRef.value
-            await companyStore.apiQueryReportCompany()
+            await companyStore.apiQuery()
             searchResult.value = companyStore.entities
             break
         case 'factory':
+            factoryStore.pagination.page = 1
+            factoryStore.pagination.pagesize = 10
+            factoryStore.queryArgs.keyword = searchValueRef.value
+            await factoryStore.apiQuery()
+            searchResult.value = factoryStore.entities
             break
         case 'company_contact':
             break
@@ -135,9 +138,8 @@ const queryEntities = async () => {
             reportTemplateStore.pagination.page = 1
             reportTemplateStore.pagination.pagesize = 10
             reportTemplateStore.queryArgs.keyword = searchValueRef.value
-            await reportTemplateStore.apiQueryTemplate()
+            await reportTemplateStore.apiQuery()
             searchResult.value = reportTemplateStore.entities
-            break
             break
         default:
             break
@@ -156,7 +158,7 @@ const getEntity = async (ids: string[]) => {
         case 'company':
             console.log('ids:', ids)
             if (ids) {
-                await companyStore.apiQueryByIdsReportCompany(ids)
+                await companyStore.apiQueryByIds(ids)
                 searchResult.value = companyStore.entities
                 selectedRowKeys.value = ids
                 console.log('selectedRowKeys.value:', selectedRowKeys.value)

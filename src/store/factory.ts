@@ -15,6 +15,7 @@ export interface ReportFactory {
   status?: string;
   is_customer?: boolean;
   is_enable?: boolean;
+  factory_id?: string;
   create_at?: string;
   avatar?: string;
 }
@@ -26,14 +27,14 @@ export const ReportFactoryStore = defineStore('reportFactory', {
       reportReportFactory: {} as ReportFactory,
       entities: <ReportFactory>[],
       pagination: {} as Pagination,
-      queryArgs: { status: "", keyword: "", is_factory: true, is_customer: false },
+      queryArgs: { status: "", keyword: "", is_factory: true },
     }
   },
   getters: {
 
   },
   actions: {
-    async apiSaveReportFactory(data: ReportFactory) {
+    async apiSave(data: ReportFactory) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -50,7 +51,7 @@ export const ReportFactoryStore = defineStore('reportFactory', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdateReportFactory(data: ReportFactory) {
+    async apiUpdate(data: ReportFactory) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -67,7 +68,7 @@ export const ReportFactoryStore = defineStore('reportFactory', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiDeleteReportFactory(id: string) {
+    async apiDelete(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -82,7 +83,7 @@ export const ReportFactoryStore = defineStore('reportFactory', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryReportFactory() {
+    async apiQuery() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -126,7 +127,7 @@ export const ReportFactoryStore = defineStore('reportFactory', {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryReportFactory()
+      this.apiQuery()
     }
   },
 })

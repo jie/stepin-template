@@ -9,8 +9,10 @@ import router from '@/router';
 import { db } from '@/hook/dexie_hook'
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
 import { ReportTemplateStore } from "@/store/reportTemplate"
+import { Report } from '@/pages/constants';
+import { statusFormSchema } from "@/types"
 const isViewForm = ref(false)
-const templateStore = ReportTemplateStore()
+const store = ReportTemplateStore()
 const searchKeywords = ref("")
 const columns = [
   {
@@ -41,20 +43,8 @@ const createTimeRef = ref<Dayjs>(dayjs());
 
 
 const initializeData = async () => {
-  // let result = await db.paginateReportTemplate(Ctl.page, Ctl.pagesize)
-  // Ctl.records = result.data.map((item: any) => {
-  //   return {
-  //     id: item.id,
-  //     name: item.name,
-  //     status: item.status,
-  //     create_at: item.create_at
-  //   }
-  // })
-  // Ctl.total = result.total
-  // console.log('Ctl.records:', toRaw(Ctl.records))
-
-    let result = await templateStore.apiQueryTemplate()
-    console.log('result:', result)
+  let result = await store.apiQuery()
+  console.log('result:', result)
 
 }
 
@@ -116,23 +106,9 @@ async function submit() {
     ?.validateFields()
     .then(async (res: ReportTemplate) => {
       if (Ctl.isNew === true) {
-
-        // await db.addReportTemplate({
-        //   name: form.name,
-        //   status: form.status,
-        //   create_at: form.create_at
-        // })
-        await templateStore.apiSaveTemplate({name: form.name, status: form.status})
-
+        await store.apiSave({ name: form.name, status: form.status })
       } else {
-        // console.log('form:', form)
-        // await db.updateReportTemplate({
-        //   id: form.id,
-        //   name: form.name,
-        //   status: form.status,
-        //   create_at: form.create_at
-        // })
-        await templateStore.apiUpdateTemplate({id: form.id, name: form.name, status: form.status})
+        await store.apiUpdate({ id: form.id, name: form.name, status: form.status })
       }
       showModal.value = false;
       reset();
@@ -181,43 +157,78 @@ const goDesign = (record: ReportTemplate) => {
 
 const deleteRecord = async (record: ReportTemplate) => {
   console.log('record:', record)
-  await db.delReportTemplate(record.id)
+  await store.apiDelete(record.id)
   initializeData()
 }
 
 const onClickSearch = async () => {
-  templateStore.queryArgs.keyword = searchKeywords.value
-  console.log('templateStore.queryArgs.keyword:', templateStore.queryArgs.keyword)
-  templateStore.apiQueryTemplate()
+  store.queryArgs.keyword = searchKeywords.value
+  console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
+  store.apiQuery()
+}
+
+// status form
+const statusForm = reactive<statusFormSchema>({
+  id: "",
+  status: "",
+  reason: ""
+});
+const statusFormModel = ref<FormInstance>()
+
+const statusDialogRef = ref(false)
+const showStatusDialog = (record: any) => {
+  statusDialogRef.value = true
+  statusForm.reason = record.reason || ''
+  statusForm.id = record.id
+  statusForm.status = record.status
+}
+const statusDialogConfirm = async () => {
+  await store.apiSetStatus(statusForm)
+  statusDialogRef.value = false
+  initializeData()
+}
+const statusDialogCancel = () => {
+  statusDialogRef.value = false
+  statusForm.reason = ''
+  statusForm.id = ''
+  statusForm.status = ''
 }
 
 
 </script>
 <template>
+  <!-- 审核dialog -->
+  <a-modal title="Set Status" v-model:visible="statusDialogRef" @ok="statusDialogConfirm" @cancel="statusDialogCancel"
+    width="660px">
+    <a-form ref="statusFormModel" :model="statusForm" :label-col="{ style: { width: '150px' } }"
+      :wrapper-col="{ span: 14 }">
+      <a-form-item required label="Status" name="status">
+        <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
+      </a-form-item>
+      <a-form-item label="Reason" name="reason">
+        <a-textarea v-model:value="statusForm.reason" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
   <a-modal :title="Ctl.isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel"
-  
-      :ok-button-props="{ disabled: isViewForm }"
-      :cancel-button-props="{ disabled: isViewForm }"
-  >
+    :ok-button-props="{ disabled: isViewForm }" :cancel-button-props="{ disabled: isViewForm }">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="Status" name="status">
-        <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions" />
-      </a-form-item>
     </a-form>
   </a-modal>
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="templateStore.entities" @change="templateStore.changePage" :pagination="{
-    current: templateStore.pagination.page, pageSize: templateStore.pagination.pagesize, total: templateStore.pagination.total, showSizeChanger:true, showQuickJumper: true} ">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" @change="store.changePage" :pagination="{
+    current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger: true, showQuickJumper: true
+  }">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>Templates</h4>
         <div class="flex">
           <div class="mr-4">
-            <span class="mr-2">Status {{ templateStore.queryArgs.status }}</span>
-            <a-select ref="select" style="width: 200px" v-model:value="templateStore.queryArgs.status" allowClear>
+            <span class="mr-2">Status {{ store.queryArgs.status }}</span>
+            <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>
@@ -244,7 +255,7 @@ const onClickSearch = async () => {
     <template #bodyCell="{ column, text, record }">
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
         <div class="flex-col flex justify-evenly">
-          <span class="text-title font-bold">{{  text }}</span>
+          <span class="text-title font-bold">{{ text }}</span>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
@@ -264,7 +275,7 @@ const onClickSearch = async () => {
           </span>
           <template #overlay>
             <a-menu>
-              <a-menu-item key="0">
+              <a-menu-item key="4">
                 <a @click="view(record)" rel="noopener noreferrer">
                   <ReadOutlined />
                   View
@@ -277,12 +288,18 @@ const onClickSearch = async () => {
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="删除" content="确认删除吗？" okText="确认" cancelText="取消" @confirm="deleteRecord(record)">
+                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="No" @confirm="deleteRecord(record)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
                     Delete
                   </a>
                 </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="2">
+                <a @click="showStatusDialog(record)" rel="noopener noreferrer">
+                  <VerifiedOutlined />
+                  Verify
+                </a>
               </a-menu-item>
               <a-menu-divider />
               <a-menu-item key="3">

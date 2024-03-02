@@ -170,7 +170,7 @@ export const ReportCategoryStore = defineStore('report_category', {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryReport()
+      this.apiQuery()
     }
   },
 })

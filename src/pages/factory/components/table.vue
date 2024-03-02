@@ -11,7 +11,7 @@ import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
 import { ReportFactoryStore, ReportFactory } from "@/store/factory"
 import {getSessionInfo} from '@/utils/session'
 const isViewForm = ref(false)
-const factoryStore = ReportFactoryStore()
+const store = ReportFactoryStore()
 const searchKeywords = ref("")
 const columns = [
   {
@@ -40,7 +40,7 @@ const createTimeRef = ref<Dayjs>(dayjs());
 
 
 const initializeData = async () => {
-    let result = await factoryStore.apiQueryReportFactory()
+    let result = await store.apiQuery()
 }
 
 initializeData()
@@ -109,15 +109,15 @@ async function submit() {
     remark: form.remark,
     status: form.status,
     org_id:session.user_data.org_id,
-    is_customer: true
-  } 
+    is_factory: true
+  }
   formModel.value
     ?.validateFields()
     .then(async (res: ReportFactory) => {
       if (Ctl.isNew === true) {
-        await factoryStore.apiSaveReportFactory(formValue)
+        await store.apiSave(formValue)
       } else {
-        await factoryStore.apiUpdateReportFactory({id: form.id, ...formValue})
+        await store.apiUpdate({id: form.id, ...formValue})
       }
       showModal.value = false;
       reset();
@@ -166,14 +166,14 @@ const goDesign = (record: ReportFactory) => {
 
 const deleteRecord = async (record: ReportFactory) => {
   console.log('record:', record)
-  // await db.delReportFactory(record.id)
+  await store.apiDelete(record.id)
   initializeData()
 }
 
 const onClickSearch = async () => {
-  factoryStore.queryArgs.keyword = searchKeywords.value
-  console.log('factoryStore.queryArgs.keyword:', factoryStore.queryArgs.keyword)
-  factoryStore.apiQueryReportFactory()
+  store.queryArgs.keyword = searchKeywords.value
+  console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
+  store.apiQuery()
 }
 async function extractImg(file: Blob, Factory: ReportFactory) {
     await getBase64(file).then((res) => {
@@ -205,15 +205,15 @@ async function extractImg(file: Blob, Factory: ReportFactory) {
     </a-form>
   </a-modal>
   <!-- 成员表格 -->
-  <a-table v-bind="$attrs" :columns="columns" :dataSource="factoryStore.entities" @change="factoryStore.changePage" :pagination="{
-    current: factoryStore.pagination.page, pageSize: factoryStore.pagination.pagesize, total: factoryStore.pagination.total, showSizeChanger:true, showQuickJumper: true} ">
+  <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" @change="store.changePage" :pagination="{
+    current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger:true, showQuickJumper: true} ">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>Factory</h4>
         <div class="flex">
           <div class="mr-4">
             <span class="mr-2">Status</span>
-            <a-select ref="select" style="width: 200px" v-model:value="factoryStore.queryArgs.status" allowClear>
+            <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>

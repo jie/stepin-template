@@ -30,8 +30,8 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/workspace',
-    name: 'workspace',
+    path: '/workplace',
+    name: 'workplace',
     meta: {
       renderMenu: false,
     },
@@ -52,6 +52,16 @@ const routes: RouteRecordRaw[] = [
           renderMenu: true,
          },
         component: () => import('@/pages/template'),
+        children: [
+          {
+            path: 'design',
+            name: 'design',
+            meta: {
+              renderMenu: false,
+             },
+            component: () => import('@/pages/designer'),
+          },
+        ],
       },
       {
         path: 'category',
@@ -77,30 +87,30 @@ const routes: RouteRecordRaw[] = [
          },
         component: () => import('@/pages/company'),
       },
-      {
-        path: 'company_contact',
-        name: 'company_contact',
-        meta: {
-          renderMenu: true,
-         },
-        component: () => import('@/pages/company_contact'),
-      },
-      {
-        path: 'factory',
-        name: 'factory',
-        meta: {
-          renderMenu: true,
-         },
-        component: () => import('@/pages/factory'),
-      },
-      {
-        path: 'factory_contact',
-        name: 'factory_contact',
-        meta: {
-          renderMenu: true,
-         },
-        component: () => import('@/pages/factory_contact'),
-      },
+      // {
+      //   path: 'company_contact',
+      //   name: 'company_contact',
+      //   meta: {
+      //     renderMenu: true,
+      //    },
+      //   component: () => import('@/pages/company_contact'),
+      // },
+      // {
+      //   path: 'factory',
+      //   name: 'factory',
+      //   meta: {
+      //     renderMenu: true,
+      //    },
+      //   component: () => import('@/pages/factory'),
+      // },
+      // {
+      //   path: 'factory_contact',
+      //   name: 'factory_contact',
+      //   meta: {
+      //     renderMenu: true,
+      //    },
+      //   component: () => import('@/pages/factory_contact'),
+      // },
       {
         path: 'role',
         name: 'role',
@@ -117,6 +127,14 @@ const routes: RouteRecordRaw[] = [
          },
         component: () => import('@/pages/settings'),
       },
+      {
+        path: 'system_settings',
+        name: 'system_settings',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/system_settings'),
+      },
     ],
   },
   {
@@ -128,15 +146,26 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/layout/BlankView.vue'),
     children: [
       {
-        path: '/public/report/:reportId',
-        name: 'public_report',
+        path: '/public/report/fill/:reportId',
+        name: 'report_fill',
         meta: {
           icon: 'LoginOutlined',
           view: 'blank',
           target: '_blank',
           cacheable: false,
         },
-        component: () => import('@/pages/public_report/index.vue'),
+        component: () => import('@/pages/report_fill/index.vue'),
+      },
+      {
+        path: '/public/report/approve/:reportId',
+        name: 'report_approve',
+        meta: {
+          icon: 'LoginOutlined',
+          view: 'blank',
+          target: '_blank',
+          cacheable: false,
+        },
+        component: () => import('@/pages/report_approve/index.vue'),
       },
     ]
   },

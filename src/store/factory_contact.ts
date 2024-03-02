@@ -35,7 +35,7 @@ export const ReportFactoryContactStore = defineStore('reportFactoryContact', {
 
   },
   actions: {
-    async apiSaveReportFactoryContact(data: ReportFactoryContact) {
+    async apiSave(data: ReportFactoryContact) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -52,7 +52,7 @@ export const ReportFactoryContactStore = defineStore('reportFactoryContact', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdateReportFactoryContact(data: ReportFactoryContact) {
+    async apiUpdate(data: ReportFactoryContact) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -69,7 +69,7 @@ export const ReportFactoryContactStore = defineStore('reportFactoryContact', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiDeleteReportFactoryContact(id: string) {
+    async apiDelete(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -84,7 +84,7 @@ export const ReportFactoryContactStore = defineStore('reportFactoryContact', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryReportFactoryContact() {
+    async apiQuery() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -108,7 +108,7 @@ export const ReportFactoryContactStore = defineStore('reportFactoryContact', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiGetReportFactoryContact(id: string) {
+    async apiGetReportFactory(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
@@ -128,7 +128,7 @@ export const ReportFactoryContactStore = defineStore('reportFactoryContact', {
       console.log('args:', args)
       this.pagination.page = args.current
       this.pagination.pagesize = args.pageSize
-      this.apiQueryReportFactoryContact()
+      this.apiQuery()
     }
   },
 })
