@@ -22,17 +22,30 @@ type Option = {
 const itemValue = ref<Option[]>([])
 
 const exportData = () => {
-    return props.item
+  const data = {
+        ...props.item,
+        data: {
+            options: props?.item?.data?.options,
+            value: itemValue.value
+        }
+    }
+  return data
 }
 const exportValue = () => {
-    return itemValue.value
+    return {value: itemValue.value, options: props?.item?.data?.options}
 }
 
+
+const refreshValue = (data: any) => {
+    itemValue.value = data.value
+
+}
 
 defineExpose({
     props,
     itemValue,
     exportValue,
-    exportData
+    exportData,
+    refreshValue
 })
 </script>

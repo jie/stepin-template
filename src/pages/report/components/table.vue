@@ -3,21 +3,18 @@ import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
-import StatusDialog from "@/components/status_dialog/index.vue";
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import {
-  VerifyStatuses, customers,
-  factories,
-  workers,
-  categories
+  VerifyStatuses
 } from "@/pages/constants";
 import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
-import { db } from '@/hook/dexie_hook';
 import { ReportStore, Report } from '@/store/report'
 import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
+import {useRouter} from 'vue-router'
+const router = useRouter()
 const store = ReportStore()
 const categoryStore = ReportCategoryStore()
 const searchKeywords = ref('');
@@ -93,12 +90,16 @@ function submit() {
         if (form.order_id) {
           await store.apiSave({
             name: form.name,
+            title: form.title,
+            summary: form.summary,
             order_id: form.order_id,
             report_template_id: form.report_template_id
           })
         } else {
           await store.apiSave({
             name: form.name,
+            title: form.title,
+            summary: form.summary,
             report_template_id: form.report_template_id,
             category_id: form.category_id,
             workers: form.workers,
@@ -112,12 +113,16 @@ function submit() {
           await store.apiUpdate({
             id: form.id,
             name: form.name,
+            title: form.title,
+            summary: form.summary,
             order_id: form.order_id,
             report_template_id: form.report_template_id
           })
         } else {
           await store.apiUpdate({
             name: form.name,
+            title: form.title,
+            summary: form.summary,
             report_template_id: form.report_template_id,
             category_id: form.category_id,
             workers: form.workers,
@@ -154,7 +159,10 @@ function edit(record: any) {
   console.log('form:', toRaw(form))
   form.id = record.id
   form.order_id = record?.order?.id
-  form.report_template_id = record?.report_template?.id
+  form.name = record?.name
+  form.title = record?.title
+  form.summary = record?.summary
+  form.report_template_id = record?.report_template
   showModal.value = true;
   setTimeout(() => {
     reportTemplateSelectRef.value?.getEntity([form.report_template_id])
@@ -209,6 +217,20 @@ const statusDialogCancel = () => {
   statusForm.status = ''
 }
 
+
+const goPublicFillReport = (report:any) => {
+  console.log('form:', toRaw(form))
+  let url = router.resolve({
+    name: 'report_fill',
+    params: {
+      reportId: report.id
+    }
+  })
+  console.log('url:', url.href)
+  window.open(url.href, '_blank')
+
+}
+
 initializeData()
 
 </script>
@@ -257,8 +279,14 @@ initializeData()
   <a-modal :title="form._isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel"
     width="660px">
     <a-form ref="formModel" :model="form" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
-      <a-form-item label="Name" name="name">
+      <a-form-item required label="Name" name="name">
         <a-input v-model:value="form.name" />
+      </a-form-item>
+      <a-form-item label="Title" name="title">
+        <a-input v-model:value="form.title" />
+      </a-form-item>
+      <a-form-item label="Summary" name="summary">
+        <a-textarea v-model:value="form.summary" />
       </a-form-item>
       <a-form-item label="Order ID" name="order">
         <a-input v-model:value="form.order_id" />
@@ -461,6 +489,12 @@ initializeData()
                   <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
                     Verify
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="1">
+                  <a @click="goPublicFillReport(record)" rel="noopener noreferrer">
+                    <VerifiedOutlined />
+                    Public View
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">

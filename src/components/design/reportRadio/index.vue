@@ -7,7 +7,7 @@
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
-import { defineProps, ref, PropType } from 'vue'
+import { defineProps, ref, PropType, toRaw } from 'vue'
 import { ReportTemplateStore } from "@/store/reportTemplate"
 const reportTemplateStore = ReportTemplateStore()
 const props = defineProps({
@@ -23,17 +23,33 @@ type Option = {
 
 const itemValue = ref<Option[]>([])
 
+// const exportData = () => {
+//   return reportTemplateStore.reportTemplate.items.find((item: any) => item.key == props.item.key)
+// }
+
 const exportData = () => {
-  return reportTemplateStore.reportTemplate.items.find((item: any) => item.key == props.item.key)
+    console.log('radio-export:', toRaw(props.item))
+  return {
+    ...props.item,
+    data: {value: itemValue.value, options: props?.item?.data?.options}
+  }
 }
 
+
 const exportValue = () => {
-    return itemValue.value
+    return {value: itemValue.value, options: props?.item?.data?.options}
 }
+
+const refreshValue = (data: any) => {
+    itemValue.value = data.value
+
+}
+
 defineExpose({
     props,
     itemValue,
     exportValue,
-    exportData
+    exportData,
+    refreshValue
 })
 </script>

@@ -9,6 +9,8 @@ import { inspect } from 'util';
 export interface Report {
   id?: string;
   name?: string;
+  title?: string;
+  summary?: string;
   settings?: any;
   inspect_date?:string;
   report_template_id?: string;

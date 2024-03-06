@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
 import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import router from '@/router';
-import { db } from '@/hook/dexie_hook'
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
 import { ReportFactoryContactStore, ReportFactoryContact } from "@/store/factory_contact"
 import { ReportCompanyStore } from "@/store/company"

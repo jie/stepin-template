@@ -347,17 +347,13 @@ function convertColumnToTableData(arr) {
 
 
 const initializeData = (item: any) => {
-  console.log('initializeData:', toRaw(item))
   treeData.value = convertColumnToTreeData(item?.data?.columns)
-  console.log('treeData.value:', toRaw(treeData.value))
   editKey.value = item.key
-  rows.value = item?.data?.rows || []
-  console.log('data:', toRaw(item?.data))
-
+  rows.value = item?.data?.rowSchema || []
+  console.log('rows:', toRaw(rows.value))
   setTimeout(() => {
-
+    console.log('data:', item.data)
     let { _columns, _rows } = item?.data
-    console.log('_columns:', toRaw(_columns))
     if (_columns && _columns.length != 0) {
       itemParam.title = _columns[0].title
       itemParam.dataIndex = _columns[0].dataIndex
@@ -374,6 +370,8 @@ const initializeData = (item: any) => {
     TableSettings.tableWidth = item?.data?.width
     TableSettings.pageSize = item?.data?.pageSize
     currentItem.value = item
+
+    presetTable.value.updateTableData({ columns: convertColumnToTableData(treeData.value), rows: rows.value })
   }, 1000)
 
 }
@@ -384,7 +382,9 @@ const exportData = () => {
   console.log('export--data:', toRaw(data))
   let tableData = {
     columns: data.columns,
-    rows: data.rows, pageSize: TableSettings.value.pageSize,
+    rows: [], 
+    rowSchema: data.rows, 
+    pageSize: TableSettings.value.pageSize,
     addRowCount: TableSettings.value.hasAddRowButton ? data.rows.length : 0,
     hasAddRowButton: TableSettings.value.hasAddRowButton
   }

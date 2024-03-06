@@ -3,20 +3,40 @@
 
     <BaseSlot :item="props?.item">
       <div>
-        <a-image-preview-group>
-          <a-image :width="240" :src="item.url" v-for="item in fileList" style="padding: 10px;" />
-        </a-image-preview-group>
+        <a-button type="primary" @click="onClickTriggerButton">
+          <template #icon>
+            <plus-outlined />
+          </template>
+          Upload
+        </a-button>
       </div>
-      <a-upload v-model:file-list="fileList" action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-        list-type="picture-card" @preview="handlePreview" :show-upload-list="false" :accept="props?.item?.data?.accept">
-        <div v-if="fileList.length < 8">
-          <plus-outlined />
-          <div style="margin-top: 8px">Upload</div>
+      <div class="flex" style="flex-wrap: wrap;margin-top: 20px;">
+
+        <div v-for="item in fileList" style="width: 50%; margin-bottom: 20px;" ref="boxRef">
+
+
+          <a-image :src="item.url" style=" width: 300px; height: 300px;border: 1px solid #000;" />
+          <div class="flex" style="height: 60px;padding-top: 10px;">
+            <div style="flex: 1">
+              <a-textarea style="width: 100%;" v-model:value="item.desc"
+                placeholder="Please enter description"></a-textarea>
+            </div>
+            <div style="width:60px; height: 100%;display: flex;justify-content: center;align-items: center;">
+              <a-popconfirm :getPopupContainer="triggerNode => {return triggerNode.parentNode||document.body;}" @confirm="deleteImage(item)" title="Confirm delete?" ok-text="Yes" cancel-text="No">
+                <a-button shape="circle">
+                  <template #icon>
+                    <DeleteOutlined />
+                  </template>
+                </a-button>
+              </a-popconfirm>
+
+            </div>
+
+          </div>
         </div>
-      </a-upload>
-      <a-modal :visible="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
-        <img alt="example" style="width: 100%" :src="previewImage" />
-      </a-modal>
+      </div>
+      <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
+        :accept="props?.item?.data?.accept" multiple />
     </BaseSlot>
 
   </div>
@@ -24,80 +44,78 @@
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
 import { PlusOutlined } from '@ant-design/icons-vue';
-import { defineComponent, ref } from 'vue';
-import {getBase64} from "@/utils/file"
+import { ref } from 'vue';
+import { getBase64 } from "@/utils/file"
 import type { UploadProps } from 'ant-design-vue';
-
+import { ossUploadFiles } from "@/store/uploader"
+import { ImageType } from "@/types/components/image"
 const props = defineProps({
   item: {
     type: Object,
   },
 });
 
-
+const fileBtnRef = ref(null);
 const previewVisible = ref(false);
 const previewImage = ref('');
 const previewTitle = ref('');
 
-const fileList = ref<UploadProps['fileList']>([
-  // {
-  //   uid: '-1',
-  //   name: 'image.png',
-  //   status: 'done',
-  //   url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  // },
-  // {
-  //   uid: '-2',
-  //   name: 'image.png',
-  //   status: 'done',
-  //   url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  // },
-  // {
-  //   uid: '-3',
-  //   name: 'image.png',
-  //   status: 'done',
-  //   url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  // },
-  // {
-  //   uid: '-4',
-  //   name: 'image.png',
-  //   status: 'done',
-  //   url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  // },
-  // {
-  //   uid: '-xxx',
-  //   percent: 50,
-  //   name: 'image.png',
-  //   status: 'uploading',
-  //   url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  // },
-  // {
-  //   uid: '-5',
-  //   name: 'image.png',
-  //   status: 'error',
-  // },
-]);
+const onClickTriggerButton = async () => {
+  // let targetElement = document.getElementById('btn_result_file')
+  // if (targetElement != null && targetElement.value) {
+  //   targetElement.value = ''
+  // }
+  fileBtnRef.value.click()
+}
+
+const onUploadInputChange = async (e: Event) => {
+  let images = await ossUploadFiles(e)
+  console.log('images:', images)
+  for (let item of images) {
+    fileList.value.push({
+      name: "",
+      url: item,
+      status: "done",
+      uid: item,
+      desc: ""
+    })
+  }
+}
+
+
+const fileList = ref(<ImageType>[]);
 
 const handleCancel = () => {
   previewVisible.value = false;
   previewTitle.value = '';
 };
-const handlePreview = async (file: UploadProps['fileList'][number]) => {
-  if (!file.url && !file.preview) {
-    file.preview = (await getBase64(file.originFileObj)) as string;
-  }
-  previewImage.value = file.url || file.preview;
-  previewVisible.value = true;
-  previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
-};
 
 const exportData = () => {
-  return props.item
+  return {
+    ...props.item,
+    data: {
+      images: fileList
+    }
+  }
+}
+
+const exportValue = () => {
+  return { "images": fileList.value }
+}
+
+const deleteImage = (image: ImageType) => {
+  fileList.value = fileList.value.filter(item => item.url !== image.url)
+}
+
+const refreshValue = (data: any) => {
+  fileList.value = data.images
 }
 
 defineExpose({
   props,
-  exportData
+  exportValue,
+  exportData,
+  refreshValue
 })
 
 </script>

@@ -12,7 +12,6 @@ import {
   ReportContainer,
 } from "@/types/components"
 import { ref } from "vue"
-import { db } from "@/hook/dexie_hook";
 import { useRoute } from "vue-router";
 import router from "@/router";
 const route = useRoute()

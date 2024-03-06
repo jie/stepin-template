@@ -20,17 +20,30 @@ const props = defineProps({
 const itemValue = ref("")
 
 const exportData = () => {
-  return reportTemplateStore.reportTemplate.items.find((item: any) => item.key == props.item.key)
+  return {
+    ...props.item,
+    data: {
+      value: itemValue.value
+    }
+  }
+//   return reportTemplateStore.reportTemplate.items.find((item: any) => item.key == props.item.key)
 }
 
 const exportValue = () => {
-    return itemValue.value
+    return {value: itemValue.value}
+}
+
+const refreshValue = (data: any) => {
+    console.log('refreshValue:', data)
+    itemValue.value = data.value
+    console.log('itemValue:', itemValue.value)
 }
 
 defineExpose({
     props,
     itemValue,
     exportValue,
-    exportData
+    exportData,
+    refreshValue
 })
 </script>

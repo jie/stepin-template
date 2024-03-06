@@ -22,7 +22,6 @@
 </template>
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
-import { db } from '@/hook/dexie_hook'
 import { ReportCompanyStore } from '@/store/company'
 import { ReportCompanyContactStore } from '@/store/company_contact'
 import { ReportFactoryStore } from '@/store/factory'

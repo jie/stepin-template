@@ -5,6 +5,7 @@ import { useLoadingStore } from '@/store';
 import { Pagination, statusFormSchema } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
 
+
 const permissionInfoKey = "reportPermissionInfo"
 
 export const ReportFillStore = defineStore('report_fill', {
@@ -14,7 +15,8 @@ export const ReportFillStore = defineStore('report_fill', {
       permissionForm: {
         email: "",
         password: ""
-      }
+      },
+      report: <any>{}
     }
   },
   getters: {
@@ -51,5 +53,30 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiGet(id: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let bodyJson = { id: id }
+      return http
+        .request('/platform/report_api/report/get', 'post_json', bodyJson, {})
+        .then((response) => {
+          if (response.data?.data) {
+            this.report = response.data?.data?.entity
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async dbSave() {
+
+    },
+    async apiSave() {
+
+    },
+    async apiUpdate() {
+
+    }
   },
 })

@@ -169,7 +169,6 @@ import {
   ReportContainer,
 } from "@/types/components"
 import { ReportTemplateStore } from "@/store/reportTemplate"
-import {db} from "@/hook/dexie_hook"
 import { useRoute, useRouter } from "vue-router";
 import dayjs from 'dayjs';
 const reportTemplateStore = ReportTemplateStore()

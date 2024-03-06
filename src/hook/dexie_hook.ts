@@ -1,8 +1,8 @@
 import Dexie, { Table } from 'dexie';
 import { nanoid } from 'nanoid';
+import dayjs from 'dayjs';
 
-
-export interface ReportTemplate {
+export interface LocalTemplate {
     id?: string;
     name?: string;
     title?: string;
@@ -10,92 +10,76 @@ export interface ReportTemplate {
     status?: string;
     create_at?: string;
     create_by?: object;
+    update_at?: string;
+    update_by?: object;
     settings?: object;
     items?: Array<any>;
 }
 
-interface Company {
-    id?: string;
-    name?: string;
-    shortname?: string;
-}
 
-interface Customer {
-    id?: string;
-    name?: string;
-    email?: string
-    mobile?: string
-}
-
-interface Worker {
-    id?: string;
-    name?: string;
-    email?: string
-    mobile?: string
-}
-
-interface Category {
+interface LocalCategory {
     id?: string;
     name?: string;
 }
 
-export interface Report {
+export interface LocalReport {
     id?: string;
     name?: string;
-    company?: Company;
-    customer?: Customer;
-    workers?: Array<Worker>;
-    category?: Category;
+    title?:string;
+    summary?:string;
     inspect_date?: string;
     status?: string;
+    category?: LocalCategory;
+    schema?:Array<any>;
+    items?:Array<any>;
+    values?:string;
     create_at?: string;
     create_by?: object;
+    update_at?: string;
+    update_by?: object;
 }
 
 
 
-export class ReportDatabase extends Dexie {
-    public report_templates!: Table<ReportTemplate, string>; // id is number in this case
-    public report_items!: Table<Report, string>; // id is number in this case
-
+export class TemplateDatabase extends Dexie {
+    public templates!: Table<LocalTemplate, string>; // id is number in this case
     public constructor() {
-        super("ReportDatabase");
+        super("TemplateDatabase");
         this.version(1).stores({
-            report_templates: "id, name, title, summary, status, create_at, create_by, settings, items",
-            report_items: "id, name, company, customer, workers, category, inspect_date, status, create_at, create_by"
+            templates: "id, name, title, summary, status, create_at, create_by, settings, items",
         });
     }
     // template
-    public async addReportTemplate(record: ReportTemplate) {
+    public async createRecord(record: LocalTemplate) {
         if (!record.id) {
             record.id = nanoid();
         }
-        await this.report_templates.add(record);
+        await this.templates.add(record);
         return record.id;
     }
 
-    public async delReportTemplate(id: string) {
-        await this.report_templates.delete(id);
+    public async deleteRecord(id: string) {
+        await this.templates.delete(id);
     }
 
-    public async updateReportTemplate(record: ReportTemplate) {
-        await this.report_templates.update(record.id, record);
+    public async updateRecord(record: LocalTemplate) {
+        await this.templates.update(record.id, record);
     }
 
-    public getReportTemplate(id: string) {
-        return this.report_templates.get({ id: id });
+    public getRecord(id: string) {
+        return this.templates.get({ id: id });
     }
 
-    public queryReportTemplate(args: any) {
-        return this.report_templates.where(args);
+    public queryRecord(args: any) {
+        return this.templates.where(args);
     }
 
-    public async paginateReportTemplate(page: number, pageSize: number, args: any = {}) {
+    public async paginate(page: number, pageSize: number, args: any = {}) {
         if (args && args.key) {
-            let total = await this.report_templates.where(args.key).startsWith(args.value).count()
+            let total = await this.templates.where(args.key).startsWith(args.value).count()
             if(total === 0) return Promise.resolve({total: 0, data: []})
             console.log(total, page, pageSize, args.key, args.value)
-            let data = await this.report_templates
+            let data = await this.templates
                 .where(args.key).startsWith(args.value)
                 .offset((page - 1) * pageSize)
                 .limit(pageSize)
@@ -106,8 +90,8 @@ export class ReportDatabase extends Dexie {
                 data: data
             }
         } else {
-            let total = await this.report_templates.count()
-            let data = await this.report_templates
+            let total = await this.templates.count()
+            let data = await this.templates
                 .offset((page - 1) * pageSize)
                 .limit(pageSize)
                 .toArray()
@@ -117,41 +101,76 @@ export class ReportDatabase extends Dexie {
             }
         }
     }
-    // report
-    public async addReportItem(record: Report) {
+}
+
+
+
+
+export class ReportDatabase extends Dexie {
+    public reports!: Table<LocalReport, string>; // id is number in this case
+    public constructor() {
+        super("ReportDatabase");
+        this.version(1).stores({
+            reports: "id, name, title, summary, category, schema, items, values, inspect_date, status, create_at, create_by"
+        });
+    }
+    // template
+    public async createRecord(record: LocalReport) {
         if (!record.id) {
             record.id = nanoid();
         }
-        await this.report_items.add(record);
+        record.update_at = dayjs().format('YYYY-MM-DD HH:mm:ss')
+        record.create_at = record.update_at 
+        await this.reports.add(record);
         return record.id;
     }
 
-    public async delReportItem(id: string) {
-        await this.report_items.delete(id);
+    public async deleteRecord(id: string) {
+        await this.reports.delete(id);
     }
 
-    public async updateReportItem(record: Report) {
-        await this.report_items.update(record.id, record);
+    public async updateRecord(record: LocalReport) {
+        record.update_at = dayjs().format('YYYY-MM-DD HH:mm:ss')
+        await this.reports.update(record.id, record);
     }
 
-    public getReportItem(id: string) {
-        return this.report_items.get({ id: id });
+    public getRecord(id: string) {
+        return this.reports.get({ id: id });
     }
 
-    public queryReportItem(args: any) {
-        return this.report_items.where(args);
+    public queryRecord(args: any) {
+        return this.reports.where(args);
     }
 
-    public async paginateReportItem(page: number, pageSize: number) {
-        let offset = (page - 1) * pageSize;
-        let limit = pageSize;
-        let total = await this.report_items.count();
-        let data = await this.report_items.offset(offset).limit(limit).toArray();
-        return {
-            total: total,
-            data: data
+    public async paginate(page: number, pageSize: number, args: any = {}) {
+        if (args && args.key) {
+            let total = await this.reports.where(args.key).startsWith(args.value).count()
+            if(total === 0) return Promise.resolve({total: 0, data: []})
+            console.log(total, page, pageSize, args.key, args.value)
+            let data = await this.reports
+                .where(args.key).startsWith(args.value)
+                .offset((page - 1) * pageSize)
+                .limit(pageSize)
+                .toArray()
+            console.log('data:', data)
+            return {
+                total: total,
+                data: data
+            }
+        } else {
+            let total = await this.reports.count()
+            let data = await this.reports
+                .offset((page - 1) * pageSize)
+                .limit(pageSize)
+                .toArray()
+            return {
+                total: total,
+                data: data
+            }
         }
     }
 }
 
-export const db = new ReportDatabase();
+
+export const templateDatabase = new TemplateDatabase();
+export const reportDatabase = new ReportDatabase()
