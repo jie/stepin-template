@@ -1,24 +1,28 @@
 <template>
     <div>
-        <BaseSlot :item="props.item">
-            <a-input v-model:value="itemValue"></a-input>
-        </BaseSlot>
+        <a-form-item :rules="[{ required: props?.item?.required, message: `Please enter ${props?.item?.title}`, type:'string' }]" :label="props?.item?.title" :extra="props?.item?.summary" :required="props?.item?.required" :name="props?.item?.key">
+            <a-input v-model:value="props.value" @change="onChange" clearable></a-input>
+        </a-form-item>
     </div>
 
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
 import {ref} from "vue"
-import { ReportTemplateStore } from "@/store/reportTemplate"
-const reportTemplateStore = ReportTemplateStore()
+import { ReportFillStore } from "@/store/report_fill"
+const store = ReportFillStore()
 const props = defineProps({
     item: {
         type: Object,        
+    },
+    value: {
+        type: String,
+        default: ""
     }
 })
 
 const itemValue = ref("")
-
+const emits = defineEmits(["update:value"])
 const exportData = () => {
   return {
     ...props.item,
@@ -27,6 +31,10 @@ const exportData = () => {
     }
   }
 //   return reportTemplateStore.reportTemplate.items.find((item: any) => item.key == props.item.key)
+}
+
+const onChange = (e) => {
+    emits('update:value', e.target.value)
 }
 
 const exportValue = () => {
@@ -38,6 +46,7 @@ const refreshValue = (data: any) => {
     itemValue.value = data.value
     console.log('itemValue:', itemValue.value)
 }
+
 
 defineExpose({
     props,

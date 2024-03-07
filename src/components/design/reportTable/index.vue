@@ -28,7 +28,7 @@
         </a-table>
       </div>
       <div v-else>
-        <a-table class="report-table" :columns="tableDataRef?.columns" :data-source="tableDataRef?.rows" bordered
+        <a-table class="report-table" :columns="tableDataRef?.columns" :data-source="props.value" bordered
           size="middle" :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
           :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }">
 
@@ -73,8 +73,20 @@ import { toRaw, computed, reactive } from 'vue';
 import { copyObject } from "@/utils/objectUtils"
 // import { ReportTemplateStore } from "@/store/reportTemplate"
 // const reportTemplateStore = ReportTemplateStore()
-const props = defineProps(["item", "mode"])
-const emits = defineEmits(["edit-table-row"])
+const props = defineProps({
+    item: {
+        type: Object,
+    },
+    mode: {
+        type: String,
+        default: ""
+    },
+    value: {
+        type: Array,
+        default: []
+    }
+})
+const emits = defineEmits(["edit-table-row", "update:value"])
 const AddRowDialogVisible = ref(false)
 // extends TableColumnsType
 type MyTableColumnsType = TableColumnsType & {
@@ -113,9 +125,9 @@ const addRow = (row: any) => {
 }
 
 const deleteSelectedRows = () => {
-  let rows = tableDataRef.value.rows
-  let newRows = rows.filter((row: any) => !state.selectedRowKeys.includes(row.key))
-  tableDataRef.value.rows = newRows
+  let newRows = [...props.value]
+  newRows = newRows.filter((row: any) => !state.selectedRowKeys.includes(row.key))
+  emits('update:value', newRows)
 }
 
 const exportData = () => {
@@ -158,16 +170,21 @@ const confirmDeleteRowItem = () => {
 
 
 const handleConfirmAddRow = () => {
+  let newRows = [...props.value]
   for (let row of formRows.value) {
     for (let key of Object.keys(row.fieldOptions)) {
       if (row.fieldOptions[key].fieldType == 'input') {
         row[key] = row.fieldOptions[key].val
       }
     }
-    tableDataRef.value.rows.push(copyObject(row))
+    newRows.push(copyObject(row))
   }
-  reOrderKey()
+  newRows = newRows.map((row: any, index: number) => {
+    row.key = index
+    return row
+  })
   AddRowDialogVisible.value = false
+  emits('update:value', newRows)
 }
 
 const updateFieldValueByKey = (key: string, obj: object) => {

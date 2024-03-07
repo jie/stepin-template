@@ -12,9 +12,7 @@
       </div>
       <div class="flex" style="flex-wrap: wrap;margin-top: 20px;">
 
-        <div v-for="item in fileList" style="width: 50%; margin-bottom: 20px;" ref="boxRef">
-
-
+        <div v-for="item in props.value" style="width: 50%; margin-bottom: 20px;" ref="boxRef">
           <a-image :src="item.url" style=" width: 300px; height: 300px;border: 1px solid #000;" />
           <div class="flex" style="height: 60px;padding-top: 10px;">
             <div style="flex: 1">
@@ -29,9 +27,7 @@
                   </template>
                 </a-button>
               </a-popconfirm>
-
             </div>
-
           </div>
         </div>
       </div>
@@ -53,12 +49,17 @@ const props = defineProps({
   item: {
     type: Object,
   },
+  value: {
+    type: Array,
+    default: []
+  }
 });
 
 const fileBtnRef = ref(null);
 const previewVisible = ref(false);
 const previewImage = ref('');
 const previewTitle = ref('');
+const emits = defineEmits(["update:value"])
 
 const onClickTriggerButton = async () => {
   // let targetElement = document.getElementById('btn_result_file')
@@ -68,11 +69,13 @@ const onClickTriggerButton = async () => {
   fileBtnRef.value.click()
 }
 
+
 const onUploadInputChange = async (e: Event) => {
+  let filelist = [...props.value]
   let images = await ossUploadFiles(e)
   console.log('images:', images)
   for (let item of images) {
-    fileList.value.push({
+    filelist.push({
       name: "",
       url: item,
       status: "done",
@@ -80,6 +83,7 @@ const onUploadInputChange = async (e: Event) => {
       desc: ""
     })
   }
+  emits('update:value', filelist)
 }
 
 

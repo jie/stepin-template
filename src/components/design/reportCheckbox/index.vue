@@ -1,7 +1,9 @@
 <template>
     <div>
         <BaseSlot :item="props?.item">
-            <a-checkbox-group v-model:value="itemValue" :options="props?.item?.data?.options" />
+            <a-form-item :label="props?.item?.data?.label" :required="props?.item?.data?.required">
+                <a-checkbox-group v-model:value="props.value" :options="props?.item?.data?.options" @change="onChange" />
+            </a-form-item>
         </BaseSlot>
     </div>
 </template>
@@ -11,6 +13,10 @@ import { defineProps, ref, PropType } from 'vue'
 const props = defineProps({
     item: {
         type: Object,
+    },
+    value: {
+        type: Array as PropType<string[]>,
+        default: []
     }
 })
 
@@ -19,7 +25,14 @@ type Option = {
     value: string;
 }
 
+const emits = defineEmits(["update:value"])
+
 const itemValue = ref<Option[]>([])
+
+const onChange = (e) => {
+    console.log(e)
+    emits('update:value', e)
+}
 
 const exportData = () => {
   const data = {

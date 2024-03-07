@@ -1,6 +1,6 @@
 <template>
   <div v-if="!store.loading">
-    <Designer ref="designerRef" />
+    <Designer ref="designerRef"/>
     <!-- <div class="flex" style="justify-content: center; align-items:center; min-height: 800px; ">
       <div style="width: 460px;display:block;">
         <div
@@ -51,7 +51,7 @@ const permissionForm = reactive({
   password: ""
 })
 const initialization = async () => {
-  // store.loading = true
+  store.loading = true
   // hasPermissionRef.value = await store.apiCheckPermission()
   // if (!hasPermissionRef.value) {
   //   store.loading = false
@@ -61,34 +61,44 @@ const initialization = async () => {
   // store.loading = false
   hasPermissionRef.value = true
   await store.apiGet(route.params.reportId)
-  if (!store.report.items || store.report.items.length == 0) {
-    let localRecord = await reportDatabase.getRecord(route.params.reportId)
-    if (!localRecord) {
-      designerRef.value.refresh({ items: store.report.schema, title: 'Title', summary: 'Summary', id: store.report.id })
-      return
-    }
+  store.loading = false
 
-    let localDate = dayjs(localRecord.update_at)
-    let serverDate = dayjs(store.report.update_at)
-    if (localDate > serverDate) {
-    }
+  // if (!store.report.items || store.report.items.length == 0) {
+  //   let localRecord = await reportDatabase.getRecord(route.params.reportId)
+  //   if (!localRecord) {
 
-    if (store.report.items.length === 0 || (localDate > serverDate)) {
-      let values = JSON.parse(localRecord.values)
-      console.log('values:', values)
-      if(!values || values.length != 0) {
-        for(let valueItem of values) {
-          let item = store.report.schema.find(o=>o.key == valueItem.key)
-          console.log('item:', toRaw(item))
-          if(item) {
-            item.data = valueItem.value
-          }
-        }
-      }
-    }
-  }
-  console.log('store.report:', toRaw(store.report.schema)) 
-  designerRef.value.refresh({ items: store.report.schema, title: 'Title', summary: 'Summary', id: store.report.id, isLocal: true })
+  //     designerRef.value.refresh({ items: store.report.schema, values: store.report.values, title: 'Title', summary: 'Summary', id: store.report.id })
+  //     return
+  //   }
+
+  //   let localDate = dayjs(localRecord.update_at)
+  //   let serverDate = dayjs(store.report.update_at)
+  //   if (localDate > serverDate) {
+  //   }
+
+  //   if (store.report.items.length === 0 || (localDate > serverDate)) {
+  //     let values = JSON.parse(localRecord.values)
+  //     console.log('values:', values)
+  //     if(!values || values.length != 0) {
+  //       for(let valueItem of values) {
+  //         let item = store.report.schema.find(o=>o.key == valueItem.key)
+  //         console.log('item:', toRaw(item))
+  //         if(item) {
+  //           item.data = valueItem.value
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+  // console.log('store.report:', toRaw(store.report.schema)) 
+  // designerRef.value.refresh({ 
+  //   items: store.report.schema, 
+  //   values: store.report.values, 
+  //   title: store.report.title, 
+  //   summary: store.report.summary, 
+  //   id: store.report.id, 
+  //   isLocal: true 
+  // })
 }
 
 const onClickLogin = async () => {

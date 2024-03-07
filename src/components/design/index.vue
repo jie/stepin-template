@@ -31,6 +31,8 @@
       <div class="summary">
         <div>{{ reportTemplateStore.reportTemplate.summary }}</div>
       </div>
+
+      <a-form layout="vertical" v-model="formState">
       <div v-for="item in reportTemplateStore.reportTemplate.items" :key="item.key">
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-if="item.type == 'text'">
@@ -99,6 +101,7 @@
 
         <div v-else>unsupported components</div>
       </div>
+    </a-form>
     </div>
   </div>
 
@@ -193,6 +196,7 @@ const imageUploadEditor = ref(null)
 const itemRefs = ref([])
 const currentEditItem = ref(null)
 const currentEditRef = ref(null)
+const formState = ref({})
 const onOpenEditor = (item: any) => {
   editDrawerVisible.value = true;
   drawerTitle.value = `${item.type} - Editor`;

@@ -1,11 +1,10 @@
 <template>
     <div>
-        <div v-if="props?.item?.title" style="color: #000">{{ props?.item?.title }}</div>
-        <div v-if="props?.item?.summary" style="font-size: 80%; color: #999;">{{ props?.item?.summary }}</div>
-        <div class="mt-1 mb-1">
+        <a-form-item :rules="[{ required: props?.item?.required, message: `Please enter ${props?.item?.title}` }]" :label="props?.item?.title" :extra="props?.item?.summary" :required="props?.item?.required" :name="props?.item?.key">
             <slot></slot>
-        </div>
-        <div v-if="props?.item?.desc" style="color: #666">{{ props?.item?.desc }}</div>
+            <div style="height: 5px;"></div>
+            <div v-if="props?.item?.desc" style="color: #666">{{ props?.item?.desc }}</div>
+        </a-form-item>
     </div>
 </template>
 

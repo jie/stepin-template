@@ -1,18 +1,20 @@
 <template>
     <div>
         <BaseSlot :item="props?.item">
-            <a-radio-group v-model:value="itemValue" :options="props?.item?.data?.options" />
+            <a-radio-group :required="props?.item?.data?.required" v-model:value="props.value" :options="props?.item?.data?.options" @change="onChange"/>
         </BaseSlot>
     </div>
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
 import { defineProps, ref, PropType, toRaw } from 'vue'
-import { ReportTemplateStore } from "@/store/reportTemplate"
-const reportTemplateStore = ReportTemplateStore()
 const props = defineProps({
     item: {
         type: Object,
+    },
+    value: {
+        type: String,
+        default: ""
     }
 })
 
@@ -21,11 +23,15 @@ type Option = {
     value: string;
 }
 
-const itemValue = ref<Option[]>([])
-
+const itemValue = ref<string>('')
+const emits = defineEmits(["update:value"])
 // const exportData = () => {
 //   return reportTemplateStore.reportTemplate.items.find((item: any) => item.key == props.item.key)
 // }
+
+const onChange = (e) => {
+    emits('update:value', e.target.value)
+}
 
 const exportData = () => {
     console.log('radio-export:', toRaw(props.item))
