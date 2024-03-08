@@ -77,6 +77,21 @@ export const ReportFillStore = defineStore('report_fill', {
     },
     async apiUpdate() {
 
+    },
+    async apiSubmit(email: string, password: string, values: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let bodyJson = { id: this.report.id, email: email, password: password, values: values }
+      return http
+        .request('/platform/report_api/report/fill', 'post_json', bodyJson, {})
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
     }
   },
 })

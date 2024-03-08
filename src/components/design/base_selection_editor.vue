@@ -21,6 +21,12 @@
           <a-form-item label="Is Required" name="required">
             <a-switch v-model:checked="baseData.required" />
           </a-form-item>
+          <a-form-item label="Layout" name="layout">
+            <a-radio-group v-model:value="baseData.layout">
+              <a-radio-button value="vertical">vertical</a-radio-button>
+              <a-radio-button value="horizontal">horizontal</a-radio-button>
+            </a-radio-group>
+            </a-form-item>
         </a-form>
       </div>
       <div class="pb-6">
@@ -63,6 +69,7 @@ const baseData = ref({
   sort: "0",
   summary: "",
   desc: "",
+  layout: "horizontal",
   data: {
     options: []
   }
@@ -77,6 +84,7 @@ const initializeData = (item: ComponentType) => {
   baseData.value.sort = item.sort
   baseData.value.desc = item.desc
   baseData.value.data.options = item.data.options
+  baseData.value.layout = item.layout
 }
 
 const exportData = () => {

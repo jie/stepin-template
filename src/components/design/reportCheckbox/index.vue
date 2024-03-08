@@ -1,15 +1,18 @@
 <template>
     <div>
         <BaseSlot :item="props?.item">
-            <a-form-item :label="props?.item?.data?.label" :required="props?.item?.data?.required">
-                <a-checkbox-group v-model:value="props.value" :options="props?.item?.data?.options" @change="onChange" />
+            <a-form-item :label="props?.item?.data?.label" :rules="[{ required: props?.item?.required, message: `Please enter ${props?.item?.title}`, trigger: 'change' }]">
+                <a-checkbox-group :checked="props.value" :options="props?.item?.data?.options" @change="onChange" v-if="props?.item?.layout == 'horizontal'" />
+                <a-checkbox-group v-else :checked="props.value" @change="onChange">
+                    <a-checkbox :style="checkboxStyle" :value="option.value" v-for="option in props?.item?.data?.options">{{option.label}}</a-checkbox>
+                </a-checkbox-group>
             </a-form-item>
         </BaseSlot>
     </div>
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
-import { defineProps, ref, PropType } from 'vue'
+import { defineProps, ref, PropType, reactive } from 'vue'
 const props = defineProps({
     item: {
         type: Object,
@@ -24,6 +27,13 @@ type Option = {
     label: string;
     value: string;
 }
+
+const checkboxStyle = reactive({
+    display: 'flex',
+    height: '30px',
+    lineHeight: '30px',
+    marginLeft: '0px'
+})
 
 const emits = defineEmits(["update:value"])
 

@@ -20,6 +20,7 @@ export type SelectionComponentType = ComponentType & {
   maxCount?: number;
   minCount?: number;
   multiple?: boolean;
+  layout?: string;
 }
 
 export type UploadComponentType = ComponentType & {
@@ -44,6 +45,7 @@ export class BaseComponent  {
   maxCount?: number;
   minCount?: number;
   multiple?: boolean;
+  layout?:string;
   // columns
   columns?: number;
   constructor(componentData: ComponentType) {
@@ -98,6 +100,7 @@ export interface SelectionInterface {
   maxCount?: number;
   minCount?: number;
   multiple?: boolean;
+  layout?:string;
   validate(): validateResult;
 }
 
@@ -109,6 +112,8 @@ export class SelectionComponent extends BaseComponent implements SelectionInterf
     this.maxCount = componentData.maxCount;
     this.minCount = componentData.minCount;
     this.multiple = componentData.multiple;
+    this.layout = componentData.layout;
+    
   }
 
   validate(): validateResult {

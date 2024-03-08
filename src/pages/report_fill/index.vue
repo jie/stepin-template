@@ -1,6 +1,6 @@
 <template>
   <div v-if="!store.loading">
-    <Designer ref="designerRef"/>
+    <Designer ref="designerRef" />
     <!-- <div class="flex" style="justify-content: center; align-items:center; min-height: 800px; ">
       <div style="width: 460px;display:block;">
         <div
@@ -46,10 +46,7 @@ const route = useRoute()
 const designerRef = ref(null)
 const store = ReportFillStore()
 const hasPermissionRef = ref(false)
-const permissionForm = reactive({
-  email: "",
-  password: ""
-})
+
 const initialization = async () => {
   store.loading = true
   // hasPermissionRef.value = await store.apiCheckPermission()

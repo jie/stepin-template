@@ -1,6 +1,21 @@
 <template>
-  <div class="report relative" v-if="store.report?.schema">
 
+  <div class="report relative" v-if="store.report?.schema">
+    <a-modal
+      :getContainer="() => document.body"
+      v-model:visible="isShowSubmitDialog"
+      title="Please enter email and password to submit report"
+      @ok="handleSubmitOk"
+    >
+      <a-form :model="submitFormData" layout="">
+        <a-form-item label="E-mail" name="email" required>
+          <a-input v-model:value="submitFormData.email"></a-input>
+        </a-form-item>
+        <a-form-item label="Password" name="password" required>
+          <a-input type="password" v-model:value="submitFormData.password"></a-input>
+        </a-form-item>
+      </a-form>
+    </a-modal>
     <div
       style="max-width: 700px;  padding: 20px 20px 100px 20px; height: 100%; background-color: #fff; margin: 0 auto; position: relative;">
 
@@ -48,7 +63,7 @@
         <div class="controls border-t"
           style="border-top: 1px solid #000; background-color: #fff;display: flex; justify-content: center; align-items: center;height: 100px; position: absolute; bottom: 0;left: 0;width:100%;">
           <div>
-            <a-button type="primary" html-type="submit" style="width: 140px; margin-left: 10px;">Submit</a-button>
+            <a-button type="primary" html-type="submit" style="width: 140px; margin-left: 10px;">Submit </a-button>
             <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
               @confirm="onSave" title="Confirm save a draft?" ok-text="Yes" cancel-text="No">
               <a-button type="" style="width: 140px; margin-left: 10px;">Save</a-button>
@@ -80,6 +95,7 @@ import { copyObject } from "@/utils/objectUtils"
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import dayjs from 'dayjs';
+const document = window.document
 const store = ReportFillStore()
 const checkUpdate = (e) => {
   console.log('checkUpdate:', e)
@@ -102,12 +118,7 @@ const initialization = () => {
   loadLocalData()
 }
 
-const onFinishSubmit = () => {
-  console.log('onFinishSubmit:', toRaw(formState))
-}
-const onFinishFailed = () => {
-  console.log('onFinishFailed:')
-}
+
 
 type HeadImage = {
   url: string,
@@ -186,8 +197,25 @@ const refresh = (data: any) => {
 
 }
 
-const onSubmit = () => {
 
+const isShowSubmitDialog = ref(false)
+const submitLoadingRef = ref(false)
+const submitFormData = reactive({
+  email: "",
+  password: ""
+})
+const onFinishSubmit = () => {
+  console.log('onFinishSubmit:', toRaw(formState))
+  isShowSubmitDialog.value = true
+}
+const onFinishFailed = () => {
+  console.log('onFinishFailed:')
+}
+
+const handleSubmitOk = async () => {
+  // apiSubmit
+
+  await store.apiSubmit(submitFormData.email, submitFormData.password, formState)
 }
 
 initialization()
