@@ -16,8 +16,26 @@
           <a-image :src="item.url" style=" width: 300px; height: 300px;border: 1px solid #000;" />
           <div class="flex" style="height: 60px;padding-top: 10px;">
             <div style="flex: 1">
-              <a-textarea style="width: 100%;" v-model:value="item.desc"
-                placeholder="Please enter description"></a-textarea>
+              <a-auto-complete
+                :getPopupContainer="triggerNode => triggerNode.parentNode"
+                v-model:value="item.desc"
+                v-if="props.item?.is_defect"
+                style="width: 100%"
+                placeholder="input here"
+                :options="defectOptions"
+                @search="handleSearchDefect"
+                allowClear>
+                <a-textarea style="width: 100%;"/>
+                <template #option="{ content_en: content_en, id: id }">
+                  <div style="display:flex" @click="onDefectSelect(item, id)">
+                      <span style="flex: 1">{{ content_en }}</span>
+                      <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
+                  </div>
+                </template>
+            </a-auto-complete>
+            <a-textarea style="width: 100%;" v-model:value="item.desc"
+                placeholder="Please enter description" v-else />
+
             </div>
             <div style="width:60px; height: 100%;display: flex;justify-content: center;align-items: center;">
               <a-popconfirm :getPopupContainer="triggerNode => {return triggerNode.parentNode||document.body;}" @confirm="deleteImage(item)" title="Confirm delete?" ok-text="Yes" cancel-text="No">
@@ -45,6 +63,8 @@ import { getBase64 } from "@/utils/file"
 import type { UploadProps } from 'ant-design-vue';
 import { ossUploadFiles } from "@/store/uploader"
 import { ImageType } from "@/types/components/image"
+import { ReportFillStore } from "@/store/report_fill"
+const store = ReportFillStore()
 const props = defineProps({
   item: {
     type: Object,
@@ -61,6 +81,13 @@ const previewImage = ref('');
 const previewTitle = ref('');
 const emits = defineEmits(["update:value"])
 
+const defectOptions = ref([])
+const handleSearchDefect = (value) => {
+    defectOptions.value = value ? store.defects.filter((s) => s.content_en.toLowerCase().includes(value.toLowerCase())) : []
+}
+const onDefectSelect = (i, e) => {
+    i.desc = store.defects.find((s) => s.id == e).content_en
+}
 const onClickTriggerButton = async () => {
   // let targetElement = document.getElementById('btn_result_file')
   // if (targetElement != null && targetElement.value) {

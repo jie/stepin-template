@@ -11,7 +11,7 @@
         <a-form-item label="E-mail" name="email" required>
           <a-input v-model:value="submitFormData.email"></a-input>
         </a-form-item>
-        <a-form-item label="Password" name="password" required>
+        <a-form-item label="Password" name="password" required v-if="store.report?.settings.validate_password">
           <a-input type="password" v-model:value="submitFormData.password"></a-input>
         </a-form-item>
       </a-form>
@@ -115,7 +115,8 @@ const change = (affixed: boolean) => {
 const reportDataRef = ref()
 const initialization = () => {
   console.log('loadLocalData')
-  loadLocalData()
+  // loadLocalData()
+  loadRemoteData()
 }
 
 
@@ -157,6 +158,13 @@ const loadLocalData = async () => {
   console.log('formState:', formState)
 }
 
+const loadRemoteData = async () => {
+  if(store?.report?.values && Object.keys(store.report.values).length != 0) {
+    for(let key of Object.keys(store.report.values)) {
+      formState[key] = store.report.values[key]
+    }
+  }
+}
 
 const editableComponents = [
   "input",
@@ -214,8 +222,20 @@ const onFinishFailed = () => {
 
 const handleSubmitOk = async () => {
   // apiSubmit
-
-  await store.apiSubmit(submitFormData.email, submitFormData.password, formState)
+  let result;
+  try {
+    result = await store.apiSubmit(submitFormData.email, submitFormData.password, formState)
+  } catch (e) {
+    openNotification({
+      type: "error",
+      message: "Submit report failed",
+      description: e.message
+    })
+  }
+  if (result) {
+    successNotification("submit_report")
+    isShowSubmitDialog.value = false
+  }
 }
 
 initialization()

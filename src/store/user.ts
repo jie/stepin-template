@@ -10,6 +10,7 @@ export interface ReportUser {
   id?: string;
   name?: string;
   email?: string;
+  password?: string;
   phone?: string;
   mobile?: string;
   remark?: string;
@@ -138,6 +139,29 @@ export const ReportUserStore = defineStore('reportUser', {
         .request('/platform/report_api/report_user/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiQueryByIds(ids: string[]) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = {
+        ids: ids
+      }
+      return http
+        .request('/platform/report_api/report_user/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          console.log('response:', response)
+          if (response.data?.data) {
+            this.pagination.total = response.data?.data?.total
+            this.pagination.pagesize = response.data?.data?.total
+            this.pagination.page = 1
+            this.entities = response.data?.data?.entities
             return response.data?.data;
           } else {
             return Promise.reject(response);

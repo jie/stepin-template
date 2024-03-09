@@ -7,28 +7,28 @@ import { Dayjs } from 'dayjs';
 import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import router from '@/router';
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
-import { ReportTemplateStore } from "@/store/reportTemplate"
+import { ReportTemplateStore, ReportTemplate } from "@/store/reportTemplate"
+import { ReportCategoryStore } from "@/store/category"
 import { Report } from '@/pages/constants';
 import { statusFormSchema } from "@/types"
 const isViewForm = ref(false)
 const store = ReportTemplateStore()
+const categoryStore = ReportCategoryStore()
 const searchKeywords = ref("")
 const columns = [
   {
     title: 'Name',
     dataIndex: 'name',
   },
+  {
+    title: 'Category',
+    dataIndex: 'category',
+  },
   { title: 'Status', dataIndex: 'status' },
   { title: 'Create at', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
-type ReportTemplate = {
-  id?: string;
-  name?: string;
-  status?: string;
-  create_at?: string;
-};
 
 const Ctl = reactive({
   records: [] as ReportTemplate[],
@@ -44,7 +44,8 @@ const createTimeRef = ref<Dayjs>(dayjs());
 const initializeData = async () => {
   let result = await store.apiQuery()
   console.log('result:', result)
-
+  await categoryStore.apiQueryParent(true)
+  console.log('categoryStore.entities:', toRaw(categoryStore.entities))
 }
 
 initializeData()
@@ -65,11 +66,13 @@ const newReportTemplate = (reportTemplate?: ReportTemplate) => {
     return <ReportTemplate>{
       id: '',
       name: '',
+      category_id: '',
       status: '1',
       create_at: create_at
     }
   } else {
     reportTemplate.name = '';
+    reportTemplate.category_id = '';
     reportTemplate.status = '1';
     reportTemplate.create_at = create_at;
     return reportTemplate;
@@ -105,9 +108,9 @@ async function submit() {
     ?.validateFields()
     .then(async (res: ReportTemplate) => {
       if (Ctl.isNew === true) {
-        await store.apiSave({ name: form.name, status: form.status })
+        await store.apiSave({ name: form.name, category_id: form.category_id ,status: form.status })
       } else {
-        await store.apiUpdate({ id: form.id, name: form.name, status: form.status })
+        await store.apiUpdate({ id: form.id, name: form.name, category_id: form.category_id, status: form.status })
       }
       showModal.value = false;
       reset();
@@ -215,6 +218,15 @@ const statusDialogCancel = () => {
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
+      <a-form-item label="Category" required name="category_id">
+        <a-tree-select v-model:value="form.category_id" style="width: 100%" placeholder="Please select" allow-clear :tree-data="categoryStore.entities" :field-names="{
+            children: 'children',
+            label: 'name',
+            value: 'id',
+            selectable: 'selectable'
+          }" tree-node-filter-prop="name">
+        </a-tree-select>
+      </a-form-item>
     </a-form>
   </a-modal>
   <!-- 成员表格 -->
@@ -257,6 +269,9 @@ const statusDialogCancel = () => {
           <span class="text-title font-bold">{{ text }}</span>
         </div>
       </div>
+      <template v-else-if="column.dataIndex === 'category'">
+        {{ record?.category?.name }}
+      </template>
       <template v-else-if="column.dataIndex === 'status'">
         <a-badge class="text-subtext" :color="'green'">
           <template #text>
@@ -264,6 +279,7 @@ const statusDialogCancel = () => {
           </template>
         </a-badge>
       </template>
+
       <template v-else-if="column.dataIndex === 'create_at'">
         {{ text }}
       </template>

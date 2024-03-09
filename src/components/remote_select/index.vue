@@ -112,8 +112,20 @@ const onSearch = async () => {
 const queryEntities = async () => {
     switch (props.type) {
         case 'worker':
+            userStore.pagination.page = 1
+            userStore.pagination.pagesize = 10
+            userStore.queryArgs.is_worker = true
+            userStore.queryArgs.keyword = searchValueRef.value
+            await userStore.apiQuery()
+            searchResult.value = userStore.entities
             break
-        case 'user':
+        case 'customer':
+            userStore.pagination.page = 1
+            userStore.pagination.pagesize = 10
+            userStore.queryArgs.is_customer = true
+            userStore.queryArgs.keyword = searchValueRef.value
+            await userStore.apiQuery()
+            searchResult.value = userStore.entities
             break
         case 'company':
             companyStore.pagination.page = 1
@@ -128,10 +140,6 @@ const queryEntities = async () => {
             factoryStore.queryArgs.keyword = searchValueRef.value
             await factoryStore.apiQuery()
             searchResult.value = factoryStore.entities
-            break
-        case 'company_contact':
-            break
-        case 'factory_contact':
             break
         case 'report_template':
             reportTemplateStore.pagination.page = 1
@@ -151,33 +159,66 @@ const getEntity = async (ids: string[]) => {
         case 'template':
             break
         case 'worker':
-            break
-        case 'user':
-            break
-        case 'company':
-            console.log('ids:', ids)
             if (ids) {
-                await companyStore.apiQueryByIds(ids)
-                searchResult.value = companyStore.entities
-                selectedRowKeys.value = ids
-                console.log('selectedRowKeys.value:', selectedRowKeys.value)
+                try {
+                    await userStore.apiQueryByIds(ids)
+                    searchResult.value = userStore.entities
+                    selectedRowKeys.value = ids
+                } catch (error) {
+                    console.log('error:', error)
+                } finally {
+                    displayLoadingRef.value = false
+                }
+
             } else {
                 searchResult.value = []
             }
 
             break
-        case 'factory':
+        case 'customer':
+            if (ids) {
+                try {
+                    await userStore.apiQueryByIds(ids)
+                    searchResult.value = userStore.entities
+                    selectedRowKeys.value = ids
+                } catch (error) {
+                    console.log('error:', error)
+                } finally {
+                    displayLoadingRef.value = false
+                }
+
+            } else {
+                searchResult.value = []
+            }
+
             break
-        case 'company_contact':
-            break
-        case 'factory_contact':
+        case 'company':
+            if (ids) {
+                try {
+                    await companyStore.apiQueryByIds(ids)
+                    searchResult.value = companyStore.entities
+                    selectedRowKeys.value = ids
+                } catch (error) {
+                    console.log('error:', error)
+                } finally {
+                    displayLoadingRef.value = false
+                }
+            } else {
+                searchResult.value = []
+            }
+
             break
         case 'report_template':
             if (ids) {
-                await reportTemplateStore.apiQueryByIds(ids)
-                searchResult.value = reportTemplateStore.entities
-                selectedRowKeys.value = ids
-                console.log('selectedRowKeys.value:', selectedRowKeys.value)
+                try {
+                    await reportTemplateStore.apiQueryByIds(ids)
+                    searchResult.value = reportTemplateStore.entities
+                    selectedRowKeys.value = ids
+                } catch (error) {
+                    console.log('error:', error)
+                } finally {
+                    displayLoadingRef.value = false
+                }
             } else {
                 searchResult.value = []
             }

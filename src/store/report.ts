@@ -15,6 +15,7 @@ export interface Report {
   inspect_date?:string;
   report_template_id?: string;
   users?: Array<string>;
+  users_review?: Array<string>;
   company_id?: string;
   factory_id?: string;
   workers?: Array<string>;
@@ -126,11 +127,14 @@ export const ReportStore = defineStore('report', {
             this.pagination.total = response.data?.data?.total
             this.entities = response.data?.data?.entities.map(item=>{
               if(item.order) {
-                item.category = item.order.category
-                item.company = item.order.company
-                item.company_contact = item.order.company_customer
-                item.factory_contact = item.order.factory_contacts[0]
-                item.workers = item.order.workers.map(c=>{return c.worker.name}).join(',')
+                item.order_data = {
+                  category: item.order.category,
+                  company: item.order.company,
+                  company_contact: item.order.company_customer,
+                  factory_contact: item.order.factory_contacts[0],
+                  workers: item.order.workers.map(c=>{return c.worker.name}).join(','),
+                }
+
               }
               return item
             }) 

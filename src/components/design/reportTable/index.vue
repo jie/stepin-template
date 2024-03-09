@@ -35,7 +35,7 @@
           <template #bodyCell="{ text, record, index, column }">
             <template v-if="record?.fieldOptions[column.key]?.fieldType == 'input'">
               <a-input v-model:value="record[column.key]" :placeholder="record.fieldOptions[column.key].placeholder"
-                clearable />
+                allowClear />
             </template>
 
             <template v-else>{{ text }}</template>
@@ -51,12 +51,29 @@
     </BaseSlot>
     <a-modal v-model:visible="AddRowDialogVisible" title="Add Row" ok-text="Confirm" cancel-text="Cancel"
       @ok="handleConfirmAddRow" @onCancel="handleCancelAddRow" :z-index="1001" :getContainer="() => $refs.allModal">
-      <a-form name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }" autocomplete="off" layout="vertical">
+      <a-form name="basic"  autocomplete="off" layout="vertical">
         <template v-for="row in formRows">
           <div v-for="col in tableDataRef.columns">
             <div>{{ row[col.key] }}</div>
             <a-form-item :label="col.title" v-if="row.fieldOptions[col.key].fieldType == 'input'">
-              <a-input v-model:value="row.fieldOptions[col.key].val" clearable />
+
+              <a-auto-complete
+                :getPopupContainer="triggerNode => triggerNode.parentNode"
+                v-model:value="row.fieldOptions[col.key].val"
+                style="width: 100%"
+                placeholder="input here"
+                :options="defectOptions"
+                @search="handleSearchDefect"
+                allowClear>
+                <template #option="{ content_en: content_en, id: id }">
+                  <div style="display:flex" @click="onDefectSelect(row, col.key, id)">
+                      <span style="flex: 1">{{ content_en }}</span>
+                      <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
+                  </div>
+                </template>
+            </a-auto-complete>
+
+              <!-- <a-input v-model:value="row.fieldOptions[col.key].val" allowClear /> -->
             </a-form-item>
           </div>
         </template>
@@ -71,8 +88,9 @@ import { defineEmits, defineProps, ref } from 'vue';
 import type { TableColumnsType } from 'ant-design-vue';
 import { toRaw, computed, reactive } from 'vue';
 import { copyObject } from "@/utils/objectUtils"
-// import { ReportTemplateStore } from "@/store/reportTemplate"
+import { ReportFillStore } from "@/store/report_fill"
 // const reportTemplateStore = ReportTemplateStore()
+const store = ReportFillStore()
 const props = defineProps({
     item: {
         type: Object,
@@ -87,6 +105,15 @@ const props = defineProps({
     }
 })
 const emits = defineEmits(["edit-table-row", "update:value"])
+
+const defectOptions = ref([])
+const handleSearchDefect = (value) => {
+    defectOptions.value = value ? store.defects.filter((s) => s.content_en.toLowerCase().includes(value.toLowerCase())) : []
+}
+const onDefectSelect = (row, key, e) => {
+  row.fieldOptions[key].val = store.defects.find((s) => s.id == e).content_en
+}
+
 const AddRowDialogVisible = ref(false)
 // extends TableColumnsType
 type MyTableColumnsType = TableColumnsType & {

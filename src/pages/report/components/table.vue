@@ -19,6 +19,9 @@ const store = ReportStore()
 const categoryStore = ReportCategoryStore()
 const searchKeywords = ref('');
 const reportTemplateSelectRef = ref(null)
+const reportWorkerRef = ref(null)
+const reportUsersReviewRef = ref(null)
+const reportCompanyReviewRef = ref(null)
 const searchDateRangeRef = ref<DayjsDateRangeSchema>()
 const columns = [
   {
@@ -31,7 +34,8 @@ const columns = [
   { title: 'CUSTOMER', dataIndex: 'company', width: 200 },
   { title: 'WORKERS', dataIndex: 'workers', width: 200 },
   { title: 'CATEGORY', dataIndex: 'category', width: 160 },
-  { title: 'STATUS', dataIndex: 'status', width: 120 },
+  { title: 'STATUS', dataIndex: 'status', width: 80 },
+  { title: 'Review', dataIndex: 'approve_status', width: 80 },
   { title: 'OP', dataIndex: 'edit', width: 50 },
 ];
 
@@ -49,6 +53,12 @@ const newRecord = (record?: Report) => {
   }
   record.name = undefined;
   record.status = '0';
+  record.settings = {
+    validate_password: false,
+    validate_permission: false,
+    approve_password: false,
+    approve_permission: false,
+  }
   return record;
 };
 
@@ -86,53 +96,23 @@ function submit() {
   formModel.value
     ?.validateFields()
     .then(async (res: Report) => {
-      if (!form.id) {
-        if (form.order_id) {
-          await store.apiSave({
-            name: form.name,
-            title: form.title,
-            summary: form.summary,
-            order_id: form.order_id,
-            report_template_id: form.report_template_id
-          })
-        } else {
-          await store.apiSave({
-            name: form.name,
-            title: form.title,
-            summary: form.summary,
-            report_template_id: form.report_template_id,
-            category_id: form.category_id,
-            workers: form.workers,
-            users: form.users,
-            factory_id: form.factory_id,
-            company_id: form.company_id,
-          })
-        }
-      } else {
-        if (form.order_id) {
-          await store.apiUpdate({
-            id: form.id,
-            name: form.name,
-            title: form.title,
-            summary: form.summary,
-            order_id: form.order_id,
-            report_template_id: form.report_template_id
-          })
-        } else {
-          await store.apiUpdate({
-            name: form.name,
-            title: form.title,
-            summary: form.summary,
-            report_template_id: form.report_template_id,
-            category_id: form.category_id,
-            workers: form.workers,
-            users: form.users,
-            factory_id: form.factory_id,
-            company_id: form.company_id,
-          })
-        }
+      let reqData = {
+        name: form.name,
+        title: form.title,
+        summary: form.summary,
+        report_template_id: form.report_template_id,
+        category_id: form.category_id,
+        workers: form.workers,
+        users: form.users,
+        users_review: form.users_review,
+        factory_id: form.factory_id,
+        company_id: form.company_id,
+        settings: form.settings,
       }
-
+      if (form.order_id) {
+        reqData.id = form.id
+      }
+      await store.apiUpdate(reqData)
 
       showModal.value = false;
       initializeData()
@@ -163,9 +143,30 @@ function edit(record: any) {
   form.title = record?.title
   form.summary = record?.summary
   form.report_template_id = record?.report_template
+  form.workers = record?.workers
+  form.users_review = record?.users_review
+  form.company_id = record?.company
+  form.settings = record?.settings
+  if(form.settings.validate_password === undefined) {
+    form.settings.validate_password = false
+  }
+  if(form.settings.validate_permission === undefined) {
+    form.settings.validate_permission = false
+  }
+  if(form.settings.approve_password === undefined) {
+    form.settings.approve_password = false
+  }
+  if(form.settings.approve_permission === undefined) {
+    form.settings.approve_permission = false
+  }
   showModal.value = true;
-  setTimeout(() => {
-    reportTemplateSelectRef.value?.getEntity([form.report_template_id])
+  setTimeout(async () => {
+    console.log('company_id:', form.company_id)
+    reportCompanyReviewRef.value?.getEntity([form.company_id])
+    await reportTemplateSelectRef.value?.getEntity([form.report_template_id])
+    await reportWorkerRef.value?.getEntity(form.workers)
+    console.log('users_review:', form.users_review)
+    await reportUsersReviewRef.value?.getEntity(form.users_review)
   }, 1000)
 }
 
@@ -291,8 +292,34 @@ initializeData()
       <a-form-item label="Order ID" name="order">
         <a-input v-model:value="form.order_id" />
       </a-form-item>
+      <hr />
+      <a-form-item label="Fill by password" name="validate_password">
+        <a-switch v-model:checked="form.settings.validate_password" />
+      </a-form-item>
+      <a-form-item label="Fill by permission" name="validate_permission">
+        <a-switch v-model:checked="form.settings.validate_permission" />
+      </a-form-item>
+      <a-form-item label="Review by password" name="approve_password">
+        <a-switch v-model:checked="form.settings.approve_password" />
+      </a-form-item>
+      <a-form-item label="Review by permission" name="approve_permission">
+        <a-switch v-model:checked="form.settings.approve_permission" />
+      </a-form-item>
+      <hr />
       <a-form-item label="Template" name="report_template">
         <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
+          searchKey="name" />
+      </a-form-item>
+      <a-form-item label="Workers" name="workers">
+        <RemoteSelect ref="reportWorkerRef" type="worker" v-model:value="form.workers" :isMultiple="true"
+          searchKey="name" />
+      </a-form-item>
+      <a-form-item label="Customer" name="users_review">
+        <RemoteSelect ref="reportUsersReviewRef" type="customer" v-model:value="form.users_review" :isMultiple="true"
+          searchKey="name" />
+      </a-form-item>
+      <a-form-item label="Company" name="company">
+        <RemoteSelect ref="reportCompanyReviewRef" type="company" v-model:value="form.company_id"
           searchKey="name" />
       </a-form-item>
     </a-form>
@@ -348,7 +375,6 @@ initializeData()
                     }}</a-select-option>
                   </a-select>
                 </div>
-
               </div>
             </a-col>
           </a-row>
@@ -386,43 +412,6 @@ initializeData()
 
             </a-col>
           </a-row>
-          <!-- <div class="flex">
-            <div class="mr-4">
-              <span class="mr-2">Customer</span>
-              <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">
-              </a-input>
-            </div>
-            <div class="mr-4">
-              <span class="mr-2">Workers</span>
-              <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">
-              </a-input>
-            </div>
-            <div class="mr-4">
-              <span class="mr-2">Status</span>
-              <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
-                <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label
-                }}</a-select-option>
-              </a-select>
-            </div>
-            <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4">
-              <template #addonBefore>
-                Keywords
-              </template>
-            </a-input>
-            <a-button class="mr-2" @click="onClickSearch">
-              <template #icon>
-                <SearchOutlined />
-              </template>
-              Search
-            </a-button>
-            <a-button type="primary" @click="addNew" :loading="formLoading">
-              <template #icon>
-                <PlusOutlined />
-              </template>
-              Create
-            </a-button>
-          </div> -->
-
         </div>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -432,21 +421,37 @@ initializeData()
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
-          <div class="text-title font-bold">
+          <div class="text-title font-bold" v-if="record.order">
+            {{ record.order_data.company.shortname }}
+          </div>
+          <div class="text-title font-bold" v-else>
             {{ record.company.shortname }}
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'workers'">
-          <div class="text-title font-bold">
+          <div class="text-title font-bold" v-if="record.order">
+            {{ record.order_data.workers }}
+          </div>
+          <div class="text-title font-bold" v-else>
             {{ record.workers }}
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'category'">
-          <div class="text-title font-bold">
-            {{ record.category.name }}
+          <div class="text-title font-bold" v-if="record.order">
+            {{ record.order_data.category.name }}
+          </div>
+          <div class="text-title font-bold" v-else>
+            {{ record.workers }}
           </div>
         </div>
         <template v-else-if="column.dataIndex === 'status'">
+          <a-badge class="text-subtext" :color="formatStatusColor(text)">
+            <template #text>
+              <span class="text-subtext">{{ VerifyStatuses[text] }}</span>
+            </template>
+          </a-badge>
+        </template>
+        <template v-else-if="column.dataIndex === 'approve_status'">
           <a-badge class="text-subtext" :color="formatStatusColor(text)">
             <template #text>
               <span class="text-subtext">{{ VerifyStatuses[text] }}</span>

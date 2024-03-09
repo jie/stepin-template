@@ -135,6 +135,14 @@ const routes: RouteRecordRaw[] = [
          },
         component: () => import('@/pages/system_settings'),
       },
+      {
+        path: 'defect',
+        name: 'defect',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/defect'),
+      },
     ],
   },
   {

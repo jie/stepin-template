@@ -21,6 +21,9 @@
           <a-form-item label="Is Required" name="required">
             <a-switch v-model:checked="baseData.required" />
           </a-form-item>
+          <a-form-item label="Is Defect" name="is_defect">
+            <a-switch v-model:checked="baseData.is_defect" />
+          </a-form-item>
         </a-form>
       </div>
     </div>
@@ -35,6 +38,7 @@ import { ComponentType } from "@/types/components/base"
 const baseData = ref({
   title: "",
   required: false,
+  is_defect: false,
   type: "",
   key: "",
   sort: "0",
@@ -47,6 +51,7 @@ const initializeData = (item: ComponentType) => {
   baseData.value.summary = item.summary
   baseData.value.type = item.type
   baseData.value.required = item.required
+  baseData.value.is_defect = item.is_defect
   baseData.value.key = item.key
   baseData.value.sort = item.sort
   baseData.value.desc = item.desc

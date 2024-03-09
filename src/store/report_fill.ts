@@ -16,7 +16,8 @@ export const ReportFillStore = defineStore('report_fill', {
         email: "",
         password: ""
       },
-      report: <any>{}
+      report: <any>{},
+      defects: <any>[],
     }
   },
   getters: {
@@ -85,7 +86,41 @@ export const ReportFillStore = defineStore('report_fill', {
       return http
         .request('/platform/report_api/report/fill', 'post_json', bodyJson, {})
         .then((response) => {
-          if (response.data?.data) {
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiReview(email: string, password: string, approve_status: string, approve_reason: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let bodyJson = { id: this.report.id, email: email, password: password, approve_status: approve_status, approve_reason: approve_reason}
+      return http
+        .request('/platform/report_api/report/review', 'post_json', bodyJson, {})
+        .then((response) => {
+          console.log('response:', response.data)
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiQueryDefectByReportId() {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let bodyJson = { report_id: this.report.id, pagesize: 10000, page: 1}
+      return http
+        .request('/platform/report_api/report_defect/public_query', 'post_json', bodyJson, {})
+        .then((response) => {
+          console.log('response:', response.data)
+          if (response.data?.status) {
+            this.defects = response.data?.data?.entities
+            console.log('this.defects:', this.defects)
             return response.data?.data;
           } else {
             return Promise.reject(response);

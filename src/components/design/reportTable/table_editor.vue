@@ -80,7 +80,7 @@
         </a-form>
         <a-modal v-model:visible="rowEditDialogVisible" title="Edit Row" ok-text="Confirm" cancel-text="Cancel"
           @ok="onRowEditFinish" @onCancel="cancelRowEditModal" :z-index="1001">
-          <a-form :model="rowItemParam" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }"
+          <a-form :model="rowItemParam" name="basic" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }"
             autocomplete="off">
             <a-form-item label="Text" name="text">
               <a-input v-model:value="rowItemParam.text" />
@@ -90,6 +90,9 @@
                 <a-radio-button value="text">Text</a-radio-button>
                 <a-radio-button value="input">Input</a-radio-button>
               </a-radio-group>
+            </a-form-item>
+            <a-form-item label="Is Defect" name="is_defect">
+              <a-switch v-model:checked="rowItemParam.is_defect" />
             </a-form-item>
           </a-form>
         </a-modal>
@@ -119,6 +122,7 @@ const rowItemParam = ref<any>({
   key: '',
   text: '',
   fieldType: '',
+  is_defect: false
 })
 const itemParam = ref<any>({
   title: '',
@@ -444,6 +448,7 @@ const editTableRow = (rowVal: any) => {
   rowItemParam.value.key = rowVal.column.key
   rowItemParam.value.text = rowVal.text
   rowItemParam.value.fieldType = rowVal.record.fieldOptions[rowVal.column.key].fieldType
+  rowItemParam.value.is_defect = rowVal.record.fieldOptions[rowVal.column.key].is_defect
   rowEditDialogVisible.value = true
 }
 
@@ -455,6 +460,7 @@ const onRowEditFinish = () => {
   console.log('dataIndex:', toRaw(rowItemParam.value))
   rows.value[rowItemParam.value.rowIndex][rowItemParam.value.key] = rowItemParam.value.text
   rows.value[rowItemParam.value.rowIndex].fieldOptions[rowItemParam.value.key].fieldType = rowItemParam.value.fieldType
+  rows.value[rowItemParam.value.rowIndex].fieldOptions[rowItemParam.value.key].is_defect = rowItemParam.value.is_defect
   resetRowEdit()
   rowEditDialogVisible.value = false
 }
@@ -470,6 +476,7 @@ const resetRowEdit = () => {
     key: '',
     text: '',
     fieldType: '',
+    is_defect: false
   }
 }
 

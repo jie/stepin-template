@@ -7,22 +7,29 @@ import { openNotification, successNotification } from '@/utils/notification';
 import { inspect } from 'util';
 
 
-export interface ReportCategory {
+export interface ReportDefect {
   id?: string;
   name?: string;
   name_en?: string;
-  remark?: string;
-  children?: Array<ReportCategory>;
-  status?: string;
+  product?: string;
+  product_en?: string;
+  code?: string;
+  content?: string;
+  content_en?: string;
+  types?: Array<string>;
+  category_id?: string;
+  category?: object;
   org_id?: string;
+  status?: string;
 }
 
 
-export const ReportCategoryStore = defineStore('report_category', {
+export const ReportDefectStore = defineStore('report_defect', {
   state: () => {
     return {
       loading: false,
-      entity: {} as ReportCategory,
+      isNew: false,
+      defect: {} as ReportDefect,
       entities: <any>[],
       pagination: {} as Pagination,
       queryArgs: { status: "", keyword: ""},
@@ -32,12 +39,12 @@ export const ReportCategoryStore = defineStore('report_category', {
 
   },
   actions: {
-    async apiSave(data: ReportCategory) {
+    async apiSave(data: ReportDefect) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_category/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_defect/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Saved")
@@ -49,12 +56,12 @@ export const ReportCategoryStore = defineStore('report_category', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdate(data: Report) {
+    async apiUpdate(data: ReportDefect) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_category/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_defect/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Updated")
@@ -71,7 +78,7 @@ export const ReportCategoryStore = defineStore('report_category', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_category/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_defect/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -91,7 +98,7 @@ export const ReportCategoryStore = defineStore('report_category', {
         ...this.queryArgs
       }
       return http
-        .request('/platform/report_api/report_category/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_defect/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -104,69 +111,13 @@ export const ReportCategoryStore = defineStore('report_category', {
         })
         .finally(() => {setPageLoading(false);this.loading = false});
     },
-    async apiQueryParent(onlyLeafSelectables: boolean = false) {
-        const { setPageLoading } = useLoadingStore();
-        setPageLoading(true)
-        this.loading = true
-        let session = getSessionInfo()
-        let bodyJson = {
-          ...this.pagination,
-          ...this.queryArgs
-        }
-        return http
-          .request('/platform/report_api/report_category/query_parent', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
-          .then((response) => {
-            console.log('response:', response)
-            if (response.data?.data) {
-              this.pagination.total = response.data?.data?.total
-              this.entities = response.data?.data?.entities
-              if(onlyLeafSelectables) {
-                this.entities = this.entities.map(item=>{
-                  if(item.children && item.children.length > 0) {
-                    item.selectable = false
-                  } else {
-                    item.selectable = true
-                  }
-                  return item
-                })
-              }
-              return response.data?.data;
-            } else {
-              return Promise.reject(response);
-            }
-          })
-          .finally(() => {setPageLoading(false);this.loading = false});
-      },
-    async apiQueryByIdsReport(ids: string[]) {
-      const { setPageLoading } = useLoadingStore();
-      setPageLoading(true)
-      let session = getSessionInfo()
-      let bodyJson = {
-        ids: ids
-      }
-      return http
-        .request('/platform/report_api/report_category/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
-        .then((response) => {
-          console.log('response:', response)
-          if (response.data?.data) {
-            this.pagination.total = response.data?.data?.total
-            this.pagination.pagesize = response.data?.data?.total
-            this.pagination.page = 1
-            this.entities = response.data?.data?.entities
-            return response.data?.data;
-          } else {
-            return Promise.reject(response);
-          }
-        })
-        .finally(() => setPageLoading(false));
-    },
     async apiGet(id: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       let bodyJson = { id: id }
       return http
-        .request('/platform/report_api/report_category/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_defect/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

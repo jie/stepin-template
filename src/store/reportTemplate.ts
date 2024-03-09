@@ -16,6 +16,8 @@ interface ReportTemplateSettings {
 export interface ReportTemplate {
   id?: string;
   title?: string;
+  category?:any;
+  category_id?: string;
   summary?: string;
   settings?: ReportTemplateSettings;
   items?: BaseComponent[];

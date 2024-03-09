@@ -2,8 +2,8 @@
     <div>
         <BaseSlot :item="props?.item">
             <a-form-item :label="props?.item?.data?.label" :rules="[{ required: props?.item?.required, message: `Please enter ${props?.item?.title}`, trigger: 'change' }]">
-                <a-checkbox-group :checked="props.value" :options="props?.item?.data?.options" @change="onChange" v-if="props?.item?.layout == 'horizontal'" />
-                <a-checkbox-group v-else :checked="props.value" @change="onChange">
+                <a-checkbox-group v-model:value="props.value" :options="props?.item?.data?.options" @change="onChange" v-if="props?.item?.layout == 'horizontal'" />
+                <a-checkbox-group v-else v-model:value="props.value" @change="onChange">
                     <a-checkbox :style="checkboxStyle" :value="option.value" v-for="option in props?.item?.data?.options">{{option.label}}</a-checkbox>
                 </a-checkbox-group>
             </a-form-item>

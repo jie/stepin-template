@@ -70,6 +70,7 @@ const newReportUser = (reportUser?: ReportUser) => {
       mobile: '',
       remark: '',
       avatar: '',
+      password: '',
       roles: [],
       status: '1',
       is_customer: false,
@@ -83,6 +84,7 @@ const newReportUser = (reportUser?: ReportUser) => {
     reportUser.phone = '';
     reportUser.mobile = '';
     reportUser.name = '';
+    reportUser.password = '';
     reportUser.remark = '';
     reportUser.avatar = '';
     reportUser.status = '1';
@@ -127,6 +129,7 @@ async function submit() {
     email: form.email,
     phone: form.phone,
     mobile: form.mobile,
+    password: form.password,
     remark: form.remark,
     status: form.status,
     avatar: form.avatar,
@@ -171,6 +174,7 @@ function edit(record: ReportUser) {
   if ((record.roles as any).length > 0) {
     form.roles = (record.roles as any).map((item: any) => item.id)
   }
+  form.password = ''
   showModal.value = true;
 }
 function view(record: ReportUser) {
@@ -262,6 +266,9 @@ const statusDialogCancel = () => {
       </a-form-item>
       <a-form-item required label="E-mail" name="email">
         <a-input v-model:value="form.email" />
+      </a-form-item>
+      <a-form-item label="Password" name="password">
+        <a-input v-model:value="form.password" type="password"/>
       </a-form-item>
       <a-form-item label="Mobile" name="mobile">
         <a-input v-model:value="form.mobile" />

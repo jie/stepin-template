@@ -58,6 +58,8 @@ const initialization = async () => {
   // store.loading = false
   hasPermissionRef.value = true
   await store.apiGet(route.params.reportId)
+  await store.apiQueryDefectByReportId()
+  console.log('defects:', toRaw(store.defects))
   store.loading = false
 
   // if (!store.report.items || store.report.items.length == 0) {

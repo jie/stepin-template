@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
-import { reactive, ref } from 'vue';
+import { reactive, ref, toRaw } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
 import { DeleteOutlined, EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
 import { ReportCategory as Category, ReportCategoryStore } from '@/store/category';
@@ -13,7 +13,6 @@ const columns = [
     dataIndex: 'id'
   },
   { title: 'NAME', dataIndex: 'name', width: 400 },
-  { title: 'STATUS', dataIndex: 'status' },
   { title: 'REMARK', dataIndex: 'remark' },
   { title: 'CREATED', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
@@ -73,6 +72,7 @@ function submit() {
         store.apiUpdate(form)
       }
       showModal.value = false;
+      initializeData()
       reset();
     })
     .catch((e) => {
@@ -94,6 +94,9 @@ const editRecord = ref<Category>();
 function edit(record: Category) {
   editRecord.value = record;
   copyObject(form, record);
+  console.log('form:', toRaw(form))
+  console.log('record:', toRaw(record))
+  form.id = record.id
   showModal.value = true;
 }
 
