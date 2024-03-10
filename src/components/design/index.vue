@@ -1,7 +1,7 @@
 <template>
   <div class="report">
-    <div style="max-width: 700px;  padding: 20px; height: 100%;">
-      <div style="text-align: right;">
+    <div style="max-width: 1024px;  padding: 20px; height: 100%;">
+      <div class="component-operation">
         <a-button class="mr-2" @click="onClickPreview">
           <template #icon>
             <EyeOutlined />
@@ -49,6 +49,14 @@
               v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
           </div>
           <reportInput :item="item" ref="itemRefs" />
+        </div>
+        <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
+          @click="onSetCurrentCom(item)" v-else-if="item.type == 'input_group'">
+          <div class="options">
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+          </div>
+          <reportInputGroup :item="item" ref="itemRefs" />
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'radio'">
@@ -115,6 +123,7 @@
       <div>
         <TableEditor ref="tableEditor" v-if="currentEditItem?.type == 'table'" />
         <InputEditor ref="inputEditor" v-else-if="currentEditItem?.type == 'input'" />
+        <InputGroupEditor ref="inputGroupEditor" v-else-if="currentEditItem?.type == 'input_group'" />
         <TextEditor ref="textEditor" v-else-if="currentEditItem?.type == 'text'" />
         <RadioEditor ref="radioEditor" v-else-if="currentEditItem?.type == 'radio'" />
         <CheckboxEditor ref="checkboxEditor" v-else-if="currentEditItem?.type == 'checkbox'" />
@@ -148,6 +157,7 @@ import { EditOutlined, SettingOutlined, DeleteOutlined, PlusOutlined } from '@an
 import TableEditor from './reportTable/table_editor.vue'
 import TextEditor from "./reportText/text_editor.vue"
 import InputEditor from "./reportInput/input_editor.vue"
+import InputGroupEditor from "./reportInputGroup/input_group_editor.vue"
 import RadioEditor from "./reportRadio/radio_editor.vue"
 import CheckboxEditor from "./reportCheckbox/checkbox_editor.vue"
 import ImageEditor from "./reportImage/image_editor.vue"
@@ -156,6 +166,7 @@ import ContainerEditor from "./reportContainer/container_editor.vue"
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
+import reportInputGroup from "./reportInputGroup/index.vue"
 import reportRadio from "./reportRadio/index.vue"
 import reportCheckbox from "./reportCheckbox/index.vue"
 import reportImage from "./reportImage/index.vue"
@@ -164,6 +175,7 @@ import reportContainer from "./container.vue"
 import {
   ReportTitle,
   ReportInput,
+  ReportInputGroup,
   ReportTable,
   ReportImage,
   ReportImageUpload,
@@ -189,6 +201,7 @@ const afterVisibleChange = (bool: boolean) => {
 const isDrawerLoading = ref(false)
 const tableEditor = ref(null)
 const inputEditor = ref(null)
+const inputGroupEditor = ref(null)
 const radioEditor = ref(null)
 const checkboxEditor = ref(null)
 const imageEditor = ref(null)
@@ -216,9 +229,11 @@ const onOpenEditor = (item: any) => {
       case 'text':
         break;
       case 'input':
-        console.log('input1')
         currentEditRef.value = inputEditor.value
         inputEditor.value.initializeData(item)
+      case 'input_group':
+        currentEditRef.value = inputGroupEditor.value
+        inputGroupEditor.value.initializeData(item)
         break;
       case 'radio':
         console.log('radio1')
@@ -298,6 +313,9 @@ const onAddComponent = (com: any) => {
       break
     case "input":
       newItem = new ReportInput(com.com.defaultData)
+      break
+    case "input_group":
+      newItem = new ReportInputGroup(com.com.defaultData)
       break
     case "table":
       newItem = new ReportTable(com.com.defaultData)
@@ -439,6 +457,18 @@ const onClickSaveReportTemplate = async () => {
 </script>
 
 <style scoped>
+.component-operation {
+  text-align: right; 
+  position: fixed; 
+  top: 82px; 
+  left: 260px;
+  background-color: #f9f9f9; 
+  border: 2px solid #ccc; 
+  z-index: 100; 
+  padding: 20px; 
+  border-radius: 20px; 
+  box-shadow: 0 0 10px #ccc;
+}
 .title,
 .summary {
   padding: 10px;
@@ -447,7 +477,7 @@ const onClickSaveReportTemplate = async () => {
 }
 
 .title {
-  margin-top: 30px;
+  margin-top: 60px;
   font-size: 20px;
   font-weight: bold;
 }

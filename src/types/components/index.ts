@@ -12,6 +12,11 @@ export class ReportInput extends BaseComponent {
     defaultData = ""
 }
 
+export class ReportInputGroup extends BaseComponent {
+    type = "input_group"
+    defaultData = ""
+}
+
 export class ReportTable extends BaseComponent {
     type = "table"
     defaultData = ""

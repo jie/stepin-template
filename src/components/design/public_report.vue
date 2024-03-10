@@ -17,7 +17,7 @@
       </a-form>
     </a-modal>
     <div
-      style="max-width: 700px;  padding: 20px 20px 100px 20px; height: 100%; background-color: #fff; margin: 0 auto; position: relative;">
+      style="max-width: 1024px;  padding: 20px 20px 100px 20px; height: 100%; background-color: #fff; margin: 0 auto; position: relative;">
 
       <div v-if="loadingRef"
         style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
@@ -35,9 +35,10 @@
             <reportText :item="item" ref="itemRefs" />
           </div>
           <div class="component" v-else-if="item.type == 'input'">
-
             <reportInput :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
-
+          </div>
+          <div class="component" v-else-if="item.type == 'input_group'">
+            <reportInputGroup :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
           </div>
           <div class="component" v-else-if="item.type == 'radio'">
             <reportRadio :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
@@ -84,6 +85,7 @@ import { defineProps, ref, computed, toRaw, reactive } from 'vue';
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
+import reportInputGroup from "./reportInputGroup/index.vue"
 import reportRadio from "./reportRadio/index.vue"
 import reportCheckbox from "./reportCheckbox/index.vue"
 import reportImage from "./reportImage/index.vue"
@@ -115,8 +117,8 @@ const change = (affixed: boolean) => {
 const reportDataRef = ref()
 const initialization = () => {
   console.log('loadLocalData')
-  // loadLocalData()
-  loadRemoteData()
+  loadLocalData()
+  // loadRemoteData()
 }
 
 
@@ -155,7 +157,7 @@ const loadLocalData = async () => {
     formState[key] = values[key]
   
   }
-  console.log('formState:', formState)
+  console.log('formState:', toRaw(formState))
 }
 
 const loadRemoteData = async () => {
@@ -168,6 +170,7 @@ const loadRemoteData = async () => {
 
 const editableComponents = [
   "input",
+  "input_group",
   "radio",
   "checkbox",
   "image_upload",

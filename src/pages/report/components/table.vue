@@ -109,10 +109,18 @@ function submit() {
         company_id: form.company_id,
         settings: form.settings,
       }
-      if (form.order_id) {
+      if (form.id) {
         reqData.id = form.id
       }
-      await store.apiUpdate(reqData)
+      if(form.order_id) {
+        reqData.order_id = form.order_id
+      }
+      if(form.id) {
+        await store.apiUpdate(reqData)
+      } else {
+        await store.apiSave(reqData)
+      }
+
 
       showModal.value = false;
       initializeData()
@@ -306,7 +314,7 @@ initializeData()
         <a-switch v-model:checked="form.settings.approve_permission" />
       </a-form-item>
       <hr />
-      <a-form-item label="Template" name="report_template">
+      <a-form-item label="Template" name="report_template_id" required>
         <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
           searchKey="name" />
       </a-form-item>

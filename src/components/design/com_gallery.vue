@@ -25,6 +25,13 @@ const items = ref([
     }),
     defaultData: { title: "Here is the title", sort: "0", desc: "Here is the description", type: "input", data: {value: ""} }
   },
+  {
+    name: 'InputGroup',
+    type: 'input_group',
+    icon: h(BorderOutlined, {
+    }),
+    defaultData: { title: "Here is the title", sort: "0", desc: "Here is the description", type: "input_group", data: {value: [], hasAddRowButton: false} }
+  },
   // {
   //   name: 'Text',
   //   type: 'text',

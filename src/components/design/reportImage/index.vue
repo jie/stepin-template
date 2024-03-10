@@ -29,7 +29,7 @@ const exportData = () => {
 }
 
 const exportValue = () => {
-    return itemValue.value
+    return props.item.value
 }
 
 
