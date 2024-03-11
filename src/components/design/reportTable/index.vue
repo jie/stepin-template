@@ -11,7 +11,7 @@
                 :placeholder="record.fieldOptions[column.key].placeholder"
                 @search="clickEditRow({ text, record, index, column })">
                 <template #enterButton>
-                  <a-button>Edit Row</a-button>
+                  <EditOutlined />
                 </template>
               </a-input-search>
             </template>
@@ -56,7 +56,7 @@
         <template v-for="row in formRows">
           <div v-for="col in tableDataRef.columns">
             <div>{{ row[col.key] }}</div>
-            <a-form-item :label="col.title" v-if="row.fieldOptions[col.key].fieldType == 'input'">
+            <a-form-item :label="col.title" v-if="col.children.length==0 && row.fieldOptions[col.key].fieldType == 'input'">
 
               <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
                 v-model:value="row.fieldOptions[col.key].val" style="width: 100%"
@@ -72,6 +72,28 @@
 
               <a-input v-model:value="row.fieldOptions[col.key].val" allowClear v-else />
             </a-form-item>
+
+
+            <div v-if="col.children && col.children.length != 0">
+              <a-form-item :label="`${col.title} - ${child.title}`" v-for="child in col.children">
+
+                <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
+                  v-model:value="row.fieldOptions[child.key].val" style="width: 100%"
+                  placeholder="" :options="defectOptions"
+                  v-if="row.fieldOptions[child.key].is_defect"
+                  @search="handleSearchDefect" allowClear>
+                  <template #option="{ content_en: content_en, id: id }">
+                    <div style="display:flex" @click="onDefectSelect(row, child.key, id)">
+                      <span style="flex: 1">{{ content_en }}</span>
+                      <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
+                    </div>
+                  </template>
+                </a-auto-complete>
+                <a-input v-model:value="row.fieldOptions[child.key].val" v-else allowClear />
+              </a-form-item>
+            </div>
+
+
           </div>
         </template>
       </a-form>
@@ -86,6 +108,7 @@ import type { TableColumnsType } from 'ant-design-vue';
 import { toRaw, computed, reactive } from 'vue';
 import { copyObject } from "@/utils/objectUtils"
 import { ReportFillStore } from "@/store/report_fill"
+import { EditOutlined } from "@ant-design/icons-vue";
 // const reportTemplateStore = ReportTemplateStore()
 const store = ReportFillStore()
 const props = defineProps({

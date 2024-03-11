@@ -53,11 +53,17 @@
             <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">Add New
               Item</a-button>
             <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>Add
-              Child
-              Item</a-button>
+              Child Item</a-button>
             <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">Edit
               Item</a-button>
+
+            <a-popconfirm title="Confirm delete?" @confirm="onClickDelete(itemParam.key)" ok-text="Yes" no-text="No">
+              <a-button type="default" class="mr-2" :disabled="itemParam.key ? false : true">Delete
+                Item</a-button>
+            </a-popconfirm>
           </a-form-item>
+
+
         </a-form>
       </div>
     </div>
@@ -304,6 +310,24 @@ const onClickEdit = () => {
   presetTable.value.updateTableData({ columns: convertColumnToTableData(treeData.value), rows: rows.value })
 }
 
+function deleteNode(key, items) {
+  for (let item of items) {
+    if (item.children && item.children.length != 0) {
+      item.children = deleteNode(key, item.children)
+    }
+  }
+  return items.filter(obj => obj.value !== key);
+}
+
+const onClickDelete = (key: string) => {
+  if (!key) {
+    return
+  }
+  treeData.value = deleteNode(key, treeData.value)
+  updateRowsWhenUpdateColumn()
+  presetTable.value.updateTableData({ columns: convertColumnToTableData(treeData.value), rows: rows.value })
+}
+
 
 const onFinish = () => {
 
@@ -386,8 +410,8 @@ const exportData = () => {
   console.log('export--data:', toRaw(data))
   let tableData = {
     columns: data.columns,
-    rows: [], 
-    rowSchema: data.rows, 
+    rows: [],
+    rowSchema: data.rows,
     pageSize: TableSettings.value.pageSize,
     addRowCount: TableSettings.value.hasAddRowButton ? data.rows.length : 0,
     hasAddRowButton: TableSettings.value.hasAddRowButton
