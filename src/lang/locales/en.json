@@ -3,5 +3,48 @@
     "menu": {
         "report": "Report",
         "personal": "User Center"
+    },
+    "login": {
+        "login": "Login",
+        "regist": "Regist",
+        "please_enter_email": "Please enter E-mail",
+        "please_enter_password": "Please enter password",
+        "not_user": "Not a user?"
+    },
+    "base": {
+        "Report": "Report",
+        "Date": "Date",
+        "Customer": "Customer",
+        "Workers": "Workers",
+        "Status": "Status",
+        "Category": "Category",
+        "Search": "Search",
+        "Create": "Create",
+        "Name": "Name",
+        "Title": "Title",
+        "Summary": "Summary",
+        "OrderID": "Order ID",
+        "Review": "Review",
+        "OP": "OP",
+        "View": "View",
+        "Edit": "Edit",
+        "Delete": "Delete",
+        "Submit": "Submit",
+        "Verify": "Verify",
+        "SendToCustomer": "Send To Customer",
+        "SendToWorker": "Send To Worker",
+        "FillByPassword": "Fill By Password",
+        "FillByPermission": "Fill By Permission",
+        "ReviewByPassword": "Review By Password",
+        "ReviewByPermission": "Review By Permission",
+        "Template": "Template",
+        "Company": "Company",
+        "Choose": "Choose",
+        "Cancel": "Cancel",
+        "OK": "OK",
+        "ConfirmDelete": "Confirm delete?",
+        "SetStatus": "Set Status",
+        "Reason": "Reason",
+        "PublicView": "View Report"
     }
 }

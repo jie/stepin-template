@@ -9,8 +9,7 @@
 
   const router = useRouter();
   function onLoginSuccess() {
-    console.log('111')
-    router.push('/workspace/report');
+    router.push('/workplace/report');
   }
 </script>
 <style scoped lang="less">

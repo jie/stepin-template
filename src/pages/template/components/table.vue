@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { getBase64 } from '@/utils/file';
 import { FormInstance } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
@@ -8,17 +7,22 @@ import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } fro
 import router from '@/router';
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
 import { ReportTemplateStore, ReportTemplate } from "@/store/reportTemplate"
+import { ReportConfigStore } from '@/store/config';
 import { ReportCategoryStore } from "@/store/category"
-import { Report } from '@/pages/constants';
 import { statusFormSchema } from "@/types"
 const isViewForm = ref(false)
 const store = ReportTemplateStore()
 const categoryStore = ReportCategoryStore()
+const configStore = ReportConfigStore()
 const searchKeywords = ref("")
 const columns = [
   {
     title: 'Name',
     dataIndex: 'name',
+  },
+  {
+    title: 'Language',
+    dataIndex: 'language',
   },
   {
     title: 'Category',
@@ -35,10 +39,12 @@ const Ctl = reactive({
   page: 1,
   pagesize: 10,
   total: 0,
-  isNew: false
+  isNew: false,
+  languages: [],
 });
 
 const createTimeRef = ref<Dayjs>(dayjs());
+
 
 
 const initializeData = async () => {
@@ -46,6 +52,16 @@ const initializeData = async () => {
   console.log('result:', result)
   await categoryStore.apiQueryParent(true)
   console.log('categoryStore.entities:', toRaw(categoryStore.entities))
+  let languageConfig = await configStore.apiGetByKey("LANGUAGE")
+  console.log('languageConfig:', toRaw(languageConfig))
+  let languages = JSON.parse(languageConfig.entity.value)
+  Ctl.languages = languages.map((item: any) => {
+    return {
+      label: item.name,
+      value: item.code
+    }
+  })
+  console.log('languageConfig:', toRaw(Ctl.languages))
 }
 
 initializeData()
@@ -66,12 +82,14 @@ const newReportTemplate = (reportTemplate?: ReportTemplate) => {
     return <ReportTemplate>{
       id: '',
       name: '',
+      language: '',
       category_id: '',
       status: '1',
       create_at: create_at
     }
   } else {
     reportTemplate.name = '';
+    reportTemplate.language = '';
     reportTemplate.category_id = '';
     reportTemplate.status = '1';
     reportTemplate.create_at = create_at;
@@ -108,9 +126,9 @@ async function submit() {
     ?.validateFields()
     .then(async (res: ReportTemplate) => {
       if (Ctl.isNew === true) {
-        await store.apiSave({ name: form.name, category_id: form.category_id ,status: form.status })
+        await store.apiSave({ name: form.name, category_id: form.category_id ,status: form.status, language: form.language})
       } else {
-        await store.apiUpdate({ id: form.id, name: form.name, category_id: form.category_id, status: form.status })
+        await store.apiUpdate({ id: form.id, name: form.name, category_id: form.category_id, status: form.status, language: form.language})
       }
       showModal.value = false;
       reset();
@@ -196,6 +214,10 @@ const statusDialogCancel = () => {
   statusForm.status = ''
 }
 
+const getLanguage = (code: string) => {
+  let language = Ctl.languages.find((item: any) => item.value === code)
+  return language ? language.label : ''
+}
 
 </script>
 <template>
@@ -218,6 +240,9 @@ const statusDialogCancel = () => {
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
+      <a-form-item label="Language" required name="language">
+        <a-select v-model:value="form.language" style="width: 100%" :options="Ctl.languages" />
+      </a-form-item>
       <a-form-item label="Category" required name="category_id">
         <a-tree-select v-model:value="form.category_id" style="width: 100%" placeholder="Please select" allow-clear :tree-data="categoryStore.entities" :field-names="{
             children: 'children',
@@ -238,7 +263,7 @@ const statusDialogCancel = () => {
         <h4>Templates</h4>
         <div class="flex">
           <div class="mr-4">
-            <span class="mr-2">Status {{ store.queryArgs.status }}</span>
+            <span class="mr-2">Status</span>
             <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
@@ -271,6 +296,9 @@ const statusDialogCancel = () => {
       </div>
       <template v-else-if="column.dataIndex === 'category'">
         {{ record?.category?.name }}
+      </template>
+      <template v-else-if="column.dataIndex === 'language'">
+        {{ getLanguage(record?.language) }}
       </template>
       <template v-else-if="column.dataIndex === 'status'">
         <a-badge class="text-subtext" :color="'green'">

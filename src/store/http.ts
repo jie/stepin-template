@@ -2,6 +2,7 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import createHttp from '@/utils/axiosHttp';
 import { isResponse } from '@/types';
 import NProgress from 'nprogress';
+import { message } from 'ant-design-vue';
 
 const http = createHttp({
   timeout: 10000,
@@ -10,6 +11,29 @@ const http = createHttp({
   xsrfCookieName: 'Authorization',
   xsrfHeaderName: 'Authorization',
 });
+
+
+http.interceptors.response.use(
+
+  (response) => {
+    console.log('axios:', response)
+    if (response?.data?.status === false && response?.data?.message === "session_required") {
+      let session = localStorage.getItem('report_session')
+      if(session) {
+        localStorage.removeItem('report_session')
+        message.error('Session Expired, please login again.');
+      }
+
+      return Promise.reject('session_required')
+    }
+    return response
+  },
+  (error) => {
+
+    return Promise.reject(error) // 错误继续返回给到具体页面
+  }
+)
+
 
 const isAxiosResponse = (obj: any): obj is AxiosResponse => {
   return typeof obj === 'object' && obj.status && obj.statusText && obj.headers && obj.config;

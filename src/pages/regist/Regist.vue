@@ -9,7 +9,7 @@
   
     const router = useRouter();
     function onLoginSuccess() {
-      router.push('/workspace/report');
+      router.push('/workplace/report');
     }
   </script>
   <style scoped lang="less">

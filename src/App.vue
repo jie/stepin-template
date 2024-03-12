@@ -1,5 +1,5 @@
 <template>
-  <a-config-provider :getPopupContainer="getPopupContainer">
+  <a-config-provider :getPopupContainer="getPopupContainer" :locale="locale === 'en' ? enUS : zhCN">
     <ThemeProvider is-root v-bind="themeConfig" :apply-style="false" :size="size" :font="font">
       <stepin-view
         system-name=""
@@ -14,7 +14,7 @@
         @themeSelect="configTheme"
       >
         <template #headerActions>
-          <HeaderActions @showSetting="showSetting = true" />
+          <HeaderActions @showSetting="showSetting = true" v-on:change-locale="onChangeLocale"/>
         </template>
         <template #pageFooter>
           <PageFooter />
@@ -41,8 +41,12 @@
   import { configTheme, themeList } from '@/theme';
   import { ThemeProvider } from 'stepin';
   import { computed } from 'vue';
-
+  import {i18n} from '@/lang/i18n';
+  import dayjs  from 'dayjs';
+  import enUS from 'ant-design-vue/es/locale/en_US';
+  import zhCN from 'ant-design-vue/es/locale/zh_CN';
   const { logout, profile } = useAccountStore();
+  const locale = ref("zh");
 
   // 获取个人信息
   profile().then((response) => {
@@ -78,6 +82,17 @@
 
   function getPopupContainer() {
     return document.querySelector('.stepin-layout');
+  }
+
+  function onChangeLocale(lang: string) {
+    locale.value = lang;
+    console.log('lang', lang)
+    i18n.global.locale = lang;
+    dayjs.locale(lang);
+    localStorage.setItem('locale', lang);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000)
   }
 
   const size = {

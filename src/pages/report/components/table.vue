@@ -14,6 +14,7 @@ import { ReportStore, Report } from '@/store/report'
 import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
 import {useRouter} from 'vue-router'
+import {i18n} from "@/lang/i18n"
 const router = useRouter()
 const store = ReportStore()
 const categoryStore = ReportCategoryStore()
@@ -25,18 +26,18 @@ const reportCompanyReviewRef = ref(null)
 const searchDateRangeRef = ref<DayjsDateRangeSchema>()
 const columns = [
   {
-    title: 'Report',
+    title: i18n.global.t('base.Report'),
     dataIndex: 'name',
     fixed: 'left',
     width: 260,
   },
-  { title: 'DATE', dataIndex: 'inspect_date', width: 120 },
-  { title: 'CUSTOMER', dataIndex: 'company', width: 200 },
-  { title: 'WORKERS', dataIndex: 'workers', width: 200 },
-  { title: 'CATEGORY', dataIndex: 'category', width: 160 },
-  { title: 'STATUS', dataIndex: 'status', width: 80 },
-  { title: 'Review', dataIndex: 'approve_status', width: 80 },
-  { title: 'OP', dataIndex: 'edit', width: 50 },
+  { title: i18n.global.t('base.Date'), dataIndex: 'inspect_date', width: 120 },
+  { title: i18n.global.t('base.Customer'), dataIndex: 'company', width: 200 },
+  { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
+  { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
+  { title: i18n.global.t('base.Status'), dataIndex: 'status', width: 80 },
+  { title: i18n.global.t('base.Review'), dataIndex: 'approve_status', width: 80 },
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 50 },
 ];
 
 
@@ -285,61 +286,61 @@ initializeData()
     </a-form>
   </a-modal> -->
 
-  <a-modal :title="form._isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel"
+  <a-modal :title="form._isNew ? $t('base.Create') : $t('base.Edit')" v-model:visible="showModal" @ok="submit" @cancel="cancel"
     width="660px">
     <a-form ref="formModel" :model="form" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
-      <a-form-item required label="Name" name="name">
+      <a-form-item required :label="$t('base.Name')" name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item label="Title" name="title">
+      <a-form-item :label="$t('base.Title')" name="title">
         <a-input v-model:value="form.title" />
       </a-form-item>
-      <a-form-item label="Summary" name="summary">
+      <a-form-item :label="$t('base.Summary')" name="summary">
         <a-textarea v-model:value="form.summary" />
       </a-form-item>
-      <a-form-item label="Order ID" name="order">
+      <a-form-item :label="$t('base.OrderID')" name="order">
         <a-input v-model:value="form.order_id" />
       </a-form-item>
       <hr />
-      <a-form-item label="Fill by password" name="validate_password">
+      <a-form-item :label="$t('base.FillByPassword')" name="validate_password">
         <a-switch v-model:checked="form.settings.validate_password" />
       </a-form-item>
-      <a-form-item label="Fill by permission" name="validate_permission">
+      <a-form-item :label="$t('base.FillByPermission')" name="validate_permission">
         <a-switch v-model:checked="form.settings.validate_permission" />
       </a-form-item>
-      <a-form-item label="Review by password" name="approve_password">
+      <a-form-item :label="$t('base.ReviewByPassword')" name="approve_password">
         <a-switch v-model:checked="form.settings.approve_password" />
       </a-form-item>
-      <a-form-item label="Review by permission" name="approve_permission">
+      <a-form-item :label="$t('base.ReviewByPermission')" name="approve_permission">
         <a-switch v-model:checked="form.settings.approve_permission" />
       </a-form-item>
       <hr />
-      <a-form-item label="Template" name="report_template_id" required>
+      <a-form-item :label="$t('base.Template')" name="report_template_id" required>
         <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
           searchKey="name" />
       </a-form-item>
-      <a-form-item label="Workers" name="workers">
+      <a-form-item :label="$t('base.Workers')" name="workers">
         <RemoteSelect ref="reportWorkerRef" type="worker" v-model:value="form.workers" :isMultiple="true"
           searchKey="name" />
       </a-form-item>
-      <a-form-item label="Customer" name="users_review">
+      <a-form-item :label="$t('base.Customer')" name="users_review">
         <RemoteSelect ref="reportUsersReviewRef" type="customer" v-model:value="form.users_review" :isMultiple="true"
           searchKey="name" />
       </a-form-item>
-      <a-form-item label="Company" name="company">
+      <a-form-item :label="$t('base.Company')" name="company">
         <RemoteSelect ref="reportCompanyReviewRef" type="company" v-model:value="form.company_id"
           searchKey="name" />
       </a-form-item>
     </a-form>
   </a-modal>
   <!-- 审核dialog -->
-  <a-modal title="Set Status" v-model:visible="statusDialogRef" @ok="statusDialogConfirm" @cancel="statusDialogCancel"
+  <a-modal :title="$t('base.SetStatu')" v-model:visible="statusDialogRef" @ok="statusDialogConfirm" @cancel="statusDialogCancel"
     width="660px">
-    <a-form ref="statusFormModel" :model="statusForm" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
-      <a-form-item required label="Status" name="status">
+    <a-form ref="statusFormModel" :model="statusForm" ::label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
+      <a-form-item required :label="$t('base.Status')" name="status">
         <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
       </a-form-item>
-      <a-form-item label="Reason" name="reason">
+      <a-form-item :label="$t('base.Reason')" name="reason">
         <a-textarea v-model:value="statusForm.reason" />
       </a-form-item>
     </a-form>
@@ -352,31 +353,31 @@ initializeData()
     }" :scroll="{ y: 600 }">
       <template #title>
         <div class="">
-          <h4>Report</h4>
+          <h4>{{ $t('base.Report') }}</h4>
           <a-row type="flex" style="width: 100%" :gutter="[16, 16]">
             <a-col :span="6">
               <div>
-                <span class="mr-2">Date</span>
+                <span class="mr-2">{{ $t('base.Date') }}</span>
                 <div><a-range-picker v-model:value="searchDateRangeRef" allowClear style="width: 100%;" /></div>
               </div>
             </a-col>
             <a-col :span="6">
               <div>
-                <span class="mr-2">Customer</span>
+                <span class="mr-2">{{ $t('base.Customer') }}</span>
                 <a-input v-model:value="store.queryArgs.company_name" allowClear>
                 </a-input>
               </div>
             </a-col>
             <a-col :span="6">
               <div class="">
-                <span class="mr-2">Workers</span>
+                <span class="mr-2">{{ $t('base.Workers') }}</span>
                 <a-input v-model:value="store.queryArgs.worker_name" allowClear>
                 </a-input>
               </div>
             </a-col>
             <a-col :span="6">
               <div class="">
-                <span class="mr-2">Status</span>
+                <span class="mr-2">{{ $t('base.Status') }}</span>
                 <div>
                   <a-select class="w-full" ref="select" v-model:value="store.queryArgs.status" allowClear>
                     <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label
@@ -388,7 +389,7 @@ initializeData()
           </a-row>
           <a-row type="flex" style="width: 100%;margin-top:10px;" :gutter="[16, 16]">
             <a-col :span="6">
-              <div class="mr-2">Category</div>
+              <div class="mr-2">{{ $t('base.Category') }}</div>
               <a-tree-select v-model:value="store.queryArgs.category_id" show-search style="width: 100%"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" placeholder="Please select" allow-clear
                 tree-default-expand-all :tree-data="categoryStore.entities" :field-names="{
@@ -409,13 +410,13 @@ initializeData()
                 <template #icon>
                   <PlusOutlined />
                 </template>
-                Create
+                {{ $t('base.Create') }}
               </a-button>
               <a-button class="mr-2" @click="onClickSearch" style="float: right;">
                 <template #icon>
                   <SearchOutlined />
                 </template>
-                Search
+                {{ $t('base.Search') }}
               </a-button>
 
             </a-col>
@@ -479,13 +480,13 @@ initializeData()
                 <a-menu-item key="0">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <ReadOutlined />
-                    View
+                    {{ $t('base.View') }}
                   </a>
                 </a-menu-item>
                 <a-menu-item key="0">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <EditOutlined />
-                    Edit
+                    {{ $t('base.Edit') }}
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
@@ -493,7 +494,7 @@ initializeData()
                     @confirm="deleteRecord(record)">
                     <a rel="noopener noreferrer">
                       <DeleteOutlined />
-                      Delete
+                      {{ $t('base.Delete') }}
                     </a>
                   </a-popconfirm>
 
@@ -501,19 +502,19 @@ initializeData()
                 <a-menu-item key="1">
                   <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
-                    Verify
+                    {{ $t('base.Verify') }}
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
                   <a @click="goPublicFillReport(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
-                    Public View
+                    {{ $t('base.PublicView') }}
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <MailOutlined />
-                    Send to Customer
+                    {{ $t('base.SendToCustomer') }}
                   </a>
                 </a-menu-item>
               </a-menu>

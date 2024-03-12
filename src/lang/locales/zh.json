@@ -3,5 +3,48 @@
     "menu": {
         "report": "报告",
         "personal": "个人设置"
+    },
+    "login": {
+        "login": "登录",
+        "regist": "注册",
+        "please_enter_email": "请输入登录邮箱",
+        "please_enter_password": "请输入密码",
+        "not_user": "还未成为用户?"
+    },
+    "base": {
+        "Report": "报告",
+        "Date": "日期",
+        "Customer": "客户",
+        "Workers": "检验员",
+        "Status": "状态",
+        "Category": "分类",
+        "Search": "搜索",
+        "Create": "创建",
+        "Name": "名称",
+        "Title": "标题",
+        "Summary": "简介",
+        "OrderID": "订单ID",
+        "Review": "客户审核",
+        "OP": "操作",
+        "View": "查看",
+        "Edit": "编辑",
+        "Delete": "删除",
+        "Submit": "提交",
+        "Verify": "审核",
+        "SendToCustomer": "发送给客户",
+        "SendToWorker": "发送给检验员",
+        "FillByPassword": "提交时需要密码",
+        "FillByPermission": "提交时需要权限",
+        "ReviewByPassword": "客户审核时需要密码",
+        "ReviewByPermission": "客户审核时需要权限",
+        "Template": "模版",
+        "Company": "客户公司",
+        "Choose": "选择",
+        "Cancel": "取消",
+        "OK": "确定",
+        "ConfirmDelete": "确定删除?",
+        "SetStatus": "设置状态",
+        "Reason": "原因",
+        "PublicView": "打开填写报告页面"
     }
 }

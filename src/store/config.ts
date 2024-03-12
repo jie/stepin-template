@@ -121,6 +121,22 @@ export const ReportConfigStore = defineStore('report_config', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiGetByKey(key: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { key: key }
+      return http
+        .request('/platform/report_api/report_config/get_by_key', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
     async changePage(args: any) {
       console.log('args:', args)
       this.pagination.page = args.current
