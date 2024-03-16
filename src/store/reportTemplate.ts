@@ -9,15 +9,25 @@ import { Pagination } from "@/types"
 
 interface ReportTemplateSettings {
   allowSelectImageFromAlbum?: boolean;
+  ReportNumber?: boolean;
+  Applicant?: boolean;
+  Supplier?: boolean;
+  Factory?: boolean;
+  ItemNumber?: boolean;
+  ProductDescription?: boolean;
+  AddressOfInspection?: boolean;
+  DateOfInspection?: boolean;
+  ArrivalTime?: boolean;
+  DepartureTime?: boolean;
+  Inspector?: boolean;
 }
-
 
 
 export interface ReportTemplate {
   id?: string;
   title?: string;
   language?: string;
-  category?:any;
+  category?: any;
   category_id?: string;
   summary?: string;
   settings?: ReportTemplateSettings;

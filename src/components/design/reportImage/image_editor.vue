@@ -6,24 +6,24 @@
     </div>
     <div>
       <a-form name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }">
-        <a-form-item label="Full Width" name="full width">
+        <a-form-item :label="$t('base.FullWidth')" name="full width">
           <a-switch v-model:checked="imageItemSettings.isFullWidth" />
         </a-form-item>
-        <a-form-item label="Width" name="width" v-if="!imageItemSettings.isFullWidth">
+        <a-form-item :label="$t('base.Width')" name="width" v-if="!imageItemSettings.isFullWidth">
           <a-input-number v-model:value="imageItemSettings.width" />
         </a-form-item>
-        <a-form-item label="Columns" name="columns">
+        <a-form-item :label="$t('base.Column')" name="columns">
           <a-input-number v-model:value="imageItemSettings.columns" />
         </a-form-item>
-        <a-form-item label="Images" name="images" v-if="fileList && fileList.length != 0">
-          <a-image alt="example" style="width: 200px; height: 200px;" :src="item.url" v-for="item in fileList" />
+        <a-form-item :label="$t('base.Image')" name="images" v-if="fileList && fileList.length != 0">
+          <a-image  style="width: 200px; height: 200px;" :src="item.url" v-for="item in fileList" />
         </a-form-item>
-        <a-form-item label="Upload" name="uploader">
+        <a-form-item  :label="$t('base.Upload')" name="uploader">
           <a-button type="primary" @click="onClickTriggerButton">
             <template #icon>
               <plus-outlined />
             </template>
-            Upload
+            {{ $t('base.Upload') }}
           </a-button>
           <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange" accept="image/*" multiple />
         </a-form-item>

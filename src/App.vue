@@ -87,6 +87,7 @@
   function onChangeLocale(lang: string) {
     locale.value = lang;
     console.log('lang', lang)
+    console.log('i18n.global.locale:', i18n.global.locale)
     i18n.global.locale = lang;
     dayjs.locale(lang);
     localStorage.setItem('locale', lang);
@@ -103,6 +104,17 @@
   const font = {
     'font-size': '16px'
   }
+
+  function updateLocale() {
+    let lang = localStorage.getItem("locale")
+    if(!lang) {
+      lang = 'zh'
+    }
+    locale.value = lang
+  }
+
+
+  updateLocale()
 </script>
 
 <style lang="less">

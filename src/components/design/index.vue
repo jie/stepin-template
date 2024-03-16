@@ -2,26 +2,26 @@
   <div class="report">
     <div style="max-width: 1024px;  padding: 20px; height: 100%;">
       <div class="component-operation">
-        <a-button class="mr-2" @click="onClickPreview">
+        <!-- <a-button class="mr-2" @click="onClickPreview">
           <template #icon>
             <EyeOutlined />
-          </template> Preview
-        </a-button>
+          </template> {{ $t('base.Preview') }}
+        </a-button> -->
         <a-button class="mr-2" @click="onClickOpenGalleryDrawer">
           <template #icon>
             <PlusOutlined />
-          </template> Add Component
+          </template> {{ $t('base.AddComponent') }}
         </a-button>
         <a-button class="mr-2" @click="onClickOpenReportSettingDrawer">
           <template #icon>
             <SettingOutlined />
-          </template> Settings
+          </template> {{ $t('base.Settings') }}
         </a-button>
-        <a-popconfirm title="Save report template?" @confirm="onClickSaveReportTemplate">
+        <a-popconfirm title="Confirm save?" @confirm="onClickSaveReportTemplate">
           <a-button type="primary">
             <template #icon>
               <SaveOutlined />
-            </template> Save
+            </template> {{ $t('base.Save') }}
           </a-button>
         </a-popconfirm>
       </div>
@@ -116,8 +116,8 @@
   <a-drawer v-model:visible="editDrawerVisible" class="custom-class"  width="60%" :title="drawerTitle"
     placement="right" @after-visible-change="afterVisibleChange">
     <template #extra>
-      <a-button style="margin-right: 8px" @click="onClose">Cancel</a-button>
-      <a-button type="primary" @click="onApply">Apply</a-button>
+      <a-button style="margin-right: 8px" @click="onClose">{{ $t('base.Cancel') }}</a-button>
+      <a-button type="primary" @click="onApply">{{ $t('base.Apply') }}</a-button>
     </template>
     <a-spin :spinning="isDrawerLoading">
       <div>
@@ -140,10 +140,10 @@
     <ComGallery v-on:add-component="onAddComponent" />
   </a-drawer>
   <a-drawer v-model:visible="reportSettingDrawerVisible" class="custom-class"  width="600"
-    title="Settings" placement="right">
+    :title="$t('base.Settings')" placement="right">
     <template #extra>
-      <a-button style="margin-right: 8px" @click="onCloseSetting">Cancel</a-button>
-      <a-button type="primary" @click="onConfirmSetting">Confirm</a-button>
+      <a-button style="margin-right: 8px" @click="onCloseSetting">{{ $t('base.Cancel') }}</a-button>
+      <a-button type="primary" @click="onConfirmSetting">{{ $t('base.Confirm') }}</a-button>
     </template>
     <ReportSetting ref="reportSetting"/>
   </a-drawer>
@@ -219,6 +219,7 @@ const onOpenEditor = (item: any) => {
   isDrawerLoading.value = true
   setTimeout(() => {
     // const itemRef = itemRefs.value.find(r => r?.props?.item?.key == item.key)
+    console.log('item.type:', item.type)
     switch (item.type) {
       case 'table':
         // tableEditor.value.initializeData(item.key, itemRef.getTableData())
@@ -231,8 +232,10 @@ const onOpenEditor = (item: any) => {
       case 'input':
         currentEditRef.value = inputEditor.value
         inputEditor.value.initializeData(item)
+        break
       case 'input_group':
         currentEditRef.value = inputGroupEditor.value
+        console.log('item:', toRaw(item))
         inputGroupEditor.value.initializeData(item)
         break;
       case 'radio':
@@ -394,6 +397,23 @@ const onClickOpenGalleryDrawer = () => {
 }
 const onClickOpenReportSettingDrawer = () => {
   reportSettingDrawerVisible.value = true
+  console.log('reportTemplateStore.reportTemplate.settings:', toRaw(reportTemplateStore.reportTemplate))
+  let mySettings = {
+    allowSelectImageFromAlbum: reportTemplateStore.reportTemplate.settings?.allowSelectImageFromAlbum === undefined ? true: reportTemplateStore.reportTemplate.settings.allowSelectImageFromAlbum,
+    ReportNumber: reportTemplateStore.reportTemplate.settings?.ReportNumber === undefined ? true: reportTemplateStore.reportTemplate.settings.ReportNumber,
+    Applicant: reportTemplateStore.reportTemplate.settings?.Applicant === undefined ? true: reportTemplateStore.reportTemplate.settings.Applicant,
+    Supplier: reportTemplateStore.reportTemplate.settings?.Supplier === undefined ? true: reportTemplateStore.reportTemplate.settings.Supplier,
+    Factory: reportTemplateStore.reportTemplate.settings?.Factory === undefined ? true: reportTemplateStore.reportTemplate.settings.Factory,
+    ItemNumber: reportTemplateStore.reportTemplate.settings?.ItemNumber === undefined ? true: reportTemplateStore.reportTemplate.settings.ItemNumber,
+    ProductDescription: reportTemplateStore.reportTemplate.settings?.ProductDescription === undefined ? true: reportTemplateStore.reportTemplate.settings.ProductDescription,
+    AddressOfInspection: reportTemplateStore.reportTemplate.settings?.AddressOfInspection === undefined ? true: reportTemplateStore.reportTemplate.settings.AddressOfInspection,
+    DateOfInspection: reportTemplateStore.reportTemplate.settings?.DateOfInspection === undefined ? true: reportTemplateStore.reportTemplate.settings.DateOfInspection,
+    ArrivalTime: reportTemplateStore.reportTemplate.settings?.ArrivalTime === undefined ? true: reportTemplateStore.reportTemplate.settings.ArrivalTime,
+    DepartureTime: reportTemplateStore.reportTemplate.settings?.DepartureTime === undefined ? true: reportTemplateStore.reportTemplate.settings.DepartureTime,
+    Inspector: reportTemplateStore.reportTemplate.settings?.Inspector === undefined ? true: reportTemplateStore.reportTemplate.settings.Inspector,
+  }
+  console.log('mySettings:', mySettings)
+  reportTemplateStore.reportTemplate.settings = {...mySettings}
 
 }
 

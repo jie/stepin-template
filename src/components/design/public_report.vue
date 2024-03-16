@@ -1,12 +1,7 @@
 <template>
-
   <div class="report relative" v-if="store.report?.schema">
-    <a-modal
-      :getContainer="() => document.body"
-      v-model:visible="isShowSubmitDialog"
-      title="Please enter email and password to submit report"
-      @ok="handleSubmitOk"
-    >
+    <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog"
+      :title="$t('base.ValidatePrivileges')" @ok="handleSubmitOk">
       <a-form :model="submitFormData" layout="">
         <a-form-item label="E-mail" name="email" required>
           <a-input v-model:value="submitFormData.email"></a-input>
@@ -15,6 +10,14 @@
           <a-input type="password" v-model:value="submitFormData.password"></a-input>
         </a-form-item>
       </a-form>
+    </a-modal>
+
+    <a-modal :getContainer="() => document.body" v-model:visible="loadLocalDataDialogRef"
+      :title="$t('base.FindLatestLocalData')" @ok="handleConfirmUseLocalData">
+      <div>
+        <div><span>{{ $t('base.LocalDataUpdateAt') }}:</span><span>{{ localDataRecord.update_at }}</span></div>
+        <div><span>{{ $t('base.RemoteDataUpdateAt') }}:</span><span>{{ store.report.update_at }}</span></div>
+      </div>
     </a-modal>
     <div
       style="max-width: 1024px;  padding: 20px 20px 100px 20px; height: 100%; background-color: #fff; margin: 0 auto; position: relative;">
@@ -29,7 +32,64 @@
       <div class="summary">
         <div>{{ store.report?.summary }}</div>
       </div>
-      <a-form layout="vertical" :model="formState"  v-if="store.report" @finish="onFinishSubmit">
+      <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit" @finishFailed="onFinishFailed">
+        <div v-if="store.report">
+          <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
+            <a-form-item required :label="$t('base.ReportNumber')">
+              <a-input v-model:value="formState['ReportNumber']"></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.Applicant">
+            <a-form-item required :label="$t('base.Applicant')">
+              <a-input v-model:value="formState['Applicant']"></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.Supplier">
+            <a-form-item required :label="$t('base.Supplier')">
+              <a-input v-model:value="formState['Supplier']"></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.Factory">
+            <a-form-item required :label="$t('base.Factory')">
+              <a-input v-model:value="formState['Factory']"></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
+            <a-form-item required :label="$t('base.ItemNumber')">
+              <a-textarea v-model:value="formState['ItemNumber']"></a-textarea>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.ProductDescription">
+            <a-form-item required :label="$t('base.ProductDescription')">
+              <a-textarea v-model:value="formState['ProductDescription']"></a-textarea>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.AddressOfInspection">
+            <a-form-item required :label="$t('base.AddressOfInspection')">
+              <a-input v-model:value="formState['AddressOfInspection']"></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.DateOfInspection">
+            <a-form-item required :label="$t('base.DateOfInspection')">
+              <a-date-picker style="width: 100%" v-model:value="formState['DateOfInspection']" :getPopupContainer="triggerNode => triggerNode.parentNode"/>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
+            <a-form-item required :label="$t('base.ArrivalTime')">
+              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }" v-model:value="formState['ArrivalTime']" :getPopupContainer="triggerNode => triggerNode.parentNode"/>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
+            <a-form-item required :label="$t('base.DepartureTime')">
+              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }" v-model:value="formState['DepartureTime']" :getPopupContainer="triggerNode => triggerNode.parentNode"/>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.Inspector">
+            <a-form-item required :label="$t('base.Inspector')">
+              <a-input v-model:value="formState['Inspector']"></a-input>
+            </a-form-item>
+          </div>
+        </div>
         <div v-for="(item, index) in store.report.schema" :key="item.key">
           <div class="component" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
@@ -60,23 +120,27 @@
           </div>
           <div v-else>unsupported components: {{ item }}</div>
         </div>
-        <a-affix :offset-bottom="0" @change="change">
-        <div class="controls border-t"
-          style="border-top: 1px solid #000; background-color: #fff;display: flex; justify-content: center; align-items: center;height: 100px; position: absolute; bottom: 0;left: 0;width:100%;">
-          <div>
-            <a-button type="primary" html-type="submit" style="width: 140px; margin-left: 10px;">Submit </a-button>
-            <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-              @confirm="onSave" title="Confirm save a draft?" ok-text="Yes" cancel-text="No">
-              <a-button type="" style="width: 140px; margin-left: 10px;">Save</a-button>
-            </a-popconfirm>
+
+
+        <a-affix :offset-bottom="20" @change="affixedChange">
+          <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
+            style="">
+            <div>
+              <a-button type="primary" html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit') }} </a-button>
+              <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+                @confirm="onSave" :title="$t('base.ConfirmSave')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
+                <a-button type="" style="width: 140px; margin-left: 10px;">{{ $t('base.Save') }}</a-button>
+              </a-popconfirm>
+              <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }" v-if="localDataRecord"
+                @confirm="onDeleteLocalData" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
+                <a-button type="" style="width: 140px; margin-left: 10px;">{{ $t('base.DeleteLocalData') }}</a-button>
+              </a-popconfirm>
+            </div>
           </div>
-        </div>
-      </a-affix>
+        </a-affix>
+
       </a-form>
-
-
     </div>
-
   </div>
 </template>
 
@@ -93,46 +157,45 @@ import reportImageUpload from "./reportImageUpload/index.vue"
 import reportContainer from "./container.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
 import { openNotification, successNotification } from '@/utils/notification';
-import { copyObject } from "@/utils/objectUtils"
+// import { copyObject } from "@/utils/objectUtils"
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import dayjs from 'dayjs';
 const document = window.document
 const store = ReportFillStore()
-const checkUpdate = (e) => {
-  console.log('checkUpdate:', e)
-
-} 
-
-const startedRef = ref(false)
-const props = defineProps({
-  reportData: Object
-})
-
+const isAffixedRef = ref(false)
 const loadingRef = ref(false)
 const formState = reactive({})
-const change = (affixed: boolean) => {
-  console.log(affixed);
-};
 const reportDataRef = ref()
-const initialization = () => {
-  console.log('loadLocalData')
-  loadLocalData()
-  // loadRemoteData()
-}
-
-
-
-type HeadImage = {
-  url: string,
-  style: object
-}
 const itemRefs = ref([])
+const loadLocalDataDialogRef = ref(false)
+const localDataRecord = ref(null)
+const startedRef = ref(false)
+const affixedChange = (affixed: boolean) => {
+  isAffixedRef.value = affixed
+};
 
-
+const initialization = async () => {
+  console.log('loadLocalData')
+  // loadLocalData()
+  loadRemoteData()
+  let localData = await loadLocalData()
+  if(localData && localData.values &&  localData.values.length != 0) {
+    if(dayjs(localData.update_at) > dayjs(store.report.update_at)) {
+      loadLocalDataDialogRef.value = true
+      localDataRecord.value = localData
+    }
+  }
+}
 
 const onSave = async () => {
-  let record = await reportDatabase.getRecord(store.report.id)
+  let record
+  try {
+    record = await reportDatabase.getRecord(store.report.id)
+  } catch (e) {
+    console.error(e)
+  }
+  console.log('formState:', toRaw(formState))
   if (!record) {
     await reportDatabase.createRecord({ id: store.report.id, values: JSON.stringify(formState) })
   } else {
@@ -142,30 +205,89 @@ const onSave = async () => {
 }
 
 const loadLocalData = async () => {
-  let localRecord = await reportDatabase.getRecord(store.report.id)
+  let localRecord
+  try {
+    localRecord = await reportDatabase.getRecord(store.report.id)
+  } catch(e) {
+    console.warn(e)
+  }
   if (!localRecord) {
     return
   }
-  // let localDate = dayjs(localRecord.update_at)
-  // let serverDate = dayjs(store.report.update_at)
-  // if (localDate > serverDate) {
-  //   return
-  // }
   let values = JSON.parse(localRecord.values)
-  console.log('values:', values)
-  for(let key of Object.keys(values)) {
-    formState[key] = values[key]
-  
+  return {
+    id: localRecord.id,
+    create_at: localRecord.create_at,
+    update_at: localRecord.update_at,
+    values: values
   }
-  console.log('formState:', toRaw(formState))
 }
 
 const loadRemoteData = async () => {
-  if(store?.report?.values && Object.keys(store.report.values).length != 0) {
-    for(let key of Object.keys(store.report.values)) {
+  if (store?.report?.values && Object.keys(store.report.values).length != 0) {
+    for (let key of Object.keys(store.report.values)) {
       formState[key] = store.report.values[key]
     }
   }
+
+  console.log('schema:', toRaw(store?.report?.schema))
+
+  if (store?.report?.template?.settings) {
+
+    formState["ReportNumber"] = store.report.values["ReportNumber"] || ""
+    formState["Applicant"] = store.report.values["Applicant"] || ""
+    formState["Supplier"] = store.report.values["Supplier"] || ""
+    formState["Factory"] = store.report.values["Factory"] || ""
+    formState["ItemNumber"] = store.report.values["ItemNumber"] || ""
+    formState["ProductDescription"] = store.report.values["ProductDescription"] || ""
+    formState["AddressOfInspection"] = store.report.values["AddressOfInspection"] || ""
+    formState["DateOfInspection"] = ""
+    if(store.report.values["DateOfInspection"]) {
+      formState["DateOfInspection"] = dayjs(store.report.values["DateOfInspection"])
+    }
+    formState["ArrivalTime"] = ""
+    if(store.report.values["ArrivalTime"]) {
+      formState["ArrivalTime"] = dayjs(store.report.values["ArrivalTime"])
+    }
+    formState["DepartureTime"] = ""
+    if(store.report.values["DepartureTime"]) {
+      formState["DepartureTime"] = dayjs(store.report.values["DepartureTime"])
+    }
+    formState["Inspector"] = store.report.values["Inspector"] || ""
+    if(store.report.order) {
+      if(!formState["ReportNumber"]) {
+        formState["ReportNumber"] = store.report.order.order_no
+      }
+      if(!formState["Factory"]) {
+        formState["Factory"] = store.report.order.factory_name
+      }
+      if(!formState["Supplier"]) {
+        formState["Supplier"] = store.report.order.suppliers
+      }
+      if(!formState["ItemNumber"]) {
+        formState["ItemNumber"] = store.report.order.po_number
+      }
+      if(!formState["ProductDescription"]) {
+        formState["ProductDescription"] = store.report.order.product_name
+      }
+      if(!formState["AddressOfInspection"]) {
+        formState["AddressOfInspection"] = store.report.order.address?.country?.code == '1' ? `${store.report.order.address?.province?.name} ${store.report.order.address?.city?.name} ${store.report.order.address?.details}` : store.report.order.address?.country?.name
+      }
+      if(!formState["DateOfInspection"]) {
+        formState["DateOfInspection"] = dayjs(store.report.order.inspect_date)
+      }
+      if(!formState["ArrivalTime"]) {
+        formState["ArrivalTime"] = dayjs(`${store.report.order.inspect_date} 09:00:00`)
+      }
+      if(!formState["DepartureTime"]) {
+        formState["DepartureTime"] = dayjs(`${store.report.order.inspect_date} 18:00:00`)
+      }
+      if(!formState["Inspector"]) {
+        formState["Inspector"] = store.report.order.workers.map(c=>c.worker.name).join(',')
+      }
+    }
+  }
+
 }
 
 const editableComponents = [
@@ -186,21 +308,21 @@ const refresh = (data: any) => {
       // if (item.refreshValue && item.props.item.data) {
       //   item.refreshValue(item.props.item.data)
       // }
-      if(editableComponents.includes(item.type)) {
-          if(item.type == 'input') {
-            item.data = {value: ''}
-          } else if(item.type == 'radio') {
-            if(!item.data.value) {
-              item.data.value = ""
-            }
-          } else if(item.type == 'checkbox') {
-            if(!item.data.value) {
-              item.data.value = []
-            }
+      if (editableComponents.includes(item.type)) {
+        if (item.type == 'input') {
+          item.data = { value: '' }
+        } else if (item.type == 'radio') {
+          if (!item.data.value) {
+            item.data.value = ""
           }
-
-          console.log('item.key:', item.key,  ', data:', toRaw(item.data))
+        } else if (item.type == 'checkbox') {
+          if (!item.data.value) {
+            item.data.value = []
+          }
         }
+
+        console.log('item.key:', item.key, ', data:', toRaw(item.data))
+      }
     })
     loadingRef.value = false
     startedRef.value = true
@@ -210,7 +332,6 @@ const refresh = (data: any) => {
 
 
 const isShowSubmitDialog = ref(false)
-const submitLoadingRef = ref(false)
 const submitFormData = reactive({
   email: "",
   password: ""
@@ -238,6 +359,29 @@ const handleSubmitOk = async () => {
   if (result) {
     successNotification("submit_report")
     isShowSubmitDialog.value = false
+  }
+}
+
+
+const handleConfirmUseLocalData = async () => {
+  for(let key of Object.keys(localDataRecord.value.values)) {
+    formState[key] = localDataRecord.value.values[key]
+  }
+  loadLocalDataDialogRef.value = false
+}
+
+const onDeleteLocalData = () => {
+  try {
+    reportDatabase.deleteRecord(store.report.id)
+    successNotification("local_data_deleted")
+    localDataRecord.value = null
+  } catch(e) {
+    console.error(e)
+    openNotification({
+      type: "error",
+      message: "Fail delete local data",
+      description: e.message
+    })
   }
 }
 
@@ -285,5 +429,45 @@ defineExpose({
 .component .options {
   text-align: left;
   margin-bottom: 10px;
+}
+
+.component.meta {
+  margin: 0;
+}
+
+.affixed-style {
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  box-shadow: 2px 5px 10px #ddd;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  width: 100%;
+}
+
+.unaffixed-style {
+  border-top: 2px solid #ccc;
+  /* box top shadow */
+
+  box-shadow: 0px 15px 10px -15px #333;
+  background-color: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  width: 100%;
+
 }
 </style>

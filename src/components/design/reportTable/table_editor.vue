@@ -5,16 +5,16 @@
       <div>
         <a-form :model="TableSettings" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }"
           autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed">
-          <a-form-item label="Has Add Button" name="hasAddRowButton">
+          <a-form-item :label="$t('base.HasAddButton')" name="hasAddRowButton">
             <a-switch v-model:checked="TableSettings.hasAddRowButton" />
           </a-form-item>
-          <a-form-item label="Width" name="width">
+          <a-form-item :label="$t('base.Width')" name="width">
             <a-input v-model:value="TableSettings.tableWidth" />
           </a-form-item>
-          <a-form-item label="Height" name="height">
+          <a-form-item :label="$t('base.Height')" name="height">
             <a-input v-model:value="TableSettings.tableHeight" />
           </a-form-item>
-          <a-form-item label="Page Size" name="pageSize">
+          <a-form-item :label="$t('base.PageSize')" name="pageSize">
             <a-input v-model:value="TableSettings.pageSize" />
           </a-form-item>
         </a-form>
@@ -22,44 +22,40 @@
     </div>
     <div>
       <div class="pb-6">
-        <h3 class="" style="text-align:center; font-size:120%">Columns</h3>
+        <h3 class="" style="text-align:center; font-size:120%">{{ $t('base.Column') }}</h3>
       </div>
       <div class="">
         <a-form :model="itemParam" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }" autocomplete="off"
           @finish="onFinish" @finishFailed="onFinishFailed">
-          <a-form-item label="Column" name="column">
+          <a-form-item :label="$t('base.Column')" name="column">
             <a-tree-select v-model:value="columns" show-search style="width: 100%" @clear="clearTreeSelect"
               @change="onTreeSelect" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              placeholder="Please select" allow-clear tree-default-expand-all :tree-data="treeData"
+              :placeholder="$t('base.please_select')" allow-clear tree-default-expand-all :tree-data="treeData"
               tree-node-filter-prop="label">
             </a-tree-select>
           </a-form-item>
-          <a-form-item label="Title" name="title">
+          <a-form-item :label="$t('base.Title')" name="title">
             <a-input v-model:value="itemParam.title" />
           </a-form-item>
-          <a-form-item label="Key" name="key">
+          <a-form-item :label="$t('base.Key')" name="key">
             <a-input v-model:value="itemParam.key" />
           </a-form-item>
-          <a-form-item label="Type" name="fieldType">
+          <a-form-item :label="$t('base.Type')" name="fieldType">
             <a-radio-group v-model:value="itemParam.fieldType" button-style="solid">
-              <a-radio-button value="text">Text</a-radio-button>
-              <a-radio-button value="input">Input</a-radio-button>
+              <a-radio-button value="text">{{ $t('base.Text') }}</a-radio-button>
+              <a-radio-button value="input">{{ $t('base.Input') }}</a-radio-button>
             </a-radio-group>
           </a-form-item>
-          <a-form-item label="Width" name="width">
+          <a-form-item :label="$t('base.Width')" name="width">
             <a-input-number v-model:value="itemParam.width" placeholder="Basic usage" />
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
-            <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">Add New
-              Item</a-button>
-            <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>Add
-              Child Item</a-button>
-            <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">Edit
-              Item</a-button>
+            <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">{{ $t('base.AddColumn') }}</a-button>
+            <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>{{ $t('base.AddChildColumn') }}</a-button>
+            <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">{{ $t('base.EditColumn') }}</a-button>
 
-            <a-popconfirm title="Confirm delete?" @confirm="onClickDelete(itemParam.key)" ok-text="Yes" no-text="No">
-              <a-button type="default" class="mr-2" :disabled="itemParam.key ? false : true">Delete
-                Item</a-button>
+            <a-popconfirm :title="$t('base.ConfirmDelete')" @confirm="onClickDelete(itemParam.key)" ok-text="Yes" no-text="No">
+              <a-button type="default" class="mr-2" :disabled="itemParam.key ? false : true">{{ $t('base.DeleteColumn') }}</a-button>
             </a-popconfirm>
           </a-form-item>
 
@@ -69,35 +65,35 @@
     </div>
     <div class="mt-6">
       <div class="pb-6">
-        <h3 class="" style="text-align:center; font-size:120%">Rows</h3>
+        <h3 class="" style="text-align:center; font-size:120%">{{ $t('base.Row') }}</h3>
       </div>
       <div>
         <a-form :model="TableSettings" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }"
-          autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed">
+          autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed" layout="vertical">
           <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
             <Table ref="presetTable" :item="currentItem" mode="preview" v-on:edit-table-row="editTableRow"></Table>
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
-            <a-button type="primary" class="mr-2" @click="onClickAddPresetRow">Add Rows</a-button>
-            <a-popconfirm title="Confirm delete row？" ok-text="Yes" cancel-text="No" @confirm="onClickDelPresetRow">
-              <a-button type="danger" class="mr-2">Delete Rows</a-button>
+            <a-button type="primary" class="mr-2" @click="onClickAddPresetRow">{{ $t('base.AddRow') }}</a-button>
+            <a-popconfirm :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')" @confirm="onClickDelPresetRow">
+              <a-button type="danger" class="mr-2">{{ $t('base.DeleteRow')  }}</a-button>
             </a-popconfirm>
           </a-form-item>
         </a-form>
-        <a-modal v-model:visible="rowEditDialogVisible" title="Edit Row" ok-text="Confirm" cancel-text="Cancel"
+        <a-modal v-model:visible="rowEditDialogVisible" :title="$t('base.EditRow')" :ok-text="$t('base.Confirm')" :cancel-text="$t('base.Cancel')"
           @ok="onRowEditFinish" @onCancel="cancelRowEditModal" :z-index="1001">
           <a-form :model="rowItemParam" name="basic" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }"
             autocomplete="off">
-            <a-form-item label="Text" name="text">
+            <a-form-item :label="$t('base.Text')" name="text">
               <a-input v-model:value="rowItemParam.text" />
             </a-form-item>
-            <a-form-item label="Type" name="fieldType">
+            <a-form-item :label="$t('base.Type')" name="fieldType">
               <a-radio-group v-model:value="rowItemParam.fieldType" button-style="solid">
-                <a-radio-button value="text">Text</a-radio-button>
-                <a-radio-button value="input">Input</a-radio-button>
+                <a-radio-button value="text">{{ $t('base.Text') }}</a-radio-button>
+                <a-radio-button value="input">{{ $t('base.Input') }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
-            <a-form-item label="Is Defect" name="is_defect">
+            <a-form-item :label="$t('base.IsDefect')" name="is_defect">
               <a-switch v-model:checked="rowItemParam.is_defect" />
             </a-form-item>
           </a-form>

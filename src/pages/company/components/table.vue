@@ -329,7 +329,7 @@ const statusDialogCancel = () => {
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="No"
+                <a-popconfirm title="Delete" :content="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$('base.No')"
                   @confirm="deleteRecord(record.id)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />

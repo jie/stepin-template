@@ -10,6 +10,7 @@ import { ReportTemplateStore, ReportTemplate } from "@/store/reportTemplate"
 import { ReportConfigStore } from '@/store/config';
 import { ReportCategoryStore } from "@/store/category"
 import { statusFormSchema } from "@/types"
+import {i18n} from "@/lang/i18n"
 const isViewForm = ref(false)
 const store = ReportTemplateStore()
 const categoryStore = ReportCategoryStore()
@@ -17,20 +18,20 @@ const configStore = ReportConfigStore()
 const searchKeywords = ref("")
 const columns = [
   {
-    title: 'Name',
+    title: i18n.global.t('base.Name'),
     dataIndex: 'name',
   },
   {
-    title: 'Language',
+    title: i18n.global.t('base.Language'),
     dataIndex: 'language',
   },
   {
-    title: 'Category',
+    title: i18n.global.t('base.Category'),
     dataIndex: 'category',
   },
-  { title: 'Status', dataIndex: 'status' },
-  { title: 'Create at', dataIndex: 'create_at' },
-  { title: 'OP', dataIndex: 'edit', width: 40 },
+  { title: i18n.global.t('base.Status'), dataIndex: 'status' },
+  { title: i18n.global.t('base.CreateAt'), dataIndex: 'create_at' },
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
 
@@ -226,25 +227,25 @@ const getLanguage = (code: string) => {
     width="660px">
     <a-form ref="statusFormModel" :model="statusForm" :label-col="{ style: { width: '150px' } }"
       :wrapper-col="{ span: 14 }">
-      <a-form-item required label="Status" name="status">
+      <a-form-item required  :label="$t('base.Status')" name="status">
         <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
       </a-form-item>
-      <a-form-item label="Reason" name="reason">
+      <a-form-item  :label="$t('base.Reason')" name="reason">
         <a-textarea v-model:value="statusForm.reason" />
       </a-form-item>
     </a-form>
   </a-modal>
-  <a-modal :title="Ctl.isNew ? 'Create' : 'Edit'" v-model:visible="showModal" @ok="submit" @cancel="cancel"
+  <a-modal :title="Ctl.isNew ? $t('base.Create') : $t('base.Edit')" v-model:visible="showModal" @ok="submit" @cancel="cancel"
     :ok-button-props="{ disabled: isViewForm }" :cancel-button-props="{ disabled: isViewForm }">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item label="Name" required name="name">
+      <a-form-item :label="$t('base.Name')" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item label="Language" required name="language">
+      <a-form-item  :label="$t('base.Language')" required name="language">
         <a-select v-model:value="form.language" style="width: 100%" :options="Ctl.languages" />
       </a-form-item>
-      <a-form-item label="Category" required name="category_id">
-        <a-tree-select v-model:value="form.category_id" style="width: 100%" placeholder="Please select" allow-clear :tree-data="categoryStore.entities" :field-names="{
+      <a-form-item  :label="$t('base.Category')" required name="category_id">
+        <a-tree-select v-model:value="form.category_id" style="width: 100%" :placeholder="$t('base.please_select')" allow-clear :tree-data="categoryStore.entities" :field-names="{
             children: 'children',
             label: 'name',
             value: 'id',
@@ -260,30 +261,30 @@ const getLanguage = (code: string) => {
   }">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>Templates</h4>
+        <h4>{{ $t('base.Template') }}</h4>
         <div class="flex">
           <div class="mr-4">
-            <span class="mr-2">Status</span>
+            <span class="mr-2">{{ $t('base.Status') }}</span>
             <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>
           <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4" allowClear>
             <template #addonBefore>
-              Keywords
+              {{$t('base.Keywords')}}
             </template>
           </a-input>
           <a-button class="mr-2" @click="onClickSearch">
             <template #icon>
               <SearchOutlined />
             </template>
-            Search
+            {{$t('base.Search')}}
           </a-button>
           <a-button type="primary" @click="addNew" :loading="formLoading">
             <template #icon>
               <PlusOutlined />
             </template>
-            Create
+            {{$t('base.Create')}}
           </a-button>
         </div>
       </div>
@@ -321,34 +322,34 @@ const getLanguage = (code: string) => {
               <a-menu-item key="4">
                 <a @click="view(record)" rel="noopener noreferrer">
                   <ReadOutlined />
-                  View
+                  {{$t('base.View')}}
                 </a>
               </a-menu-item>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <EditOutlined />
-                  Edit
+                  {{$t('base.Edit')}}
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="No" @confirm="deleteRecord(record)">
+                <a-popconfirm title="Delete" :content="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$('base.No')" @confirm="deleteRecord(record)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
-                    Delete
+                    {{$t('base.Delete')}}
                   </a>
                 </a-popconfirm>
               </a-menu-item>
               <a-menu-item key="2">
                 <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                   <VerifiedOutlined />
-                  Verify
+                  {{$t('base.Verify')}}
                 </a>
               </a-menu-item>
               <a-menu-divider />
               <a-menu-item key="3">
                 <a @click="goDesign(record)" rel="noopener noreferrer">
                   <ExperimentOutlined />
-                  Template Design
+                  {{$t('base.TemplateDesign')}}
                 </a>
               </a-menu-item>
             </a-menu>

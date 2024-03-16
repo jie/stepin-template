@@ -3,7 +3,7 @@
     <div v-for="item in items" class="com" @click="onClickAddComponent(item)">
       <div class="flex-1 text-center" style="font-size: 30px;">
         <component :is="item.icon" />
-        <div style="font-size: 14px;color: #333">{{ item.type }}</div>
+        <div style="font-size: 14px;color: #333">{{ item.name }}</div>
       </div>
     </div>
   </div>
@@ -13,20 +13,21 @@
 <script lang="ts" setup>
 import { defineEmits, defineProps, ref, h } from 'vue';
 import { BorderOutlined, FieldStringOutlined, TableOutlined, ExpandOutlined, CheckSquareOutlined, CheckCircleOutlined, FileImageOutlined, UploadOutlined } from '@ant-design/icons-vue';
+import { i18n } from '@/lang/i18n';
 // const item = {
 //     icon: BorderOutlined
 // }
 
 const items = ref([
   {
-    name: 'Input',
+    name: i18n.global.t('base.Input'),
     type: 'input',
     icon: h(BorderOutlined, {
     }),
     defaultData: { title: "Here is the title", sort: "0", desc: "Here is the description", type: "input", data: {value: ""} }
   },
   {
-    name: 'InputGroup',
+    name: i18n.global.t('base.InputGroup'),
     type: 'input_group',
     icon: h(BorderOutlined, {
     }),
@@ -39,7 +40,7 @@ const items = ref([
   //   })
   // },
   {
-    name: 'Radio',
+    name: i18n.global.t('base.Radio'),
     type: 'radio',
     icon: h(CheckCircleOutlined, {
     }),
@@ -55,7 +56,7 @@ const items = ref([
     }
   },
   {
-    name: 'Checkbox',
+    name: i18n.global.t('base.Checkbox'),
     type: 'checkbox',
     icon: h(CheckSquareOutlined, {
     }),
@@ -71,7 +72,7 @@ const items = ref([
     }
   },
   {
-    name: 'Table',
+    name: i18n.global.t('base.Table'),
     type: 'table',
     icon: h(TableOutlined, {
     }),
@@ -101,7 +102,7 @@ const items = ref([
     }
   },
   {
-    name: 'Image',
+    name: i18n.global.t('base.Image'),
     type: 'image',
     icon: h(FileImageOutlined, {
     }),
@@ -126,7 +127,7 @@ const items = ref([
     }
   },
   {
-    name: 'Upload',
+    name: i18n.global.t('base.Upload'),
     type: 'upload',
     icon: h(UploadOutlined, {
     }),

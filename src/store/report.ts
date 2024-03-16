@@ -12,7 +12,9 @@ export interface Report {
   title?: string;
   summary?: string;
   settings?: any;
+  meta?:any;
   inspect_date?:string;
+  template?:any;
   report_template_id?: string;
   users?: Array<string>;
   users_review?: Array<string>;

@@ -173,7 +173,7 @@ initializeData()
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="Cancel"
+                <a-popconfirm :title="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$t('base.No')"
                     @confirm="deleteRecord(record)">
                     <a rel="noopener noreferrer">
                       <DeleteOutlined />

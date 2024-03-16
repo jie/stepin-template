@@ -35,7 +35,7 @@
           <a-col :span="3" align="center" class="r-group-col">
             <div style="display: flex; justify-content: align-items:center; width: 100%; height: 100%">
               <div style="flex:1;display: flex; justify-content:center; align-items:center;height: 100%;">
-                <a-popconfirm title="Confirm delete?" @confirm="confirmDeleteRow($index)"
+                <a-popconfirm :title="$t('base.ConfirmDelete')" @confirm="confirmDeleteRow($index)"
                   v-if="items[0].is_repeat || items[1].is_repeat"
                   :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }">
 
@@ -61,7 +61,7 @@
       </div>
     </a-form-item>
     <a-form-item v-if="props?.item?.data.hasAddRowButton">
-      <a-button type="primary" @click="onClickShowAddRow">Add Rows</a-button>
+      <a-button type="primary" @click="onClickShowAddRow">{{ $t('base.AddRow') }}</a-button>
     </a-form-item>
     <a-modal style="max-height: 100%; overflow-y:scroll" v-model:visible="addRowDialogVisibleRef" zIndex="99999"
       @ok="onClickAddStep" :z-index="1001" :getContainer="() => $refs.allModal">

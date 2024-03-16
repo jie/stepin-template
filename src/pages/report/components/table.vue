@@ -4,9 +4,6 @@ import { FormInstance } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
-import {
-  VerifyStatuses
-} from "@/pages/constants";
 import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
@@ -456,14 +453,14 @@ initializeData()
         <template v-else-if="column.dataIndex === 'status'">
           <a-badge class="text-subtext" :color="formatStatusColor(text)">
             <template #text>
-              <span class="text-subtext">{{ VerifyStatuses[text] }}</span>
+              <span class="text-subtext">{{ ApproveStatus[text] }}</span>
             </template>
           </a-badge>
         </template>
         <template v-else-if="column.dataIndex === 'approve_status'">
           <a-badge class="text-subtext" :color="formatStatusColor(text)">
             <template #text>
-              <span class="text-subtext">{{ VerifyStatuses[text] }}</span>
+              <span class="text-subtext">{{ ApproveStatus[text] }}</span>
             </template>
           </a-badge>
         </template>
@@ -490,7 +487,7 @@ initializeData()
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
-                  <a-popconfirm title="Delete" content="Confirm delete?" okText="Yes" cancelText="Cancel"
+                  <a-popconfirm :title="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$t('base.No')"
                     @confirm="deleteRecord(record)">
                     <a rel="noopener noreferrer">
                       <DeleteOutlined />

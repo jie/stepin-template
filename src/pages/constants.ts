@@ -1,24 +1,34 @@
 import { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { ref, reactive } from 'vue';
+import {i18n} from "@/lang/i18n"
+
 
 export const VerifyStatuses = {
-  '0': '未通过审核',
-  '1': '未审核',
-  '2': '审核中',
-  '3': '已审核'
+  '0': i18n.global.t('constant.Disapprove'),
+  '1': i18n.global.t('constant.Unapprove'),
+  '2': i18n.global.t('constant.Approving'),
+  '3': i18n.global.t('constant.Approved')
 }
 
 
 export const ReportStatuses = {
-  '0': '未通过审核',
-  '1': '待检验',
-  '2': '检验中',
-  '3': '已填写',
-  '4': '审核中',
-  '5': '已审核',
-  '6': '已发送',
-  '100': '已取消'
+  // '0': '未通过审核',
+  // '1': '待检验',
+  // '2': '检验中',
+  // '3': '已填写',
+  // '4': '审核中',
+  // '5': '已审核',
+  // '6': '已发送',
+  // '100': '已取消'
+  '0': i18n.global.t('constant.Disapprove'),
+  '1': i18n.global.t('constant.Unapprove'),
+  '2': i18n.global.t('constant.Filling'),
+  '3': i18n.global.t('constant.Filled'),
+  '4': i18n.global.t('constant.Approving'),
+  '5': i18n.global.t('constant.Approved'),
+  '6': i18n.global.t('constant.Send'),
+  '100': i18n.global.t('constant.Canceled')
 }
 
 export type Role = {

@@ -1,18 +1,18 @@
 <template>
   <div>
-    <div> edit {{ baseForm?.title }}</div>
+    <div>{{$t('base.EditComponent')}} {{ baseForm?.title }}</div>
     <div>
       <BaseForm ref="baseForm" />
     </div>
     <div>
       <a-form :model="extraSettingForm" name="Extra Settings" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }">
-        <a-form-item label="Is Required" name="hasAddRowButton">
+        <a-form-item :label="$t('base.IsRequire')" name="hasAddRowButton">
           <a-switch v-model:checked="extraSettingForm.hasAddRowButton" />
         </a-form-item>
-        <a-form-item label="Is Table" name="isTable">
+        <a-form-item  :label="$t('base.IsTable')" name="isTable">
           <a-switch v-model:checked="extraSettingForm.isTable" />
         </a-form-item>
-        <a-form-item label="Columns number" name="column">
+        <a-form-item  :label="$t('base.ColumnNumber')" name="column">
           <a-radio-group v-model:value="extraSettingForm.column" button-style="solid">
             <a-radio-button value="1">1</a-radio-button>
             <a-radio-button value="2">2</a-radio-button>
@@ -27,17 +27,17 @@
     <div>
       <a-modal v-model:visible="colFormVisibleRef" zIndex="99999" @ok="handConfirmAddCol">
         <a-form :model="colForm" name="Column Settings" layout="vertical">
-          <a-form-item label="Title" name="title" required>
+          <a-form-item :label="$t('base.Title')" name="title" required>
             <a-input v-model:value="colForm.title" />
           </a-form-item>
-          <a-form-item label="Name" name="name" required>
+          <a-form-item :label="$t('base.Name')" name="name" required>
             <a-input v-model:value="colForm.name" />
           </a-form-item>
         </a-form>
       </a-modal>
 
       <a-modal v-model:visible="rowFormVisibleRef" zIndex="99999" @ok="handConfirmAddRow">
-        <a-form :model="rowForm" name="Row Settings" layout="vertical">
+        <a-form :model="rowForm" :label="$t('base.Row')" layout="vertical">
           <template v-if="extraSettingForm.columns && extraSettingForm.columns.length != 0">
             <a-form-item label="Column">
               <a-select @change="onChangeColumn" :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }">
@@ -46,60 +46,60 @@
                 </a-select-option>
               </a-select>
             </a-form-item>
-            <a-form-item label="Title" name="title" readonly required>
+            <a-form-item :label="$t('base.Title')" name="title" readonly required>
               <a-input v-model:value="rowForm.title" />
             </a-form-item>
-            <a-form-item label="Name" name="name" readonly required>
+            <a-form-item :label="$t('base.Name')" name="name" readonly required>
               <a-input v-model:value="rowForm.name" />
             </a-form-item>
           </template>
           <template v-else>
-            <a-form-item label="Title" name="title" required>
+            <a-form-item :label="$t('base.Title')" name="title" required>
               <a-input v-model:value="rowForm.title" />
             </a-form-item>
-            <a-form-item label="Name" name="name" required>
+            <a-form-item :label="$t('base.Name')" name="name" required>
               <a-input v-model:value="rowForm.name" />
             </a-form-item>
           </template>
-          <a-form-item label="Summary" name="summary">
+          <a-form-item :label="$t('base.Summary')" name="summary">
             <a-input v-model:value="rowForm.summary" />
           </a-form-item>
-          <a-form-item label="Description" name="desc">
+          <a-form-item :label="$t('base.Description')" name="desc">
             <a-input v-model:value="rowForm.desc" />
           </a-form-item>
-          <a-form-item label="Default Value" name="default_value">
+          <a-form-item :label="$t('base.DefaultValue')" name="default_value">
             <a-input v-model:value="rowForm.default_value" />
           </a-form-item>
-          <a-form-item label="Is Required" name="required">
+          <a-form-item :label="$t('base.Type')" name="required">
             <a-radio-group v-model:value="rowForm.type" button-style="solid">
-              <a-radio-button value="input">Input</a-radio-button>
-              <a-radio-button value="text">Text</a-radio-button>
+              <a-radio-button value="input">{{ $t('base.Input') }}</a-radio-button>
+              <a-radio-button value="text">{{ $t('base.Text') }}</a-radio-button>
             </a-radio-group>
           </a-form-item>
-          <a-form-item label="Is Required" name="required">
+          <a-form-item :label="$t('base.IsRequire')" name="required">
             <a-switch v-model:checked="rowForm.required" />
           </a-form-item>
-          <a-form-item label="Is Textarea" name="is_textarea">
+          <a-form-item :label="$t('base.IsTextarea')" name="is_textarea">
             <a-switch v-model:checked="rowForm.is_textarea" />
           </a-form-item>
-          <a-form-item label="Is Defect" name="is_defect">
+          <a-form-item :label="$t('base.IsDefect')" name="is_defect">
             <a-switch v-model:checked="rowForm.is_defect" />
           </a-form-item>
-          <a-form-item label="Is Repeat" name="is_repeat">
+          <a-form-item :label="$t('base.IsRepeat')" name="is_repeat">
             <a-switch v-model:checked="rowForm.is_repeat" />
           </a-form-item>
         </a-form>
       </a-modal>
       <div>
         <a-form name="Row Column" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }">
-          <a-form-item label="Add Column">
-            <a-button @click="showColFormModal" type="primary">Add Column</a-button>
+          <a-form-item :label="$t('base.AddColumn')">
+            <a-button @click="showColFormModal" type="primary">{{ $t('base.AddColumn') }}</a-button>
           </a-form-item>
-          <a-form-item label="Columns">
+          <a-form-item :label="$t('base.Column')">
             <a-table :dataSource="extraSettingForm.columns" :columns="headerFormColumn" :pagination="false">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'delete'">
-                  <a-popconfirm title="Confirm delete?" ok-text="Yes" cancel-text="No" @confirm="deleteCol(record)">
+                  <a-popconfirm :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')" @confirm="deleteCol(record)">
                     <DeleteOutlined></DeleteOutlined>
                   </a-popconfirm>
                 </template>
@@ -113,10 +113,10 @@
       </div>
       <div>
         <a-form name="Row Settings" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }">
-          <a-form-item label="Add Row">
-            <a-button @click="showRowFormModal" type="primary">Add Row</a-button>
+          <a-form-item :label="$t('base.AddRow')">
+            <a-button @click="showRowFormModal" type="primary">{{ $t('base.AddRow') }}</a-button>
           </a-form-item>
-          <a-form-item label="Rows">
+          <a-form-item :label="$t('base.Row')">
             <a-table :dataSource="extraSettingForm.rows" :columns="rowFormColumn" :pagination="false">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'required'">
@@ -148,7 +148,7 @@
                   </a>
                 </template>
                 <template v-else-if="column.key === 'delete'">
-                  <a-popconfirm title="Confirm delete?" ok-text="Yes" cancel-text="No" @confirm="deleteRow(record)">
+                  <a-popconfirm :label="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')" @confirm="deleteRow(record)">
                     <DeleteOutlined></DeleteOutlined>
                   </a-popconfirm>
                 </template>
@@ -167,7 +167,7 @@
 import { reactive, ref, toRaw } from "vue"
 import BaseForm from "../base_editor.vue"
 import { DeleteOutlined, EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
-import { on } from "events";
+import { i18n } from "@/lang/i18n";
 
 const baseForm = ref(null)
 const itemData = ref({})
@@ -206,23 +206,23 @@ const colForm = reactive({
 
 const headerFormColumn = [
   {
-    title: 'Title',
+    title: i18n.global.t('base.Title'),
     dataIndex: 'title',
     key: 'title',
   },
   {
-    title: 'Name',
+    title: i18n.global.t('base.Name'),
     dataIndex: 'name',
     key: 'name',
   },
   {
-    title: 'Delete',
+    title: i18n.global.t('base.Delete'),
     key: 'delete',
     fixed: 'right',
     width: 60,
   },
   {
-    title: 'Edit',
+    title: i18n.global.t('base.Edit'),
     key: 'edit',
     fixed: 'right',
     width: 60,
@@ -231,48 +231,48 @@ const headerFormColumn = [
 
 const rowFormColumn = [
   {
-    title: 'Title',
+    title: i18n.global.t('base.Title'),
     dataIndex: 'title',
     key: 'title',
   },
   {
-    title: 'Require',
+    title: i18n.global.t('base.IsRequire'),
     dataIndex: 'required',
     key: 'required',
     width: '80px'
   },
   {
-    title: 'Type',
+    title: i18n.global.t('base.Type'),
     dataIndex: 'type',
     key: 'type',
     width: '80px'
   },
   {
-    title: 'Textarea',
+    title: i18n.global.t('base.IsTextarea'),
     dataIndex: 'is_textarea',
     key: 'is_textarea',
     width: '80px'
   },
   {
-    title: 'Defect',
+    title: i18n.global.t('base.IsDefect'),
     dataIndex: 'is_defect',
     key: 'is_defect',
     width: '80px'
   },
   {
-    title: 'Repeat',
+    title: i18n.global.t('base.IsRepeat'),
     dataIndex: 'is_repeat',
     key: 'is_repeat',
     width: '80px'
   },
   {
-    title: 'Delete',
+    title: i18n.global.t('base.Delete'),
     key: 'delete',
     fixed: 'right',
     width: 60,
   },
   {
-    title: 'Edit',
+    title: i18n.global.t('base.Edit'),
     key: 'edit',
     fixed: 'right',
     width: 60,

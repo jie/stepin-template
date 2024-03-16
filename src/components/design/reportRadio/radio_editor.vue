@@ -1,6 +1,6 @@
 <template>
     <div>
-      <div> edit {{ baseForm?.title }}</div>
+      <div>{{$t('base.EditComponent')}} {{ baseForm?.title }}</div>
       <div>
         <BaseForm ref="baseForm" />
       </div>

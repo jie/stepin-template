@@ -7,7 +7,7 @@
           <template #icon>
             <plus-outlined />
           </template>
-          Upload
+          {{ $t('base.Upload') }}
         </a-button>
       </div>
       <div class="flex" style="flex-wrap: wrap;margin-top: 20px;">
@@ -38,7 +38,7 @@
 
             </div>
             <div style="width:60px; height: 100%;display: flex;justify-content: center;align-items: center;">
-              <a-popconfirm :getPopupContainer="triggerNode => {return triggerNode.parentNode||document.body;}" @confirm="deleteImage(item)" title="Confirm delete?" ok-text="Yes" cancel-text="No">
+              <a-popconfirm :getPopupContainer="triggerNode => {return triggerNode.parentNode||document.body;}" @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
                 <a-button shape="circle">
                   <template #icon>
                     <DeleteOutlined />

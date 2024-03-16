@@ -41,16 +41,16 @@
           </template>
         </a-table>
         <div v-if="tableDataRef?.hasAddRowButton">
-          <a-button type="primary" @click="showAddRowDialog" class="mt-2">Add</a-button>
+          <a-button type="primary" @click="showAddRowDialog" class="mt-2">{{ $t('base.Add') }}</a-button>
           <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-            title="Please delete row?" ok-text="Yes" cancel-text="No" @confirm="confirmDeleteRowItem"
+            title="Please delete row?" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')" @confirm="confirmDeleteRowItem"
             v-if="state.selectedRowKeys && state.selectedRowKeys.length != 0">
             <a-button type="danger" class="mt-2 ml-2">Delete</a-button>
           </a-popconfirm>
         </div>
       </div>
     </BaseSlot>
-    <a-modal v-model:visible="AddRowDialogVisible" title="Add Row" ok-text="Confirm" cancel-text="Cancel"
+    <a-modal v-model:visible="AddRowDialogVisible" :title="$t('base.AddRow')" :ok-text="$t('base.Confirm')" :cancel-text="$t('base.Cancel')"
       @ok="handleConfirmAddRow" @onCancel="handleCancelAddRow" :z-index="1001" :getContainer="() => $refs.allModal">
       <a-form name="basic" autocomplete="off" layout="vertical">
         <template v-for="row in formRows">

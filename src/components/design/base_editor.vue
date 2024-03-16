@@ -2,26 +2,26 @@
   <div style="color: #333">
     <div class="mt-6">
       <div class="pb-6">
-        <h3 class="" style="text-align:center; font-size:120%">Settings</h3>
+        <h3 class="" style="text-align:center; font-size:120%">{{ $t('base.Settings') }}</h3>
       </div>
       <div>
         <a-form :model="baseData" name="basic" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }">
-          <a-form-item label="Title" name="title">
+          <a-form-item :label="$t('base.Title')" name="title">
             <a-input v-model:value="baseData.title" />
           </a-form-item>
-          <a-form-item label="Summary" name="summary">
+          <a-form-item :label="$t('base.Summary')" name="summary">
             <a-textarea v-model:value="baseData.summary" />
           </a-form-item>
-          <a-form-item label="Description" name="desc">
+          <a-form-item :label="$t('base.Description')" name="desc">
             <a-textarea v-model:value="baseData.desc" />
           </a-form-item>
-          <a-form-item label="Sort" name="sort">
+          <a-form-item :label="$t('base.Sort')" name="sort">
             <a-input-number v-model:value="baseData.sort" />
           </a-form-item>
-          <a-form-item label="Is Required" name="required">
+          <a-form-item :label="$t('base.IsRequire')" name="required">
             <a-switch v-model:checked="baseData.required" />
           </a-form-item>
-          <a-form-item label="Is Defect" name="is_defect">
+          <a-form-item :label="$t('base.IsDefect')" name="is_defect">
             <a-switch v-model:checked="baseData.is_defect" />
           </a-form-item>
         </a-form>

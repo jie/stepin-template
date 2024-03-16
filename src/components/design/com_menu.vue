@@ -7,20 +7,20 @@
             <a-menu>
                 <a-menu-item>
                     <span @click="onClickEdit(props.item)" class="block">
-                        <EditOutlined /> Edit
+                        <EditOutlined /> {{ $t('base.Edit') }}
                     </span>
                 </a-menu-item>
                 <a-menu-item>
-                    <a-popconfirm title="Please confirm remove component?" ok-text="Yes" cancel-text="No"
+                    <a-popconfirm title="Please confirm remove component?" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"
                         @confirm="onClickDel(props.item)">
                         <span class="block">
-                            <DeleteOutlined /> Remove
+                            <DeleteOutlined /> {{ $t('base.Remove') }}
                         </span>
                     </a-popconfirm>
                 </a-menu-item>
                 <a-menu-item>
                     <span @click="onClickDuplicate(props.item)" class="block">
-                        <CopyOutlined /> Duplicate
+                        <CopyOutlined /> {{ $t('base.Duplicate') }}
                     </span>
                 </a-menu-item>
             </a-menu>
