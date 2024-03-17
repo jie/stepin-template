@@ -20,6 +20,8 @@ export type SelectionComponentType = ComponentType & {
   maxCount?: number;
   minCount?: number;
   multiple?: boolean;
+  hasRemark?: boolean;
+  hasResult?: boolean;
   layout?: string;
 }
 
@@ -101,6 +103,8 @@ export interface SelectionInterface {
   minCount?: number;
   multiple?: boolean;
   layout?:string;
+  hasRemark?: boolean;
+  hasResult?: boolean;
   validate(): validateResult;
 }
 
@@ -113,6 +117,8 @@ export class SelectionComponent extends BaseComponent implements SelectionInterf
     this.minCount = componentData.minCount;
     this.multiple = componentData.multiple;
     this.layout = componentData.layout;
+    this.hasRemark = componentData.hasRemark;
+    this.hasResult = componentData.hasResult;
     
   }
 

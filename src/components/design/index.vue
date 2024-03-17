@@ -17,7 +17,7 @@
             <SettingOutlined />
           </template> {{ $t('base.Settings') }}
         </a-button>
-        <a-popconfirm title="Confirm save?" @confirm="onClickSaveReportTemplate">
+        <a-popconfirm :title="$t('base.ConfirmSave')" @confirm="onClickSaveReportTemplate">
           <a-button type="primary">
             <template #icon>
               <SaveOutlined />
@@ -38,7 +38,7 @@
           @click="onSetCurrentCom(item)" v-if="item.type == 'text'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportText :item="item" ref="itemRefs" />
         </div>
@@ -46,7 +46,7 @@
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'input'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportInput :item="item" ref="itemRefs" />
         </div>
@@ -54,7 +54,7 @@
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'input_group'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportInputGroup :item="item" ref="itemRefs" />
         </div>
@@ -62,7 +62,7 @@
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'radio'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportRadio :item="item" ref="itemRefs" />
         </div>
@@ -70,7 +70,7 @@
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'checkbox'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportCheckbox :item="item" ref="itemRefs" />
         </div>
@@ -78,7 +78,7 @@
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'image'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportImage :item="item" ref="itemRefs" />
         </div>
@@ -86,7 +86,7 @@
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'image_upload'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportImageUpload :item="item" ref="itemRefs" />
         </div>
@@ -94,7 +94,7 @@
          v-else-if="item.type == 'table'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportTable :item="item" ref="itemRefs"></reportTable>
         </div>
@@ -102,7 +102,7 @@
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'container'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
-              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" />
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
           <reportContainer :item="item" ref="itemRefs"></reportContainer>
         </div>
@@ -200,6 +200,7 @@ const afterVisibleChange = (bool: boolean) => {
 };
 const isDrawerLoading = ref(false)
 const tableEditor = ref(null)
+const textEditor = ref(null)
 const inputEditor = ref(null)
 const inputGroupEditor = ref(null)
 const radioEditor = ref(null)
@@ -228,6 +229,8 @@ const onOpenEditor = (item: any) => {
         currentEditRef.value = tableEditor.value
         break;
       case 'text':
+        currentEditRef.value = textEditor.value
+        textEditor.value.initializeData(item)
         break;
       case 'input':
         currentEditRef.value = inputEditor.value
@@ -306,6 +309,10 @@ const onDelComponent = (item: any) => {
 
 const onAddComponent = (com: any) => {
   console.log('onAddComponent:', toRaw(com.com))
+  let sortNumber = '0'
+  if(reportTemplateStore.reportTemplate.items && reportTemplateStore.reportTemplate.items.length != 0) {
+    sortNumber = (parseInt(reportTemplateStore.reportTemplate.items[reportTemplateStore.reportTemplate.items.length - 1].sort) + 1).toString()
+  }
   let newItem;
   switch (com.com.defaultData.type) {
     case "container":
@@ -340,6 +347,7 @@ const onAddComponent = (com: any) => {
   }
   if (newItem) {
     console.log('newItem:', toRaw(newItem))
+    newItem.sort = sortNumber
     reportTemplateStore.addComponent(newItem)
       galleryDrawerVisible.value = false
     console.log('all-items:', toRaw(reportTemplateStore.reportTemplate.items))
@@ -387,6 +395,32 @@ const onAddAfterComponent = (item: any) => {
     newItem.generateKey()
     console.log('newItem.key:', newItem.key)
     reportTemplateStore.reportTemplate.items.splice(index + 1, 0, newItem)
+  }
+}
+
+const onMoveDownComponent = (item: any) => {
+  //swap i and i+1
+  let index = reportTemplateStore.reportTemplate.items.findIndex(c => c.key == item.key)
+  if (index < reportTemplateStore.reportTemplate.items.length - 1) {
+    let temp = reportTemplateStore.reportTemplate.items[index]
+    reportTemplateStore.reportTemplate.items[index] = reportTemplateStore.reportTemplate.items[index + 1]
+    reportTemplateStore.reportTemplate.items[index + 1] = temp
+  }
+  for(let i = 0; i < reportTemplateStore.reportTemplate.items.length; i++) {
+    reportTemplateStore.reportTemplate.items[i].sort = i.toString()
+  }
+}
+
+const onMoveUpComponent = (item: any) => {
+  // swap i and i-1
+  let index = reportTemplateStore.reportTemplate.items.findIndex(c => c.key == item.key)
+  if (index > 0) {
+    let temp = reportTemplateStore.reportTemplate.items[index]
+    reportTemplateStore.reportTemplate.items[index] = reportTemplateStore.reportTemplate.items[index - 1]
+    reportTemplateStore.reportTemplate.items[index - 1] = temp
+  }
+  for(let i = 0; i < reportTemplateStore.reportTemplate.items.length; i++) {
+    reportTemplateStore.reportTemplate.items[i].sort = i.toString()
   }
 }
 

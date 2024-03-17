@@ -61,7 +61,7 @@
       </div>
     </a-form-item>
     <a-form-item v-if="props?.item?.data.hasAddRowButton">
-      <a-button type="primary" @click="onClickShowAddRow">{{ $t('base.AddRow') }}</a-button>
+      <a-button type="primary" @click="onClickShowAddRow">{{ $t('base.Add') }}</a-button>
     </a-form-item>
     <a-modal style="max-height: 100%; overflow-y:scroll" v-model:visible="addRowDialogVisibleRef" zIndex="99999"
       @ok="onClickAddStep" :z-index="1001" :getContainer="() => $refs.allModal">

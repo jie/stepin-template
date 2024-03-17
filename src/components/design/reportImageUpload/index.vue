@@ -3,17 +3,46 @@
 
     <BaseSlot :item="props?.item">
       <div>
-        <a-button type="primary" @click="onClickTriggerButton">
-          <template #icon>
-            <plus-outlined />
-          </template>
-          {{ $t('base.Upload') }}
-        </a-button>
-      </div>
-      <div class="flex" style="flex-wrap: wrap;margin-top: 20px;">
+        <a-row type="flex" v-for="items in computedItems" :gutter="[16,16]">
+          <a-col flex="1" v-for="item in items">
+            <div style="margin-bottom: 10px;">
+              <a-image :src="item.url" height="200px" width="100%"
+                style="border: 1px solid #ccc; border-radius: 5px; object-fit: contain;" />
+            </div>
+            <a-row type="flex" :gutter="[16,16]">
+              <a-col flex="auto">
+                <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-model:value="item.desc"
+                  v-if="props.item?.is_defect" style="width: 100%" placeholder="input here" :options="defectOptions"
+                  @search="handleSearchDefect" allowClear>
+                  <a-textarea style="width: 100%;" />
+                  <template #option="{ content_en: content_en, id: id }">
+                    <div style="display:flex" @click="onDefectSelect(item, id)">
+                      <span style="flex: 1">{{ content_en }}</span>
+                      <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
+                    </div>
+                  </template>
+                </a-auto-complete>
+                <a-textarea style="width: 100%;" v-model:value="item.desc" placeholder="Please enter description"
+                  v-else />
+              </a-col>
+              <a-col flex="60px">
+                <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+                  @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')"
+                  :cancel-text="$t('base.No')">
+                  <a-button shape="circle" style="margin-top: 10px;">
+                    <template #icon>
+                      <DeleteOutlined />
+                    </template>
+                  </a-button>
+                </a-popconfirm>
+              </a-col>
+            </a-row>
+          </a-col>
+        </a-row>
 
-        <div v-for="item in props.value" style="width: 50%; margin-bottom: 20px;" ref="boxRef">
-          <a-image :src="item.url" style=" width: 300px; height: 300px;border: 1px solid #000;" />
+
+        <!-- <div v-for="item in props.value" style="width: 50%; margin-bottom: 20px;" ref="boxRef">
+          <a-image :src="item.url" height="200" width="100%" style="border: 1px solid #ccc; border-radius: 5px; object-fit: contain;" />
           <div class="flex" style="height: 60px;padding-top: 10px;">
             <div style="flex: 1">
               <a-auto-complete
@@ -47,7 +76,15 @@
               </a-popconfirm>
             </div>
           </div>
-        </div>
+        </div> -->
+      </div>
+      <div style="margin-top: 10px;">
+        <a-button type="primary" @click="onClickTriggerButton">
+          <template #icon>
+            <plus-outlined />
+          </template>
+          {{ $t('base.Upload') }}
+        </a-button>
       </div>
       <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
         :accept="props?.item?.data?.accept" multiple />
@@ -58,7 +95,8 @@
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
 import { PlusOutlined } from '@ant-design/icons-vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { groupArray } from "@/utils/objectUtils"
 import { getBase64 } from "@/utils/file"
 import type { UploadProps } from 'ant-design-vue';
 import { ossUploadFiles } from "@/store/uploader"
@@ -75,6 +113,10 @@ const props = defineProps({
   }
 });
 
+const computedItems = computed(() => {
+  return groupArray(props.value, 2)
+})
+
 const fileBtnRef = ref(null);
 const previewVisible = ref(false);
 const previewImage = ref('');
@@ -83,10 +125,10 @@ const emits = defineEmits(["update:value"])
 
 const defectOptions = ref([])
 const handleSearchDefect = (value) => {
-    defectOptions.value = value ? store.defects.filter((s) => s.content_en.toLowerCase().includes(value.toLowerCase())) : []
+  defectOptions.value = value ? store.defects.filter((s) => s.content_en.toLowerCase().includes(value.toLowerCase())) : []
 }
 const onDefectSelect = (i, e) => {
-    i.desc = store.defects.find((s) => s.id == e).content_en
+  i.desc = store.defects.find((s) => s.id == e).content_en
 }
 const onClickTriggerButton = async () => {
   // let targetElement = document.getElementById('btn_result_file')

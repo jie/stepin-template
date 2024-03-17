@@ -90,7 +90,7 @@
             </a-form-item>
           </div>
         </div>
-        <div v-for="(item, index) in store.report.schema" :key="item.key">
+        <div v-for="(item, index) in schemaRef" :key="item.key">
           <div class="component" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
           </div>
@@ -128,7 +128,7 @@
             <div>
               <a-button type="primary" html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit') }} </a-button>
               <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-                @confirm="onSave" :title="$t('base.ConfirmSave')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
+                @confirm="onLocalSave" :title="$t('base.ConfirmSave')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
                 <a-button type="" style="width: 140px; margin-left: 10px;">{{ $t('base.Save') }}</a-button>
               </a-popconfirm>
               <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }" v-if="localDataRecord"
@@ -168,6 +168,7 @@ const loadingRef = ref(false)
 const formState = reactive({})
 const reportDataRef = ref()
 const itemRefs = ref([])
+const schemaRef = ref([])
 const loadLocalDataDialogRef = ref(false)
 const localDataRecord = ref(null)
 const startedRef = ref(false)
@@ -176,7 +177,11 @@ const affixedChange = (affixed: boolean) => {
 };
 
 const initialization = async () => {
-  console.log('loadLocalData')
+  if(store.report?.values && Object.keys(store.report?.values).length != 0) {
+    schemaRef.value = store.report.schema
+  } else {
+    schemaRef.value = store.report.template?.items
+  }
   // loadLocalData()
   loadRemoteData()
   let localData = await loadLocalData()
@@ -188,7 +193,7 @@ const initialization = async () => {
   }
 }
 
-const onSave = async () => {
+const onLocalSave = async () => {
   let record
   try {
     record = await reportDatabase.getRecord(store.report.id)
@@ -345,6 +350,7 @@ const onFinishFailed = () => {
 }
 
 const handleSubmitOk = async () => {
+  console.log('formState:', toRaw(formState))
   // apiSubmit
   let result;
   try {

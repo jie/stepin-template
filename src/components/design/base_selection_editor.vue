@@ -21,6 +21,12 @@
           <a-form-item :label="$t('base.IsRequire')" name="required">
             <a-switch v-model:checked="baseData.required" />
           </a-form-item>
+          <a-form-item :label="$t('base.HasResult')" name="required">
+            <a-switch v-model:checked="baseData.hasResult" />
+          </a-form-item>
+          <a-form-item :label="$t('base.HasRemark')" name="required">
+            <a-switch v-model:checked="baseData.hasRemark" />
+          </a-form-item>
           <a-form-item :label="$t('base.Layout')" name="layout">
             <a-radio-group v-model:value="baseData.layout">
               <a-radio-button value="vertical">{{ $t('base.Vertical') }}</a-radio-button>
@@ -41,10 +47,11 @@
             <a-input v-model:value="optionData.value" />
           </a-form-item>
           <a-form-item v-if="baseData?.data?.options.length != 0"  :wrapper-col="{ offset: 3, span: 21 }">
-            <a-tag closable @close="delOption(option.value)" v-for="option in baseData?.data?.options">{{ option.label }} / {{ option.value }}</a-tag>
+            <a-tag closable @click="selectOption(index)" @close="delOption($event, index)" v-for="(option, index) in baseData?.data?.options">{{ option.label }} / {{ option.value }}</a-tag>
           </a-form-item>
           <a-form-item  :wrapper-col="{ offset: 3, span: 21 }">
-            <a-button @click="addOption">{{ $t('base.Add') }}</a-button>
+            <a-button @click="addOption" type="primary">{{ $t('base.Add') }}</a-button>
+            <a-button @click="editOption" v-if="!isAddRef" style="margin-left: 10px;">{{ $t('base.Edit') }}</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -57,6 +64,9 @@
 import { ref } from "vue"
 import { ComponentType } from "@/types/components/base"
 import { notification } from 'ant-design-vue';
+import { toRaw } from "vue";
+const isAddRef = ref(true)
+const selectIndexRef = ref(null)
 const optionData = ref({
   label: "",
   value: ""
@@ -64,6 +74,8 @@ const optionData = ref({
 const baseData = ref({
   title: "",
   required: false,
+  hasResult: false,
+  hasRemark: false,
   type: "",
   key: "",
   sort: "0",
@@ -80,6 +92,8 @@ const initializeData = (item: ComponentType) => {
   baseData.value.summary = item.summary
   baseData.value.type = item.type
   baseData.value.required = item.required
+  baseData.value.hasResult = item.hasResult
+  baseData.value.hasRemark = item.hasRemark
   baseData.value.key = item.key
   baseData.value.sort = item.sort
   baseData.value.desc = item.desc
@@ -112,9 +126,30 @@ const addOption = () => {
   optionData.value.value = ""
 }
 
-const delOption = (value:string) => {
-  baseData.value.data.options = baseData.value.data.options.filter((item:any) => item.value != value)
+const delOption = (e: Event, index:number) => {
+  // let items = baseData.value.data.options.filter((item, i) => index != i)
+  // baseData.value.data.options = [...items]
+  baseData.value.data.options.splice(index, 1)
+  console.log(e)
+  console.log(index)
+  e.preventDefault()
 } 
+
+const editOption = () => {
+  baseData.value.data.options[selectIndexRef.value].label = optionData.value.label
+  baseData.value.data.options[selectIndexRef.value].value = optionData.value.value
+  optionData.value.label = ""
+  optionData.value.value = ""
+  isAddRef.value = true
+  selectIndexRef.value = null
+}
+
+const selectOption = (index:number) => {
+  optionData.value.label = baseData.value.data.options[index].label
+  optionData.value.value = baseData.value.data.options[index].value
+  isAddRef.value = false
+  selectIndexRef.value = index
+}
 
 defineExpose({
   initializeData,

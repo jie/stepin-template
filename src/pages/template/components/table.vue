@@ -332,7 +332,7 @@ const getLanguage = (code: string) => {
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="Delete" :content="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$('base.No')" @confirm="deleteRecord(record)">
+                <a-popconfirm title="Delete" :content="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$t('base.No')" @confirm="deleteRecord(record)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
                     {{$t('base.Delete')}}

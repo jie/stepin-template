@@ -45,7 +45,7 @@
           <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
             title="Please delete row?" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')" @confirm="confirmDeleteRowItem"
             v-if="state.selectedRowKeys && state.selectedRowKeys.length != 0">
-            <a-button type="danger" class="mt-2 ml-2">Delete</a-button>
+            <a-button type="danger" class="mt-2 ml-2">{{ $t('base.Delete') }}</a-button>
           </a-popconfirm>
         </div>
       </div>

@@ -33,12 +33,13 @@ const items = ref([
     }),
     defaultData: { title: "Here is the title", sort: "0", desc: "Here is the description", type: "input_group", data: {value: [], hasAddRowButton: false} }
   },
-  // {
-  //   name: 'Text',
-  //   type: 'text',
-  //   icon: h(FieldStringOutlined, {
-  //   })
-  // },
+  {
+    name: 'Text',
+    type: 'text',
+    icon: h(FieldStringOutlined, {
+    }),
+    defaultData: { sort: "0", type: "text", data: {value: ""} }
+  },
   {
     name: i18n.global.t('base.Radio'),
     type: 'radio',
@@ -51,7 +52,10 @@ const items = ref([
           { label: 'Option 2', value: '2' },
           { label: 'Option 3', value: '3' },
           { label: 'Option 4', value: '4' },
-        ]
+        ],
+        value: "",
+        result: "",
+        remark: ""
       }
     }
   },
@@ -67,7 +71,10 @@ const items = ref([
           { label: 'Option 2', value: '2' },
           { label: 'Option 3', value: '3' },
           { label: 'Option 4', value: '4' },
-        ]
+        ],
+        value: [],
+        result: "",
+        remark: ""
       }
     }
   },

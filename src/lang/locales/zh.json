@@ -74,8 +74,8 @@
         "IsTable": "是否为表格",
         "IsTextarea": "是否为多行文本",
         "IsRepeat": "是否可重复",
-        "Input": "文本",
-        "InputGroup": "组合文本",
+        "Input": "输入框",
+        "InputGroup": "组合输入框",
         "Radio": "单选",
         "Checkbox": "多选",
         "Table": "表格",
@@ -129,6 +129,14 @@
         "FindLatestLocalData": "是否载入本地数据",
         "LocalDataUpdateAt": "本地数据更新时间",
         "RemoteDataUpdateAt": "远程数据更新时间",
-        "DeleteLocalData": "删除本地数据"
+        "DeleteLocalData": "删除本地数据",
+        "HasResult": "是否有结论输入框",
+        "HasRemark": "是否有备注输入框",
+        "PleaseEnterResult": "请输入结论",
+        "PleaseEnterRemark": "请输入备注",
+        "MoveUp": "向上移动",
+        "MoveDown": "向下移动",
+        "PleaseEnterReviewComments": "审核结果",
+        "Email": "邮箱"
     }
 }

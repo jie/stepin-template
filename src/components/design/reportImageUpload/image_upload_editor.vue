@@ -26,7 +26,13 @@ const initializeData = (item: any) => {
   baseForm.value.initializeData(item)
 }
 
+const exportData = () => {
+  console.log('baseForm.value.exportData():', baseForm.value.exportData())
+  return baseForm.value.exportData()
+}
+
 defineExpose({
-  initializeData
+  initializeData,
+  exportData
 })
 </script>

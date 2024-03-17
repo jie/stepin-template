@@ -1,21 +1,21 @@
 <template>
   <div class="report relative" v-if="store.report?.schema">
     <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog"
-      title="Please enter your review comments" @ok="handleSubmitOk">
+      :title="$t('base.PleaseEnterReviewComments')" @ok="handleSubmitOk">
       <a-form :model="submitFormData" layout="vertical">
-        <a-form-item label="Status" name="approve_status" required>
+        <a-form-item :label="$t('base.Status')" name="approve_status" required>
           <a-select :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
             v-model:value="submitFormData.approve_status" style="width: 100%">
             <a-select-option :value="option.value" v-for="option in approveStatuses">{{ option.label }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="Reason" name="approve_reason" required>
+        <a-form-item :label="$t('base.Reason')" name="approve_reason" required>
           <a-textarea v-model:value="submitFormData.approve_reason" />
         </a-form-item>
-        <a-form-item label="E-mail" name="email" required>
+        <a-form-item :label="$t('base.Email')" name="email" required>
           <a-input v-model:value="submitFormData.email"></a-input>
         </a-form-item>
-        <a-form-item label="Password" name="password" required v-if="store.report?.settings.approve_password">
+        <a-form-item :label="$t('base.Password')" name="password" required v-if="store.report?.settings.approve_password">
           <a-input type="password" v-model:value="submitFormData.password"></a-input>
         </a-form-item>
       </a-form>
