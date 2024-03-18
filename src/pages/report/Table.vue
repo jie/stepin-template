@@ -1,5 +1,5 @@
-<script lang="ts" setup>
-import Report from "@/components/report_designer/index"
+<!-- <script lang="ts" setup>
+import Report from "@/components/design/index.vue"
 import { ref } from "vue"
 const items = [
   {
@@ -36,4 +36,5 @@ const items = [
 </script>
 <template><div class="table w-full h-full">
   <Report title="My Report" summary="My summary" :items="items" />
-</div></template>
+</div></template> -->
+<template></template>

@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<!-- <script lang="ts" setup>
 import Report from "@/components/report/index"
 import { ref } from "vue"
 const items = [
@@ -15,4 +15,6 @@ const items = [
   <div class="table w-full h-full">
     <Report title="My Report" summary="My summary" :items="items" />
   </div>
-</template>
+</template> -->
+
+<template></template>
