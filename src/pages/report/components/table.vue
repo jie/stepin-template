@@ -12,6 +12,7 @@ import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
 import {useRouter} from 'vue-router'
 import {i18n} from "@/lang/i18n"
+import {openNewUrl} from "@/utils/helpers"
 const router = useRouter()
 const store = ReportStore()
 const categoryStore = ReportCategoryStore()
@@ -227,15 +228,12 @@ const statusDialogCancel = () => {
 
 const goPublicFillReport = (report:any) => {
   console.log('form:', toRaw(form))
-  let url = router.resolve({
+  openNewUrl(router, {
     name: 'report_fill',
     params: {
       reportId: report.id
     }
   })
-  console.log('url:', url.href)
-  window.open(url.href, '_blank')
-
 }
 
 initializeData()

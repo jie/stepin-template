@@ -150,14 +150,14 @@ const routes: RouteRecordRaw[] = [
       }
     ],
   },
-  {
-    path: '/report_system/',
-    name: 'workplace_index',
-    meta: {
-      renderMenu: false,
-    },
-    component: () => import('@/pages/report_system/index.vue'),
-  },
+  // {
+  //   path: '/report_system/',
+  //   name: 'workplace_index',
+  //   meta: {
+  //     renderMenu: false,
+  //   },
+  //   component: () => import('@/pages/report_system/index.vue'),
+  // },
   {
     path: '/report_system/public',
     name: 'public',
@@ -167,7 +167,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/layout/BlankView.vue'),
     children: [
       {
-        path: '/public/report/fill/:reportId',
+        path: 'report/fill/:reportId',
         name: 'report_fill',
         meta: {
           icon: 'LoginOutlined',
@@ -178,7 +178,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/report_fill/index.vue'),
       },
       {
-        path: '/public/report/approve/:reportId',
+        path: 'report/approve/:reportId',
         name: 'report_approve',
         meta: {
           icon: 'LoginOutlined',

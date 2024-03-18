@@ -113,7 +113,7 @@
     </div>
   </div>
 
-  <a-drawer v-model:visible="editDrawerVisible" class="custom-class"  width="60%" :title="drawerTitle"
+  <a-drawer v-model:visible="editDrawerVisible" class="custom-class"  width="60%" :title="drawerTitle" :maskClosable="false"
     placement="right" @after-visible-change="afterVisibleChange">
     <template #extra>
       <a-button style="margin-right: 8px" @click="onClose">{{ $t('base.Cancel') }}</a-button>
@@ -139,7 +139,7 @@
     placement="right">
     <ComGallery v-on:add-component="onAddComponent" />
   </a-drawer>
-  <a-drawer v-model:visible="reportSettingDrawerVisible" class="custom-class"  width="600"
+  <a-drawer v-model:visible="reportSettingDrawerVisible" class="custom-class"  width="600" :maskClosable="false"
     :title="$t('base.Settings')" placement="right">
     <template #extra>
       <a-button style="margin-right: 8px" @click="onCloseSetting">{{ $t('base.Cancel') }}</a-button>
@@ -185,6 +185,7 @@ import {
 } from "@/types/components"
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { useRoute, useRouter } from "vue-router";
+import { openNewUrl } from '@/utils/helpers';
 import dayjs from 'dayjs';
 const reportTemplateStore = ReportTemplateStore()
 const router = useRouter()
@@ -452,13 +453,12 @@ const onClickOpenReportSettingDrawer = () => {
 }
 
 const onClickPreview = () => {
-  let url = router.resolve({
+  openNewUrl(router, {
     name: 'public_report',
     params: {
       reportId: reportTemplateStore.reportTemplate.id
     }
   })
-  window.open(url.href, '_blank')
 }
 
 const onSetCurrentCom = (item: any) => {
