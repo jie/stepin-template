@@ -30,13 +30,18 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/workplace',
+    path: '/report_system/workplace',
     name: 'workplace',
     meta: {
       renderMenu: false,
     },
     // component: () => import('@/components/layout/FrontView.vue'),
     children: [
+      {
+        path: '',
+        name: 'report_system',
+        component: () => import('@/pages/report_system/index.vue'),
+      },
       {
         path: 'report',
         name: 'report',
@@ -142,11 +147,19 @@ const routes: RouteRecordRaw[] = [
           renderMenu: true,
          },
         component: () => import('@/pages/defect'),
-      },
+      }
     ],
   },
   {
-    path: '/public',
+    path: '/report_system/',
+    name: 'workplace_index',
+    meta: {
+      renderMenu: false,
+    },
+    component: () => import('@/pages/report_system/index.vue'),
+  },
+  {
+    path: '/report_system/public',
     name: 'public',
     meta: {
       renderMenu: false,
@@ -178,7 +191,7 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: '/account',
+    path: '/report_system/account',
     name: 'account',
     meta: {
       renderMenu: false,
@@ -186,7 +199,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/layout/FrontView.vue'),
     children: [
       {
-        path: '/account/login',
+        path: 'login',
         name: 'login',
         meta: {
           icon: 'LoginOutlined',
@@ -197,7 +210,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/login'),
       },
       {
-        path: '/account/regist',
+        path: 'regist',
         name: 'regist',
         meta: {
           icon: 'RegisterOutlined',

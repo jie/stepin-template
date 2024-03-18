@@ -15,10 +15,10 @@ interface NaviGuard {
 }
 
 const publicPages = [
-  '/account/login',
-  '/account/regist',
-  '/public/report',
-  '/home',
+  '/report_system/account/login',
+  '/report_system/account/regist',
+  '/report_system/public/report',
+  '/report_system/home',
 ]
 
 const isPublicPage = (path: string) => {
@@ -33,8 +33,7 @@ const loginGuard: NavigationGuard = function (to, from) {
   const account = useAccountStore();
   // if (!http.checkAuthorization() && !/^\/(login|home)?$/.test(to.fullPath)) {
   if (!http.checkAuthorization() && !isPublicPage(to.fullPath)) {
-    console.log('1111')
-    return '/account/login';
+    return '/report_system/account/login';
     // account.setLogged(false);
   }
 };

@@ -4,7 +4,7 @@
 
   const router = useRouter();
   function signIn() {
-    router.push('/account/login');
+    router.push({name: 'login'});
   }
 </script>
 <template>

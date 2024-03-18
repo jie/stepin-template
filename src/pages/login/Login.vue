@@ -9,7 +9,9 @@
 
   const router = useRouter();
   function onLoginSuccess() {
-    router.push('/workplace/report');
+    router.push({
+      name: "report"
+    });
   }
 </script>
 <style scoped lang="less">

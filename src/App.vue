@@ -75,7 +75,7 @@
         title: '退出登录',
         key: 'logout',
         icon: 'LogoutOutlined',
-        onClick: () => logout().then(() => router.push('/account/login')),
+        onClick: () => logout().then(() => router.push({name: 'login'})),
       },
     ],
   });
