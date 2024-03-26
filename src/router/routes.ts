@@ -188,6 +188,17 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import('@/pages/report_approve/index.vue'),
       },
+      {
+        path: 'report/test',
+        name: 'report_test',
+        meta: {
+          icon: 'LoginOutlined',
+          view: 'blank',
+          target: '_blank',
+          cacheable: false,
+        },
+        component: () => import('@/pages/test/index.vue'),
+      },
     ]
   },
   {

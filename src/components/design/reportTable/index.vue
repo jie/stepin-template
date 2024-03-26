@@ -2,7 +2,7 @@
   <div ref="allModal">
     <BaseSlot :item="props?.item">
       <div v-if="props.mode == 'preview'">
-        <a-table class="report-table" :columns="tableDataRef?.columns" :data-source="previewRows" bordered size="middle"
+        <a-table class="report-table" :columns="tableDataRef.columns" :data-source="previewRows" bordered size="small" :scroll="{ x: 1500 }"
           :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
           :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }">
           <template #bodyCell="{ text, record, index, column }">
@@ -27,7 +27,7 @@
         </a-table>
       </div>
       <div v-else>
-        <a-table class="report-table" :columns="tableDataRef?.columns" :data-source="props.value" bordered size="middle"
+        <a-table class="report-table" :columns="tableDataRef.columns" :data-source="props.value" bordered size="small" :scroll="{ x: 1500 }"
           :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
           :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }">
 
@@ -43,20 +43,23 @@
         <div v-if="tableDataRef?.hasAddRowButton">
           <a-button type="primary" @click="showAddRowDialog" class="mt-2">{{ $t('base.Add') }}</a-button>
           <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-            title="Please delete row?" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')" @confirm="confirmDeleteRowItem"
-            v-if="state.selectedRowKeys && state.selectedRowKeys.length != 0">
+            title="Please delete row?" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"
+            @confirm="confirmDeleteRowItem" v-if="state.selectedRowKeys && state.selectedRowKeys.length != 0">
             <a-button type="danger" class="mt-2 ml-2">{{ $t('base.Delete') }}</a-button>
           </a-popconfirm>
         </div>
       </div>
     </BaseSlot>
-    <a-modal v-model:visible="AddRowDialogVisible" :title="$t('base.AddRow')" :ok-text="$t('base.Confirm')" :cancel-text="$t('base.Cancel')"
-      @ok="handleConfirmAddRow" @onCancel="handleCancelAddRow" :z-index="1001" :getContainer="() => $refs.allModal">
+    <a-modal v-model:visible="AddRowDialogVisible" :title="$t('base.AddRow')" :ok-text="$t('base.Confirm')"
+      :cancel-text="$t('base.Cancel')" @ok="handleConfirmAddRow" @onCancel="handleCancelAddRow" :z-index="1001"
+      :getContainer="() => $refs.allModal">
       <a-form name="basic" autocomplete="off" layout="vertical">
+
         <template v-for="row in formRows">
           <div v-for="col in tableDataRef.columns">
             <div>{{ row[col.key] }}</div>
-            <a-form-item :label="col.title" v-if="col.children.length==0 && row.fieldOptions[col.key].fieldType == 'input'">
+            <a-form-item :label="col.title"
+              v-if="col.children.length == 0 && row.fieldOptions[col.key].fieldType == 'input'">
 
               <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
                 v-model:value="row.fieldOptions[col.key].val" style="width: 100%"
@@ -75,22 +78,38 @@
 
 
             <div v-if="col.children && col.children.length != 0">
-              <a-form-item :label="`${col.title} - ${child.title}`" v-for="child in col.children">
-
-                <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
-                  v-model:value="row.fieldOptions[child.key].val" style="width: 100%"
-                  placeholder="" :options="defectOptions"
-                  v-if="row.fieldOptions[child.key].is_defect"
-                  @search="handleSearchDefect" allowClear>
-                  <template #option="{ content_en: content_en, id: id }">
-                    <div style="display:flex" @click="onDefectSelect(row, child.key, id)">
-                      <span style="flex: 1">{{ content_en }}</span>
-                      <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
-                    </div>
-                  </template>
-                </a-auto-complete>
-                <a-input v-model:value="row.fieldOptions[child.key].val" v-else allowClear />
-              </a-form-item>
+              <div v-for="child in col.children">
+                <a-form-item :label="`${col.title} - ${child.title}`" v-if="!child.children || child.children.length == 0">
+                  <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
+                    v-model:value="row.fieldOptions[child.key].val" style="width: 100%" placeholder=""
+                    :options="defectOptions" v-if="row.fieldOptions[child.key].is_defect" @search="handleSearchDefect"
+                    allowClear>
+                    <template #option="{ content_en: content_en, id: id }">
+                      <div style="display:flex" @click="onDefectSelect(row, child.key, id)">
+                        <span style="flex: 1">{{ content_en }}</span>
+                        <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
+                      </div>
+                    </template>
+                  </a-auto-complete>
+                  <a-input v-model:value="row.fieldOptions[child.key].val" v-else allowClear />
+                </a-form-item>
+                <div v-else>
+                  <a-form-item :label="`${col.title} - ${child.title} - ${oChild.title}`" v-for="oChild in child.children">
+                    <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
+                      v-model:value="row.fieldOptions[oChild.key].val" style="width: 100%" placeholder=""
+                      :options="defectOptions" v-if="row.fieldOptions[oChild.key].is_defect" @search="handleSearchDefect"
+                      allowClear>
+                      <template #option="{ content_en: content_en, id: id }">
+                        <div style="display:flex" @click="onDefectSelect(row, oChild.key, id)">
+                          <span style="flex: 1">{{ content_en }}</span>
+                          <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
+                        </div>
+                      </template>
+                    </a-auto-complete>
+                    <a-input v-model:value="row.fieldOptions[oChild.key].val" v-else allowClear />
+                  </a-form-item>
+                </div>
+              </div>
             </div>
 
 
@@ -158,6 +177,14 @@ const previewRows = computed(() => {
   })
 })
 
+
+const tableDataColumnsComputed = computed(() => {
+  return tableDataRef.value?.columns.map((col, index) => {
+    col.responsive = ['small']
+    return col
+  })
+})
+
 const getTableData = () => {
   return tableDataRef.value
 }
@@ -172,9 +199,16 @@ const addRow = (row: any) => {
 }
 
 const deleteSelectedRows = () => {
-  let newRows = [...props.value]
-  newRows = newRows.filter((row: any) => !state.selectedRowKeys.includes(row.key))
-  emits('update:value', newRows)
+  if (props.mode == 'preview') {
+    tableDataRef.value.rows = tableDataRef.value.rows.filter((row: any, index: number) => !state.selectedRowKeys.includes(index))
+  } else {
+    let newRows = [...props.value]
+    console.log('newRows1:', toRaw(newRows))
+    console.log('state.selectedRowKeys2:', state.selectedRowKeys)
+    newRows = newRows.filter((row: any) => !state.selectedRowKeys.includes(row.key))
+    emits('update:value', newRows)
+  }
+
 }
 
 const exportData = () => {
@@ -280,6 +314,7 @@ const initialization = () => {
       ...props?.item?.data,
       rows: []
     }
+    console.log('tableDataRef.value:', toRaw(tableDataRef.value))
   }
 }
 
@@ -301,10 +336,10 @@ defineExpose({
 </script>
 
 
-<!-- <style>
+<style>
 
 .report-table .ant-table-cell.ant-table-selection-column {
-  width: 40px;
-  padding: 1px;
+  min-width: 30px!important;
+  width: 30px!important
 }
-</style> -->
+</style>

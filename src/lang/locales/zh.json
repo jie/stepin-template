@@ -137,6 +137,8 @@
         "MoveUp": "向上移动",
         "MoveDown": "向下移动",
         "PleaseEnterReviewComments": "审核结果",
-        "Email": "邮箱"
+        "Email": "邮箱",
+        "Number": "数字",
+        "HasTotal": "是否有总计"
     }
 }

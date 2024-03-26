@@ -6,7 +6,10 @@ import { useAuthStore } from '@/plugins';
 import NProgress from 'nprogress';
 import { clearPage } from 'stepin/es/tabs-view';
 import 'nprogress/nprogress.css';
-
+import {
+  isRoleHasPermission,
+  getUserPermissions
+} from '@/router/permissionUtils';
 NProgress.configure({ showSpinner: false });
 
 interface NaviGuard {
@@ -63,8 +66,8 @@ const ProgressGuard: NaviGuard = {
 // 403 forbidden
 const ForbiddenGuard: NaviGuard = {
   before(to) {
-    const { hasAuthority } = useAuthStore();
-    if (to.meta?.permission && !hasAuthority(to.meta?.permission)) {
+    // const { hasAuthority } = useAuthStore();
+    if (to.meta?.permission && !isRoleHasPermission(getUserPermissions(), to.meta?.permission)) {
       const { authLoading } = storeToRefs(useLoadingStore());
       return {
         path: '/403',

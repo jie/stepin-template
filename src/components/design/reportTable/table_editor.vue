@@ -8,6 +8,9 @@
           <a-form-item :label="$t('base.HasAddButton')" name="hasAddRowButton">
             <a-switch v-model:checked="TableSettings.hasAddRowButton" />
           </a-form-item>
+          <a-form-item :label="$t('base.HasTotal')" name="hasTotal">
+            <a-switch v-model:checked="TableSettings.hasTotal" />
+          </a-form-item>
           <a-form-item :label="$t('base.Width')" name="width">
             <a-input v-model:value="TableSettings.tableWidth" />
           </a-form-item>
@@ -44,6 +47,7 @@
             <a-radio-group v-model:value="itemParam.fieldType" button-style="solid">
               <a-radio-button value="text">{{ $t('base.Text') }}</a-radio-button>
               <a-radio-button value="input">{{ $t('base.Input') }}</a-radio-button>
+              <a-radio-button value="number">{{ $t('base.Number') }}</a-radio-button>
             </a-radio-group>
           </a-form-item>
           <a-form-item :label="$t('base.Width')" name="width">
@@ -91,6 +95,7 @@
               <a-radio-group v-model:value="rowItemParam.fieldType" button-style="solid">
                 <a-radio-button value="text">{{ $t('base.Text') }}</a-radio-button>
                 <a-radio-button value="input">{{ $t('base.Input') }}</a-radio-button>
+                <a-radio-button value="number">{{ $t('base.Number') }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
             <a-form-item :label="$t('base.IsDefect')" name="is_defect">
@@ -124,7 +129,7 @@ const rowItemParam = ref<any>({
   key: '',
   text: '',
   fieldType: '',
-  is_defect: false
+  is_defect: false,
 })
 const itemParam = ref<any>({
   title: '',
@@ -139,6 +144,7 @@ const itemParam = ref<any>({
 
 const TableSettings = ref<any>({
   hasAddRowButton: false,
+  hasTotal: false,
   tableHeight: 300,
   tableWidth: "100%",
   pageSize: 0
@@ -390,9 +396,10 @@ const initializeData = (item: any) => {
 
     baseForm.value.initializeData(item)
     TableSettings.value.hasAddRowButton = item?.data?.hasAddRowButton
-    TableSettings.tableHeight = item?.data?.heigth
-    TableSettings.tableWidth = item?.data?.width
-    TableSettings.pageSize = item?.data?.pageSize
+    TableSettings.value.hasTotal = item?.data?.hasTotal
+    TableSettings.value.tableHeight = item?.data?.heigth
+    TableSettings.value.tableWidth = item?.data?.width
+    TableSettings.value.pageSize = item?.data?.pageSize
     currentItem.value = item
 
     presetTable.value.updateTableData({ columns: convertColumnToTableData(treeData.value), rows: rows.value })
@@ -410,7 +417,8 @@ const exportData = () => {
     rowSchema: data.rows,
     pageSize: TableSettings.value.pageSize,
     addRowCount: TableSettings.value.hasAddRowButton ? data.rows.length : 0,
-    hasAddRowButton: TableSettings.value.hasAddRowButton
+    hasAddRowButton: TableSettings.value.hasAddRowButton,
+    hasTotal: TableSettings.value.hasTotal,
   }
   let result = new ReportTable(baseForm.value.exportData())
   result.data = tableData
@@ -496,7 +504,7 @@ const resetRowEdit = () => {
     key: '',
     text: '',
     fieldType: '',
-    is_defect: false
+    is_defect: false,
   }
 }
 

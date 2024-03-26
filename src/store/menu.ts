@@ -4,6 +4,10 @@ import { ref, toRaw, watch } from 'vue';
 import { Response } from '@/types';
 import { RouteOption } from '@/router/interface';
 import { addRoutes, removeRoute } from '@/router/dynamicRoutes';
+import {
+  isRoleHasPermission,
+  getUserPermissions
+} from '@/router/permissionUtils';
 import { useSettingStore } from './setting';
 import { RouteRecordRaw, RouteMeta } from 'vue-router';
 import { useAuthStore } from '@/plugins';
@@ -37,7 +41,7 @@ const presetList = [
     component: '@/pages/report',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "report:list",
     cacheable: false,
   },
   {
@@ -51,7 +55,7 @@ const presetList = [
     component: '@/pages/template',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "template:list",
     cacheable: false,
   },
   {
@@ -65,7 +69,7 @@ const presetList = [
     component: '@/pages/designer',
     renderMenu: false,
     parent: 3,
-    permission: null,
+    permission: "template:list",
     cacheable: false,
   },
   {
@@ -79,7 +83,7 @@ const presetList = [
     component: '@/pages/category',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "category:list",
     cacheable: false,
   },
   {
@@ -93,7 +97,7 @@ const presetList = [
     component: '@/pages/company',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "company:list",
     cacheable: false,
   },
   // {
@@ -149,7 +153,7 @@ const presetList = [
     component: '@/pages/user',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "user:list",
     cacheable: false,
   },
   {
@@ -163,7 +167,7 @@ const presetList = [
     component: '@/pages/role',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "role:list",
     cacheable: false,
   },
   {
@@ -177,7 +181,7 @@ const presetList = [
     component: '@/pages/settings',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "org:list",
     cacheable: false,
   },
   {
@@ -191,7 +195,7 @@ const presetList = [
     component: '@/pages/system_settings',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "system_settings:list",
     cacheable: false,
   },
   {
@@ -205,7 +209,7 @@ const presetList = [
     component: '@/pages/defect',
     renderMenu: true,
     parent: null,
-    permission: null,
+    permission: "defect:list",
     cacheable: false,
   },
   {
@@ -341,20 +345,25 @@ export interface MenuProps {
  */
 function doMenuFilter(routes: Readonly<RouteRecordRaw[]>, parentPermission?: string) {
   const { hasAuthority } = useAuthStore();
-
+  console.log('hasAuthority:', hasAuthority)
   const setCache = (meta: RouteMeta) => {
     meta._cache = {
       renderMenu: meta.renderMenu,
     };
   };
 
+
   routes.forEach((route) => {
     const required = route.meta?.permission ?? parentPermission;
+    console.log('required:', required)
     // if (route.meta?.renderMenu === undefined && required) {
     if (required) {
       route.meta = route.meta ?? {};
       setCache(route.meta);
-      route.meta.renderMenu = hasAuthority(route.meta.permission);
+
+      route.meta.renderMenu = isRoleHasPermission(getUserPermissions(), route.meta.permission);
+      // route.meta.renderMenu = isRoleHasPermission(getUserPermissions(), route.meta.permission);
+      // route.meta.renderMenu = hasAuthority(route.meta.permission);
     }
     if (route.children) {
       doMenuFilter(route.children, required);
@@ -408,14 +417,15 @@ export const useMenuStore = defineStore('menu', () => {
   const menuList = ref<MenuProps[]>([]);
 
   const { filterMenu } = storeToRefs(useSettingStore());
-
+  console.log('filterMenu:', toRaw(filterMenu.value))
   const checkMenuPermission = () => {
-    if (filterMenu.value) {
-      doMenuFilter(router.options.routes);
-      console.log(router.options.routes);
-    } else {
-      resetMenuFilter(router.options.routes);
-    }
+    console.log('1111:', toRaw(router.options.routes), toRaw(filterMenu.value));
+    // if (filterMenu.value) {
+    //   doMenuFilter(router.options.routes);
+    // } else {
+    //   resetMenuFilter(router.options.routes);
+    // }
+    doMenuFilter(router.options.routes);
   };
 
   checkMenuPermission();

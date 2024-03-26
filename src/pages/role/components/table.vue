@@ -4,10 +4,12 @@ import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
-import {permissions, roles} from '@/pages/constants';
+// import {permissions, roles} from '@/pages/constants';
 import { ReportRoleStore, ReportRole } from '@/store/role';
+import { ReportPermissionStore } from '@/store/permission';
 import { ApproveStatusOptions, ApproveStatus } from '@/utils/constant';
 
+const permissionStore = ReportPermissionStore();
 const store = ReportRoleStore();
 const columns = [
   {
@@ -18,7 +20,6 @@ const columns = [
   { title: 'CREATED', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
-
 
 
 function addNew() {
@@ -88,9 +89,11 @@ const editRecord = ref<ReportRole>();
  * @param record
  */
 function edit(record: ReportRole) {
+  store.isNew = false
   editRecord.value = record;
   copyObject(form, record);
   console.log('permissions:', record.permissions)
+  form.id = record.id;
   form.permissions = record.permissions.map(c=>c.id)
   showModal.value = true;
 }
@@ -105,6 +108,11 @@ const deleteRecord = async (record: ReportRole) => {
   initializeData()
 };
 
+const getAllPermissions = async () => {
+  await permissionStore.apiQuery()
+};
+
+getAllPermissions()
 initializeData()
 
 </script>
@@ -115,7 +123,7 @@ initializeData()
         <a-input v-model:value="form.name" />
       </a-form-item>
       <a-form-item label="Permission" required name="permissions">
-        <a-select v-model:value="form.permissions" mode="multiple" :options="permissions" :fieldNames="{label: 'name', value: 'id'}"/>
+        <a-select v-model:value="form.permissions" mode="multiple" :options="permissionStore.entities" :fieldNames="{label: 'name', value: 'id'}"/>
       </a-form-item>
     </a-form>
   </a-modal>
