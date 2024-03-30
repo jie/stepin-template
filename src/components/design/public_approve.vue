@@ -93,6 +93,64 @@
               <a-input v-model:value="formState['Inspector']"></a-input>
             </a-form-item>
           </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.InspectionStandard">
+            <a-form-item required :label="$t('base.InspectionStandard')">
+              <a-input v-model:value="formState['InspectionStandard']" allowClear></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.GeneralInspectionLevel">
+            <a-form-item required :label="$t('base.GeneralInspectionLevel')">
+              <a-radio-group v-model:value="formState['GeneralInspectionLevel']" allowClear>
+                <a-radio value="I">I</a-radio>
+                <a-radio value="II">II</a-radio>
+                <a-radio value="III">III</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.SampleSize">
+            <a-form-item required :label="$t('base.SampleSize')">
+              <a-input-number v-model:value="formState['SampleSize']" style="width: 100%;" allowClear></a-input-number>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
+            <a-row style="width: 100%" :gutter="[16,16]">
+              <a-col :span="8" >
+                <a-form-item required :label="$t('base.AQL_CR')">
+                  <a-input v-model:value="formState['AQL_CR']" allowClear></a-input>
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item required :label="$t('base.AQL_MAJ')">
+                  <a-input v-model:value="formState['AQL_MAJ']" allowClear></a-input>
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item required :label="$t('base.AQL_MIN')">
+                  <a-input v-model:value="formState['AQL_MIN']" allowClear></a-input>
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </div>
+
+          <div class="component meta" v-if="store.report?.template?.settings?.InspectionType">
+            <a-form-item required :label="$t('base.InspectionType')">
+              <a-radio-group v-model:value="formState['InspectionType']" allowClear>
+                <a-radio value="PPI">PPI</a-radio>
+                <a-radio value="DPI">DPI</a-radio>
+                <a-radio value="PSI">PSI</a-radio>
+                <a-radio value="Re-PSI">Re-PSI</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.ReInspectionType">
+            <a-form-item required :label="$t('base.ReInspectionType')">
+              <a-radio-group v-model:value="formState['ReInspectionType']" allowClear>
+                <a-radio value="1ST">1ST</a-radio>
+                <a-radio value="2ST">2ST</a-radio>
+                <a-radio value="3ST">3ST</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </div>
         </div>
         <div v-for="(item, index) in store.report.schema" :key="item.key">
           <div class="component" v-if="item.type == 'text'">

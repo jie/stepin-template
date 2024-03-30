@@ -15,9 +15,7 @@
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.allowSelectImageFromAlbum" />
             </a-form-item>
 
-            <a-form-item :label="$t('base.ReportNumber')" name="ReportNumber">
-                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.ReportNumber" />
-            </a-form-item>
+
             <a-form-item :label="$t('base.Applicant')" name="Applicant">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.Applicant" />
             </a-form-item>
@@ -48,6 +46,55 @@
             <a-form-item :label="$t('base.Inspector')" name="Inspector">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.Inspector" />
             </a-form-item>
+            <a-form-item :label="$t('base.ReportNumber')" name="ReportNumber">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.ReportNumber" />
+            </a-form-item>
+            <a-form-item :label="$t('base.InspectStandard')" name="InspectStandard">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.InspectStandard" />
+            </a-form-item>
+            <a-form-item :label="$t('base.SampleSize')" name="SampleSize">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.SampleSize" />
+            </a-form-item>
+            <a-form-item :label="$t('base.AQL_CR')" name="AQL_CR">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.AQL_CR" />
+            </a-form-item>
+            <a-form-item :label="$t('base.AQL_MAJ')" name="AQL_MAJ">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.AQL_MAJ" />
+            </a-form-item>
+            <a-form-item :label="$t('base.AQL_MIN')" name="AQL_MIN">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.AQL_MIN" />
+            </a-form-item>
+            <a-form-item :label="$t('base.GeneralInspectionLevel')" name="GeneralInspectionLevel">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.GeneralInspectionLevel" />
+            </a-form-item>
+            <a-form-item :label="$t('base.InspectionType')" name="InspectionType">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.InspectionType" />
+            </a-form-item>
+            <a-form-item :label="$t('base.ReInspectionType')" name="ReInspectionType">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.ReInspectionType" />
+            </a-form-item>
+            <!-- <a-form-item :label="$t('base.GeneralInspectionLevel')" name="GeneralInspectionLevel">
+                <a-select v-model:checked="reportTemplateStore.reportTemplate.settings.GeneralInspectionLevel" mode="multiple">
+                    <a-select-option value="I">I</a-select-option>
+                    <a-select-option value="II">II</a-select-option>
+                    <a-select-option value="III">III</a-select-option>
+                </a-select>
+            </a-form-item>
+            <a-form-item :label="$t('base.InspectionType')" name="InspectionType">
+                <a-select v-model:checked="reportTemplateStore.reportTemplate.settings.InspectionType" mode="multiple">
+                    <a-select-option value="PPI">PPI</a-select-option>
+                    <a-select-option value="DPI">DPI</a-select-option>
+                    <a-select-option value="PSI">PSI</a-select-option>
+                    <a-select-option value="Re-PSI">Re-PSI</a-select-option>
+                </a-select>
+            </a-form-item>
+            <a-form-item :label="$t('base.ReInspectionType')" name="ReInspectionType">
+                <a-select v-model:checked="reportTemplateStore.reportTemplate.settings.ReInspectionType" mode="multiple">
+                    <a-select-option value="1ST">1ST</a-select-option>
+                    <a-select-option value="2ND">2ND</a-select-option>
+                    <a-select-option value="3RD">3RD</a-select-option>
+                </a-select>
+            </a-form-item> -->
         </a-form>
     </div>
 </template>
@@ -73,7 +120,15 @@ const exportData = () => {
         DateOfInspection: reportTemplateStore.reportTemplate?.settings?.DateOfInspection,
         ArrivalTime: reportTemplateStore.reportTemplate?.settings?.ArrivalTime,
         DepartureTime: reportTemplateStore.reportTemplate?.settings?.DepartureTime,
-        Inspector: reportTemplateStore.reportTemplate?.settings?.Inspector
+        Inspector: reportTemplateStore.reportTemplate?.settings?.Inspector,
+        InspectStandard: reportTemplateStore.reportTemplate?.settings?.InspectStandard,
+        SampleSize: reportTemplateStore.reportTemplate?.settings?.SampleSize,
+        AQL_CR: reportTemplateStore.reportTemplate?.settings?.AQL_CR,
+        AQL_MAJ: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ,
+        AQL_MIN: reportTemplateStore.reportTemplate?.settings?.AQL_MIN,
+        GeneralInspectionLevel: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel,
+        InspectionType: reportTemplateStore.reportTemplate?.settings?.InspectionType,
+        ReInspectionType: reportTemplateStore.reportTemplate?.settings?.ReInspectionType,
     }
 }
 

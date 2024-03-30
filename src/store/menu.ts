@@ -14,7 +14,7 @@ import { useAuthStore } from '@/plugins';
 import router from '@/router';
 import { useLoadingStore } from '@/store';
 import routes from '@/router/routes';
-
+import {i18n} from "@/lang/i18n"
 const presetList = [
   // {
   //   id: 1,
@@ -61,7 +61,7 @@ const presetList = [
   {
     id: 31,
     name: 'design',
-    title: '模版',
+    title: '模版设计',
     icon: 'ProjectOutlined',
     badge: '',
     target: '_self',
@@ -69,7 +69,7 @@ const presetList = [
     component: '@/pages/designer',
     renderMenu: false,
     parent: 3,
-    permission: "template:list",
+    permission: "template:design",
     cacheable: false,
   },
   {
@@ -345,7 +345,6 @@ export interface MenuProps {
  */
 function doMenuFilter(routes: Readonly<RouteRecordRaw[]>, parentPermission?: string) {
   const { hasAuthority } = useAuthStore();
-  console.log('hasAuthority:', hasAuthority)
   const setCache = (meta: RouteMeta) => {
     meta._cache = {
       renderMenu: meta.renderMenu,
@@ -355,13 +354,12 @@ function doMenuFilter(routes: Readonly<RouteRecordRaw[]>, parentPermission?: str
 
   routes.forEach((route) => {
     const required = route.meta?.permission ?? parentPermission;
-    console.log('required:', required)
     // if (route.meta?.renderMenu === undefined && required) {
     if (required) {
       route.meta = route.meta ?? {};
       setCache(route.meta);
 
-      route.meta.renderMenu = isRoleHasPermission(getUserPermissions(), route.meta.permission);
+      route.meta.renderMenu = route.meta.renderMenu && isRoleHasPermission(getUserPermissions(), route.meta.permission);
       // route.meta.renderMenu = isRoleHasPermission(getUserPermissions(), route.meta.permission);
       // route.meta.renderMenu = hasAuthority(route.meta.permission);
     }
@@ -400,7 +398,7 @@ const toRoutes = (list: MenuProps[]): RouteOption[] => {
     component: item.component,
     children: item.children && toRoutes(item.children),
     meta: {
-      title: item.name,
+      title: i18n.global.t(`menu.${item.name}`),
       permission: item.permission,
       icon: item.icon,
       renderMenu: item.renderMenu,
@@ -417,9 +415,7 @@ export const useMenuStore = defineStore('menu', () => {
   const menuList = ref<MenuProps[]>([]);
 
   const { filterMenu } = storeToRefs(useSettingStore());
-  console.log('filterMenu:', toRaw(filterMenu.value))
   const checkMenuPermission = () => {
-    console.log('1111:', toRaw(router.options.routes), toRaw(filterMenu.value));
     // if (filterMenu.value) {
     //   doMenuFilter(router.options.routes);
     // } else {
@@ -452,6 +448,7 @@ export const useMenuStore = defineStore('menu', () => {
   // use local menu
   async function getMenuList() {
     menuList.value = presetList;
+    console.log('menuList:', toRaw(toRoutes(presetList)))
     addRoutes(toRoutes(presetList));
     checkMenuPermission();
     return presetList

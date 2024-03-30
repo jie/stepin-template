@@ -2,6 +2,14 @@
     "site_name": "ECQA报告系统",
     "menu": {
         "report": "报告",
+        "template": "模版",
+        "category": "分类",
+        "company": "客户",
+        "user": "用户",
+        "setting": "设置",
+        "system_settings": "系统设置",
+        "defect": "缺陷",
+        "role": "角色",
         "personal": "个人设置"
     },
     "login": {
@@ -139,6 +147,24 @@
         "PleaseEnterReviewComments": "审核结果",
         "Email": "邮箱",
         "Number": "数字",
-        "HasTotal": "是否有总计"
+        "HasTotal": "是否有总计",
+        "HasReportNumber": "是否有报告编号",
+        "HasInspectStandard": "是否有检验标准",
+        "HasSampleSize": "是否有样本数量",
+        "HasAQL_CR": "是否有AQL Cr",
+        "HasAQL_MAJ": "是否有AQL Maj",
+        "HasAQL_MIN": "是否有AQL Min",
+        "HasGeneralInspectionLevel": "是否有通用检验等级",
+        "HasInspectionType": "是否有检验类型",
+        "HasReInspectionType": "是否有Re检验类型",
+        "InspectStandard": "检验标准",
+        "SampleSize": "样本数量",
+        "AQL_CR": "AQL Cr",
+        "AQL_MAJ": "AQL Maj",
+        "AQL_MIN": "AQL Min",
+        "GeneralInspectionLevel": "通用检验登记",
+        "InspectionType": "检验类型",
+        "ReInspectionType": "Re检验类型",
+        "LoginToFillForm": "请登录填写表单"
     }
 }

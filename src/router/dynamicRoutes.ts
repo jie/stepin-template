@@ -4,7 +4,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { RouteOption, LazyRouteComponent, RouteRecordLink } from './interface';
 import router from './index';
 import { initUndefined } from '@/utils/helpers';
-
+import {toRaw} from 'vue'
 // 注册 IframeBox、BlankView 组件
 Pages['iframe'] = () => import('stepin/es/iframe-box');
 Pages['blankView'] = () => import('@/components/layout/BlankView.vue');

@@ -446,6 +446,14 @@ const onClickOpenReportSettingDrawer = () => {
     ArrivalTime: reportTemplateStore.reportTemplate.settings?.ArrivalTime === undefined ? true: reportTemplateStore.reportTemplate.settings.ArrivalTime,
     DepartureTime: reportTemplateStore.reportTemplate.settings?.DepartureTime === undefined ? true: reportTemplateStore.reportTemplate.settings.DepartureTime,
     Inspector: reportTemplateStore.reportTemplate.settings?.Inspector === undefined ? true: reportTemplateStore.reportTemplate.settings.Inspector,
+    InspectStandard: reportTemplateStore.reportTemplate?.settings?.InspectStandard === undefined ? true: reportTemplateStore.reportTemplate?.settings?.InspectStandard,
+    SampleSize: reportTemplateStore.reportTemplate?.settings?.SampleSize === undefined ? true: reportTemplateStore.reportTemplate?.settings?.SampleSize,
+    AQL_CR: reportTemplateStore.reportTemplate?.settings?.AQL_CR === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_CR,
+    AQL_MAJ: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ,
+    AQL_MIN: reportTemplateStore.reportTemplate?.settings?.AQL_MIN === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_MIN,
+    GeneralInspectionLevel: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel === undefined ? true: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel,
+    InspectionType: reportTemplateStore.reportTemplate?.settings?.InspectionType === undefined ? true: reportTemplateStore.reportTemplate?.settings?.InspectionType,
+    ReInspectionType: reportTemplateStore.reportTemplate?.settings?.ReInspectionType === undefined ? true: reportTemplateStore.reportTemplate?.settings?.ReInspectionType
   }
   console.log('mySettings:', mySettings)
   reportTemplateStore.reportTemplate.settings = {...mySettings}

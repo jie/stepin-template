@@ -39,8 +39,8 @@ export const useAccountStore = defineStore('account', {
             this.logged = true;
             // http.setAuthorization(`Bearer ${response.data.token}`, new Date(response.data.expires));
             // localStorage.setItem("report_session", JSON.stringify(response.data.data))
-            // await useMenuStore().getMenuList();
             http.setAuthorization(response.data.data, new Date(response.data.expires))
+            await useMenuStore().getMenuList();
             return response.data.data.user_data;
           } else {
             return Promise.reject(response);
@@ -83,6 +83,23 @@ export const useAccountStore = defineStore('account', {
     },
     setLogged(logged: boolean) {
       this.logged = logged;
+    },
+    async apiFillFormLogin(email: string, password: string) {
+      return http
+        .request('/platform/report_api/report_fill/login', 'post_json', { email, password })
+        .then(async (response) => {
+          console.log('response:', response)
+          if (response?.data?.status) {
+            localStorage.setItem("fill_session", JSON.stringify({
+              email: email,
+              password: password,
+              ...response.data.data
+            }))
+            return response.data.data.user_data;
+          } else {
+            return Promise.reject(response);
+          }
+        });
     },
   },
 });

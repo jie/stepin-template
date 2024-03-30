@@ -20,6 +20,17 @@ interface ReportTemplateSettings {
   ArrivalTime?: boolean;
   DepartureTime?: boolean;
   Inspector?: boolean;
+  InspectStandard?: boolean;
+  SampleSize?: boolean;
+  AQL_CR?: boolean;
+  AQL_MAJ?: boolean;
+  AQL_MIN?: boolean;
+  GeneralInspectionLevel?: boolean;
+  InspectionType?: boolean;
+  ReInspectionType?: boolean;
+  // GeneralInspectionLevel?: Array<string>;
+  // InspectionType?: Array<string>;
+  // ReInspectionType?: Array<string>;
 }
 
 
