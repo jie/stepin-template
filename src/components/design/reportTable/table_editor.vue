@@ -62,8 +62,6 @@
               <a-button type="default" class="mr-2" :disabled="itemParam.key ? false : true">{{ $t('base.DeleteColumn') }}</a-button>
             </a-popconfirm>
           </a-form-item>
-
-
         </a-form>
       </div>
     </div>

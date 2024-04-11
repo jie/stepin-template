@@ -24,7 +24,7 @@ export const ReportPermissionStore = defineStore('reportPermission', {
       reportPermission: {} as ReportPermission, 
       entities: <ReportPermission>[], 
       pagination: {} as Pagination,
-      queryArgs: {status: "", keyword: ""},
+      queryArgs: {status: "", keyword: "", pagesize: 1000},
       isNew: false
     }
   },

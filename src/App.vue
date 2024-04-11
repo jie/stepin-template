@@ -65,14 +65,14 @@
   const themeConfig = computed(() => themeList.find((item) => item.key === theme.value)?.config ?? {});
   console.log('themeConfig:', toRaw(themeConfig))
   const user = reactive({
-    name: 'admin',
+    name: '',
     avatar: avatar,
     menuList: [
       // { title: '个人中心', key: 'personal', icon: 'UserOutlined', onClick: () => router.push('/profile') },
-      { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
+      { title:  i18n.global.t("base.layout_settings"), key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
       { type: 'divider' },
       {
-        title: '退出登录',
+        title: i18n.global.t("base.logout"),
         key: 'logout',
         icon: 'LogoutOutlined',
         onClick: () => logout().then(() => router.push({name: 'login'})),

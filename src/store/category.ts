@@ -18,6 +18,17 @@ export interface ReportCategory {
 }
 
 
+function updateDisplayName(item:object) {
+  if(item['name_en']) {
+    item['displayName'] = `${item['name']} / ${item['name_en']}`
+  } else {
+    item['displayName'] = item['name']
+  }
+  if(item['children']) {
+    item['children'].map(updateDisplayName)
+  }
+}
+
 export const ReportCategoryStore = defineStore('report_category', {
   state: () => {
     return {
@@ -96,6 +107,11 @@ export const ReportCategoryStore = defineStore('report_category', {
           console.log('response:', response)
           if (response.data?.data) {
             this.pagination.total = response.data?.data?.total
+
+            response.data?.data?.entities.map((c ) => {
+              updateDisplayName(c)
+              return c
+            })
             this.entities = response.data?.data?.entities
             return response.data?.data;
           } else {
@@ -119,6 +135,11 @@ export const ReportCategoryStore = defineStore('report_category', {
             console.log('response:', response)
             if (response.data?.data) {
               this.pagination.total = response.data?.data?.total
+
+              response.data?.data?.entities.map((c ) => {
+                updateDisplayName(c)
+                return c
+              })
               this.entities = response.data?.data?.entities
               if(onlyLeafSelectables) {
                 this.entities = this.entities.map(item=>{
@@ -127,6 +148,7 @@ export const ReportCategoryStore = defineStore('report_category', {
                   } else {
                     item.selectable = true
                   }
+
                   return item
                 })
               }
@@ -152,6 +174,10 @@ export const ReportCategoryStore = defineStore('report_category', {
             this.pagination.total = response.data?.data?.total
             this.pagination.pagesize = response.data?.data?.total
             this.pagination.page = 1
+            response.data?.data?.entities.map((c ) => {
+              updateDisplayName(c)
+              return c
+            })
             this.entities = response.data?.data?.entities
             return response.data?.data;
           } else {

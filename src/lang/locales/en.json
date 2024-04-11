@@ -10,7 +10,8 @@
         "system_settings": "System Settings",
         "defect": "Defect",
         "role": "Role",
-        "personal": "User Center"
+        "personal": "User Center",
+        "my_report": "My Reports"
     },
     "login": {
         "login": "Login",
@@ -133,7 +134,7 @@
         "Yes": "Yes",
         "No": "No",
         "ValidatePrivileges": "Privilege Validation",
-        "SubmitReviewResult": "Review",
+        "SubmitReviewResult": "Audit Report",
         "FindLatestLocalData": "Find local data",
         "LocalDataUpdateAt": "Local data update at",
         "RemoteDataUpdateAt": "Remote data update at",
@@ -165,6 +166,11 @@
         "GeneralInspectionLevel": "General Inspection Level",
         "InspectionType": "Inspection Type",
         "ReInspectionType": "Re-Inspection Type",
-        "LoginToFillForm": "Login to fill form"
+        "LoginToFillForm": "Login to fill form",
+        "layout_settings": "Layout Settings",  
+        "logout": "Logout",
+        "NameInEnglish": "Name in English",
+        "Remark": "Remark",
+        "ParentCategory": "Parent Category"
     }
 }

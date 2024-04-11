@@ -1,23 +1,23 @@
 <template>
-  <div class="report relative" v-if="store.report?.schema">
+  <div class="report relative review" v-if="store.report?.schema">
     <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog"
       :title="$t('base.PleaseEnterReviewComments')" @ok="handleSubmitOk">
       <a-form :model="submitFormData" layout="vertical">
-        <a-form-item :label="$t('base.Status')" name="approve_status" required>
+        <a-form-item :label="$t('base.Status')" name="approve_status">
           <a-select :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
             v-model:value="submitFormData.approve_status" style="width: 100%">
             <a-select-option :value="option.value" v-for="option in approveStatuses">{{ option.label }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item :label="$t('base.Reason')" name="approve_reason" required>
+        <a-form-item :label="$t('base.Reason')" name="approve_reason">
           <a-textarea v-model:value="submitFormData.approve_reason" />
         </a-form-item>
-        <a-form-item :label="$t('base.Email')" name="email" required>
-          <a-input v-model:value="submitFormData.email"></a-input>
+        <!-- <a-form-item :label="$t('base.Email')" name="email">
+          <a-input v-model:value="submitFormData.email" readonly></a-input>
         </a-form-item>
-        <a-form-item :label="$t('base.Password')" name="password" required v-if="store.report?.settings.approve_password">
-          <a-input type="password" v-model:value="submitFormData.password"></a-input>
-        </a-form-item>
+        <a-form-item :label="$t('base.Password')" name="password" v-if="store.report?.settings.approve_password">
+          <a-input type="password" v-model:value="submitFormData.password" readonly></a-input>
+        </a-form-item> -->
       </a-form>
     </a-modal>
     <div
@@ -33,125 +33,18 @@
       <div class="summary">
         <div>{{ store.report?.summary }}</div>
       </div>
-      <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit" @finishFailed="onFinishFailed">
-        <div v-if="store.report">
-          <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
-            <a-form-item required :label="$t('base.ReportNumber')">
-              <a-input v-model:value="formState['ReportNumber']"></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.Applicant">
-            <a-form-item required :label="$t('base.Applicant')">
-              <a-input v-model:value="formState['Applicant']"></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.Supplier">
-            <a-form-item required :label="$t('base.Supplier')">
-              <a-input v-model:value="formState['Supplier']"></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.Factory">
-            <a-form-item required :label="$t('base.Factory')">
-              <a-input v-model:value="formState['Factory']"></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
-            <a-form-item required :label="$t('base.ItemNumber')">
-              <a-textarea v-model:value="formState['ItemNumber']"></a-textarea>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.ProductDescription">
-            <a-form-item required :label="$t('base.ProductDescription')">
-              <a-textarea v-model:value="formState['ProductDescription']"></a-textarea>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.AddressOfInspection">
-            <a-form-item required :label="$t('base.AddressOfInspection')">
-              <a-input v-model:value="formState['AddressOfInspection']"></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.DateOfInspection">
-            <a-form-item required :label="$t('base.DateOfInspection')">
-              <a-date-picker style="width: 100%" v-model:value="formState['DateOfInspection']"
-                :getPopupContainer="triggerNode => triggerNode.parentNode" />
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
-            <a-form-item required :label="$t('base.ArrivalTime')">
-              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }" v-model:value="formState['ArrivalTime']"
-                :getPopupContainer="triggerNode => triggerNode.parentNode" />
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
-            <a-form-item required :label="$t('base.DepartureTime')">
-              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
-                v-model:value="formState['DepartureTime']" :getPopupContainer="triggerNode => triggerNode.parentNode" />
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.Inspector">
-            <a-form-item required :label="$t('base.Inspector')">
-              <a-input v-model:value="formState['Inspector']"></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.InspectionStandard">
-            <a-form-item required :label="$t('base.InspectionStandard')">
-              <a-input v-model:value="formState['InspectionStandard']" allowClear></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.GeneralInspectionLevel">
-            <a-form-item required :label="$t('base.GeneralInspectionLevel')">
-              <a-radio-group v-model:value="formState['GeneralInspectionLevel']" allowClear>
-                <a-radio value="I">I</a-radio>
-                <a-radio value="II">II</a-radio>
-                <a-radio value="III">III</a-radio>
-              </a-radio-group>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.SampleSize">
-            <a-form-item required :label="$t('base.SampleSize')">
-              <a-input-number v-model:value="formState['SampleSize']" style="width: 100%;" allowClear></a-input-number>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
-            <a-row style="width: 100%" :gutter="[16,16]">
-              <a-col :span="8" >
-                <a-form-item required :label="$t('base.AQL_CR')">
-                  <a-input v-model:value="formState['AQL_CR']" allowClear></a-input>
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item required :label="$t('base.AQL_MAJ')">
-                  <a-input v-model:value="formState['AQL_MAJ']" allowClear></a-input>
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item required :label="$t('base.AQL_MIN')">
-                  <a-input v-model:value="formState['AQL_MIN']" allowClear></a-input>
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </div>
 
-          <div class="component meta" v-if="store.report?.template?.settings?.InspectionType">
-            <a-form-item required :label="$t('base.InspectionType')">
-              <a-radio-group v-model:value="formState['InspectionType']" allowClear>
-                <a-radio value="PPI">PPI</a-radio>
-                <a-radio value="DPI">DPI</a-radio>
-                <a-radio value="PSI">PSI</a-radio>
-                <a-radio value="Re-PSI">Re-PSI</a-radio>
-              </a-radio-group>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.ReInspectionType">
-            <a-form-item required :label="$t('base.ReInspectionType')">
-              <a-radio-group v-model:value="formState['ReInspectionType']" allowClear>
-                <a-radio value="1ST">1ST</a-radio>
-                <a-radio value="2ST">2ST</a-radio>
-                <a-radio value="3ST">3ST</a-radio>
-              </a-radio-group>
-            </a-form-item>
-          </div>
-        </div>
+      <div v-if="reportInspectDetailRef.length != 0" style="margin-left: 10px; margin-right: 10px;">
+        <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index"  style="margin-bottom: 20px">
+          <a-col :span="12" v-for="(item, index) in row" :key="index">
+            <div><strong>{{ item.key }}</strong>: <span style="float: right">{{ item.value }}</span>
+            </div>
+          </a-col>
+        </a-row>
+      </div>
+
+      <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
+        @finishFailed="onFinishFailed">
         <div v-for="(item, index) in store.report.schema" :key="item.key">
           <div class="component" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
@@ -186,7 +79,8 @@
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
             style="">
             <div>
-              <a-button type="primary" html-type="submit" style="width: 240px; margin-left: 10px;">{{ $t('base.SubmitReviewResult') }}</a-button>
+              <a-button type="primary" html-type="submit" style="width: 240px; margin-left: 10px;">{{
+                $t('base.SubmitReviewResult') }}</a-button>
             </div>
           </div>
         </a-affix>
@@ -197,13 +91,13 @@
   
 <script lang="ts" setup>
 import { defineProps, ref, computed, toRaw, reactive } from 'vue';
-import reportTable from "./reportTable/index.vue"
+import reportTable from "./reportTable/view.vue"
 import reportText from "./reportText/index.vue"
-import reportInput from "./reportInput/index.vue"
-import reportRadio from "./reportRadio/index.vue"
-import reportCheckbox from "./reportCheckbox/index.vue"
+import reportInput from "./reportInput/view.vue"
+import reportRadio from "./reportRadio/view.vue"
+import reportCheckbox from "./reportCheckbox/view.vue"
 import reportImage from "./reportImage/index.vue"
-import reportImageUpload from "./reportImageUpload/index.vue"
+import reportImageUpload from "./reportImageUpload/view.vue"
 import reportContainer from "./container.vue"
 import reportInputGroup from "./reportInputGroup/index.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
@@ -224,10 +118,37 @@ const affixedChange = (affixed: boolean) => {
   isAffixedRef.value = affixed
 };
 const reportDataRef = ref()
+const reportInspectDetailRef = ref([])
 const initialization = () => {
   refresh(store.report)
 }
 
+const dateKeys = [
+  "DateOfInspection",
+]
+const datetimeKeys = [
+  "ArrivalTime",
+  "DepartureTime",
+]
+const insepctDetailsKeys = [
+  "ReportNumber",
+  "Applicant",
+  "Supplier",
+  "Factory",
+  "ItemNumber",
+  "ProductDescription",
+  "AddressOfInspection",
+  "DateOfInspection",
+  "ArrivalTime",
+  "DepartureTime",
+  "Inspector",
+  "InspectionStandard",
+  "GeneralInspectionLevel",
+  "SampleSize",
+  "InspectionType",
+  "ReInspectionType"
+
+]
 const itemRefs = ref([])
 
 const loadLocalData = async () => {
@@ -236,12 +157,9 @@ const loadLocalData = async () => {
     return
   }
   let values = JSON.parse(localRecord.values)
-  console.log('values:', values)
   for (let key of Object.keys(values)) {
     formState[key] = values[key]
-
   }
-  console.log('formState:', formState)
 }
 
 
@@ -253,12 +171,14 @@ const editableComponents = [
   "table",
 ]
 
-const refresh = (data: any) => {
+const refresh = async (data: any) => {
   console.log('refresh*******************:', data)
   loadingRef.value = true
   reportDataRef.value = data
+  console.log('store.report:', toRaw(store.report.template))
   setTimeout(() => {
-    store.report.schema.map((item: any) => {
+    // store.report.schema.map((item: any) => {
+    store.report.template.items.map((item: any) => {
       if (editableComponents.includes(item.type)) {
         if (item.type == 'input') {
           item.data = { value: '' }
@@ -290,6 +210,7 @@ const refresh = (data: any) => {
     if (store.report.values["DepartureTime"]) {
       formState["DepartureTime"] = dayjs(store.report.values["DepartureTime"])
     }
+    reportInspectDetailRef.value = generateInspectDetailRows()
     loadingRef.value = false
     startedRef.value = true
   }, 2000)
@@ -320,7 +241,8 @@ const handleSubmitOk = async () => {
   // apiSubmit
   let result;
   try {
-    result = await store.apiReview(submitFormData.email, submitFormData.password, submitFormData.approve_status, submitFormData.approve_reason)
+    // result = await store.apiReview(submitFormData.email, submitFormData.password, submitFormData.approve_status, submitFormData.approve_reason)
+    result = await store.apiAudit(submitFormData.approve_status, submitFormData.approve_reason)
   } catch (e) {
     console.error(e)
     openNotification({
@@ -332,6 +254,59 @@ const handleSubmitOk = async () => {
     successNotification("submit_report")
     isShowSubmitDialog.value = false
   }
+}
+
+const formatDate = (date: any) => {
+  return dayjs(date).format('YYYY-MM-DD')
+}
+const formatDatetime = (date: any) => {
+  return dayjs(date).format('YYYY-MM-DD HH:mm')
+}
+
+
+const generateInspectDetailRows = () => {
+  let rows = []
+  // every 2 items in a row
+  let row = []
+  for (let key of Object.keys(formState)) {
+    if (insepctDetailsKeys.includes(key) == false) {
+      continue
+    }
+    if (dateKeys.includes(key)) {
+      row.push({
+        key: key,
+        value: formatDate(formState[key])
+      })
+    } else if (datetimeKeys.includes(key)) {
+      row.push({
+        key: key,
+        value: formatDatetime(formState[key])
+      })
+    } else {
+      row.push({
+        key: key,
+        value: formState[key]
+      })
+    }
+
+    if (row.length == 2) {
+      rows.push(row)
+      row = []
+    }
+  }
+
+  if(formState["AQL_CR"] || formState["AQL_MAJ"] || formState["AQL_MIN"]) {
+
+    if(rows[rows.length - 1].length == 1) {
+      rows[rows.length - 1].push({key: 'AQL', value: `Cr: ${formState["AQL_CR"]} Maj: ${formState["AQL_MAJ"]} Min: ${formState["AQL_MIN"]}`})
+    } else  {
+      rows.push([{key: 'AQL', value: `Cr: ${formState["AQL_CR"]}, Maj: ${formState["AQL_MAJ"]}, Min: ${formState["AQL_MIN"]}`}])
+    }
+  }
+
+
+
+  return rows
 }
 
 initialization()
@@ -375,6 +350,14 @@ defineExpose({
   cursor: pointer;
 }
 
+.review .component {
+  margin: 0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
 .component .options {
   text-align: left;
   margin-bottom: 10px;
@@ -414,5 +397,10 @@ defineExpose({
   padding: 20px;
   width: 100%;
 
-}</style>
+}
+
+.ant-col.ant-form-item-label label {
+  font-weight: bold;
+}
+</style>
   

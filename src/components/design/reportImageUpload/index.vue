@@ -1,82 +1,46 @@
 <template>
   <div class="clearfix">
-
     <BaseSlot :item="props?.item">
       <div>
-        <a-row type="flex" v-for="items in computedItems" :gutter="[16,16]">
+        <a-row type="flex" v-for="items in computedItems" :gutter="[16, 16]" style="margin-bottom: 20px">
           <a-col flex="1" v-for="item in items">
-            <div style="margin-bottom: 10px;">
-              <a-image :src="item.url" height="200px" width="100%"
-                style="border: 1px solid #ccc; border-radius: 5px; object-fit: contain;" />
-            </div>
-            <a-row type="flex" :gutter="[16,16]">
-              <a-col flex="auto">
-                <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-model:value="item.desc"
-                  v-if="props.item?.is_defect" style="width: 100%" placeholder="input here" :options="defectOptions"
-                  @search="handleSearchDefect" allowClear>
-                  <a-textarea style="width: 100%;" />
-                  <template #option="{ content_en: content_en, id: id }">
-                    <div style="display:flex" @click="onDefectSelect(item, id)">
-                      <span style="flex: 1">{{ content_en }}</span>
-                      <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
-                    </div>
-                  </template>
-                </a-auto-complete>
-                <a-textarea style="width: 100%;" v-model:value="item.desc" placeholder="Please enter description"
-                  v-else />
-              </a-col>
-              <a-col flex="60px">
-                <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-                  @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')"
-                  :cancel-text="$t('base.No')">
-                  <a-button shape="circle" style="margin-top: 10px;">
-                    <template #icon>
-                      <DeleteOutlined />
+            <div v-if="item?.url">
+              <div style="margin-bottom: 10px;">
+                <a-image :src="item.url" height="200px" width="100%"
+                  style="border: 1px solid #ccc; border-radius: 5px; object-fit: contain;" />
+              </div>
+              <a-row type="flex" :gutter="[16, 16]">
+                <a-col flex="auto">
+                  <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-model:value="item.desc"
+                    v-if="props.item?.is_defect" style="width: 100%" :options="defectOptions"
+                    @search="handleSearchDefect" allowClear>
+                    <a-textarea style="width: 100%;" />
+                    <template
+                      #option="{ content_en: content_en, id: id, content: content, types: types, product: product, product_en: product_en }">
+                      <div @click="onDefectSelect(item, id)">
+                        <div style="margin-bottom: 2px"><a-tag v-for="tag in types">{{ tag }}</a-tag></div>
+                        <div>{{ product }}: {{ content }}</div>
+                        <div>{{ product_en }}: {{ content_en }}</div>
+                      </div>
                     </template>
-                  </a-button>
-                </a-popconfirm>
-              </a-col>
-            </a-row>
+                  </a-auto-complete>
+                  <a-textarea style="width: 100%;" v-model:value="item.desc" v-else />
+                </a-col>
+                <a-col flex="60px">
+                  <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+                    @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')"
+                    :cancel-text="$t('base.No')">
+                    <a-button shape="circle" style="margin-top: 10px;">
+                      <template #icon>
+                        <DeleteOutlined />
+                      </template>
+                    </a-button>
+                  </a-popconfirm>
+                </a-col>
+              </a-row>
+            </div>
           </a-col>
         </a-row>
-
-
-        <!-- <div v-for="item in props.value" style="width: 50%; margin-bottom: 20px;" ref="boxRef">
-          <a-image :src="item.url" height="200" width="100%" style="border: 1px solid #ccc; border-radius: 5px; object-fit: contain;" />
-          <div class="flex" style="height: 60px;padding-top: 10px;">
-            <div style="flex: 1">
-              <a-auto-complete
-                :getPopupContainer="triggerNode => triggerNode.parentNode"
-                v-model:value="item.desc"
-                v-if="props.item?.is_defect"
-                style="width: 100%"
-                placeholder="input here"
-                :options="defectOptions"
-                @search="handleSearchDefect"
-                allowClear>
-                <a-textarea style="width: 100%;"/>
-                <template #option="{ content_en: content_en, id: id }">
-                  <div style="display:flex" @click="onDefectSelect(item, id)">
-                      <span style="flex: 1">{{ content_en }}</span>
-                      <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
-                  </div>
-                </template>
-            </a-auto-complete>
-            <a-textarea style="width: 100%;" v-model:value="item.desc"
-                placeholder="Please enter description" v-else />
-
-            </div>
-            <div style="width:60px; height: 100%;display: flex;justify-content: center;align-items: center;">
-              <a-popconfirm :getPopupContainer="triggerNode => {return triggerNode.parentNode||document.body;}" @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
-                <a-button shape="circle">
-                  <template #icon>
-                    <DeleteOutlined />
-                  </template>
-                </a-button>
-              </a-popconfirm>
-            </div>
-          </div>
-        </div> -->
       </div>
       <div style="margin-top: 10px;">
         <a-button type="primary" @click="onClickTriggerButton">
@@ -96,12 +60,13 @@
 import BaseSlot from "../base_slot.vue"
 import { PlusOutlined } from '@ant-design/icons-vue';
 import { ref, computed } from 'vue';
-import { groupArray } from "@/utils/objectUtils"
+import { groupArrayWithPatch } from "@/utils/objectUtils"
 import { getBase64 } from "@/utils/file"
 import type { UploadProps } from 'ant-design-vue';
 import { ossUploadFiles } from "@/store/uploader"
 import { ImageType } from "@/types/components/image"
 import { ReportFillStore } from "@/store/report_fill"
+import { toRaw } from "vue";
 const store = ReportFillStore()
 const props = defineProps({
   item: {
@@ -114,7 +79,7 @@ const props = defineProps({
 });
 
 const computedItems = computed(() => {
-  return groupArray(props.value, 2)
+  return groupArrayWithPatch(props.value, 2)
 })
 
 const fileBtnRef = ref(null);
@@ -177,7 +142,10 @@ const exportValue = () => {
 }
 
 const deleteImage = (image: ImageType) => {
-  fileList.value = fileList.value.filter(item => item.url !== image.url)
+  let filelist = [...props.value]
+  filelist = filelist.filter(item => item.url !== image.url)
+  console.log('props.value:', toRaw(props.value))
+  emits('update:value',filelist || [])
 }
 
 const refreshValue = (data: any) => {

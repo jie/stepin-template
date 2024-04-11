@@ -198,7 +198,7 @@
               <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
                 v-if="localDataRecord" @confirm="onDeleteLocalData" :title="$t('base.ConfirmDelete')"
                 :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
-                <a-button type="" style="width: 140px; margin-left: 10px;">{{ $t('base.DeleteLocalData') }}</a-button>
+                <a-button danger style="margin-left: 10px;">{{ $t('base.DeleteLocalData') }}</a-button>
               </a-popconfirm>
             </div>
           </div>
@@ -246,11 +246,12 @@ const accountStore = useAccountStore()
 
 const initialization = async () => {
   console.log('initialization')
-  if (store.report?.values && Object.keys(store.report?.values).length != 0) {
-    schemaRef.value = store.report.schema
-  } else {
-    schemaRef.value = store.report.template?.items
-  }
+  // if (store.report?.values && Object.keys(store.report?.values).length != 0) {
+  //   schemaRef.value = store.report.schema
+  // } else {
+  //   schemaRef.value = store.report.template?.items
+  // }
+  schemaRef.value = store.report.template?.items
   // loadLocalData()
   loadRemoteData()
   let localData = await loadLocalData()
@@ -423,17 +424,33 @@ const loginFormData = reactive({
   email: "",
   password: ""
 })
-const onFinishSubmit = () => {
+const onFinishSubmit = async () => {
   console.log('onFinishSubmit:', toRaw(formState))
   let fillSession = getFillSession()
   if (!fillSession) {
     isShowSubmitDialog.value = true
     return
   }
-  store.apiSubmit(fillSession.email, fillSession.password, formState)
+  await store.apiSubmit(fillSession.email, fillSession.password, formState)
+  openNotification({
+    type: "success",
+    message: "Success",
+    description: "Submit Success"
+  })
 }
-const onFinishFailed = () => {
-  console.log('onFinishFailed:')
+const onFinishFailed = (e) => {
+  console.log('onFinishFailed:', e)
+  if(e.errorFields) {
+    e.errorFields.map((item) => {
+      if(item.errors) {
+        openNotification({
+          type: "error",
+          message: "Validate Fail",
+          description: item.errors
+        })
+      }
+    })
+  }
 }
 
 const handleLoginOk = async () => {
@@ -441,6 +458,7 @@ const handleLoginOk = async () => {
   let result;
   try {
     result = await accountStore.apiFillFormLogin(loginFormData.email, loginFormData.password)
+    console.log('result:', result)
   } catch (e) {
     openNotification({
       type: "error",

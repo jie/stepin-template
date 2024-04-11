@@ -7,7 +7,8 @@ import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant
 import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
-import { ReportStore, Report } from '@/store/report'
+import { Report } from '@/store/report'
+import { MyReportStore as ReportStore } from '@/store/my_report'
 import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
 import {useRouter} from 'vue-router'
@@ -40,7 +41,6 @@ const columns = [
 
 
 function addNew() {
-  reset();
   showModal.value = true;
   form._isNew = true;
 }
@@ -52,13 +52,6 @@ const newRecord = (record?: Report) => {
     record = { _isNew: true };
   }
   record.name = undefined;
-  record.title = undefined;
-  record.order_id = undefined;
-  record.category_id = undefined;
-  record.report_template_id = undefined;
-  record.company_id = undefined;
-  record.users_review = [];
-  record.users = [];
   record.status = '0';
   record.settings = {
     validate_password: true,
@@ -202,15 +195,6 @@ const onClickSearch = async () => {
   store.apiQuery()
 }
 
-const goPublicReviewReport = (report:any) => {
-  console.log('form:', toRaw(form))
-  openNewUrl(router, {
-    name: 'report_review',
-    params: {
-      reportId: report.id
-    }
-  })
-}
 
 const initializeData = async () => {
   await store.apiQuery()
@@ -243,15 +227,16 @@ const statusDialogCancel = () => {
 }
 
 
-const goPublicFillReport = (report:any) => {
+const goPublicReviewReport = (report:any) => {
   console.log('form:', toRaw(form))
   openNewUrl(router, {
-    name: 'report_fill',
+    name: 'report_review',
     params: {
       reportId: report.id
     }
   })
 }
+
 
 initializeData()
 
@@ -271,15 +256,6 @@ initializeData()
       </a-form-item>
       <a-form-item :label="$t('base.OrderID')" name="order">
         <a-input v-model:value="form.order_id" />
-      </a-form-item>
-      <a-form-item  :label="$t('base.Category')" required name="category_id">
-        <a-tree-select v-model:value="form.category_id" style="width: 100%" :placeholder="$t('base.please_select')" allow-clear :tree-data="categoryStore.entities" :field-names="{
-            children: 'children',
-            label: 'displayName',
-            value: 'id',
-            selectable: 'selectable'
-          }" tree-node-filter-prop="name">
-        </a-tree-select>
       </a-form-item>
       <hr />
       <a-form-item :label="$t('base.FillByPassword')" name="validate_password">
@@ -349,11 +325,20 @@ initializeData()
               </div>
             </a-col>
             <a-col :span="6">
-              <div class="">
+              <!-- <div class="">
                 <span class="mr-2">{{ $t('base.Workers') }}</span>
                 <a-input v-model:value="store.queryArgs.worker_name" allowClear>
                 </a-input>
-              </div>
+              </div> -->
+              <div class="mr-2">{{ $t('base.Category') }}</div>
+              <a-tree-select v-model:value="store.queryArgs.category_id" show-search style="width: 100%"
+                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" placeholder="Please select" allow-clear
+                tree-default-expand-all :tree-data="categoryStore.entities" :field-names="{
+                  children: 'children',
+                  label: 'name',
+                  value: 'id',
+                }" tree-node-filter-prop="name">
+              </a-tree-select>
             </a-col>
             <a-col :span="6">
               <div class="">
@@ -369,15 +354,7 @@ initializeData()
           </a-row>
           <a-row type="flex" style="width: 100%;margin-top:10px;" :gutter="[16, 16]">
             <a-col :span="6">
-              <div class="mr-2">{{ $t('base.Category') }}</div>
-              <a-tree-select v-model:value="store.queryArgs.category_id" show-search style="width: 100%"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" placeholder="Please select" allow-clear
-                tree-default-expand-all :tree-data="categoryStore.entities" :field-names="{
-                  children: 'children',
-                  label: 'name',
-                  value: 'id',
-                }" tree-node-filter-prop="name">
-              </a-tree-select>
+
             </a-col>
             <a-col :span="6">
 
@@ -386,13 +363,7 @@ initializeData()
 
             </a-col>
             <a-col :span="6">
-              <a-button type="primary" @click="addNew" :loading="formLoading" style="float: right;">
-                <template #icon>
-                  <PlusOutlined />
-                </template>
-                {{ $t('base.Create') }}
-              </a-button>
-              <a-button class="mr-2" @click="onClickSearch" style="float: right;">
+              <a-button @click="onClickSearch" style="float: right;">
                 <template #icon>
                   <SearchOutlined />
                 </template>
@@ -426,8 +397,11 @@ initializeData()
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'category'">
-          <div class="text-title font-bold">
-            {{ record.category?.name }} {{ record.category?.name_en ? `/ ${ record.category?.name_en}` : ''}}
+          <div class="text-title font-bold" v-if="record.order">
+            {{ record.order_data.category.name }}
+          </div>
+          <div class="text-title font-bold" v-else>
+            {{ record.workers }}
           </div>
         </div>
         <template v-else-if="column.dataIndex === 'status'">
@@ -454,46 +428,12 @@ initializeData()
             </span>
             <template #overlay>
               <a-menu>
-                <!-- <a-menu-item key="0">
+                <a-menu-item key="2">
                   <a @click="goPublicReviewReport(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
                     {{ $t('base.PublicView') }}
                   </a>
-                </a-menu-item> -->
-                <a-menu-item key="0">
-                  <a @click="edit(record)" rel="noopener noreferrer">
-                    <EditOutlined />
-                    {{ $t('base.Edit') }}
-                  </a>
                 </a-menu-item>
-                <a-menu-item key="1">
-                  <a-popconfirm :title="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$t('base.No')"
-                    @confirm="deleteRecord(record)">
-                    <a rel="noopener noreferrer">
-                      <DeleteOutlined />
-                      {{ $t('base.Delete') }}
-                    </a>
-                  </a-popconfirm>
-
-                </a-menu-item>
-                <a-menu-item key="1">
-                  <a @click="showStatusDialog(record)" rel="noopener noreferrer">
-                    <VerifiedOutlined />
-                    {{ $t('base.Verify') }}
-                  </a>
-                </a-menu-item>
-                <a-menu-item key="1">
-                  <a @click="goPublicFillReport(record)" rel="noopener noreferrer">
-                    <VerifiedOutlined />
-                    {{ $t('base.PublicView') }}
-                  </a>
-                </a-menu-item>
-                <!-- <a-menu-item key="1">
-                  <a @click="edit(record)" rel="noopener noreferrer">
-                    <MailOutlined />
-                    {{ $t('base.SendToCustomer') }}
-                  </a>
-                </a-menu-item> -->
               </a-menu>
             </template>
           </a-dropdown>

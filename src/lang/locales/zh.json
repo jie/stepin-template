@@ -10,7 +10,8 @@
         "system_settings": "系统设置",
         "defect": "缺陷",
         "role": "角色",
-        "personal": "个人设置"
+        "personal": "个人设置",
+        "my_report": "我的报告"
     },
     "login": {
         "login": "登录",
@@ -162,9 +163,14 @@
         "AQL_CR": "AQL Cr",
         "AQL_MAJ": "AQL Maj",
         "AQL_MIN": "AQL Min",
-        "GeneralInspectionLevel": "通用检验登记",
+        "GeneralInspectionLevel": "通用检验等级",
         "InspectionType": "检验类型",
         "ReInspectionType": "Re检验类型",
-        "LoginToFillForm": "请登录填写表单"
+        "LoginToFillForm": "请登录填写表单",
+        "layout_settings": "布局设置",  
+        "logout": "退出登录",
+        "NameInEnglish": "英文名称",
+        "Remark": "备注",
+        "ParentCategory": "父分类"
     }
 }

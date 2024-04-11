@@ -5,6 +5,7 @@ import { useMenuStore } from './menu';
 import { useAuthStore } from '@/plugins';
 import { useLoadingStore } from './loading';
 import {getSessionInfo} from '@/utils/session'
+import { message } from 'ant-design-vue';
 export interface Profile {
   account: Account;
   permissions: string[];
@@ -43,6 +44,7 @@ export const useAccountStore = defineStore('account', {
             await useMenuStore().getMenuList();
             return response.data.data.user_data;
           } else {
+            message.error(response.data.message)
             return Promise.reject(response);
           }
         });

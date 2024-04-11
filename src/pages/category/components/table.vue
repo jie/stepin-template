@@ -6,16 +6,18 @@ import dayjs, { Dayjs } from 'dayjs';
 import { DeleteOutlined, EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
 import { ReportCategory as Category, ReportCategoryStore } from '@/store/category';
 import { ApproveStatusOptions } from '@/utils/constant';
+import {i18n} from "@/lang/i18n"
 const store = ReportCategoryStore()
 const columns = [
   {
     title: 'ID',
     dataIndex: 'id'
   },
-  { title: 'NAME', dataIndex: 'name', width: 400 },
-  { title: 'REMARK', dataIndex: 'remark' },
-  { title: 'CREATED', dataIndex: 'create_at' },
-  { title: 'OP', dataIndex: 'edit', width: 40 },
+  { title: i18n.global.t('base.Name'), dataIndex: 'name', width: 200 },
+  { title: i18n.global.t('base.NameInEnglish'), dataIndex: 'name_en', width: 200 },
+  { title: i18n.global.t('base.Remark'), dataIndex: 'remark' },
+  { title: i18n.global.t('base.CreateAt'), dataIndex: 'create_at' },
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 40 },
 ];
 
 
@@ -32,6 +34,7 @@ const newRecord = (record?: Category) => {
     record = { _isNew: true };
   }
   record.name = "";
+  record.name_en = "";
   record.remark = "";
   record.children = [];
   record.status = "3";
@@ -112,12 +115,15 @@ const deleteRecord = async (id:string) => {
 initializeData()
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增' : '编辑'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
-    <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item label="名称" required name="name">
+  <a-modal :title="form._isNew ? $t('base.Add') : $t('base.Edit')" v-model:visible="showModal" @ok="submit" @cancel="cancel" >
+    <a-form ref="formModel" :model="form" layout="vertical">
+      <a-form-item :label="$t('base.Name')" required name="name">
         <a-input v-model:value="form.name" allowClear />
       </a-form-item>
-      <a-form-item label="父分类" name="parent_id">
+      <a-form-item :label="$t('base.NameInEnglish')" required name="name_en">
+        <a-input v-model:value="form.name_en" allowClear />
+      </a-form-item>
+      <a-form-item :label="$t('base.ParentCategory')" name="parent_id">
         <!-- <a-select v-model:value="form.parent_id" allowClear>
                     <a-select-option v-for="item in records" :key="item.id" :value="item.id">
                         {{ item.name }}
@@ -132,7 +138,7 @@ initializeData()
           }" tree-node-filter-prop="name">
         </a-tree-select>
       </a-form-item>
-      <a-form-item label="备注" required name="remark">
+      <a-form-item :label="$t('base.Remark')" required name="remark">
         <a-textarea v-model:value="form.remark" allowClear />
       </a-form-item>
       <!-- <a-form-item required label="状态" name="status">
@@ -145,12 +151,12 @@ initializeData()
   <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" :pagination="false" :selection="{key: 'id'}">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>分类</h4>
+        <h4>{{ $t('base.Category') }}</h4>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />
           </template>
-          新增
+          {{ $t('base.Add') }}
         </a-button>
       </div>
     </template>
@@ -183,20 +189,20 @@ initializeData()
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <ReadOutlined />
-                  View
+                  {{ $t('base.View') }}
                 </a>
               </a-menu-item>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <EditOutlined />
-                  Edit
+                  {{ $t('base.Edit') }}
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
                 <a-popconfirm title="Delete" :content="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$t('base.No')" @confirm="deleteRecord(record)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
-                    Delete
+                    {{ $t('base.Delete') }}
                   </a>
                 </a-popconfirm>
 

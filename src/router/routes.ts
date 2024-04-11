@@ -51,6 +51,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/report'),
       },
       {
+        path: 'my_report',
+        name: 'my_report',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/my_report'),
+      },
+      {
         path: 'template',
         name: 'template',
         meta: {
@@ -178,15 +186,15 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/report_fill/index.vue'),
       },
       {
-        path: 'report/approve/:reportId',
-        name: 'report_approve',
+        path: 'report/review/:reportId',
+        name: 'report_review',
         meta: {
           icon: 'LoginOutlined',
           view: 'blank',
           target: '_blank',
           cacheable: false,
         },
-        component: () => import('@/pages/report_approve/index.vue'),
+        component: () => import('@/pages/report_review/index.vue'),
       },
       {
         path: 'report/test',

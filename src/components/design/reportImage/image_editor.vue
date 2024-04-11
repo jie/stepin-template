@@ -16,16 +16,37 @@
           <a-input-number v-model:value="imageItemSettings.columns" />
         </a-form-item>
         <a-form-item :label="$t('base.Image')" name="images" v-if="fileList && fileList.length != 0">
-          <a-image  style="width: 200px; height: 200px;" :src="item.url" v-for="item in fileList" />
+          <div class="flex">
+            <div v-for="item in fileList">
+              <div>
+                <a-image style="width: 200px; height: 200px;" :src="item.url" />
+              </div>
+              <div style="text-align:center; padding-top: 10px;">
+                <a-button type="primary" @click="onClickTriggerButton(item.url)">
+                  <template #icon>
+                    <edit-outlined />
+                  </template>
+                </a-button>
+                <a-button style="margin-left: 10px;" type="danger" @click="onClickDeleteButton(item.url)">
+                  <template #icon>
+                    <delete-outlined />
+                  </template>
+                </a-button>
+              </div>
+
+            </div>
+          </div>
+
         </a-form-item>
-        <a-form-item  :label="$t('base.Upload')" name="uploader">
+        <a-form-item :label="$t('base.Upload')" name="uploader">
           <a-button type="primary" @click="onClickTriggerButton">
             <template #icon>
               <plus-outlined />
             </template>
             {{ $t('base.Upload') }}
           </a-button>
-          <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange" accept="image/*" multiple />
+          <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange" accept="image/*"
+            multiple />
         </a-form-item>
       </a-form>
     </div>
@@ -51,6 +72,7 @@ const props = defineProps({
 
 const baseForm = ref(null)
 const itemData = ref({})
+const currentItemUrl = ref("")
 const imageItemSettings = ref({})
 const fileBtnRef = ref(null);
 // const fileList = ref<UploadProps['fileList']>([]);
@@ -78,22 +100,37 @@ const exportData = (item: any) => {
   }
 }
 
-const onClickTriggerButton = async () => {
+const onClickTriggerButton = async (url: string) => {
+  currentItemUrl.value = url
   fileBtnRef.value.click()
 }
 
 
 const onUploadInputChange = async (e: Event) => {
   let images = await ossUploadFiles(e)
-  for (let item of images) {
-    fileList.value.push({
-      name: "",
-      url: item,
-      status: "done",
-      uid: item,
-      desc: ""
-    })
+  if (currentItemUrl.value) {
+    for(let item of fileList.value){
+      if(item.url == currentItemUrl.value){
+        item.url = images[0]
+        break
+      }
+    }
+  } else {
+    for (let item of images) {
+      fileList.value.push({
+        name: "",
+        url: item,
+        status: "done",
+        uid: item,
+        desc: ""
+      })
+    }
   }
+}
+
+
+const onClickDeleteButton = (url: string) => {
+  fileList.value = fileList.value.filter(c => c.url != url)
 }
 
 
