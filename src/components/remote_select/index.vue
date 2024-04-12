@@ -115,6 +115,7 @@ const queryEntities = async () => {
             userStore.pagination.page = 1
             userStore.pagination.pagesize = 10
             userStore.queryArgs.is_worker = true
+            userStore.queryArgs.is_customer = false
             userStore.queryArgs.keyword = searchValueRef.value
             await userStore.apiQuery()
             searchResult.value = userStore.entities
@@ -123,6 +124,7 @@ const queryEntities = async () => {
             userStore.pagination.page = 1
             userStore.pagination.pagesize = 10
             userStore.queryArgs.is_customer = true
+            userStore.queryArgs.is_worker = false
             userStore.queryArgs.keyword = searchValueRef.value
             await userStore.apiQuery()
             searchResult.value = userStore.entities
