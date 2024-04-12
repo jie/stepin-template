@@ -33,9 +33,9 @@ const columns = [
   { title: i18n.global.t('base.Customer'), dataIndex: 'company', width: 200 },
   { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
-  { title: i18n.global.t('base.Status'), dataIndex: 'status', width: 80 },
-  { title: i18n.global.t('base.Review'), dataIndex: 'approve_status', width: 80 },
-  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 50 },
+  { title: i18n.global.t('base.Status'), dataIndex: 'status', width: 120 },
+  { title: i18n.global.t('base.Review'), dataIndex: 'approve_status', width: 120 },
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
 
@@ -281,7 +281,7 @@ initializeData()
           }" tree-node-filter-prop="name">
         </a-tree-select>
       </a-form-item>
-      <hr />
+      <!-- <hr />
       <a-form-item :label="$t('base.FillByPassword')" name="validate_password">
         <a-switch v-model:checked="form.settings.validate_password" />
       </a-form-item>
@@ -293,7 +293,7 @@ initializeData()
       </a-form-item>
       <a-form-item :label="$t('base.ReviewByPermission')" name="approve_permission">
         <a-switch v-model:checked="form.settings.approve_permission" />
-      </a-form-item>
+      </a-form-item> -->
       <hr />
       <a-form-item :label="$t('base.Template')" name="report_template_id" required>
         <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"

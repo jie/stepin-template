@@ -43,6 +43,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/report_system/index.vue'),
       },
       {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: () => import('@/pages/dashboard'),
+      },
+      {
         path: 'report',
         name: 'report',
         meta: {
@@ -226,7 +231,7 @@ const routes: RouteRecordRaw[] = [
           target: '_blank',
           cacheable: false,
         },
-        component: () => import('@/pages/login'),
+        component: () => import('@/pages/login/Login.vue'),
       },
       {
         path: 'regist',

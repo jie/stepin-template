@@ -171,6 +171,7 @@
         "logout": "Logout",
         "NameInEnglish": "Name in English",
         "Remark": "Remark",
-        "ParentCategory": "Parent Category"
+        "ParentCategory": "Parent Category",
+        "welcome_back": "Dear user, welcome back!"
     }
 }

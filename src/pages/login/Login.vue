@@ -10,7 +10,7 @@
   const router = useRouter();
   function onLoginSuccess() {
     router.push({
-      name: "report"
+      name: "dashboard"
     });
   }
 </script>

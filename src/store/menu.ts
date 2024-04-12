@@ -16,20 +16,20 @@ import { useLoadingStore } from '@/store';
 import routes from '@/router/routes';
 import {i18n} from "@/lang/i18n"
 const presetList = [
-  // {
-  //   id: 1,
-  //   name: 'workplace',
-  //   title: '工作台1',
-  //   icon: 'DashboardOutlined',
-  //   badge: 'new',
-  //   target: '_self',
-  //   path: '/workplace',
-  //   component: '@/pages/workplace',
-  //   renderMenu: true,
-  //   parent: null,
-  //   permission: null,
-  //   cacheable: true,
-  // },
+  {
+    id: 1,
+    name: 'dashboard',
+    title: '工作台',
+    icon: 'DashboardOutlined',
+    badge: 'new',
+    target: '_self',
+    path: '/report_system/workplace/dashboard',
+    component: '@/pages/dashboard',
+    renderMenu: false,
+    parent: null,
+    permission: "dashboard:list",
+    cacheable: false,
+  },
   {
     id: 2,
     name: 'report',

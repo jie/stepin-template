@@ -6,7 +6,7 @@
     </div>
     <div class="copyright">
       Copyright
-      <CopyrightOutlined class="icon-copyright" /> 2023 UNIVETECH
+      <CopyrightOutlined class="icon-copyright" /> 2024 ECQA.CC
     </div>
   </div>
 </template>

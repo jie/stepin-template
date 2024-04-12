@@ -17,7 +17,7 @@ const columns = [
   { title: i18n.global.t('base.NameInEnglish'), dataIndex: 'name_en', width: 200 },
   { title: i18n.global.t('base.Remark'), dataIndex: 'remark' },
   { title: i18n.global.t('base.CreateAt'), dataIndex: 'create_at' },
-  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 40 },
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
 

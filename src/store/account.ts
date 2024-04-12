@@ -35,7 +35,8 @@ export const useAccountStore = defineStore('account', {
       return http
         .request('/platform/report_api/report_user/login', 'post_json', { email, password })
         .then(async (response) => {
-          console.log('response:', response)
+          console.log('response1:', response)
+          console.log('response?.data?.status:', response?.data?.status)
           if (response?.data?.status) {
             this.logged = true;
             // http.setAuthorization(`Bearer ${response.data.token}`, new Date(response.data.expires));

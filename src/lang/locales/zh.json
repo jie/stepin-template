@@ -171,6 +171,7 @@
         "logout": "退出登录",
         "NameInEnglish": "英文名称",
         "Remark": "备注",
-        "ParentCategory": "父分类"
+        "ParentCategory": "父分类",
+        "welcome_back": "尊敬的用户，欢迎回来！"
     }
 }

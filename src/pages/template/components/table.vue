@@ -31,7 +31,7 @@ const columns = [
   },
   { title: i18n.global.t('base.Status'), dataIndex: 'status' },
   { title: i18n.global.t('base.CreateAt'), dataIndex: 'create_at' },
-  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 1-0 },
 ];
 
 
