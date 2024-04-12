@@ -62,7 +62,7 @@ const onSaveTemplate = async (data:any) => {
   router.back()
 }
 
-
+console.log('11111')
 initializeData()
 </script>
 <template>

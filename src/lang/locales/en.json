@@ -3,6 +3,7 @@
     "menu": {
         "report": "Report",
         "template": "Template",
+        "templates": "Template",
         "category": "Category",
         "company": "Company",
         "user": "User",
@@ -172,6 +173,9 @@
         "NameInEnglish": "Name in English",
         "Remark": "Remark",
         "ParentCategory": "Parent Category",
-        "welcome_back": "Dear user, welcome back!"
+        "welcome_back": "Dear user, welcome back!",
+        "WaitingForAuditorApprove": "Waiting for auditor approve",
+        "report_not_in_fill_status": "Report not in fill status",
+        "AuditReportFailed": "Audit report failed"
     }
 }

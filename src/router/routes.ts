@@ -69,8 +69,13 @@ const routes: RouteRecordRaw[] = [
         meta: {
           renderMenu: true,
          },
-        component: () => import('@/pages/template'),
+        // component: () => import('@/pages/template'),
         children: [
+          {
+            path: 'templates',
+            name: 'templates',
+            component: () => import('@/pages/template'),
+          },
           {
             path: 'design',
             name: 'design',

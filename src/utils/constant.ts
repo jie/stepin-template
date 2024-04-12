@@ -13,3 +13,19 @@ export const ApproveStatusOptions = [
     { label: i18n.global.t('constant.Approving'), value: '2' },
     { label: i18n.global.t('constant.Approved'), value: '3' }
 ]
+
+
+export const approveStatusDisplayMsg = {
+    "0": "Disapproved",
+    "1": "Unapproved",
+    "2": "Approving",
+    "3": "Approved",
+  }
+  
+  
+  export const customerApproveStatusMsg = {
+    "0": "Disapproved",
+    "1": "Unapproved",
+    "2": "Approving",
+    "3": "Approved",
+  }

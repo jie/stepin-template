@@ -187,7 +187,7 @@
         <a-affix :offset-bottom="20" @change="affixedChange">
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
             style="">
-            <div>
+            <div v-if="store.report.approve_status == 'unapproved'">
               <a-button type="primary" html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit') }}
               </a-button>
               <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
@@ -201,8 +201,22 @@
                 <a-button danger style="margin-left: 10px;">{{ $t('base.DeleteLocalData') }}</a-button>
               </a-popconfirm>
             </div>
+            <div v-else>
+              <div v-if="store.report.status != '3'">
+                <strong>{{ approveStatusDisplayMsg[store.report.status] }}</strong>
+                <div v-if="store.report.status == '0'">{{ store.report.reason }}</div>
+              </div> 
+              <div v-else>
+                <div v-if="store.report.approve_status == '0'">
+                  <strong>{{ customerApproveStatusMsg[store.report.approve_status] }}</strong>
+                  <div v-if="store.report.approve_status == '0'">{{ store.report.approve_reason }}</div>
+                </div>
+                <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
+              </div>
+            </div>
           </div>
         </a-affix>
+
 
       </a-form>
     </div>
@@ -225,6 +239,7 @@ import { openNotification, successNotification } from '@/utils/notification';
 // import { copyObject } from "@/utils/objectUtils"
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
+import {approveStatusDisplayMsg, customerApproveStatusMsg} from "@/utils/constant"
 import { useAccountStore } from '@/store';
 import dayjs from 'dayjs';
 const document = window.document
@@ -243,7 +258,6 @@ const affixedChange = (affixed: boolean) => {
 };
 
 const accountStore = useAccountStore()
-
 const initialization = async () => {
   console.log('initialization')
   // if (store.report?.values && Object.keys(store.report?.values).length != 0) {

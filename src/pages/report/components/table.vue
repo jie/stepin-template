@@ -234,6 +234,8 @@ const showStatusDialog = (record: Report) => {
 }
 const statusDialogConfirm = async () => {
   await store.apiSetStatus(statusForm)
+  initializeData()
+  statusDialogRef.value = false
 }
 const statusDialogCancel = () => {
   statusDialogRef.value = false
@@ -253,6 +255,23 @@ const goPublicFillReport = (report:any) => {
   })
 }
 
+
+const goDesign = (record) => {
+  console.log('record:', toRaw(record.template.id))
+  console.log(router.resolve({
+    name: 'design',
+    query: {
+      id: record.template.id,
+    }
+  })
+)
+  openNewUrl(router, {
+    name: 'design',
+    query: {
+      id: record.template.id,
+    }
+  })
+}
 initializeData()
 
 </script>
@@ -407,6 +426,7 @@ initializeData()
         <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
           <div class="flex-col flex justify-evenly">
             <span class="text-title font-bold">{{ text }}</span>
+            <span class="text-title cursor-pointer template-name" @click="goDesign(record)">{{ record?.template?.name }}</span>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
@@ -505,3 +525,15 @@ initializeData()
     </a-table>
   </div>
 </template>
+
+<style scoped>
+.template-name {
+  color: #999;
+  cursor: pointer;
+  font-size: 80%;
+}
+
+.template-name:hover {
+  text-decoration: underline;
+}
+</style>

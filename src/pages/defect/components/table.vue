@@ -11,7 +11,8 @@ const categoryStore = ReportCategoryStore()
 const store = ReportDefectStore();
 const columns = [
   { title: 'Name', dataIndex: 'name', width: 200 },
-  { title: 'Name', dataIndex: 'name_en', width: 200 },
+  { title: 'Name En', dataIndex: 'name_en', width: 200 },
+  { title: 'Category', dataIndex: 'category', width: 100 },
   { title: 'Product', dataIndex: 'product', width: 200 },
   { title: 'Product', dataIndex: 'product_en', width: 200 },
   { title: 'Code', dataIndex: 'code', width: 200 },
@@ -36,6 +37,7 @@ const showModal = ref(false);
 const newRecord = (record?: ReportDefect) => {
   store.isNew = true
   record.name = "";
+  record.code = "";
   record.name_en = ""
   record.product = "";
   record.product_en = ""
@@ -172,6 +174,9 @@ initializeData()
       <a-form-item label="Product in English" Product="product_en">
         <a-input v-model:value="form.product_en" />
       </a-form-item>
+      <a-form-item label="Code" name="code">
+        <a-input v-model:value="form.code" />
+      </a-form-item>
       <a-form-item label="Types" name="types">
         <a-select v-model:value="form.types" :options="defectTypes"  mode="multiple"/>
       </a-form-item>
@@ -202,6 +207,13 @@ initializeData()
           <span class="text-title font-bold">{{ text }}</span>
         </div>
       </div>
+      
+      <template v-else-if="column.dataIndex === 'category'">
+        <span>{{ record.category.name }}</span>
+      </template>
+      <template v-else-if="column.dataIndex === 'code'">
+        <span>{{ record.code }}</span>
+      </template>
       <template v-else-if="column.dataIndex === 'is_enable'">
         <a-switch :checked="record.is_enable" />
       </template>

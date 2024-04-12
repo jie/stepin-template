@@ -35,7 +35,7 @@
       </div>
 
       <div v-if="reportInspectDetailRef.length != 0" style="margin-left: 10px; margin-right: 10px;">
-        <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index"  style="margin-bottom: 20px">
+        <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index" style="margin-bottom: 20px">
           <a-col :span="12" v-for="(item, index) in row" :key="index">
             <div><strong>{{ item.key }}</strong>: <span style="float: right">{{ item.value }}</span>
             </div>
@@ -78,9 +78,26 @@
         <a-affix :offset-bottom="20" @change="affixedChange">
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
             style="">
-            <div>
-              <a-button type="primary" html-type="submit" style="width: 240px; margin-left: 10px;">{{
-                $t('base.SubmitReviewResult') }}</a-button>
+            <div v-if="store.report.status == '3'">
+              <template v-if="store.report?.approve_status == '1'">
+                <a-button type="primary" html-type="submit" style="width: 240px; margin-left: 10px;">{{
+                  $t('base.SubmitReviewResult') }}</a-button>
+              </template>
+              <template v-else>
+                <div style="text-align: center;">
+                  <div>{{ customerApproveStatusMsg[store.report?.approve_status] }}</div>
+                  <div v-if="store.report?.approve_status == '0'">
+                    <div style="font-size: 80%; color: #999"> {{ store.report?.approve_reason }}</div>
+                    <div style="padding-top: 5px;padding-bottom: 5px">
+                      <a-button type="primary" html-type="submit" style="width: 240px; margin-left: 10px;">{{
+                        $t('base.SubmitReviewResult') }}</a-button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <div v-else>
+              <div>{{ $t('base.WaitingForAuditorApprove') }}</div>
             </div>
           </div>
         </a-affix>
@@ -102,10 +119,12 @@ import reportContainer from "./container.vue"
 import reportInputGroup from "./reportInputGroup/index.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
 import { openNotification, successNotification } from '@/utils/notification';
+import { approveStatusDisplayMsg, customerApproveStatusMsg } from "@/utils/constant"
 // import { copyObject } from "@/utils/objectUtils"
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import dayjs from 'dayjs';
+import { i18n } from '@/lang/i18n';
 const document = window.document
 const store = ReportFillStore()
 const isAffixedRef = ref(false)
@@ -232,6 +251,8 @@ const submitFormData = reactive({
 const onFinishSubmit = () => {
   console.log('onFinishSubmit:', toRaw(formState))
   isShowSubmitDialog.value = true
+  submitFormData.approve_status = store.report?.approve_status
+  submitFormData.approve_reason = store.report?.approve_reason
 }
 const onFinishFailed = () => {
   console.log('onFinishFailed:')
@@ -247,12 +268,15 @@ const handleSubmitOk = async () => {
     console.error(e)
     openNotification({
       type: "error",
-      message: "Submit report failed"
+      message: i18n.global.t("base.AuditReportFailed"),
     })
   }
   if (result) {
     successNotification("submit_report")
     isShowSubmitDialog.value = false
+    setTimeout(() => {
+      window.location.reload()
+    }, 5000)
   }
 }
 
@@ -295,12 +319,12 @@ const generateInspectDetailRows = () => {
     }
   }
 
-  if(formState["AQL_CR"] || formState["AQL_MAJ"] || formState["AQL_MIN"]) {
+  if (formState["AQL_CR"] || formState["AQL_MAJ"] || formState["AQL_MIN"]) {
 
-    if(rows[rows.length - 1].length == 1) {
-      rows[rows.length - 1].push({key: 'AQL', value: `Cr: ${formState["AQL_CR"]} Maj: ${formState["AQL_MAJ"]} Min: ${formState["AQL_MIN"]}`})
-    } else  {
-      rows.push([{key: 'AQL', value: `Cr: ${formState["AQL_CR"]}, Maj: ${formState["AQL_MAJ"]}, Min: ${formState["AQL_MIN"]}`}])
+    if (rows[rows.length - 1].length == 1) {
+      rows[rows.length - 1].push({ key: 'AQL', value: `Cr: ${formState["AQL_CR"]} Maj: ${formState["AQL_MAJ"]} Min: ${formState["AQL_MIN"]}` })
+    } else {
+      rows.push([{ key: 'AQL', value: `Cr: ${formState["AQL_CR"]}, Maj: ${formState["AQL_MAJ"]}, Min: ${formState["AQL_MIN"]}` }])
     }
   }
 

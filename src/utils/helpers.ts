@@ -11,5 +11,10 @@ export function initUndefined<T extends Record<string, any>, K extends keyof T>(
 
 export const openNewUrl = (router: any, params: object) => {
   let url = router.resolve(params)
-  window.open(`/report_system${url.href}`, '_blank')
+  console.log(`/${url.href}`)
+  if(url.href.startsWith('/report_system')) {
+    window.open(`${url.href}`, '_blank')
+  } else {
+    window.open(`/report_system${url.href}`, '_blank')
+  }
 }

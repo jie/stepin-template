@@ -3,6 +3,7 @@
     "menu": {
         "report": "报告",
         "template": "模版",
+        "templates": "模版",
         "category": "分类",
         "company": "客户",
         "user": "用户",
@@ -172,6 +173,9 @@
         "NameInEnglish": "英文名称",
         "Remark": "备注",
         "ParentCategory": "父分类",
-        "welcome_back": "尊敬的用户，欢迎回来！"
+        "welcome_back": "尊敬的用户，欢迎回来！",
+        "WaitingForAuditorApprove": "等待审核员处理",
+        "report_not_in_fill_status": "该报告未处于填写状态",
+        "AuditReportFailed": "审核报告出现错误"
     }
 }

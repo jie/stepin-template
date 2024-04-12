@@ -113,9 +113,10 @@ export const ReportFillStore = defineStore('report_fill', {
     async apiAudit(approve_status: string, approve_reason: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
+      let session = getSessionInfo()
       let bodyJson = { id: this.report.id, approve_status: approve_status, approve_reason: approve_reason}
       return http
-        .request('/platform/report_api/report/audit', 'post_json', bodyJson, {})
+        .request('/platform/report_api/report/audit', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response.data)
           if (response.data?.status) {

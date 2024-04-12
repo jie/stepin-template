@@ -378,6 +378,7 @@ initializeData()
         <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
           <div class="flex-col flex justify-evenly">
             <span class="text-title font-bold">{{ text }}</span>
+            <span class="text-title cursor-pointer template-name">{{ record?.template?.name }}</span>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
@@ -445,3 +446,12 @@ initializeData()
     </a-table>
   </div>
 </template>
+
+
+<style scoped>
+.template-name {
+  color: #999;
+  cursor: pointer;
+  font-size: 80%;
+}
+</style>
