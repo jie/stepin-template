@@ -176,6 +176,12 @@
         "welcome_back": "Dear user, welcome back!",
         "WaitingForAuditorApprove": "Waiting for auditor approve",
         "report_not_in_fill_status": "Report not in fill status",
-        "AuditReportFailed": "Audit report failed"
+        "AuditReportFailed": "Audit report failed",
+        "ReportResult": "Report Result",
+        "ResultPassed": "Passed",
+        "ResultPending": "Pending",
+        "ResultFailed": "Failed",
+        "ReportResultRemark": "Report result reason",
+        "AQL": "AQL"
     }
 }

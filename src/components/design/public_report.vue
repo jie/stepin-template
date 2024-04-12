@@ -26,15 +26,37 @@
         style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
         <Spin font-size="60px" />
       </div>
-      <div class="title">
-        <div>{{ store.report?.title }}</div>
+      <div class="flex mb-9" style="border-bottom: 1px solid #eee; padding-bottom: 20px;">
+        <div style="width: 200px;">
+          <img src="https://qcplatform.oss-cn-shanghai.aliyuncs.com/logo/report_logo.jpg" alt="">
+        </div>
+        <div style="flex: 1">
+          <div class="title">
+            <div>{{ store.report?.title }}</div>
+          </div>
+          <div class="summary">
+            <div>{{ store.report?.summary }}</div>
+          </div>
+        </div>
       </div>
-      <div class="summary">
-        <div>{{ store.report?.summary }}</div>
-      </div>
+
       <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
         <div v-if="store.report">
+          <div class="component meta">
+            <a-form-item required :label="$t('base.ReportResult')">
+              <a-radio-group v-model:value="formState['ReportResult']" :options="reportResultOptions">
+                <template #label="{ value }">
+                  <span style="color: red">{{ value }}</span>
+                </template>
+              </a-radio-group>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="formState['ReportResult'] == '0' || formState['ReportResult'] == '1'">
+            <a-form-item required :label="$t('base.ReportResultRemark')">
+              <a-textarea v-model:value="formState['ReportResultRemark']"></a-textarea>
+            </a-form-item>
+          </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
             <a-form-item required :label="$t('base.ReportNumber')">
               <a-input v-model:value="formState['ReportNumber']" allowClear></a-input>
@@ -235,11 +257,13 @@ import reportImage from "./reportImage/index.vue"
 import reportImageUpload from "./reportImageUpload/index.vue"
 import reportContainer from "./container.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
+import { CheckOutlined } from '@ant-design/icons-vue';
 import { openNotification, successNotification } from '@/utils/notification';
 // import { copyObject } from "@/utils/objectUtils"
+import { i18n } from '@/lang/i18n';
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
-import {approveStatusDisplayMsg, customerApproveStatusMsg} from "@/utils/constant"
+import { approveStatusDisplayMsg, customerApproveStatusMsg } from "@/utils/constant"
 import { useAccountStore } from '@/store';
 import dayjs from 'dayjs';
 const document = window.document
@@ -256,6 +280,12 @@ const startedRef = ref(false)
 const affixedChange = (affixed: boolean) => {
   isAffixedRef.value = affixed
 };
+
+const reportResultOptions = [
+  { label: i18n.global.t(`base.ResultPassed`), value: '3' },
+  { label: i18n.global.t(`base.ResultPending`), value: '1' },
+  { label: i18n.global.t(`base.ResultFailed`), value: '0' },
+];
 
 const accountStore = useAccountStore()
 const initialization = async () => {
@@ -279,11 +309,11 @@ const initialization = async () => {
 
 const onOpenForm = async () => {
   let fillSession = getFillSession()
-  if(!fillSession) {
+  if (!fillSession) {
     isShowSubmitDialog.value = true
     return
   }
-  if(((dayjs() - dayjs(fillSession.user_data.create_at)) / 3600000) > 48) {
+  if (((dayjs() - dayjs(fillSession.user_data.create_at)) / 3600000) > 48) {
     localStorage.removeItem("fill_session")
     isShowSubmitDialog.value = true
     return
@@ -445,7 +475,18 @@ const onFinishSubmit = async () => {
     isShowSubmitDialog.value = true
     return
   }
-  await store.apiSubmit(fillSession.email, fillSession.password, formState)
+  try {
+
+    await store.apiSubmit(fillSession.email, fillSession.password, formState)
+  } catch (e) {
+    console.log(e)
+    openNotification({
+      type: "error",
+      message: "Submit Fail",
+      description: e?.data?.message
+    })
+    return
+  }
   openNotification({
     type: "success",
     message: "Success",
@@ -454,9 +495,9 @@ const onFinishSubmit = async () => {
 }
 const onFinishFailed = (e) => {
   console.log('onFinishFailed:', e)
-  if(e.errorFields) {
+  if (e.errorFields) {
     e.errorFields.map((item) => {
-      if(item.errors) {
+      if (item.errors) {
         openNotification({
           type: "error",
           message: "Validate Fail",
@@ -538,13 +579,12 @@ defineExpose({
 
 .title,
 .summary {
-  padding: 10px;
   border-radius: 5px;
   text-align: center;
 }
 
 .title {
-  margin-top: 30px;
+  margin-top: 10px;
   font-size: 20px;
   font-weight: bold;
 }

@@ -27,17 +27,55 @@
         style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
         <Spin font-size="60px" />
       </div>
-      <div class="title">
-        <div>{{ store.report?.title }}</div>
+      <div class="flex mb-9" style="border-bottom: 1px solid #eee; padding-bottom: 20px;">
+        <div style="width: 200px;">
+          <img src="https://qcplatform.oss-cn-shanghai.aliyuncs.com/logo/report_logo.jpg" alt="">
+        </div>
+        <div style="flex: 1">
+          <div class="title">
+            <div>{{ store.report?.title }}</div>
+          </div>
+          <div class="summary">
+            <div>{{ store.report?.summary }}</div>
+          </div>
+        </div>
       </div>
-      <div class="summary">
-        <div>{{ store.report?.summary }}</div>
+
+      <div class="component meta">
+
+        <div class="flex">
+
+          <div style="flex: 1">
+            <div><strong>{{ $t('base.ReportResult') }}:</strong></div>
+            <div style="font-size: 120%; color: green">
+              <span class="result-opt-box">
+                <CheckSquareOutlined v-if="store.report.values.ReportResult == '3'" />
+              </span><span class="result-opt-face">{{ $t('base.ResultPassed') }}</span>
+            </div>
+            <div style="font-size: 120%; color: orange">
+              <span class="result-opt-box">
+                <CheckSquareOutlined v-if="store.report.values.ReportResult == '1'" />
+              </span><span class="result-opt-face">{{ $t('base.ResultPending') }}</span>
+            </div>
+            <div style="font-size: 120%; color: red">
+              <span class="result-opt-box">
+                <CheckSquareOutlined v-if="store.report.values.ReportResult == '0'" />
+              </span><span class="result-opt-face">{{ $t('base.ResultFailed') }}</span>
+            </div>
+          </div>
+          <div style="flex: 1">
+            <div style="padding-top: 20px;"
+              v-if="store.report.values.ReportResultRemark && (store.report.values.ReportResult == '1' || store.report.values.ReportResult == '0')">
+              <strong>{{ $t('base.Reason') }}:</strong>
+              {{ store.report.values.ReportResultRemark }}</div>
+          </div>
+        </div>
       </div>
 
       <div v-if="reportInspectDetailRef.length != 0" style="margin-left: 10px; margin-right: 10px;">
         <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index" style="margin-bottom: 20px">
           <a-col :span="12" v-for="(item, index) in row" :key="index">
-            <div><strong>{{ item.key }}</strong>: <span style="float: right">{{ item.value }}</span>
+            <div><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right">{{ item.value }}</span>
             </div>
           </a-col>
         </a-row>
@@ -118,6 +156,8 @@ import reportImageUpload from "./reportImageUpload/view.vue"
 import reportContainer from "./container.vue"
 import reportInputGroup from "./reportInputGroup/index.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
+
+import { CheckOutlined } from '@ant-design/icons-vue';
 import { openNotification, successNotification } from '@/utils/notification';
 import { approveStatusDisplayMsg, customerApproveStatusMsg } from "@/utils/constant"
 // import { copyObject } from "@/utils/objectUtils"
@@ -141,6 +181,11 @@ const reportInspectDetailRef = ref([])
 const initialization = () => {
   refresh(store.report)
 }
+const reportResultOptions = [
+  { label: i18n.global.t(`base.ResultPassed`), value: '3' },
+  { label: i18n.global.t(`base.ResultPending`), value: '1' },
+  { label: i18n.global.t(`base.ResultFailed`), value: '0' },
+];
 
 const dateKeys = [
   "DateOfInspection",
@@ -352,13 +397,12 @@ defineExpose({
 
 .title,
 .summary {
-  padding: 10px;
   border-radius: 5px;
   text-align: center;
 }
 
 .title {
-  margin-top: 30px;
+  margin-top: 10px;
   font-size: 20px;
   font-weight: bold;
 }
@@ -425,6 +469,5 @@ defineExpose({
 
 .ant-col.ant-form-item-label label {
   font-weight: bold;
-}
-</style>
+}</style>
   

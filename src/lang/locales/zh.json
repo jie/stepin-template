@@ -176,6 +176,12 @@
         "welcome_back": "尊敬的用户，欢迎回来！",
         "WaitingForAuditorApprove": "等待审核员处理",
         "report_not_in_fill_status": "该报告未处于填写状态",
-        "AuditReportFailed": "审核报告出现错误"
+        "AuditReportFailed": "审核报告出现错误",
+        "ReportResult": "报告结论",
+        "ResultPassed": "通过",
+        "ResultPending": "待确认",
+        "ResultFailed": "不通过",
+        "ReportResultRemark": "待确认和不通过须注明原因",
+        "AQL": "AQL"
     }
 }
