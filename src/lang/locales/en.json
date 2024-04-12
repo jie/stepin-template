@@ -140,6 +140,7 @@
         "LocalDataUpdateAt": "Local data update at",
         "RemoteDataUpdateAt": "Remote data update at",
         "DeleteLocalData": "Delete local data",
+        "ViewLocalData": "View local data",
         "HasResult": "Has result",
         "HasRemark": "Has remark",
         "PleaseEnterResult": "Please enter result",
@@ -177,11 +178,13 @@
         "WaitingForAuditorApprove": "Waiting for auditor approve",
         "report_not_in_fill_status": "Report not in fill status",
         "AuditReportFailed": "Audit report failed",
-        "ReportResult": "Report Result",
+        "ReportResult": "Overall Inspection Result",
         "ResultPassed": "Passed",
         "ResultPending": "Pending",
         "ResultFailed": "Failed",
         "ReportResultRemark": "Report result reason",
-        "AQL": "AQL"
+        "AQL": "AQL",
+        "ConfirmSubmitReport": "Confirm submit report? You can't modify the report after submit.",
+        "report_fail_need_refill": "Your submitted report did not pass the audit, please review and modify it before submitting it again:"
     }
 }

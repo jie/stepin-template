@@ -27,7 +27,7 @@
         style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
         <Spin font-size="60px" />
       </div>
-      <div class="flex mb-9" style="border-bottom: 1px solid #eee; padding-bottom: 20px;">
+      <div class="flex mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 20px;">
         <div style="width: 200px;">
           <img src="https://qcplatform.oss-cn-shanghai.aliyuncs.com/logo/report_logo.jpg" alt="">
         </div>
@@ -41,7 +41,7 @@
         </div>
       </div>
 
-      <div class="component meta">
+      <div class="component meta" style="border-bottom: 1px solid #eee; margin-bottom: 20px;">
 
         <div class="flex">
 
@@ -71,6 +71,7 @@
           </div>
         </div>
       </div>
+
 
       <div v-if="reportInspectDetailRef.length != 0" style="margin-left: 10px; margin-right: 10px;">
         <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index" style="margin-bottom: 20px">

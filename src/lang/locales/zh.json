@@ -140,6 +140,7 @@
         "LocalDataUpdateAt": "本地数据更新时间",
         "RemoteDataUpdateAt": "远程数据更新时间",
         "DeleteLocalData": "删除本地数据",
+        "ViewLocalData": "查看本地数据",
         "HasResult": "是否有结论输入框",
         "HasRemark": "是否有备注输入框",
         "PleaseEnterResult": "请输入结论",
@@ -175,13 +176,15 @@
         "ParentCategory": "父分类",
         "welcome_back": "尊敬的用户，欢迎回来！",
         "WaitingForAuditorApprove": "等待审核员处理",
-        "report_not_in_fill_status": "该报告未处于填写状态",
+        "report_not_in_fill_status": "该报告处于不可填写状态，请等待管理员操作",
         "AuditReportFailed": "审核报告出现错误",
-        "ReportResult": "报告结论",
+        "ReportResult": "最终检验结论",
         "ResultPassed": "通过",
         "ResultPending": "待确认",
         "ResultFailed": "不通过",
         "ReportResultRemark": "待确认和不通过须注明原因",
-        "AQL": "AQL"
+        "AQL": "AQL",
+        "ConfirmSubmitReport": "是否提交报告？提交报告后将无法修改",
+        "report_fail_need_refill": "您提交的报告未能通过审核，请查修改后再次提交:"
     }
 }

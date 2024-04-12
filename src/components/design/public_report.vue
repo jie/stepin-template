@@ -17,6 +17,14 @@
       <div>
         <div><span>{{ $t('base.LocalDataUpdateAt') }}:</span><span>{{ localDataRecord.update_at }}</span></div>
         <div><span>{{ $t('base.RemoteDataUpdateAt') }}:</span><span>{{ store.report.update_at }}</span></div>
+        <div>
+          <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+            v-if="localDataRecord" @confirm="onDeleteLocalData" :title="$t('base.ConfirmDelete')"
+            :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
+            <a-button danger>{{ $t('base.DeleteLocalData') }}</a-button>
+          </a-popconfirm>
+        </div>
+
       </div>
     </a-modal>
     <div
@@ -39,7 +47,9 @@
           </div>
         </div>
       </div>
-
+      <div v-if="store.report?.status == '0'">
+        <a-alert :message="$t('base.report_fail_need_refill')" :description="store.report?.reason" type="warning" show-icon />
+      </div>
       <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
         <div v-if="store.report">
@@ -209,33 +219,20 @@
         <a-affix :offset-bottom="20" @change="affixedChange">
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
             style="">
-            <div>
-              <a-button type="primary" html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit') }}
-              </a-button>
+            <div v-if="['1', '0'].includes(store.report.status)">
               <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-                @confirm="onLocalSave" :title="$t('base.ConfirmSave')" :ok-text="$t('base.Yes')"
+                @confirm="onSubmitReport" :title="$t('base.ConfirmSubmitReport')" :ok-text="$t('base.Yes')"
                 :cancel-text="$t('base.No')">
-                <a-button type="" style="width: 140px; margin-left: 10px;">{{ $t('base.Save') }}</a-button>
+                <a-button type="primary" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit')
+                }}</a-button>
               </a-popconfirm>
-              <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-                v-if="localDataRecord" @confirm="onDeleteLocalData" :title="$t('base.ConfirmDelete')"
-                :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
-                <a-button danger style="margin-left: 10px;">{{ $t('base.DeleteLocalData') }}</a-button>
-              </a-popconfirm>
+
+              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Save') }}</a-button>
+              <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
+                $t('base.ViewLocalData')
+              }}</a-button>
             </div>
-            <!-- <div v-else>
-              <div v-if="store.report.status != '3'">
-                <strong>{{ approveStatusDisplayMsg[store.report.status] }}</strong>
-                <div v-if="store.report.status == '0'">{{ store.report.reason }}</div>
-              </div> 
-              <div v-else>
-                <div v-if="store.report.approve_status == '0'">
-                  <strong>{{ customerApproveStatusMsg[store.report.approve_status] }}</strong>
-                  <div v-if="store.report.approve_status == '0'">{{ store.report.approve_reason }}</div>
-                </div>
-                <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
-              </div>
-            </div> -->
+            <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
           </div>
         </a-affix>
 
@@ -299,12 +296,16 @@ const initialization = async () => {
   // loadLocalData()
   loadRemoteData()
   let localData = await loadLocalData()
+  console.log('localData:', localData)
   if (localData && localData.values && localData.values.length != 0) {
     if (dayjs(localData.update_at) > dayjs(store.report.update_at)) {
-      loadLocalDataDialogRef.value = true
       localDataRecord.value = localData
     }
   }
+}
+
+const showLocalDataDialog = () => {
+  loadLocalDataDialogRef.value = true
 }
 
 const onOpenForm = async () => {
@@ -334,7 +335,7 @@ const onLocalSave = async () => {
   } else {
     await reportDatabase.updateRecord({ id: store.report.id, values: JSON.stringify(formState) })
   }
-  successNotification("Saved")
+  // successNotification("Saved")
 }
 
 const loadLocalData = async () => {
@@ -468,8 +469,38 @@ const loginFormData = reactive({
   email: "",
   password: ""
 })
+
+const onSubmitReport = async () => {
+  console.log('onSubmitReport:', toRaw(formState))
+  let fillSession = getFillSession()
+  if (!fillSession) {
+    isShowSubmitDialog.value = true
+    return
+  }
+  try {
+    await store.apiSubmit(fillSession.email, fillSession.password, formState)
+  } catch (e) {
+    console.log(e)
+    openNotification({
+      type: "error",
+      message: "Submit Report Fail",
+      description: e?.data?.message
+    })
+    return
+  } finally {
+    onLocalSave()
+  }
+
+  openNotification({
+    type: "success",
+    message: "Success",
+    description: "Report submitted"
+  })
+
+}
+
 const onFinishSubmit = async () => {
-  console.log('onFinishSubmit:', toRaw(formState))
+  console.log('onFinishSubmit-onFill:', toRaw(formState))
   let fillSession = getFillSession()
   if (!fillSession) {
     isShowSubmitDialog.value = true
@@ -477,20 +508,23 @@ const onFinishSubmit = async () => {
   }
   try {
 
-    await store.apiSubmit(fillSession.email, fillSession.password, formState)
+    await store.apiFill(fillSession.email, fillSession.password, formState)
   } catch (e) {
     console.log(e)
     openNotification({
       type: "error",
-      message: "Submit Fail",
+      message: "Save Report Fail",
       description: e?.data?.message
     })
     return
+  } finally {
+    onLocalSave()
   }
+
   openNotification({
     type: "success",
     message: "Success",
-    description: "Submit Success"
+    description: "Report saved"
   })
 }
 const onFinishFailed = (e) => {
