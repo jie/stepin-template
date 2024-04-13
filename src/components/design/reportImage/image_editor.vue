@@ -18,8 +18,8 @@
         <a-form-item :label="$t('base.Image')" name="images" v-if="fileList && fileList.length != 0">
           <div class="flex">
             <div v-for="item in fileList">
-              <div>
-                <a-image style="width: 200px; height: 200px;" :src="item.url" />
+              <div style="height: 200px;display: flex; justify-content: center;align-items: center;border:1px solid #f9f9f9;">
+                <a-image style="width: 200px;" :src="item.url" />
               </div>
               <div style="text-align:center; padding-top: 10px;">
                 <a-button type="primary" @click="onClickTriggerButton(item.url)">
@@ -39,7 +39,7 @@
 
         </a-form-item>
         <a-form-item :label="$t('base.Upload')" name="uploader">
-          <a-button type="primary" @click="onClickTriggerButton">
+          <a-button type="primary" @click="onClickTriggerButton('')">
             <template #icon>
               <plus-outlined />
             </template>
@@ -60,6 +60,7 @@ import { ReportTemplateStore } from "@/store/reportTemplate"
 import { getBase64 } from "@/utils/file"
 import { ossUploadFiles } from "@/store/uploader"
 import { ImageType } from "@/types/components/image"
+import { toRaw } from "vue";
 const previewVisible = ref(false);
 const previewImage = ref('');
 const previewTitle = ref('');
@@ -108,6 +109,7 @@ const onClickTriggerButton = async (url: string) => {
 
 const onUploadInputChange = async (e: Event) => {
   let images = await ossUploadFiles(e)
+  console.log('currentItemUrl.value:', toRaw(currentItemUrl.value))
   if (currentItemUrl.value) {
     for(let item of fileList.value){
       if(item.url == currentItemUrl.value){
