@@ -11,16 +11,21 @@ const accountStore = useAccountStore();
 const route = useRoute()
 const router = useRouter()
 
-function systemLogin(params: LoginFormProps) {
+cosnt systemLogin = async () => {
   loading.value = true;
-  accountStore.systemLogin(route.query.staff_id)
-    .then((res) => {
+  let result;
+  try {
+    result = await accountStore.systemLogin(route.query.staff_id)
+    console.log('systemLogin result:', result)
+    setTimeout(() => {
       router.push('/report_system/workplace/dashboard')
-    })
-    .catch((e) => {
-    }).finally(() => {
-      loading.value = false
-    });
+    }, 2000)
+  } catch(e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+
 }
 systemLogin()
 </script>
