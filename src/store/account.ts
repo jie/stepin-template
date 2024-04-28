@@ -6,6 +6,7 @@ import { useAuthStore } from '@/plugins';
 import { useLoadingStore } from './loading';
 import {getSessionInfo} from '@/utils/session'
 import { message } from 'ant-design-vue';
+import router from '@/router';
 export interface Profile {
   account: Account;
   permissions: string[];
@@ -100,6 +101,25 @@ export const useAccountStore = defineStore('account', {
             }))
             return response.data.data.user_data;
           } else {
+            return Promise.reject(response);
+          }
+        });
+    },
+    async systemLogin(staff_id: string) {
+      return http
+        .request('/platform/report_api/report_user/login_system_user', 'post_json', { staff_id })
+        .then(async (response) => {
+          console.log('response1:', response)
+          console.log('response?.data?.status:', response?.data?.status)
+          if (response?.data?.status) {
+            this.logged = true;
+            // http.setAuthorization(`Bearer ${response.data.token}`, new Date(response.data.expires));
+            // localStorage.setItem("report_session", JSON.stringify(response.data.data))
+            http.setAuthorization(response.data.data, new Date(response.data.expires))
+            await useMenuStore().getMenuList();
+            return response.data.data.user_data;
+          } else {
+            message.error(response.data.message)
             return Promise.reject(response);
           }
         });

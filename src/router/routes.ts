@@ -248,6 +248,17 @@ const routes: RouteRecordRaw[] = [
           cacheable: false,
         },
         component: () => import('@/pages/regist'),
+      },
+      {
+        path: 'system_login',
+        name: 'system_login',
+        meta: {
+          icon: 'RegisterOutlined',
+          view: 'blank',
+          target: '_blank',
+          cacheable: false,
+        },
+        component: () => import('@/pages/system_login'),
       }
     ],
   },
