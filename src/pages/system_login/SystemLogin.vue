@@ -1,17 +1,14 @@
-<template>
-  loading...
-</template>
-
 <script lang="ts" setup>
 import {ref} from "vue";
 import { useAccountStore } from '@/store';
 import { useRouter, useRoute } from 'vue-router';
 const loading = ref(false);
 const accountStore = useAccountStore();
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-cosnt systemLogin = async () => {
+
+const systemLogin = async () => {
   loading.value = true;
   let result;
   try {
@@ -29,3 +26,7 @@ cosnt systemLogin = async () => {
 }
 systemLogin()
 </script>
+
+<template>
+  loading...
+</template>
