@@ -216,7 +216,7 @@ const routes: RouteRecordRaw[] = [
           cacheable: false,
         },
         component: () => import('@/pages/test/index.vue'),
-      },
+      }
     ]
   },
   {
@@ -253,13 +253,14 @@ const routes: RouteRecordRaw[] = [
         path: 'system_login',
         name: 'system_login',
         meta: {
-          icon: 'RegisterOutlined',
+          renderMenu: false,
+          icon: 'LoginOutlined',
           view: 'blank',
           target: '_blank',
           cacheable: false,
         },
         component: () => import('@/pages/system_login'),
-      }
+      },
     ],
   },
   {
@@ -271,6 +272,7 @@ const routes: RouteRecordRaw[] = [
     },
     component: () => import('@/pages/Exp403.vue'),
   },
+
   {
     path: '/:pathMatch(.*)*',
     name: '404',

@@ -20,6 +20,7 @@ interface NaviGuard {
 const publicPages = [
   '/report_system/account/login',
   '/report_system/account/regist',
+  '/report_system/account/system_login',
   '/report_system/public/report',
   '/report_system/home',
 ]
