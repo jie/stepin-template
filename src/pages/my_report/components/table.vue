@@ -241,8 +241,8 @@ const goPublicReviewReport = (report: any) => {
   })
 }
 const goThirpartyReportReview = (report: any) => {
-  console.log('form:', toRaw(form), report.verify_status)
-  if(report.verify_status != '3' || !report.report_files || report.report_files.length === 0) {
+  console.log('form:', toRaw(form), report.status)
+  if(report.status != '3' || !report.report_files || report.report_files.length === 0) {
     openNotification({ type: "error", message: "Report status error", description: "Report is not ready yet" })
     return
   }
