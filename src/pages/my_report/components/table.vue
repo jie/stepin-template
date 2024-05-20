@@ -11,9 +11,10 @@ import { Report } from '@/store/report'
 import { MyReportStore as ReportStore } from '@/store/my_report'
 import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
-import {useRouter} from 'vue-router'
-import {i18n} from "@/lang/i18n"
-import {openNewUrl} from "@/utils/helpers"
+import { useRouter } from 'vue-router'
+import { i18n } from "@/lang/i18n"
+import { openNewUrl } from "@/utils/helpers"
+import { openNotification } from '@/utils/notification';
 const router = useRouter()
 const store = ReportStore()
 const categoryStore = ReportCategoryStore()
@@ -31,8 +32,6 @@ const columns = [
     width: 260,
   },
   { title: i18n.global.t('base.Date'), dataIndex: 'inspect_date', width: 120 },
-  { title: i18n.global.t('base.Customer'), dataIndex: 'company', width: 200 },
-  { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
   { title: i18n.global.t('base.Status'), dataIndex: 'status', width: 120 },
   { title: i18n.global.t('base.Review'), dataIndex: 'approve_status', width: 120 },
@@ -108,14 +107,15 @@ function submit() {
         factory_id: form.factory_id,
         company_id: form.company_id,
         settings: form.settings,
+        is_thirdparty: form.is_thirdparty
       }
       if (form.id) {
         reqData.id = form.id
       }
-      if(form.order_id) {
+      if (form.order_id) {
         reqData.order_id = form.order_id
       }
-      if(form.id) {
+      if (form.id) {
         await store.apiUpdate(reqData)
       } else {
         await store.apiSave(reqData)
@@ -155,16 +155,17 @@ function edit(record: any) {
   form.users_review = record?.users_review
   form.company_id = record?.company
   form.settings = record?.settings
-  if(form.settings.validate_password === undefined) {
+  form.is_thirdparty = record?.is_thirdparty
+  if (form.settings.validate_password === undefined) {
     form.settings.validate_password = false
   }
-  if(form.settings.validate_permission === undefined) {
+  if (form.settings.validate_permission === undefined) {
     form.settings.validate_permission = false
   }
-  if(form.settings.approve_password === undefined) {
+  if (form.settings.approve_password === undefined) {
     form.settings.approve_password = false
   }
-  if(form.settings.approve_permission === undefined) {
+  if (form.settings.approve_permission === undefined) {
     form.settings.approve_permission = false
   }
   showModal.value = true;
@@ -187,10 +188,13 @@ const deleteRecord = async (record: Report) => {
 
 const onClickSearch = async () => {
   store.queryArgs.keyword = searchKeywords.value
-  console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
+  console.log('store.queryArgs.keyword:', store.queryArgs.keyword, searchDateRangeRef.value)
   if (searchDateRangeRef.value) {
     store.queryArgs.inspect_start = searchDateRangeRef.value[0].format('YYYY-MM-DD')
     store.queryArgs.inspect_end = searchDateRangeRef.value[1].format('YYYY-MM-DD')
+  } else {
+    store.queryArgs.inspect_start = ''
+    store.queryArgs.inspect_end = ''
   }
   store.apiQuery()
 }
@@ -227,7 +231,7 @@ const statusDialogCancel = () => {
 }
 
 
-const goPublicReviewReport = (report:any) => {
+const goPublicReviewReport = (report: any) => {
   console.log('form:', toRaw(form))
   openNewUrl(router, {
     name: 'report_review',
@@ -236,14 +240,36 @@ const goPublicReviewReport = (report:any) => {
     }
   })
 }
+const goThirpartyReportReview = (report: any) => {
+  console.log('form:', toRaw(form))
+  if(!report.verify_status != '3' || !report.report_files || report.report_files.length === 0) {
+    openNotification({ type: "error", message: "Report status error", description: "Report is not ready yet" })
+    return
+  }
+  openNewUrl(router, {
+    name: 'customer_review',
+    params: {
+      reportId: report.id,
+      customerId: report?.order?.company?.id || "customer"
+    }
+  })
+}
 
+const onChangeDateRange = (data:any) => {
+  console.log(data)
+  if(!data) {
+    searchDateRangeRef.value = undefined
+  } else {
+    searchDateRangeRef.value = data
+  }
+}
 
 initializeData()
 
 </script>
 <template>
-  <a-modal :title="form._isNew ? $t('base.Create') : $t('base.Edit')" v-model:visible="showModal" @ok="submit" @cancel="cancel"
-    width="660px">
+  <a-modal :title="form._isNew ? $t('base.Create') : $t('base.Edit')" v-model:visible="showModal" @ok="submit"
+    @cancel="cancel" width="660px">
     <a-form ref="formModel" :model="form" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
       <a-form-item required :label="$t('base.Name')" name="name">
         <a-input v-model:value="form.name" />
@@ -271,28 +297,30 @@ initializeData()
         <a-switch v-model:checked="form.settings.approve_permission" />
       </a-form-item> -->
       <hr />
-      <a-form-item :label="$t('base.Template')" name="report_template_id" required>
-        <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
-          searchKey="name" />
-      </a-form-item>
-      <a-form-item :label="$t('base.Workers')" name="workers">
-        <RemoteSelect ref="reportWorkerRef" type="worker" v-model:value="form.workers" :isMultiple="true"
-          searchKey="name" />
-      </a-form-item>
-      <a-form-item :label="$t('base.Customer')" name="users_review">
-        <RemoteSelect ref="reportUsersReviewRef" type="customer" v-model:value="form.users_review" :isMultiple="true"
-          searchKey="name" />
-      </a-form-item>
-      <a-form-item :label="$t('base.Company')" name="company">
-        <RemoteSelect ref="reportCompanyReviewRef" type="company" v-model:value="form.company_id"
-          searchKey="name" />
-      </a-form-item>
+      <div v-if="!form.is_thirdparty">
+        <a-form-item :label="$t('base.Template')" name="report_template_id">
+          <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
+            searchKey="name" />
+        </a-form-item>
+        <a-form-item :label="$t('base.Workers')" name="workers">
+          <RemoteSelect ref="reportWorkerRef" type="worker" v-model:value="form.workers" :isMultiple="true"
+            searchKey="name" />
+        </a-form-item>
+        <a-form-item :label="$t('base.Customer')" name="users_review">
+          <RemoteSelect ref="reportUsersReviewRef" type="customer" v-model:value="form.users_review" :isMultiple="true"
+            searchKey="name" />
+        </a-form-item>
+        <a-form-item :label="$t('base.Company')" name="company">
+          <RemoteSelect ref="reportCompanyReviewRef" type="company" v-model:value="form.company_id" searchKey="name" />
+        </a-form-item>
+      </div>
+
     </a-form>
   </a-modal>
   <!-- 审核dialog -->
-  <a-modal :title="$t('base.SetStatus')" v-model:visible="statusDialogRef" @ok="statusDialogConfirm" @cancel="statusDialogCancel"
-    width="660px">
-    <a-form ref="statusFormModel" :model="statusForm"  layout="vertical">
+  <a-modal :title="$t('base.SetStatus')" v-model:visible="statusDialogRef" @ok="statusDialogConfirm"
+    @cancel="statusDialogCancel" width="660px">
+    <a-form ref="statusFormModel" :model="statusForm" layout="vertical">
       <a-form-item required :label="$t('base.Status')" name="status">
         <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
       </a-form-item>
@@ -314,14 +342,7 @@ initializeData()
             <a-col :span="6">
               <div>
                 <span class="mr-2">{{ $t('base.Date') }}</span>
-                <div><a-range-picker v-model:value="searchDateRangeRef" allowClear style="width: 100%;" /></div>
-              </div>
-            </a-col>
-            <a-col :span="6">
-              <div>
-                <span class="mr-2">{{ $t('base.Customer') }}</span>
-                <a-input v-model:value="store.queryArgs.company_name" allowClear>
-                </a-input>
+                <div><a-range-picker v-model:value="searchDateRangeRef" allowClear style="width: 100%;" @change="onChangeDateRange"/></div>
               </div>
             </a-col>
             <a-col :span="6">
@@ -351,27 +372,20 @@ initializeData()
                 </div>
               </div>
             </a-col>
-          </a-row>
-          <a-row type="flex" style="width: 100%;margin-top:10px;" :gutter="[16, 16]">
             <a-col :span="6">
-
-            </a-col>
-            <a-col :span="6">
-
-            </a-col>
-            <a-col :span="6">
-
-            </a-col>
-            <a-col :span="6">
-              <a-button @click="onClickSearch" style="float: right;">
-                <template #icon>
-                  <SearchOutlined />
-                </template>
-                {{ $t('base.Search') }}
-              </a-button>
+              <span class="mr-2">&nbsp</span>
+              <div>
+                <a-button @click="onClickSearch" style="float: right;" type="primary">
+                  <template #icon>
+                    <SearchOutlined />
+                  </template>
+                  {{ $t('base.Search') }}
+                </a-button>
+              </div>
 
             </a-col>
           </a-row>
+
         </div>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -429,10 +443,16 @@ initializeData()
             </span>
             <template #overlay>
               <a-menu>
-                <a-menu-item key="2">
+                <a-menu-item key="2" v-if="!record.is_thirdparty">
                   <a @click="goPublicReviewReport(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
                     {{ $t('base.PublicView') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="2" v-elese>
+                  <a @click="goThirpartyReportReview(record)" rel="noopener noreferrer">
+                    <VerifiedOutlined />
+                    {{ $t('base.ViewThirdpartyReport') }}
                   </a>
                 </a-menu-item>
               </a-menu>

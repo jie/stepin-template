@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
-import { FormInstance } from 'ant-design-vue';
+import { FormInstance, Upload } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
@@ -10,9 +10,11 @@ import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
 import { ReportStore, Report } from '@/store/report'
 import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
-import {useRouter} from 'vue-router'
-import {i18n} from "@/lang/i18n"
-import {openNewUrl} from "@/utils/helpers"
+import { ossUploadFiles } from '@/store/uploader'
+import { useRouter } from 'vue-router'
+import { i18n } from "@/lang/i18n"
+import { openNewUrl } from "@/utils/helpers"
+import { remove } from 'nprogress';
 const router = useRouter()
 const store = ReportStore()
 const categoryStore = ReportCategoryStore()
@@ -21,6 +23,20 @@ const reportTemplateSelectRef = ref(null)
 const reportWorkerRef = ref(null)
 const reportUsersReviewRef = ref(null)
 const reportCompanyReviewRef = ref(null)
+const editThirdpartyRecord = ref<Report>()
+const attachments = ref([{
+  name: '',
+  type: '',
+  mb: '',
+  url: ''
+}])
+const reportFiles = ref([
+  {
+    name: '',
+    simple_url: '',
+    detail_url: ''
+  }
+])
 const searchDateRangeRef = ref<DayjsDateRangeSchema>()
 const columns = [
   {
@@ -46,6 +62,7 @@ function addNew() {
 }
 
 const showModal = ref(false);
+const showEditThirdpartyModal = ref(false);
 
 const newRecord = (record?: Report) => {
   if (!record) {
@@ -59,6 +76,7 @@ const newRecord = (record?: Report) => {
   record.company_id = undefined;
   record.users_review = [];
   record.users = [];
+  record.is_thirdparty = false;
   record.status = '0';
   record.settings = {
     validate_password: true,
@@ -115,14 +133,15 @@ function submit() {
         factory_id: form.factory_id,
         company_id: form.company_id,
         settings: form.settings,
+        is_thirdparty: form.is_thirdparty
       }
       if (form.id) {
         reqData.id = form.id
       }
-      if(form.order_id) {
+      if (form.order_id) {
         reqData.order_id = form.order_id
       }
-      if(form.id) {
+      if (form.id) {
         await store.apiUpdate(reqData)
       } else {
         await store.apiSave(reqData)
@@ -162,16 +181,17 @@ function edit(record: any) {
   form.users_review = record?.users_review
   form.company_id = record?.company
   form.settings = record?.settings
-  if(form.settings.validate_password === undefined) {
+  form.is_thirdparty = record?.is_thirdparty
+  if (form.settings.validate_password === undefined) {
     form.settings.validate_password = false
   }
-  if(form.settings.validate_permission === undefined) {
+  if (form.settings.validate_permission === undefined) {
     form.settings.validate_permission = false
   }
-  if(form.settings.approve_password === undefined) {
+  if (form.settings.approve_password === undefined) {
     form.settings.approve_password = false
   }
-  if(form.settings.approve_permission === undefined) {
+  if (form.settings.approve_permission === undefined) {
     form.settings.approve_permission = false
   }
   showModal.value = true;
@@ -202,7 +222,7 @@ const onClickSearch = async () => {
   store.apiQuery()
 }
 
-const goPublicReviewReport = (report:any) => {
+const goPublicReviewReport = (report: any) => {
   console.log('form:', toRaw(form))
   openNewUrl(router, {
     name: 'report_review',
@@ -245,7 +265,7 @@ const statusDialogCancel = () => {
 }
 
 
-const goPublicFillReport = (report:any) => {
+const goPublicFillReport = (report: any) => {
   console.log('form:', toRaw(form))
   openNewUrl(router, {
     name: 'report_fill',
@@ -264,7 +284,7 @@ const goDesign = (record) => {
       id: record.template.id,
     }
   })
-)
+  )
   openNewUrl(router, {
     name: 'design',
     query: {
@@ -272,12 +292,204 @@ const goDesign = (record) => {
     }
   })
 }
+
+
+const submitThirdpartyReport = async () => {
+  if(!editThirdpartyRecord.value?.id) {
+    return
+  }
+  await store.apiEditThirdpartyReport({
+    id: editThirdpartyRecord.value?.id,
+    report_files: reportFiles.value,
+    attachments: attachments.value
+  })
+  showEditThirdpartyModal.value = false
+}
+
+const uploadFile = (index: number, kind: string, item: any) => {
+  console.log('index:', index)
+  console.log('kind:', kind)
+  console.log('item:', item)
+  const input = document.createElement('input');
+  input.id = 'willUploadFileInput';
+  input.type = 'file';
+  let prefix = ""
+
+  if (editThirdpartyRecord.value?.order?.company?.id) {
+    prefix = `thirdparty_reports/${editThirdpartyRecord.value?.order?.company?.id}/${dayjs().format('YYYYMMDD')}`
+  } else {
+    prefix = `thirdparty_reports/${dayjs().format('YYYYMMDD')}`
+  }
+
+
+  input.onchange = async (e: any) => {
+    const file = e.target.files[0];
+    const fileSize = file.size;
+    const fileSizeInMB = fileSize / (1024 * 1024);
+    const fileSizeFormatted = fileSizeInMB.toFixed(2);
+    console.log(fileSizeFormatted);
+    let filename = file.name
+    let result = await ossUploadFiles(e, prefix)
+    console.log('upload-result:', result)
+    if (kind === 'simple_url') {
+      reportFiles.value[index].simple_url = result[0]
+      if (!reportFiles.value[index].name) {
+        reportFiles.value[index].name = filename
+      }
+    } else if (kind === 'detail_url') {
+      reportFiles.value[index].detail_url = result[0]
+      if (!reportFiles.value[index].name) {
+        reportFiles.value[index].name = filename
+      }
+    } else {
+      attachments.value[index].url = result[0]
+      attachments.value[index].mb = fileSizeFormatted
+      attachments.value[index].type = file.type
+      if (!attachments.value[index].name) {
+        attachments.value[index].name = filename
+      }
+    }
+    // remove child by ID
+    const willUploadFileInput = document.getElementById('willUploadFileInput');
+    willUploadFileInput?.parentNode?.removeChild(willUploadFileInput);
+  };
+  input.click();
+}
+
+
+const onClickShowEditThirdpartyReportModal = (record: Report) => {
+  editThirdpartyRecord.value = record
+  showEditThirdpartyModal.value = true
+  if (record.report_files && record.report_files.length > 0) {
+    reportFiles.value = record.report_files
+  } else {
+    reportFiles.value = [{
+      name: '',
+      simple_url: '',
+      detail_url: ''
+    }]
+  }
+  if (record.attachments && record.attachments.length > 0) {
+    attachments.value = record.attachments
+  } else {
+    attachments.value = [{
+      name: '',
+      type: '',
+      mb: '',
+      url: ''
+    }]
+
+  }
+
+}
+
+const addNewThirdpartyReportFiles = () => {
+  reportFiles.value.push({
+    name: '',
+    simple_url: '',
+    detail_url: ''
+  })
+}
+const addNewThirdpartyReportAttachments = () => {
+  attachments.value.push({
+    name: '',
+    type: '',
+    mb: '',
+    url: ''
+  })
+}
+
 initializeData()
 
 </script>
 <template>
-  <a-modal :title="form._isNew ? $t('base.Create') : $t('base.Edit')" v-model:visible="showModal" @ok="submit" @cancel="cancel"
-    width="660px">
+  <a-modal :title="$t('base.EditThirdpartyReport')" v-model:visible="showEditThirdpartyModal" @ok="submitThirdpartyReport"
+    @cancel="cancel" width="660px">
+    <a-form>
+      <div>
+        <div>Report Files</div>
+        <div style="margin-bottom: 20px;">
+          <div v-for="(item, index) in reportFiles" class="report-file">
+            <div class="report-file-item">
+              <a-form-item :label="$t('base.report_file_name')">
+                <a-input v-model:value="item.name" />
+              </a-form-item>
+              <a-form-item :label="$t('base.report_file_simple_url')">
+                <a-input v-model:value="item.simple_url">
+                  <template #addonAfter>
+                    <div @click="uploadFile(index, 'simple_url', item)">
+                      <UploadOutlined /> {{ $t('base.Upload') }}
+                    </div>
+                  </template>
+                </a-input>
+              </a-form-item>
+              <a-form-item :label="$t('base.report_file_detail_url')">
+                <a-input v-model:value="item.detail_url">
+                  <template #addonAfter>
+                    <div @click="uploadFile(index, 'detail_url', item)">
+                      <UploadOutlined /> {{ $t('base.Upload') }}
+                    </div>
+                  </template>
+                </a-input>
+              </a-form-item>
+            </div>
+
+          </div>
+        </div>
+
+        <a-form-item>
+          <a-button type="primary" @click="addNewThirdpartyReportFiles" :loading="formLoading" style="float: right;">
+            <template #icon>
+              <PlusOutlined />
+            </template>
+            {{ $t('base.AddReportFile') }}
+          </a-button>
+        </a-form-item>
+      </div>
+
+
+      <div>
+        <div>Attachments</div>
+        <div style="margin-bottom: 20px;">
+          <div v-for="(item, index) in attachments" class="report-file">
+            <div class="report-file-item">
+              <a-form-item :label="$t('base.report_attachment_name')">
+                <a-input v-model:value="item.name" />
+              </a-form-item>
+              <a-form-item :label="$t('base.report_attachment_type')">
+                <a-input v-model:value="item.type" />
+              </a-form-item>
+              <a-form-item :label="$t('base.report_attachment_mb')">
+                <a-input v-model:value="item.mb" />
+              </a-form-item>
+              <a-form-item :label="$t('base.report_attachment_url')">
+                <a-input v-model:value="item.url">
+                  <template #addonAfter>
+                    <div @click="uploadFile(index, 'attatchment', item)">
+                      <UploadOutlined /> {{ $t('base.Upload') }}
+                    </div>
+                  </template>
+                </a-input>
+              </a-form-item>
+            </div>
+
+          </div>
+        </div>
+        <a-form-item>
+          <a-button type="primary" @click="addNewThirdpartyReportAttachments" :loading="formLoading"
+            style="float: right;">
+            <template #icon>
+              <PlusOutlined />
+            </template>
+            {{ $t('base.AddAttachment') }}
+          </a-button>
+        </a-form-item>
+      </div>
+    </a-form>
+  </a-modal>
+
+  <a-modal :title="form._isNew ? $t('base.Create') : $t('base.Edit')" v-model:visible="showModal" @ok="submit"
+    @cancel="cancel" width="660px">
     <a-form ref="formModel" :model="form" :label-col="{ style: { width: '150px' } }" :wrapper-col="{ span: 14 }">
       <a-form-item required :label="$t('base.Name')" name="name">
         <a-input v-model:value="form.name" />
@@ -291,14 +503,18 @@ initializeData()
       <a-form-item :label="$t('base.OrderID')" name="order">
         <a-input v-model:value="form.order_id" />
       </a-form-item>
-      <a-form-item  :label="$t('base.Category')" required name="category_id">
-        <a-tree-select v-model:value="form.category_id" style="width: 100%" :placeholder="$t('base.please_select')" allow-clear :tree-data="categoryStore.entities" :field-names="{
+      <a-form-item :label="$t('base.Category')" required name="category_id">
+        <a-tree-select v-model:value="form.category_id" style="width: 100%" :placeholder="$t('base.please_select')"
+          allow-clear :tree-data="categoryStore.entities" :field-names="{
             children: 'children',
             label: 'displayName',
             value: 'id',
             selectable: 'selectable'
           }" tree-node-filter-prop="name">
         </a-tree-select>
+      </a-form-item>
+      <a-form-item :label="$t('base.IsThirdparty')" name="is_thirdparty">
+        <a-switch v-model:checked="form.is_thirdparty" />
       </a-form-item>
       <!-- <hr />
       <a-form-item :label="$t('base.FillByPassword')" name="validate_password">
@@ -313,29 +529,32 @@ initializeData()
       <a-form-item :label="$t('base.ReviewByPermission')" name="approve_permission">
         <a-switch v-model:checked="form.settings.approve_permission" />
       </a-form-item> -->
-      <hr />
-      <a-form-item :label="$t('base.Template')" name="report_template_id" required>
-        <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
-          searchKey="name" />
-      </a-form-item>
-      <a-form-item :label="$t('base.Workers')" name="workers">
-        <RemoteSelect ref="reportWorkerRef" type="worker" v-model:value="form.workers" :isMultiple="true"
-          searchKey="name" />
-      </a-form-item>
-      <a-form-item :label="$t('base.Customer')" name="users_review">
-        <RemoteSelect ref="reportUsersReviewRef" type="customer" v-model:value="form.users_review" :isMultiple="true"
-          searchKey="name" />
-      </a-form-item>
-      <a-form-item :label="$t('base.Company')" name="company">
-        <RemoteSelect ref="reportCompanyReviewRef" type="company" v-model:value="form.company_id"
-          searchKey="name" />
-      </a-form-item>
+
+      <div v-if="!form.is_thirdparty">
+        <hr style="margin-bottom: 20px;" />
+        <a-form-item :label="$t('base.Template')" name="report_template_id">
+          <RemoteSelect ref="reportTemplateSelectRef" type="report_template" v-model:value="form.report_template_id"
+            searchKey="name" />
+        </a-form-item>
+        <a-form-item :label="$t('base.Workers')" name="workers">
+          <RemoteSelect ref="reportWorkerRef" type="worker" v-model:value="form.workers" :isMultiple="true"
+            searchKey="name" />
+        </a-form-item>
+        <a-form-item :label="$t('base.Customer')" name="users_review">
+          <RemoteSelect ref="reportUsersReviewRef" type="customer" v-model:value="form.users_review" :isMultiple="true"
+            searchKey="name" />
+        </a-form-item>
+        <a-form-item :label="$t('base.Company')" name="company">
+          <RemoteSelect ref="reportCompanyReviewRef" type="company" v-model:value="form.company_id" searchKey="name" />
+        </a-form-item>
+      </div>
+
     </a-form>
   </a-modal>
   <!-- 审核dialog -->
-  <a-modal :title="$t('base.SetStatus')" v-model:visible="statusDialogRef" @ok="statusDialogConfirm" @cancel="statusDialogCancel"
-    width="660px">
-    <a-form ref="statusFormModel" :model="statusForm"  layout="vertical">
+  <a-modal :title="$t('base.SetStatus')" v-model:visible="statusDialogRef" @ok="statusDialogConfirm"
+    @cancel="statusDialogCancel" width="660px">
+    <a-form ref="statusFormModel" :model="statusForm" layout="vertical">
       <a-form-item required :label="$t('base.Status')" name="status">
         <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
       </a-form-item>
@@ -426,7 +645,8 @@ initializeData()
         <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
           <div class="flex-col flex justify-evenly">
             <span class="text-title font-bold">{{ text }}</span>
-            <span class="text-title cursor-pointer template-name" @click="goDesign(record)">{{ record?.template?.name }}</span>
+            <span class="text-title cursor-pointer template-name" @click="goDesign(record)">{{ record?.template?.name
+            }}</span>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
@@ -447,7 +667,7 @@ initializeData()
         </div>
         <div class="" v-else-if="column.dataIndex === 'category'">
           <div class="text-title font-bold">
-            {{ record.category?.name }} {{ record.category?.name_en ? `/ ${ record.category?.name_en}` : ''}}
+            {{ record.category?.name }} {{ record.category?.name_en ? `/ ${record.category?.name_en}` : '' }}
           </div>
         </div>
         <template v-else-if="column.dataIndex === 'status'">
@@ -508,6 +728,12 @@ initializeData()
                     {{ $t('base.PublicView') }}
                   </a>
                 </a-menu-item>
+                <a-menu-item key="1" v-if="record.is_thirdparty">
+                  <a @click="onClickShowEditThirdpartyReportModal(record)" rel="noopener noreferrer">
+                    <EditOutlined />
+                    {{ $t('base.EditThirdpartyReport') }}
+                  </a>
+                </a-menu-item>
                 <!-- <a-menu-item key="1">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <MailOutlined />
@@ -536,4 +762,12 @@ initializeData()
 .template-name:hover {
   text-decoration: underline;
 }
-</style>
+
+.report-file-item {
+  border-bottom: 1px solid #ccc;
+  padding-top: 20px;
+}
+
+.report-file:last-child>.report-file-item {
+  border-bottom: 0
+}</style>

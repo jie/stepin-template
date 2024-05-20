@@ -33,7 +33,7 @@ export function uploadFile(data) {
   )
 }
 
-export const ossUploadFiles = async (e) => {
+export const ossUploadFiles = async (e, prefix="") => {
   const { setPageLoading } = useLoadingStore();
   setPageLoading(true)
   let images = []
@@ -44,6 +44,10 @@ export const ossUploadFiles = async (e) => {
         name: appname,
         filename: file.name,
       }
+      if(prefix) {
+        policyParams['prefix'] = prefix
+      }
+      console.log(policyParams)
       // 得到阿里云oss参数
       let policyResult = await getOssPolicy(policyParams)
       let upload_params = policyResult.data.upload_params

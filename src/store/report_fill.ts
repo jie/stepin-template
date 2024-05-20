@@ -65,6 +65,7 @@ export const ReportFillStore = defineStore('report_fill', {
             this.report = response.data?.data?.entity
             return response.data?.data;
           } else {
+            openNotification({ type: "error", message: "Fail to get report", description: response.data?.message || "Fail to get report" })
             return Promise.reject(response);
           }
         })

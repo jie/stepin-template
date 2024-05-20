@@ -31,6 +31,7 @@ export interface Report {
   region_id?: boolean;
   address?: boolean;
   reason?:string
+  is_thirdparty?:boolean
 }
 
 
@@ -181,6 +182,24 @@ export const ReportStore = defineStore('report', {
           if (response.data?.data) {
             return response.data?.data;
           } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiEditThirdpartyReport(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/save_thirdparty_report', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            successNotification("Saved")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to save", description: response.data?.message || "Fail to save" })
             return Promise.reject(response);
           }
         })

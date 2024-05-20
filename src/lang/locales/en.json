@@ -185,6 +185,25 @@
         "ReportResultRemark": "Report result reason",
         "AQL": "AQL",
         "ConfirmSubmitReport": "Confirm submit report? You can't modify the report after submit.",
-        "report_fail_need_refill": "Your submitted report did not pass the audit, please review and modify it before submitting it again:"
+        "report_fail_need_refill": "Your submitted report did not pass the audit, please review and modify it before submitting it again:",
+        "IsThirdparty": "Is Thirdparty",
+        "EditThirdpartyReport": "Edit Thirdparty Report",
+        "AddAttachment": "Add Attachment",
+        "AddReportFile": "Add File",
+        "report_file_name": "File Name",
+        "report_file_simple_url": "Simple URL",
+        "report_file_detail_url": "Detail URL",
+        "report_attachment_name": "Attachment Name",
+        "report_attachment_url": "Attachment URL",
+        "report_attachment_type": "Attachment Type",
+        "report_attachment_mb": "Attachment Size",
+        "OnlineReport": "Online Report",
+        "DetailedVerson": "Detailed Ver.",
+        "SimplifiedVerson": "Simplified Ver.",
+        "Attachments": "Attachments",
+        "ViewThirdpartyReport": "View Report",
+        "What_is_the_Simplified_Version_Report_1": "What is the Simplified Version Report?",
+        "What_is_the_Simplified_Version_Report_2": "You will get the main result guickly from the Simplified Report, which helps you to make quick decision to release the shipment or not.",
+        "What_is_the_Simplified_Version_Report_3": "The informative record and passed check points will be excluded or folded in the Simplified Report."
     }
 }
