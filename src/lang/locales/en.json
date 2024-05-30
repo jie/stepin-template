@@ -185,7 +185,7 @@
         "WaitingForAuditorApprove": "Waiting for auditor approve",
         "report_not_in_fill_status": "Report not in fill status",
         "AuditReportFailed": "Audit report failed",
-        "ReportResult": "Overall Inspection Result",
+        "ReportResult": "Inspection Result",
         "ResultPassed": "Passed",
         "ResultPending": "Pending",
         "ResultFailed": "Failed",
