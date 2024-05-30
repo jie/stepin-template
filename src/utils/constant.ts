@@ -7,6 +7,13 @@ export const ApproveStatus = {
     '3': i18n.global.t('constant.Approved')
 }
 
+export const ReportResultStatus = {
+  '0': i18n.global.t('constant.ResultDisapprove'),
+  '1': i18n.global.t('constant.ResultUnapprove'),
+  '3': i18n.global.t('constant.ResultApproved')
+}
+
+
 export const ApproveStatusOptions = [
     { label: i18n.global.t('constant.Disapprove'), value: '0' },
     { label: i18n.global.t('constant.Unapprove'), value: '1' },
@@ -14,6 +21,11 @@ export const ApproveStatusOptions = [
     { label: i18n.global.t('constant.Approved'), value: '3' }
 ]
 
+export const ReportResultStatusOptions = [
+  { label: i18n.global.t('constant.ResultDisapprove'), value: '0' },
+  { label: i18n.global.t('constant.ResultUnapprove'), value: '1' },
+  { label: i18n.global.t('constant.ResultApproved'), value: '3' }
+]
 
 export const approveStatusDisplayMsg = {
     "0": "Disapproved",

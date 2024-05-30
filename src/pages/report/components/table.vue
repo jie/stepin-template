@@ -1,28 +1,36 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
 import { FormInstance, Upload } from 'ant-design-vue';
-import { reactive, ref, toRaw } from 'vue';
+import { reactive, ref, toRaw, nextTick } from 'vue';
 import dayjs from 'dayjs';
-import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
+import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined, TaobaoSquareFilled, TagsOutlined } from '@ant-design/icons-vue';
 import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
+import { ReportResultStatus, ReportResultStatusOptions } from "@/utils/constant";
 import { ReportStore, Report } from '@/store/report'
 import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
+import { ReportTagStore } from '@/store/tag'
 import { ossUploadFiles } from '@/store/uploader'
 import { useRouter } from 'vue-router'
 import { i18n } from "@/lang/i18n"
 import { openNewUrl } from "@/utils/helpers"
-import { remove } from 'nprogress';
 const router = useRouter()
 const store = ReportStore()
+const tagStore = ReportTagStore()
+tagStore.mode = 'option'
 const categoryStore = ReportCategoryStore()
 const searchKeywords = ref('');
 const reportTemplateSelectRef = ref(null)
 const reportWorkerRef = ref(null)
 const reportUsersReviewRef = ref(null)
 const reportCompanyReviewRef = ref(null)
+const willSetTagRecord = ref<Report>(null)
+const tagInputVisible = ref(false)
+const tagInputValue = ref('')
+const tagInputRef = ref(null)
+const tagsRef = ref([])
 const editThirdpartyRecord = ref<Report>()
 const attachments = ref([{
   name: '',
@@ -45,12 +53,11 @@ const columns = [
     fixed: 'left',
     width: 260,
   },
-  { title: i18n.global.t('base.Date'), dataIndex: 'inspect_date', width: 120 },
+  { title: i18n.global.t('base.DateOfInspection'), dataIndex: 'inspect_date', width: 120 },
   { title: i18n.global.t('base.Customer'), dataIndex: 'company', width: 200 },
   { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
-  { title: i18n.global.t('base.Status'), dataIndex: 'status', width: 120 },
-  { title: i18n.global.t('base.Review'), dataIndex: 'approve_status', width: 120 },
+  { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
   { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
@@ -211,6 +218,12 @@ const deleteRecord = async (record: Report) => {
   initializeData()
 }
 
+const setTag = (record: Report) => {
+  console.log('record:', record)
+  willSetTagRecord.value = record
+  tagsRef.value = record.tags || []
+}
+
 
 const onClickSearch = async () => {
   store.queryArgs.keyword = searchKeywords.value
@@ -235,6 +248,8 @@ const goPublicReviewReport = (report: any) => {
 const initializeData = async () => {
   await store.apiQuery()
   await categoryStore.apiQueryParent()
+  tagStore.pagination.pagesize = 1000
+  tagStore.apiQuery()
 }
 
 // status form
@@ -295,14 +310,16 @@ const goDesign = (record) => {
 
 
 const submitThirdpartyReport = async () => {
-  if(!editThirdpartyRecord.value?.id) {
+  if (!editThirdpartyRecord.value?.id) {
     return
   }
   await store.apiEditThirdpartyReport({
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
-    attachments: attachments.value
+    attachments: attachments.value,
+    send_email: true
   })
+  await store.apiQuery()
   showEditThirdpartyModal.value = false
 }
 
@@ -399,6 +416,58 @@ const addNewThirdpartyReportAttachments = () => {
   })
 }
 
+const deleteAttachmentItem = (index: number) => {
+  if (attachments.value.length === 1) {
+    return
+  }
+  attachments.value.splice(index, 1)
+}
+const deleteFileItem = (index: number) => {
+  if (reportFiles.value.length === 1) {
+    return
+  }
+  reportFiles.value.splice(index, 1)
+}
+
+
+const setTagDialogConfirm = async () => {
+  await store.apiSetTagsForReport({ id: willSetTagRecord.value.id, tags: tagsRef.value })
+  store.apiQuery()
+  setTagDialogCancel()
+  willSetTagRecord.value = null
+  tagsRef.value = []
+
+}
+const setTagDialogCancel = () => {
+  willSetTagRecord.value = null
+  tagsRef.value = []
+}
+
+const handleTagInputConfirm = async () => {
+  console.log('tagInputValue.value:', tagInputValue.value)
+  if (tagInputValue.value && tagsRef.value.indexOf(tagInputValue.value) === -1) {
+    tagsRef.value = [...tagsRef.value, tagInputValue.value];
+  }
+  console.log('tagsRef.value:', tagsRef.value)
+  tagInputVisible.value = false;
+  tagInputValue.value = '';
+}
+
+
+const showTagInput = () => {
+  tagInputVisible.value = true;
+  nextTick(() => {
+    tagInputRef.value.focus();
+  });
+}
+
+const handleTagClose = (removedTag: any) => {
+  console.log('handleTagClose')
+  const tags = tagsRef.value.filter(tag => tag !== removedTag);
+  console.log(tags);
+  tagsRef.value = tags;
+}
+
 initializeData()
 
 </script>
@@ -407,7 +476,7 @@ initializeData()
     @cancel="cancel" width="660px">
     <a-form>
       <div>
-        <div>Report Files</div>
+        <div>{{ $t('base.ReportFiles') }}</div>
         <div style="margin-bottom: 20px;">
           <div v-for="(item, index) in reportFiles" class="report-file">
             <div class="report-file-item">
@@ -432,8 +501,12 @@ initializeData()
                   </template>
                 </a-input>
               </a-form-item>
+              <a-form-item>
+                <a-button @click="deleteFileItem(index)">
+                  <DeleteOutlined />{{ $t('base.Delete') }}
+                </a-button>
+              </a-form-item>
             </div>
-
           </div>
         </div>
 
@@ -449,7 +522,7 @@ initializeData()
 
 
       <div>
-        <div>Attachments</div>
+        <div>{{ $t('base.Attachments') }}</div>
         <div style="margin-bottom: 20px;">
           <div v-for="(item, index) in attachments" class="report-file">
             <div class="report-file-item">
@@ -470,6 +543,11 @@ initializeData()
                     </div>
                   </template>
                 </a-input>
+              </a-form-item>
+              <a-form-item>
+                <a-button @click="deleteAttachmentItem(index)">
+                  <DeleteOutlined />{{ $t('base.Delete') }}
+                </a-button>
               </a-form-item>
             </div>
 
@@ -556,14 +634,33 @@ initializeData()
     @cancel="statusDialogCancel" width="660px">
     <a-form ref="statusFormModel" :model="statusForm" layout="vertical">
       <a-form-item required :label="$t('base.Status')" name="status">
-        <a-select style="width: 100%" v-model:value="statusForm.status" :options="ApproveStatusOptions" />
+        <a-select style="width: 100%" v-model:value="statusForm.status" :options="ReportResultStatusOptions" />
       </a-form-item>
       <a-form-item :label="$t('base.Reason')" name="reason">
         <a-textarea v-model:value="statusForm.reason" />
       </a-form-item>
     </a-form>
   </a-modal>
+  <!-- 设置标签dialog -->
+  <a-modal :title="$t('base.SetTag')" v-model:visible="willSetTagRecord" @ok="setTagDialogConfirm"
+    @cancel="setTagDialogCancel" width="660px">
+    <div>
+      <template v-for="(tag, index) in tagsRef" :key="tag">
+        <a-tag closable @close="handleTagClose(tag)">
+          {{ tag }}
+        </a-tag>
+      </template>
 
+    </div>
+    <div>
+      <a-input v-if="tagInputVisible" ref="tagInputRef" v-model:value="tagInputValue" type="text" size="small"
+        :style="{ width: '78px' }" @blur="handleTagInputConfirm" @keyup.enter="handleTagInputConfirm" />
+      <a-tag v-else style="background: #fff; border-style: dashed" @click="showTagInput">
+        <plus-outlined />
+        {{ $t('base.Add') }}
+      </a-tag>
+    </div>
+  </a-modal>
   <!-- 成员表格 -->
   <div style="width: 100%">
     <a-table v-bind="$attrs" :loading="store.loading" :columns="columns" :dataSource="store.entities" :pagination="{
@@ -575,7 +672,7 @@ initializeData()
           <a-row type="flex" style="width: 100%" :gutter="[16, 16]">
             <a-col :span="6">
               <div>
-                <span class="mr-2">{{ $t('base.Date') }}</span>
+                <span class="mr-2">{{ $t('base.DateOfInspection') }}</span>
                 <div><a-range-picker v-model:value="searchDateRangeRef" allowClear style="width: 100%;" /></div>
               </div>
             </a-col>
@@ -598,7 +695,7 @@ initializeData()
                 <span class="mr-2">{{ $t('base.Status') }}</span>
                 <div>
                   <a-select class="w-full" ref="select" v-model:value="store.queryArgs.status" allowClear>
-                    <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label
+                    <a-select-option :value="item.value" v-for="item in ReportResultStatusOptions">{{ item.label
                     }}</a-select-option>
                   </a-select>
                 </div>
@@ -618,7 +715,10 @@ initializeData()
               </a-tree-select>
             </a-col>
             <a-col :span="6">
-
+              <div class="mr-2">{{ $t('base.Tags') }}</div>
+              <div>
+                <a-select v-model:value="store.queryArgs.tag" style="width: 100%" :options="tagStore.tagsOptions" allow-clear></a-select>
+              </div>
             </a-col>
             <a-col :span="6">
 
@@ -647,6 +747,9 @@ initializeData()
             <span class="text-title font-bold">{{ text }}</span>
             <span class="text-title cursor-pointer template-name" @click="goDesign(record)">{{ record?.template?.name
             }}</span>
+            <span v-if="record.tags && record.tags.length != 0">
+              <a-tag v-for="tag in record.tags"> {{ tag }} </a-tag>
+            </span>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
@@ -673,14 +776,7 @@ initializeData()
         <template v-else-if="column.dataIndex === 'status'">
           <a-badge class="text-subtext" :color="formatStatusColor(text)">
             <template #text>
-              <span class="text-subtext">{{ ApproveStatus[text] }}</span>
-            </template>
-          </a-badge>
-        </template>
-        <template v-else-if="column.dataIndex === 'approve_status'">
-          <a-badge class="text-subtext" :color="formatStatusColor(text)">
-            <template #text>
-              <span class="text-subtext">{{ ApproveStatus[text] }}</span>
+              <span class="text-subtext">{{ ReportResultStatus[text] || 'PENDING' }}</span>
             </template>
           </a-badge>
         </template>
@@ -707,6 +803,12 @@ initializeData()
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
+                  <a @click="setTag(record)" rel="noopener noreferrer">
+                    <TagsOutlined />
+                    {{ $t('base.SetTag') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="1">
                   <a-popconfirm :title="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$t('base.No')"
                     @confirm="deleteRecord(record)">
                     <a rel="noopener noreferrer">
@@ -714,12 +816,11 @@ initializeData()
                       {{ $t('base.Delete') }}
                     </a>
                   </a-popconfirm>
-
                 </a-menu-item>
                 <a-menu-item key="1">
                   <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
-                    {{ $t('base.Verify') }}
+                    {{ $t('base.SetReportResult') }}
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
@@ -770,4 +871,5 @@ initializeData()
 
 .report-file:last-child>.report-file-item {
   border-bottom: 0
-}</style>
+}
+</style>

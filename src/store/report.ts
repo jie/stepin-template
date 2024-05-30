@@ -42,7 +42,7 @@ export const ReportStore = defineStore('report', {
       reportReport: {} as Report,
       entities: <any>[],
       pagination: {} as Pagination,
-      queryArgs: { status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:""},
+      queryArgs: { tag: "", status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:""},
     }
   },
   getters: {
@@ -194,6 +194,24 @@ export const ReportStore = defineStore('report', {
       let bodyJson = { ...data }
       return http
         .request('/platform/report_api/report/save_thirdparty_report', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            successNotification("Saved")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to save", description: response.data?.message || "Fail to save" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiSetTagsForReport(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/set_tags', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             successNotification("Saved")

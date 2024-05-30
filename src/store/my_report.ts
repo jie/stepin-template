@@ -14,7 +14,7 @@ export const MyReportStore = defineStore('my_report', {
       reportReport: {} as Report,
       entities: <any>[],
       pagination: {} as Pagination,
-      queryArgs: { status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:""},
+      queryArgs: { tag: "", status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:"", factory_name: ""},
     }
   },
   getters: {
@@ -68,6 +68,23 @@ export const MyReportStore = defineStore('my_report', {
           if (response.data?.data) {
             return response.data?.data;
           } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiGetReportCustomerInfo(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report_user/get_customer_info_by_user_id', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to save", description: response.data?.message || "Fail to save" })
             return Promise.reject(response);
           }
         })

@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
-import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
+import { ReportResultStatus, ReportResultStatusOptions } from "@/utils/constant";
 import { Report } from '@/store/report'
 import { MyReportStore as ReportStore } from '@/store/my_report'
 import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
@@ -23,6 +23,7 @@ const reportTemplateSelectRef = ref(null)
 const reportWorkerRef = ref(null)
 const reportUsersReviewRef = ref(null)
 const reportCompanyReviewRef = ref(null)
+const companyInfoRef = ref({})
 const searchDateRangeRef = ref<DayjsDateRangeSchema>()
 const columns = [
   {
@@ -33,8 +34,8 @@ const columns = [
   },
   { title: i18n.global.t('base.Date'), dataIndex: 'inspect_date', width: 120 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
-  { title: i18n.global.t('base.Status'), dataIndex: 'status', width: 120 },
-  { title: i18n.global.t('base.Review'), dataIndex: 'approve_status', width: 120 },
+  { title: i18n.global.t('base.Factory'), dataIndex: 'factory', width: 120 },
+  { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
   { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
@@ -203,6 +204,12 @@ const onClickSearch = async () => {
 const initializeData = async () => {
   await store.apiQuery()
   await categoryStore.apiQueryParent()
+
+  let reportSession = localStorage.getItem('report_session')
+  reportSession = reportSession ? JSON.parse(reportSession) : {}
+  if (reportSession && reportSession?.user_data?.is_customer) {
+    companyInfoRef.value = await store.apiGetReportCustomerInfo({ id: reportSession?.user_data?.id })
+  }
 }
 
 // status form
@@ -242,7 +249,7 @@ const goPublicReviewReport = (report: any) => {
 }
 const goThirpartyReportReview = (report: any) => {
   console.log('form:', toRaw(form), report.status)
-  if(report.status != '3' || !report.report_files || report.report_files.length === 0) {
+  if (!report.report_files || report.report_files.length === 0) {
     openNotification({ type: "error", message: "Report status error", description: "Report is not ready yet" })
     return
   }
@@ -255,9 +262,9 @@ const goThirpartyReportReview = (report: any) => {
   })
 }
 
-const onChangeDateRange = (data:any) => {
+const onChangeDateRange = (data: any) => {
   console.log(data)
-  if(!data) {
+  if (!data) {
     searchDateRangeRef.value = undefined
   } else {
     searchDateRangeRef.value = data
@@ -283,19 +290,6 @@ initializeData()
       <a-form-item :label="$t('base.OrderID')" name="order">
         <a-input v-model:value="form.order_id" />
       </a-form-item>
-      <!-- <hr />
-      <a-form-item :label="$t('base.FillByPassword')" name="validate_password">
-        <a-switch v-model:checked="form.settings.validate_password" />
-      </a-form-item>
-      <a-form-item :label="$t('base.FillByPermission')" name="validate_permission">
-        <a-switch v-model:checked="form.settings.validate_permission" />
-      </a-form-item>
-      <a-form-item :label="$t('base.ReviewByPassword')" name="approve_password">
-        <a-switch v-model:checked="form.settings.approve_password" />
-      </a-form-item>
-      <a-form-item :label="$t('base.ReviewByPermission')" name="approve_permission">
-        <a-switch v-model:checked="form.settings.approve_permission" />
-      </a-form-item> -->
       <hr />
       <div v-if="!form.is_thirdparty">
         <a-form-item :label="$t('base.Template')" name="report_template_id">
@@ -337,36 +331,30 @@ initializeData()
     }" :scroll="{ y: 600 }">
       <template #title>
         <div class="">
-          <h4>{{ $t('base.Report') }}</h4>
+
+          <div class="flex" style="margin-bottom: 20px; align-items: center;" v-if="companyInfoRef.id">
+            <img :src="companyInfoRef.logo" alt="" style="width: 100px; object-fit: contain;">
+            <div style="font-size: 130%; font-weight: bold; margin-left: 20px;">{{ companyInfoRef.name }}</div>
+          </div>
+          <h4 v-if="!companyInfoRef.id">{{ $t('base.Report') }}</h4>
           <a-row type="flex" style="width: 100%" :gutter="[16, 16]">
             <a-col :span="6">
               <div>
                 <span class="mr-2">{{ $t('base.Date') }}</span>
-                <div><a-range-picker v-model:value="searchDateRangeRef" allowClear style="width: 100%;" @change="onChangeDateRange"/></div>
+                <div><a-range-picker v-model:value="searchDateRangeRef" allowClear style="width: 100%;"
+                    @change="onChangeDateRange" /></div>
               </div>
             </a-col>
             <a-col :span="6">
-              <!-- <div class="">
-                <span class="mr-2">{{ $t('base.Workers') }}</span>
-                <a-input v-model:value="store.queryArgs.worker_name" allowClear>
-                </a-input>
-              </div> -->
-              <div class="mr-2">{{ $t('base.Category') }}</div>
-              <a-tree-select v-model:value="store.queryArgs.category_id" show-search style="width: 100%"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" placeholder="Please select" allow-clear
-                tree-default-expand-all :tree-data="categoryStore.entities" :field-names="{
-                  children: 'children',
-                  label: 'name',
-                  value: 'id',
-                }" tree-node-filter-prop="name">
-              </a-tree-select>
+              <div class="mr-2">{{ $t('base.Factory') }}</div>
+              <a-input v-model:value="store.queryArgs.factory_name" allowClear />
             </a-col>
             <a-col :span="6">
               <div class="">
-                <span class="mr-2">{{ $t('base.Status') }}</span>
+                <span class="mr-2">{{ $t('base.ReportResult') }}</span>
                 <div>
                   <a-select class="w-full" ref="select" v-model:value="store.queryArgs.status" allowClear>
-                    <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label
+                    <a-select-option :value="item.value" v-for="item in ReportResultStatusOptions">{{ item.label
                     }}</a-select-option>
                   </a-select>
                 </div>
@@ -419,45 +407,26 @@ initializeData()
             {{ record.workers }}
           </div>
         </div>
-        <template v-else-if="column.dataIndex === 'status'">
-          <a-badge class="text-subtext" :color="formatStatusColor(text)">
-            <template #text>
-              <span class="text-subtext">{{ ApproveStatus[text] }}</span>
-            </template>
-          </a-badge>
+        <template v-else-if="column.dataIndex === 'factory'">
+          <div class="text-title font-bold">
+            {{ record.order._factory.name }}
+          </div>
         </template>
-        <template v-else-if="column.dataIndex === 'approve_status'">
-          <a-badge class="text-subtext" :color="formatStatusColor(text)">
-            <template #text>
-              <span class="text-subtext">{{ ApproveStatus[text] }}</span>
-            </template>
-          </a-badge>
+        <template v-else-if="column.dataIndex === 'status'">
+          <div class="text-title font-bold">
+            {{ ReportResultStatus[record.status] }}
+          </div>
         </template>
         <template v-else-if="column.dataIndex === 'inspect_date'">
           {{ text }}
         </template>
         <template v-else-if="column.dataIndex === 'edit'">
-          <a-dropdown>
-            <span class="ant-dropdown-link cursor-pointer" @click.prevent>
-              <SettingOutlined />
-            </span>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="2" v-if="!record.is_thirdparty">
-                  <a @click="goPublicReviewReport(record)" rel="noopener noreferrer">
-                    <VerifiedOutlined />
-                    {{ $t('base.PublicView') }}
-                  </a>
-                </a-menu-item>
-                <a-menu-item key="2" v-elese>
-                  <a @click="goThirpartyReportReview(record)" rel="noopener noreferrer">
-                    <VerifiedOutlined />
-                    {{ $t('base.ViewThirdpartyReport') }}
-                  </a>
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
+          <a @click="goPublicReviewReport(record)" rel="noopener noreferrer" v-if="!record.is_thirdparty">
+            {{ $t('base.PublicView') }}
+          </a>
+          <a @click="goThirpartyReportReview(record)" rel="noopener noreferrer" v-else>
+            {{ $t('base.ViewThirdpartyReport') }}
+          </a>
         </template>
         <div v-else class="text-subtext">
           {{ text }}

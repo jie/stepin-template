@@ -25,7 +25,10 @@
         "Disapprove": "Disapprove",
         "Unapprove": "Unapprove",
         "Approving": "Approving",
-        "Approved": "Approved"
+        "Approved": "Approved",
+        "ResultDisapprove": "FAIL",
+        "ResultUnapprove": "PENDING",
+        "ResultApproved": "PASS"
     },
     "base": {
         "Report": "Report",
@@ -53,6 +56,10 @@
         "FillByPermission": "Fill By Permission",
         "ReviewByPassword": "Review By Password",
         "ReviewByPermission": "Review By Permission",
+        "SetReportResult": "Set Report Result",
+        "ReportFiles": "Report Files",
+        "SetTag": "Set Tags",
+        "Tags": "Tags",
         "Template": "Template",
         "Company": "Company",
         "Choose": "Choose",
