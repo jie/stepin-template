@@ -633,7 +633,7 @@ initializeData()
   <a-modal :title="$t('base.SetStatus')" v-model:visible="statusDialogRef" @ok="statusDialogConfirm"
     @cancel="statusDialogCancel" width="660px">
     <a-form ref="statusFormModel" :model="statusForm" layout="vertical">
-      <a-form-item required :label="$t('base.Status')" name="status">
+      <a-form-item required :label="$t('base.ReportResult')" name="status">
         <a-select style="width: 100%" v-model:value="statusForm.status" :options="ReportResultStatusOptions" />
       </a-form-item>
       <a-form-item :label="$t('base.Reason')" name="reason">
@@ -692,7 +692,7 @@ initializeData()
             </a-col>
             <a-col :span="6">
               <div class="">
-                <span class="mr-2">{{ $t('base.Status') }}</span>
+                <span class="mr-2">{{ $t('base.ReportResult') }}</span>
                 <div>
                   <a-select class="w-full" ref="select" v-model:value="store.queryArgs.status" allowClear>
                     <a-select-option :value="item.value" v-for="item in ReportResultStatusOptions">{{ item.label
