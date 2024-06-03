@@ -131,6 +131,8 @@
         "Applicant": "申请人",
         "Supplier": "供应商",
         "Factory": "工厂",
+        "po_number": "PO号",
+        "inspect_remark": "备注",
         "PurchaseOrder": "订单号",
         "ItemNumber": "物品编号",
         "ProductDescription": "产品描述",

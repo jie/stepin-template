@@ -32,6 +32,8 @@ const tagInputValue = ref('')
 const tagInputRef = ref(null)
 const tagsRef = ref([])
 const editThirdpartyRecord = ref<Report>()
+const poNumberRef = ref('')
+const inspectRemarkRef = ref('')
 const attachments = ref([{
   name: '',
   type: '',
@@ -317,7 +319,9 @@ const submitThirdpartyReport = async () => {
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
     attachments: attachments.value,
-    send_email: true
+    send_email: true,
+    po_number: poNumberRef.value,
+    inspect_remark: inspectRemarkRef.value
   })
   await store.apiQuery()
   showEditThirdpartyModal.value = false
@@ -361,7 +365,24 @@ const uploadFile = (index: number, kind: string, item: any) => {
     } else {
       attachments.value[index].url = result[0]
       attachments.value[index].mb = fileSizeFormatted
-      attachments.value[index].type = file.type
+      console.log('file.type:', file.type)
+      let file_type = file.type
+      if(file_type.includes('image')) {
+        file_type = 'Image'
+      } else if(file_type.include('mp4')) {
+        file_type = 'MP4'
+      } else if(file_type.include('video')) {
+        file_type = 'Video'
+      } else if(file_type.include('pdf')) {
+        file_type = 'PDF'
+      } else if(file_type.include('doc') || file_type.include('docx')) {
+        file_type = 'Word'
+      } else if(file_type.include('xls') || file_type.include('xlsx')) {
+        file_type = 'Excel'
+      } else {
+        file_type = 'File'
+      }
+      attachments.value[index].type = file_type
       if (!attachments.value[index].name) {
         attachments.value[index].name = filename
       }
@@ -377,6 +398,8 @@ const uploadFile = (index: number, kind: string, item: any) => {
 const onClickShowEditThirdpartyReportModal = (record: Report) => {
   editThirdpartyRecord.value = record
   showEditThirdpartyModal.value = true
+  poNumberRef.value = record.po_number || ''
+  inspectRemarkRef.value = record.inspect_remark || ''
   if (record.report_files && record.report_files.length > 0) {
     reportFiles.value = record.report_files
   } else {
@@ -563,6 +586,16 @@ initializeData()
           </a-button>
         </a-form-item>
       </div>
+      <div>
+        <div>
+          <a-form-item :label="$t('base.po_number')">
+            <a-input v-model:value="poNumberRef"></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.inspect_remark')">
+            <a-textarea v-model:value="inspectRemarkRef" />
+          </a-form-item>
+        </div>
+      </div>
     </a-form>
   </a-modal>
 
@@ -717,7 +750,8 @@ initializeData()
             <a-col :span="6">
               <div class="mr-2">{{ $t('base.Tags') }}</div>
               <div>
-                <a-select v-model:value="store.queryArgs.tag" style="width: 100%" :options="tagStore.tagsOptions" allow-clear></a-select>
+                <a-select v-model:value="store.queryArgs.tag" style="width: 100%" :options="tagStore.tagsOptions"
+                  allow-clear></a-select>
               </div>
             </a-col>
             <a-col :span="6">
@@ -743,10 +777,10 @@ initializeData()
       </template>
       <template #bodyCell="{ column, text, record }">
         <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
-          <div class="flex-col flex justify-evenly">
-            <span class="text-title font-bold">{{ text }}</span>
-            <span class="text-title cursor-pointer template-name" @click="goDesign(record)">{{ record?.template?.name
-            }}</span>
+          <div class="flex-col flex justify-evenly" style="max-width: 100%;">
+            <div class="text-title font-bold whitespace-normal">{{ text }}</div>
+            <div class="text-title cursor-pointer template-name" v-if="record?.template?.name" @click="goDesign(record)">{{ record?.template?.name
+            }}</div>
             <span v-if="record.tags && record.tags.length != 0">
               <a-tag v-for="tag in record.tags"> {{ tag }} </a-tag>
             </span>

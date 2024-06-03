@@ -131,6 +131,8 @@
         "Applicant": "Applicant",
         "Supplier": "Supplier",
         "Factory": "Factory",
+        "po_number": "PO Number",
+        "inspect_remark": "Remark",
         "PurchaseOrder": "Purchase Order",
         "ItemNumber": "Item Number",
         "ProductDescription": "Product Description",
