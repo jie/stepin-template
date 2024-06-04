@@ -24,11 +24,6 @@
             </div>
           </div>
         </div>
-        <div class="notes">
-          <p>{{ $t('base.What_is_the_Simplified_Version_Report_1') }}</p>
-          <p>{{ $t('base.What_is_the_Simplified_Version_Report_2') }}</p>
-          <p>{{ $t('base.What_is_the_Simplified_Version_Report_3') }}</p>
-        </div>
       </div>
       <div class="report-attachments" v-if="store.report.attachments && store.report.attachments.length > 0">
         <div class="file-title">{{ $t('base.Attachments') }}</div>
