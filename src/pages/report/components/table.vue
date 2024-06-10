@@ -16,6 +16,7 @@ import { ossUploadFiles } from '@/store/uploader'
 import { useRouter } from 'vue-router'
 import { i18n } from "@/lang/i18n"
 import { openNewUrl } from "@/utils/helpers"
+import { openNotification } from "@/utils/notification"
 const router = useRouter()
 const store = ReportStore()
 const tagStore = ReportTagStore()
@@ -34,6 +35,7 @@ const tagsRef = ref([])
 const editThirdpartyRecord = ref<Report>()
 const poNumberRef = ref('')
 const inspectRemarkRef = ref('')
+const ccEmailsRef = ref([])
 const attachments = ref([{
   name: '',
   type: '',
@@ -315,13 +317,25 @@ const submitThirdpartyReport = async () => {
   if (!editThirdpartyRecord.value?.id) {
     return
   }
+
+  for (let item of attachments.value) {
+    if (!item.type) {
+      openNotification({
+        type: "error",
+        message: i18n.global.t("base.please_select_attachment_type"),
+      })
+      return
+    }
+  }
+
   await store.apiEditThirdpartyReport({
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
     attachments: attachments.value,
     send_email: true,
     po_number: poNumberRef.value,
-    inspect_remark: inspectRemarkRef.value
+    inspect_remark: inspectRemarkRef.value,
+    cc_emails: ccEmailsRef.value.join(';')
   })
   await store.apiQuery()
   showEditThirdpartyModal.value = false
@@ -365,24 +379,24 @@ const uploadFile = (index: number, kind: string, item: any) => {
     } else {
       attachments.value[index].url = result[0]
       attachments.value[index].mb = fileSizeFormatted
-      console.log('file.type:', file.type)
-      let file_type = file.type
-      if(file_type.includes('image')) {
-        file_type = 'Image'
-      } else if(file_type.include('mp4')) {
-        file_type = 'MP4'
-      } else if(file_type.include('video')) {
-        file_type = 'Video'
-      } else if(file_type.include('pdf')) {
-        file_type = 'PDF'
-      } else if(file_type.include('doc') || file_type.include('docx')) {
-        file_type = 'Word'
-      } else if(file_type.include('xls') || file_type.include('xlsx')) {
-        file_type = 'Excel'
-      } else {
-        file_type = 'File'
-      }
-      attachments.value[index].type = file_type
+      // console.log('file.type:', file.type)
+      // let file_type = file.type
+      // if (file_type.includes('image')) {
+      //   file_type = 'Image'
+      // } else if (file_type.include('mp4')) {
+      //   file_type = 'MP4'
+      // } else if (file_type.include('video')) {
+      //   file_type = 'Video'
+      // } else if (file_type.include('pdf')) {
+      //   file_type = 'PDF'
+      // } else if (file_type.include('doc') || file_type.include('docx')) {
+      //   file_type = 'Word'
+      // } else if (file_type.include('xls') || file_type.include('xlsx')) {
+      //   file_type = 'Excel'
+      // } else {
+      //   file_type = 'File'
+      // }
+      // attachments.value[index].type = file_type
       if (!attachments.value[index].name) {
         attachments.value[index].name = filename
       }
@@ -398,6 +412,9 @@ const uploadFile = (index: number, kind: string, item: any) => {
 const onClickShowEditThirdpartyReportModal = (record: Report) => {
   editThirdpartyRecord.value = record
   showEditThirdpartyModal.value = true
+  if(record.cc_emails && record.cc_emails.length > 0) {
+    ccEmailsRef.value = record.cc_emails.join(';')
+  }
   poNumberRef.value = record.po_number || ''
   inspectRemarkRef.value = record.inspect_remark || ''
   if (record.report_files && record.report_files.length > 0) {
@@ -499,6 +516,10 @@ initializeData()
     @cancel="cancel" width="660px">
     <a-form>
       <div>
+        <div>{{ $t('base.EmailCCList') }}</div>
+        <a-form-item :label="$t('base.cc_emails')">
+          <a-textarea v-model:value="ccEmailsRef" />
+        </a-form-item>
         <div>{{ $t('base.ReportFiles') }}</div>
         <div style="margin-bottom: 20px;">
           <div v-for="(item, index) in reportFiles" class="report-file">
@@ -553,7 +574,10 @@ initializeData()
                 <a-input v-model:value="item.name" />
               </a-form-item>
               <a-form-item :label="$t('base.report_attachment_type')">
-                <a-input v-model:value="item.type" />
+                <a-radio-group v-model:value="item.type" button-style="solid">
+                  <a-radio-button value="photo">Photo</a-radio-button>
+                  <a-radio-button value="video">Video</a-radio-button>
+                </a-radio-group>
               </a-form-item>
               <a-form-item :label="$t('base.report_attachment_mb')">
                 <a-input v-model:value="item.mb" />
@@ -779,8 +803,9 @@ initializeData()
         <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
           <div class="flex-col flex justify-evenly" style="max-width: 100%;">
             <div class="text-title font-bold whitespace-normal">{{ text }}</div>
-            <div class="text-title cursor-pointer template-name" v-if="record?.template?.name" @click="goDesign(record)">{{ record?.template?.name
-            }}</div>
+            <div class="text-title cursor-pointer template-name" v-if="record?.template?.name" @click="goDesign(record)">
+              {{ record?.template?.name
+              }}</div>
             <span v-if="record.tags && record.tags.length != 0">
               <a-tag v-for="tag in record.tags"> {{ tag }} </a-tag>
             </span>

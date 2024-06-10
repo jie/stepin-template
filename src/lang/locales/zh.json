@@ -213,6 +213,8 @@
         "ViewThirdpartyReport": "查看报告",
         "What_is_the_Simplified_Version_Report_1": "简化版本报告是什么？",
         "What_is_the_Simplified_Version_Report_2": "您可以从简化版报告中快速获得主要的检查结果，这有助于您快速决定是否释放运输。",
-        "What_is_the_Simplified_Version_Report_3": "在简化版本报告中，详细记录和已通过的检查将被排除或折叠。"
+        "What_is_the_Simplified_Version_Report_3": "在简化版本报告中，详细记录和已通过的检查将被排除或折叠。",
+        "please_select_attachment_type": "请选择附件文件类型",
+        "EmailCCList": "Email抄送列表"
     }
 }
