@@ -215,6 +215,7 @@
         "What_is_the_Simplified_Version_Report_2": "You will get the main result guickly from the Simplified Report, which helps you to make quick decision to release the shipment or not.",
         "What_is_the_Simplified_Version_Report_3": "The informative record and passed check points will be excluded or folded in the Simplified Report.",
         "please_select_attachment_type": "Please select attachment type",
-        "EmailCCList": "Email CC List"
+        "EmailCCList": "Email CC List",
+        "if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon": "If you have multiple email addresses, please separate them with a semicolon"
     }
 }

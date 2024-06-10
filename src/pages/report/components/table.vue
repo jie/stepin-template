@@ -35,7 +35,7 @@ const tagsRef = ref([])
 const editThirdpartyRecord = ref<Report>()
 const poNumberRef = ref('')
 const inspectRemarkRef = ref('')
-const ccEmailsRef = ref([])
+const ccEmailsRef = ref('')
 const attachments = ref([{
   name: '',
   type: '',
@@ -328,6 +328,8 @@ const submitThirdpartyReport = async () => {
     }
   }
 
+
+
   await store.apiEditThirdpartyReport({
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
@@ -335,7 +337,7 @@ const submitThirdpartyReport = async () => {
     send_email: true,
     po_number: poNumberRef.value,
     inspect_remark: inspectRemarkRef.value,
-    cc_emails: ccEmailsRef.value.join(';')
+    cc_emails: ccEmailsRef.value.split(';')
   })
   await store.apiQuery()
   showEditThirdpartyModal.value = false
@@ -516,8 +518,7 @@ initializeData()
     @cancel="cancel" width="660px">
     <a-form>
       <div>
-        <div>{{ $t('base.EmailCCList') }}</div>
-        <a-form-item :label="$t('base.cc_emails')">
+        <a-form-item :label="$t('base.cc_emails')" :extra="$t('base.if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon')">
           <a-textarea v-model:value="ccEmailsRef" />
         </a-form-item>
         <div>{{ $t('base.ReportFiles') }}</div>
@@ -575,8 +576,8 @@ initializeData()
               </a-form-item>
               <a-form-item :label="$t('base.report_attachment_type')">
                 <a-radio-group v-model:value="item.type" button-style="solid">
-                  <a-radio-button value="photo">Photo</a-radio-button>
-                  <a-radio-button value="video">Video</a-radio-button>
+                  <a-radio-button value="Photo">Photo</a-radio-button>
+                  <a-radio-button value="Video">Video</a-radio-button>
                 </a-radio-group>
               </a-form-item>
               <a-form-item :label="$t('base.report_attachment_mb')">
