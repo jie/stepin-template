@@ -5,11 +5,11 @@
   import dayjs from 'dayjs';
   import { Dayjs } from 'dayjs';
   import { DeleteOutlined, EditFilled, EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
-  import { ReportUser, ReportUserStore } from "@/store/user"
+  import { ReimUser, ReimUserStore } from "@/store/user"
   import { roles } from '@/pages/constants';
   import {ApproveStatusOptions, ApproveStatus} from "@/utils/constant"
 
-  const userStore = ReportUserStore()
+  const userStore = ReimUserStore()
   const columns = [
     {
       title: 'STAFF',
@@ -21,7 +21,7 @@
     { title: 'OP', dataIndex: 'edit', width: 40 },
   ];
 
-  const staffs = reactive<ReportUser[]>([
+  const staffs = reactive<ReimUser[]>([
     {
       name: '管理员1',
       email: '1126263215@qq.com',
@@ -63,7 +63,7 @@
 
   const showModal = ref(false);
 
-  const newStaff = (staff?: ReportUser) => {
+  const newStaff = (staff?: ReimUser) => {
     if (!staff) {
       staff = { _isNew: true };
     }
@@ -82,7 +82,7 @@
     Object.keys(target).forEach((key) => (target[key] = source[key]));
   };
 
-  const form = reactive<ReportUser>(newStaff());
+  const form = reactive<ReimUser>(newStaff());
 
   function reset() {
     return newStaff(form);
@@ -97,7 +97,7 @@
 
   const formLoading = ref(false);
 
-  async function extractImg(file: Blob, staff: ReportUser) {
+  async function extractImg(file: Blob, staff: ReimUser) {
     await getBase64(file).then((res) => {
       staff.avatar = res;
     });
@@ -107,7 +107,7 @@
     formLoading.value = true;
     formModel.value
       ?.validateFields()
-      .then((res: ReportUser) => {
+      .then((res: ReimUser) => {
         if (form._isNew) {
           staffs.push({ ...res });
         } else {
@@ -124,13 +124,13 @@
       });
   }
 
-  const editRecord = ref<ReportUser>();
+  const editRecord = ref<ReimUser>();
 
   /**
    * Edit
    * @param record
    */
-  function edit(record: ReportUser) {
+  function edit(record: ReimUser) {
     editRecord.value = record;
     copyObject(form, record);
     showModal.value = true;
@@ -149,7 +149,7 @@ const getRoleName = (id: string) => {
 };
 
 
-const deleteRecord = async (record: ReportUser) => {
+const deleteRecord = async (record: ReimUser) => {
   console.log('record:', record)
   // await db.delReportTemplate(record.id)
   // initializeData()

@@ -38,7 +38,7 @@ export const ReportConfigStore = defineStore('report_config', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_config/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/report_config/save', 'post_json', data, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Saved")
@@ -55,7 +55,7 @@ export const ReportConfigStore = defineStore('report_config', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_config/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/report_config/update', 'post_json', data, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Updated")
@@ -72,7 +72,7 @@ export const ReportConfigStore = defineStore('report_config', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_config/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/report_config/delete', 'post_json', { id: id }, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -92,7 +92,7 @@ export const ReportConfigStore = defineStore('report_config', {
         ...this.queryArgs
       }
       return http
-        .request('/platform/report_api/report_config/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/report_config/query', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -111,7 +111,7 @@ export const ReportConfigStore = defineStore('report_config', {
       let session = getSessionInfo()
       let bodyJson = { id: id }
       return http
-        .request('/platform/report_api/report_config/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/report_config/get', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -127,7 +127,7 @@ export const ReportConfigStore = defineStore('report_config', {
       let session = getSessionInfo()
       let bodyJson = { key: key }
       return http
-        .request('/platform/report_api/report_config/get_by_key', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/report_config/get_by_key', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

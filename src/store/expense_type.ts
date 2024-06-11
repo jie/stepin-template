@@ -8,22 +8,24 @@ import { useLoadingStore } from '@/store';
 import {Pagination} from "@/types"
 
 
-
-export interface ReimRole {
+export interface ExpenseType {
   id?: string;
   name?: string;
-  permission?: any[];
+  name_en?: string;
+  sort?: number;
+  settings?: string;
   remark?: string;
   status?: string;
   create_at?: string;
+  permission_key?: string;
 }
 
 
-export const ReimRoleStore = defineStore('reimRole', {
+export const ExpenseTypeStore = defineStore('expense_type', {
   state: () => {
     return { 
-      reportReimRole: {} as ReimRole, 
-      entities: <ReimRole>[], 
+      reportExpenseType: {} as ExpenseType, 
+      entities: [], 
       pagination: {} as Pagination,
       queryArgs: {status: "", keyword: ""},
       isNew: false
@@ -33,12 +35,12 @@ export const ReimRoleStore = defineStore('reimRole', {
 
   },
   actions: {
-    async apiSave(data: ReimRole) {
+    async apiSave(data: ExpenseType) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/reim_api/reim_role/save', 'post_json', data, {headers: {reimsessionid: session.sessionid}})
+        .request('/platform/reim_api/expense_type/save', 'post_json', data, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -48,12 +50,12 @@ export const ReimRoleStore = defineStore('reimRole', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdate(data: ReimRole) {
+    async apiUpdate(data: ExpenseType) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/reim_api/reim_role/update', 'post_json', data, {headers: {reimsessionid: session.sessionid}})
+        .request('/platform/reim_api/expense_type/update', 'post_json', data, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -68,7 +70,7 @@ export const ReimRoleStore = defineStore('reimRole', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/reim_api/reim_role/delete', 'post_json', {id: id}, {headers: {reimsessionid: session.sessionid}})
+        .request('/platform/reim_api/expense_type/delete', 'post_json', {id: id}, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -87,7 +89,7 @@ export const ReimRoleStore = defineStore('reimRole', {
         ...this.queryArgs
       }
       return http
-        .request('/platform/reim_api/reim_role/query', 'post_json', bodyJson, {headers: {reimsessionid: session.sessionid}})
+        .request('/platform/reim_api/expense_type/query', 'post_json', bodyJson, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -106,7 +108,7 @@ export const ReimRoleStore = defineStore('reimRole', {
       let session = getSessionInfo()
       let bodyJson = {id: id }
       return http
-        .request('/platform/reim_api/reim_role/get', 'post_json', bodyJson, {headers: {reimsessionid: session.sessionid}})
+        .request('/platform/reim_api/expense_type/get', 'post_json', bodyJson, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

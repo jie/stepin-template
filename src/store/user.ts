@@ -6,7 +6,7 @@ import { Pagination } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
 
 
-export interface ReportUser {
+export interface ReimUser {
   id?: string;
   name?: string;
   email?: string;
@@ -17,9 +17,6 @@ export interface ReportUser {
   status?: string;
   roles?: Array<string>;
   is_admin?: boolean;
-  is_customer?: boolean;
-  is_factory?: boolean;
-  is_worker?: boolean;
   country_id?: string;
   province_id?: boolean;
   city_id?: boolean;
@@ -28,14 +25,16 @@ export interface ReportUser {
   is_enable?: boolean;
   create_at?: string;
   avatar?: string;
+  worker?:any;
+  staff?:any;
 }
 
 
-export const ReportUserStore = defineStore('reportUser', {
+export const ReimUserStore = defineStore('reimUser', {
   state: () => {
     return {
-      reportReportUser: {} as ReportUser,
-      entities: <ReportUser>[],
+      reimUser: {} as ReimUser,
+      entities: <ReimUser>[],
       pagination: {} as Pagination,
       queryArgs: { status: "", keyword: "" },
     }
@@ -44,12 +43,12 @@ export const ReportUserStore = defineStore('reportUser', {
 
   },
   actions: {
-    async apiSave(data: ReportUser) {
+    async apiSave(data: ReimUser) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_user/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_user/save', 'post_json', data, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Saved")
@@ -61,12 +60,12 @@ export const ReportUserStore = defineStore('reportUser', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdate(data: ReportUser) {
+    async apiUpdate(data: ReimUser) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_user/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_user/update', 'post_json', data, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Updated")
@@ -83,7 +82,7 @@ export const ReportUserStore = defineStore('reportUser', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_user/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_user/delete', 'post_json', { id: id }, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -98,7 +97,7 @@ export const ReportUserStore = defineStore('reportUser', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_user/set_status', 'post_json', record, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_user/set_status', 'post_json', record, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -117,7 +116,7 @@ export const ReportUserStore = defineStore('reportUser', {
         ...this.queryArgs
       }
       return http
-        .request('/platform/report_api/report_user/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_user/query', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -136,7 +135,7 @@ export const ReportUserStore = defineStore('reportUser', {
       let session = getSessionInfo()
       let bodyJson = { id: id }
       return http
-        .request('/platform/report_api/report_user/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_user/get', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -154,7 +153,7 @@ export const ReportUserStore = defineStore('reportUser', {
         ids: ids
       }
       return http
-        .request('/platform/report_api/report_user/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_user/query', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {

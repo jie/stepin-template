@@ -18,7 +18,7 @@ export interface ReportSystemConfig {
 }
 
 
-export const ReportSystemConfigStore = defineStore('report_system_config', {
+export const ReportSystemConfigStore = defineStore('reim_system_config', {
   state: () => {
     return {
       loading: false,
@@ -38,7 +38,7 @@ export const ReportSystemConfigStore = defineStore('report_system_config', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_system_config/save', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_system_config/save', 'post_json', data, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Saved")
@@ -55,7 +55,7 @@ export const ReportSystemConfigStore = defineStore('report_system_config', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_system_config/update', 'post_json', data, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_system_config/update', 'post_json', data, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.status) {
             successNotification("Updated")
@@ -72,7 +72,7 @@ export const ReportSystemConfigStore = defineStore('report_system_config', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_system_config/delete', 'post_json', { id: id }, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_system_config/delete', 'post_json', { id: id }, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -92,7 +92,7 @@ export const ReportSystemConfigStore = defineStore('report_system_config', {
         ...this.queryArgs
       }
       return http
-        .request('/platform/report_api/report_system_config/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_system_config/query', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -111,7 +111,7 @@ export const ReportSystemConfigStore = defineStore('report_system_config', {
       let session = getSessionInfo()
       let bodyJson = { id: id }
       return http
-        .request('/platform/report_api/report_system_config/get', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/reim_api/reim_system_config/get', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

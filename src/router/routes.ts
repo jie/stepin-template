@@ -30,7 +30,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/report_system/workplace',
+    path: '/reim_system/workplace',
     name: 'workplace',
     meta: {
       renderMenu: false,
@@ -39,60 +39,13 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        name: 'report_system',
-        component: () => import('@/pages/report_system/index.vue'),
+        name: 'reim_system',
+        component: () => import('@/pages/reim_system/index.vue'),
       },
       {
         path: 'dashboard',
         name: 'dashboard',
         component: () => import('@/pages/dashboard'),
-      },
-      {
-        path: 'report',
-        name: 'report',
-        meta: {
-          renderMenu: true,
-         },
-        component: () => import('@/pages/report'),
-      },
-      {
-        path: 'my_report',
-        name: 'my_report',
-        meta: {
-          renderMenu: true,
-         },
-        component: () => import('@/pages/my_report'),
-      },
-      {
-        path: 'template',
-        name: 'template',
-        meta: {
-          renderMenu: true,
-         },
-        // component: () => import('@/pages/template'),
-        children: [
-          {
-            path: 'templates',
-            name: 'templates',
-            component: () => import('@/pages/template'),
-          },
-          {
-            path: 'design',
-            name: 'design',
-            meta: {
-              renderMenu: false,
-             },
-            component: () => import('@/pages/designer'),
-          },
-        ],
-      },
-      {
-        path: 'category',
-        name: 'category',
-        meta: {
-          renderMenu: true,
-         },
-        component: () => import('@/pages/category'),
       },
       {
         path: 'user',
@@ -103,36 +56,28 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/user'),
       },
       {
-        path: 'company',
-        name: 'company',
+        path: 'expense_type',
+        name: 'expense_type',
         meta: {
           renderMenu: true,
          },
-        component: () => import('@/pages/company'),
+        component: () => import('@/pages/expense_type'),
+      },
+      {
+        path: 'record',
+        name: 'record',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/record'),
       },
       // {
-      //   path: 'company_contact',
-      //   name: 'company_contact',
+      //   path: 'company',
+      //   name: 'company',
       //   meta: {
       //     renderMenu: true,
       //    },
-      //   component: () => import('@/pages/company_contact'),
-      // },
-      // {
-      //   path: 'factory',
-      //   name: 'factory',
-      //   meta: {
-      //     renderMenu: true,
-      //    },
-      //   component: () => import('@/pages/factory'),
-      // },
-      // {
-      //   path: 'factory_contact',
-      //   name: 'factory_contact',
-      //   meta: {
-      //     renderMenu: true,
-      //    },
-      //   component: () => import('@/pages/factory_contact'),
+      //   component: () => import('@/pages/company'),
       // },
       {
         path: 'role',
@@ -158,26 +103,18 @@ const routes: RouteRecordRaw[] = [
          },
         component: () => import('@/pages/system_settings'),
       },
-      {
-        path: 'defect',
-        name: 'defect',
-        meta: {
-          renderMenu: true,
-         },
-        component: () => import('@/pages/defect'),
-      }
     ],
   },
   // {
-  //   path: '/report_system/',
+  //   path: '/reim_system/',
   //   name: 'workplace_index',
   //   meta: {
   //     renderMenu: false,
   //   },
-  //   component: () => import('@/pages/report_system/index.vue'),
+  //   component: () => import('@/pages/reim_system/index.vue'),
   // },
   {
-    path: '/report_system/public',
+    path: '/reim_system/public',
     name: 'public',
     meta: {
       renderMenu: false,
@@ -185,41 +122,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/layout/BlankView.vue'),
     children: [
       {
-        path: 'report/fill/:reportId',
-        name: 'report_fill',
-        meta: {
-          icon: 'LoginOutlined',
-          view: 'blank',
-          target: '_blank',
-          cacheable: false,
-        },
-        component: () => import('@/pages/report_fill/index.vue'),
-      },
-      {
-        path: 'report/review/:reportId',
-        name: 'report_review',
-        meta: {
-          icon: 'LoginOutlined',
-          view: 'blank',
-          target: '_blank',
-          cacheable: false,
-        },
-        component: () => import('@/pages/report_review/index.vue'),
-      },
-      {
-        path: 'report/customer_review/:customerId/:reportId',
-        name: 'customer_review',
-        meta: {
-          icon: 'LoginOutlined',
-          view: 'blank',
-          target: '_blank',
-          cacheable: false,
-        },
-        component: () => import('@/pages/customer_review/index.vue'),
-      },
-      {
-        path: 'report/test',
-        name: 'report_test',
+        path: 'reim/test',
+        name: 'reim_test',
         meta: {
           icon: 'LoginOutlined',
           view: 'blank',
@@ -231,7 +135,7 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: '/report_system/account',
+    path: '/reim_system/account',
     name: 'account',
     meta: {
       renderMenu: false,

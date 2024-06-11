@@ -135,13 +135,13 @@ function createAxiosHttp(config: AxiosRequestConfig): AxiosHttp {
     //   return Boolean(Cookie.get(name ?? _axios.defaults.xsrfCookieName!));
     // },
     setAuthorization(session: any, expires: number | Date, name?: string): void {
-      localStorage.setItem("report_session", JSON.stringify(session))
+      localStorage.setItem("reim_session", JSON.stringify(session))
     },
     removeAuthorization(name?: string): void {
-      localStorage.removeItem('report_session');
+      localStorage.removeItem('reim_session');
     },
     checkAuthorization(name?: string | undefined): boolean {
-      let session = localStorage.getItem('report_session');
+      let session = localStorage.getItem('reim_session');
       return session ? true : false;
     },
   };

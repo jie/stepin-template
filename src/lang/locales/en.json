@@ -12,7 +12,9 @@
         "defect": "Defect",
         "role": "Role",
         "personal": "User Center",
-        "my_report": "My Reports"
+        "my_report": "My Reports",
+        "expense_type": "Expense Type",
+        "record": "Reim Record"
     },
     "login": {
         "login": "Login",

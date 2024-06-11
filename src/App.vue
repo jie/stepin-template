@@ -27,7 +27,7 @@
       </stepin-view>
     </ThemeProvider>
   </a-config-provider>
-  <login-modal :unless="['/report_system/account/login']" />
+  <login-modal :unless="['/reim_system/account/login']" />
 </template>
 
 <script lang="ts" setup>

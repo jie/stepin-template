@@ -9,6 +9,7 @@
 
   const router = useRouter();
   function onLoginSuccess() {
+    console.log('go to dashboard')
     router.push({
       name: "dashboard"
     });

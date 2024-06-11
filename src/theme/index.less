@@ -5,3 +5,34 @@
 *::backdrop {
   @apply bg-layout;
 }
+
+
+.full-modal {
+  .ant-modal {
+      max-width: 100%;
+      top: 0;
+      padding-bottom: 0;
+      margin: 0;
+  }
+
+  .ant-modal-content {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh);
+      overflow-y: scroll;
+      padding-bottom: 60px;
+  }
+
+  .ant-modal-body {
+      flex: 1;
+      box-sizing: border-box;
+  }
+
+  .ant-modal-footer {
+    position:fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+  }
+}

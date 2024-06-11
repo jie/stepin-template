@@ -2,6 +2,6 @@
 
 
 export const getSessionInfo = () => {
-    const session = localStorage.getItem('report_session');
+    const session = localStorage.getItem('reim_session');
     return session ? JSON.parse(session) : {};
 }

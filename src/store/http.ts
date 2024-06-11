@@ -18,9 +18,9 @@ http.interceptors.response.use(
   (response) => {
     console.log('axios:', response)
     if (response?.data?.status === false && response?.data?.message === "session_required") {
-      let session = localStorage.getItem('report_session')
+      let session = localStorage.getItem('reim_session')
       if(session) {
-        localStorage.removeItem('report_session')
+        localStorage.removeItem('reim_session')
         message.error('Session Expired, please login again.');
       }
 

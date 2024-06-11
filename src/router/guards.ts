@@ -18,11 +18,11 @@ interface NaviGuard {
 }
 
 const publicPages = [
-  '/report_system/account/login',
-  '/report_system/account/regist',
-  '/report_system/account/system_login',
-  '/report_system/public/report',
-  '/report_system/home',
+  '/reim_system/account/login',
+  '/reim_system/account/regist',
+  '/reim_system/account/system_login',
+  '/reim_system/public/report',
+  '/reim_system/home',
 ]
 
 const isPublicPage = (path: string) => {
@@ -37,7 +37,7 @@ const loginGuard: NavigationGuard = function (to, from) {
   const account = useAccountStore();
   // if (!http.checkAuthorization() && !/^\/(login|home)?$/.test(to.fullPath)) {
   if (!http.checkAuthorization() && !isPublicPage(to.fullPath)) {
-    return '/report_system/account/login';
+    return '/reim_system/account/login';
     // account.setLogged(false);
   }
 };

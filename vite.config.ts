@@ -32,11 +32,17 @@ export default ({ command, mode }) => {
   return defineConfig({
     server: {
       proxy: {
-        '/platform/report_api': {
+        '/platform/reim_api': {
           target: env.VITE_API_URL,
           ws: true,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/platform\/report_api/, ''),
+          rewrite: (path) => path.replace(/^\/platform\/reim_api/, ''),
+        },
+        '/platform/api': {
+          target: env.VITE_COMMON_API_URL,
+          ws: true,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/platform\/api/, ''),
         },
       },
       hmr: true,

@@ -7,12 +7,14 @@
         "category": "分类",
         "company": "客户",
         "user": "用户",
-        "setting": "设置",
+        "settings": "设置",
         "system_settings": "系统设置",
         "defect": "缺陷",
         "role": "角色",
         "personal": "个人设置",
-        "my_report": "我的报告"
+        "my_report": "我的报告",
+        "expense_type": "报销类型",
+        "record": "报销"
     },
     "login": {
         "login": "登录",

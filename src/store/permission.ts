@@ -8,7 +8,7 @@ import { useLoadingStore } from '@/store';
 import {Pagination} from "@/types"
 
 
-export interface ReportPermission {
+export interface ReimPermission {
   id?: string;
   name?: string;
   slug?: string;
@@ -18,11 +18,11 @@ export interface ReportPermission {
 }
 
 
-export const ReportPermissionStore = defineStore('reportPermission', {
+export const ReimPermissionStore = defineStore('reimPermission', {
   state: () => {
     return { 
-      reportPermission: {} as ReportPermission, 
-      entities: <ReportPermission>[], 
+      reimPermission: {} as ReimPermission, 
+      entities: <ReimPermission>[], 
       pagination: {} as Pagination,
       queryArgs: {status: "", keyword: "", pagesize: 1000},
       isNew: false
@@ -32,12 +32,12 @@ export const ReportPermissionStore = defineStore('reportPermission', {
 
   },
   actions: {
-    async apiSave(data: ReportPermission) {
+    async apiSave(data: ReimPermission) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_permission/save', 'post_json', data, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/reim_api/reim_permission/save', 'post_json', data, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -47,12 +47,12 @@ export const ReportPermissionStore = defineStore('reportPermission', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiUpdate(data: ReportPermission) {
+    async apiUpdate(data: ReimPermission) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_permission/update', 'post_json', data, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/reim_api/reim_permission/update', 'post_json', data, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -67,7 +67,7 @@ export const ReportPermissionStore = defineStore('reportPermission', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_permission/delete', 'post_json', {id: id}, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/reim_api/reim_permission/delete', 'post_json', {id: id}, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;
@@ -86,7 +86,7 @@ export const ReportPermissionStore = defineStore('reportPermission', {
         ...this.queryArgs
       }
       return http
-        .request('/platform/report_api/report_permission/query', 'post_json', bodyJson, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/reim_api/reim_permission/query', 'post_json', bodyJson, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           console.log('response:', response)
           if (response.data?.data) {
@@ -105,7 +105,7 @@ export const ReportPermissionStore = defineStore('reportPermission', {
       let session = getSessionInfo()
       let bodyJson = {id: id }
       return http
-        .request('/platform/report_api/report_permission/get', 'post_json', bodyJson, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/reim_api/reim_permission/get', 'post_json', bodyJson, {headers: {reimsessionid: session.sessionid}})
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

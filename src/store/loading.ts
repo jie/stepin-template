@@ -10,7 +10,14 @@ export const useLoadingStore = defineStore('loading', () => {
    * @param loading
    */
   function setPageLoading(loading: boolean) {
-    pageLoading.value = loading;
+    if (loading == false) {
+      setTimeout(() => {
+        pageLoading.value = loading;
+      }, 1000);
+    } else {
+      pageLoading.value = loading;
+    }
+
   }
 
   /**

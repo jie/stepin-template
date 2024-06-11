@@ -20,7 +20,7 @@ const systemLogin = async () => {
     console.log('systemLogin result:', result)
     setTimeout(() => {
       loading.value = false
-      router.push('/report_system/workplace/dashboard')
+      router.push('/reim_system/workplace/dashboard')
     }, 2000)
   } catch (e) {
     console.error(e)

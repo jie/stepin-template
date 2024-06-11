@@ -4,16 +4,25 @@
             <Spin v-if="displayLoadingRef" /><a-button type="text">{{ displayValue }}</a-button>
         </div>
         <a-button @click="showSearchDialog">Choose</a-button>
-        <a-modal v-model:visible="modelVisible" title="Title" :confirm-loading="confirmLoading" @ok="handleOk">
+        <a-modal width="100%" wrap-class-name="full-modal" v-model:visible="modelVisible" title="Title"
+            :confirm-loading="confirmLoading" @ok="handleOk">
             <a-form ref="formRef">
                 <a-form-item :label="props.searchLabel">
                     <a-input-search v-model:value="searchValueRef" placeholder="input search text" enter-button="Search"
                         @search="onSearch" />
                 </a-form-item>
                 <a-form-item v-if="searchResult && searchResult.length != 0">
-                    <a-table size="small" bordered
+                    <a-table size="small" bordered style="width: 100%"
                         :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange, type: props.isMultiple ? 'checkbox' : 'radio' }"
-                        :columns="tableColumns" :data-source="searchResult" rowKey="id" />
+                        :columns="tableColumns" :data-source="searchResult" rowKey="id">
+                        <template #bodyCell="{ column, record }">
+                            <template v-if="props.type == 'order' && column.dataIndex === 'address'">
+                                <span>
+                                    {{ record?.address?.city?.name || record?.address?.country?.name }}
+                                </span>
+                            </template>
+                        </template>
+                    </a-table>
                 </a-form-item>
                 <a-empty v-else />
             </a-form>
@@ -22,23 +31,13 @@
 </template>
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
-import { ReportCompanyStore } from '@/store/company'
-import { ReportCompanyContactStore } from '@/store/company_contact'
-import { ReportFactoryStore } from '@/store/factory'
-import { ReportFactoryContactStore } from '@/store/factory_contact'
-import { ReportUserStore } from '@/store/user'
-import { ReportTemplateStore } from '@/store/reportTemplate'
+import { ReimRecordStore } from '@/store/record'
 import Spin from "@/components/spin/index.vue";
-const userStore = ReportUserStore()
-const companyStore = ReportCompanyStore()
-const factoryStore = ReportFactoryStore()
-const companyContactStore = ReportCompanyContactStore()
-const factoryContactStore = ReportFactoryContactStore()
-const reportTemplateStore = ReportTemplateStore()
+const recordStore = ReimRecordStore()
 const open = ref<boolean>(false);
 const confirmLoading = ref<boolean>(false);
-const props = defineProps(['type', 'value', 'key', 'searchKey', 'searchLabel', 'isMultiple', 'columns', 'rows'])
-const emit = defineEmits(['update:value'])
+const props = defineProps(['type', 'value', 'key', 'searchKey', 'searchLabel', 'isMultiple', 'columns', 'rows', 'display_key'])
+const emit = defineEmits(['update:value', 'updateSelected'])
 const searchValueRef = ref<string>('')
 const tableColumns = ref([])
 const searchResult = ref<any[]>([])
@@ -61,7 +60,7 @@ const displayValue = computed(() => {
     } else {
         let item = searchResult.value.find((item) => item.id == props.value)
         if (item) {
-            return item.name
+            return item[props.display_key] || item.name
         } else {
             return ''
         }
@@ -75,7 +74,16 @@ const initializeData = () => {
         tableColumns.value = props.columns
     } else {
         tableColumns.value = [{ title: 'ID', dataIndex: 'id', width: 100 }, { title: 'Name', dataIndex: 'name' }]
+        if (props.type == 'order') {
+            tableColumns.value = [
+                { title: 'Factory', dataIndex: 'factory_name' },
+                { title: 'Inspect Date', dataIndex: 'inspect_date' },
+                { title: 'Location', dataIndex: 'address' },
+            ]
+        }
     }
+
+    queryEntities()
 }
 
 const onSelectChange = (keys: any[]) => {
@@ -87,11 +95,15 @@ const handleOk = () => {
     setTimeout(() => {
         modelVisible.value = false;
         confirmLoading.value = false;
+        let items = searchResult.value.filter((item) => selectedRowKeys.value.includes(item.id))
         if (props.isMultiple) {
             emit('update:value', selectedRowKeys.value)
+            emit('updateSelected', items)
         } else {
             emit('update:value', selectedRowKeys.value[0])
+            emit('updateSelected', items)
         }
+
     }, 1000);
 };
 const showSearchDialog = () => {
@@ -111,44 +123,12 @@ const onSearch = async () => {
 
 const queryEntities = async () => {
     switch (props.type) {
-        case 'worker':
-            userStore.pagination.page = 1
-            userStore.pagination.pagesize = 10
-            userStore.queryArgs.is_worker = true
-            userStore.queryArgs.is_customer = false
-            userStore.queryArgs.keyword = searchValueRef.value
-            await userStore.apiQuery()
-            searchResult.value = userStore.entities
-            break
-        case 'customer':
-            userStore.pagination.page = 1
-            userStore.pagination.pagesize = 10
-            userStore.queryArgs.is_customer = true
-            userStore.queryArgs.is_worker = false
-            userStore.queryArgs.keyword = searchValueRef.value
-            await userStore.apiQuery()
-            searchResult.value = userStore.entities
-            break
-        case 'company':
-            companyStore.pagination.page = 1
-            companyStore.pagination.pagesize = 10
-            companyStore.queryArgs.keyword = searchValueRef.value
-            await companyStore.apiQuery()
-            searchResult.value = companyStore.entities
-            break
-        case 'factory':
-            factoryStore.pagination.page = 1
-            factoryStore.pagination.pagesize = 10
-            factoryStore.queryArgs.keyword = searchValueRef.value
-            await factoryStore.apiQuery()
-            searchResult.value = factoryStore.entities
-            break
-        case 'report_template':
-            reportTemplateStore.pagination.page = 1
-            reportTemplateStore.pagination.pagesize = 10
-            reportTemplateStore.queryArgs.keyword = searchValueRef.value
-            await reportTemplateStore.apiQuery()
-            searchResult.value = reportTemplateStore.entities
+        case 'order':
+            recordStore.orderPagination.page = 1
+            recordStore.orderPagination.pagesize = 10
+            recordStore.queryArgs.keyword = searchValueRef.value
+            await recordStore.apiOrdersQuery()
+            searchResult.value = recordStore.orderEntities
             break
         default:
             break
@@ -158,13 +138,11 @@ const queryEntities = async () => {
 const getEntity = async (ids: string[]) => {
     displayLoadingRef.value = true
     switch (props.type) {
-        case 'template':
-            break
-        case 'worker':
+        case 'order':
             if (ids) {
                 try {
-                    await userStore.apiQueryByIds(ids)
-                    searchResult.value = userStore.entities
+                    await recordStore.apiQueryByIds(ids)
+                    searchResult.value = recordStore.orderEntities
                     selectedRowKeys.value = ids
                 } catch (error) {
                     console.log('error:', error)
@@ -172,55 +150,6 @@ const getEntity = async (ids: string[]) => {
                     displayLoadingRef.value = false
                 }
 
-            } else {
-                searchResult.value = []
-            }
-
-            break
-        case 'customer':
-            if (ids) {
-                try {
-                    await userStore.apiQueryByIds(ids)
-                    searchResult.value = userStore.entities
-                    selectedRowKeys.value = ids
-                } catch (error) {
-                    console.log('error:', error)
-                } finally {
-                    displayLoadingRef.value = false
-                }
-
-            } else {
-                searchResult.value = []
-            }
-
-            break
-        case 'company':
-            if (ids) {
-                try {
-                    await companyStore.apiQueryByIds(ids)
-                    searchResult.value = companyStore.entities
-                    selectedRowKeys.value = ids
-                } catch (error) {
-                    console.log('error:', error)
-                } finally {
-                    displayLoadingRef.value = false
-                }
-            } else {
-                searchResult.value = []
-            }
-
-            break
-        case 'report_template':
-            if (ids) {
-                try {
-                    await reportTemplateStore.apiQueryByIds(ids)
-                    searchResult.value = reportTemplateStore.entities
-                    selectedRowKeys.value = ids
-                } catch (error) {
-                    console.log('error:', error)
-                } finally {
-                    displayLoadingRef.value = false
-                }
             } else {
                 searchResult.value = []
             }
@@ -241,3 +170,7 @@ defineExpose({
     getEntity
 })
 </script>
+
+<style lang="less">
+
+</style>

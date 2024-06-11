@@ -4,21 +4,26 @@ import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
-// import {permissions, roles} from '@/pages/constants';
-import { ReimRoleStore, ReimRole } from '@/store/role';
-import { ReimPermissionStore } from '@/store/permission';
+import { ExpenseType, ExpenseTypeStore } from '@/store/expense_type';
 import { ApproveStatusOptions, ApproveStatus } from '@/utils/constant';
+import { i18n } from '@/lang/i18n';
 
-const permissionStore = ReimPermissionStore();
-const store = ReimRoleStore();
+const store = ExpenseTypeStore();
 const columns = [
   {
-    title: 'ROLE',
+    title: i18n.global.t('base.Name').toString(),
     dataIndex: 'name',
   },
-  { title: 'PERMISSIONS', dataIndex: 'permissions', width: 400 },
-  { title: 'CREATED', dataIndex: 'create_at' },
-  { title: 'OP', dataIndex: 'edit', width: 40 },
+  {
+    title: i18n.global.t('base.NameInEnglish').toString(),
+    dataIndex: 'name_en',
+  },
+  {
+    title: i18n.global.t('base.Sort').toString(),
+    dataIndex: 'sort',
+  },
+  { title: i18n.global.t('base.CreateAt').toString(), dataIndex: 'create_at' },
+  { title: i18n.global.t('base.OP').toString(), dataIndex: 'edit', width: 80 },
 ];
 
 
@@ -29,13 +34,15 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newRole = (role?: ReimRole) => {
+const newRecord = (record?: ExpenseType) => {
   store.isNew = true
-  role.name = "";
-  role.status = "3";
-  role.permissions = [];
-  role.create_at = null;
-  return role;
+  record.name = "";
+  record.name_en = "";
+  record.sort = 0;
+  record.settings = "";
+  record.status = "3";
+  record.create_at = null;
+  return record;
 };
 
 const copyObject = (target: any, source?: any) => {
@@ -45,10 +52,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(target).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<ReimRole>(newRole({}));
+const form = reactive<ExpenseType>(newRecord({}));
 
 function reset() {
-  return newRole(form);
+  return newRecord(form);
 }
 
 function cancel() {
@@ -64,11 +71,11 @@ function submit() {
   formLoading.value = true;
   formModel.value
     ?.validateFields()
-    .then(async (res: ReimRole) => {
+    .then(async (res: ExpenseType) => {
       if (store.isNew) {
-        await store.apiSave({name: form.name, status: form.status, permissions: form.permissions})
+        await store.apiSave({name: form.name, status: form.status, settings: form.settings, name_en: form.name_en, sort: form.sort})
       } else {
-        await store.apiUpdate({id: form.id, name: form.name, status: form.status, permissions: form.permissions})
+        await store.apiUpdate({id: form.id, name: form.name, status: form.status, settings: form.settings, name_en: form.name_en, sort: form.sort})
       }
       showModal.value = false;
       reset();
@@ -82,19 +89,17 @@ function submit() {
     });
 }
 
-const editRecord = ref<ReimRole>();
+const editRecord = ref<ExpenseType>();
 
 /**
  * Edit
  * @param record
  */
-function edit(record: ReimRole) {
+function edit(record: ExpenseType) {
   store.isNew = false
   editRecord.value = record;
   copyObject(form, record);
-  console.log('permissions:', record.permissions)
   form.id = record.id;
-  form.permissions = record.permissions.map(c=>c.id)
   showModal.value = true;
 }
 
@@ -103,16 +108,11 @@ const initializeData = async () => {
   store.apiQuery()
 };
 
-const deleteRecord = async (record: ReimRole) => {
+const deleteRecord = async (record: ExpenseType) => {
   await store.apiDelete(record.id)
   initializeData()
 };
 
-const getAllPermissions = async () => {
-  await permissionStore.apiQuery()
-};
-
-getAllPermissions()
 initializeData()
 
 </script>
@@ -122,8 +122,14 @@ initializeData()
       <a-form-item label="Name" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item label="Permission" required name="permissions">
-        <a-select v-model:value="form.permissions" mode="multiple" :options="permissionStore.entities" :fieldNames="{label: 'name', value: 'id'}"/>
+      <a-form-item label="Name in English" required name="name_en">
+        <a-input v-model:value="form.name_en" />
+      </a-form-item>
+      <a-form-item label="Sort" required name="sort">
+        <a-input-number v-model:value="form.sort" />
+      </a-form-item>
+      <a-form-item label="Settings" required name="name">
+        <a-textarea v-model:value="form.settings" :rows="8" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -131,7 +137,7 @@ initializeData()
   <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>Roles</h4>
+        <h4>{{ $t('menu.expense_type') }}</h4>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />
@@ -144,11 +150,6 @@ initializeData()
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
         <div class="flex-col flex justify-evenly ml-2">
           <span class="text-title font-bold">{{ text }}</span>
-        </div>
-      </div>
-      <div class="" v-else-if="column.dataIndex === 'permissions'">
-        <div class="text-subtext">
-          <a-tag color="#108ee9" v-for="permission in record.permissions">{{ permission.name }}</a-tag>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">

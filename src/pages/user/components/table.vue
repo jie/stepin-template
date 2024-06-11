@@ -7,13 +7,13 @@ import { Dayjs } from 'dayjs';
 import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import router from '@/router';
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
-import { ReportUserStore, ReportUser } from "@/store/user"
-import { ReportRoleStore } from "@/store/role"
+import { ReimUserStore, ReimUser } from "@/store/user"
+import { ReimRoleStore } from "@/store/role"
 import { getSessionInfo } from '@/utils/session'
 import { statusFormSchema } from "@/types"
 const isViewForm = ref(false)
-const store = ReportUserStore()
-const roleStore = ReportRoleStore()
+const store = ReimUserStore()
+const roleStore = ReimRoleStore()
 const searchKeywords = ref("")
 const columns = [
   {
@@ -21,16 +21,15 @@ const columns = [
     dataIndex: 'name',
   },
   { title: 'Status', dataIndex: 'status' },
-  { title: 'Is Customer', dataIndex: 'is_customer' },
-  { title: 'Is Factory', dataIndex: 'is_factory' },
-  { title: 'Is Worker', dataIndex: 'is_worker' },
+  { title: 'Staff', dataIndex: 'staff' },
+  { title: 'Worker', dataIndex: 'worker' },
   { title: 'Create at', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
 
 
 const Ctl = reactive({
-  records: [] as ReportUser[],
+  records: [] as ReimUser[],
   page: 1,
   pagesize: 10,
   total: 0,
@@ -57,12 +56,12 @@ function addNew() {
 
 const showModal = ref(false);
 
-const newReportUser = (reportUser?: ReportUser) => {
+const newReimUser = (reimUser?: ReimUser) => {
   createTimeRef.value = dayjs()
   let create_at = createTimeRef.value.format('YYYY-MM-DD HH:mm:ss')
-  if (!reportUser) {
+  if (!reimUser) {
 
-    return <ReportUser>{
+    return <ReimUser>{
       id: '',
       name: '',
       email: '',
@@ -73,27 +72,25 @@ const newReportUser = (reportUser?: ReportUser) => {
       password: '',
       roles: [],
       status: '1',
-      is_customer: false,
-      is_factory: false,
-      is_worker: false,
+      worker: "",
+      staff: "",
       create_at: create_at
     }
   } else {
-    reportUser.name = '';
-    reportUser.email = '';
-    reportUser.phone = '';
-    reportUser.mobile = '';
-    reportUser.name = '';
-    reportUser.password = '';
-    reportUser.remark = '';
-    reportUser.avatar = '';
-    reportUser.status = '1';
-    reportUser.roles = [];
-    reportUser.is_customer = false;
-    reportUser.is_factory = false;
-    reportUser.is_worker = false;
-    reportUser.create_at = create_at;
-    return reportUser;
+    reimUser.name = '';
+    reimUser.email = '';
+    reimUser.phone = '';
+    reimUser.mobile = '';
+    reimUser.name = '';
+    reimUser.password = '';
+    reimUser.remark = '';
+    reimUser.avatar = '';
+    reimUser.status = '1';
+    reimUser.roles = [];
+    reimUser.worker = "";
+    reimUser.staff = "";
+    reimUser.create_at = create_at;
+    return reimUser;
   }
 };
 
@@ -104,10 +101,10 @@ const copyObject = (target: any, source?: any) => {
   Object.keys(source).forEach((key) => (target[key] = source[key]));
 };
 
-const form = reactive<ReportUser>(newReportUser());
+const form = reactive<ReimUser>(newReimUser());
 console.log('form:', form)
 function reset() {
-  return newReportUser(form);
+  return newReimUser(form);
 }
 
 function cancel() {
@@ -134,14 +131,13 @@ async function submit() {
     status: form.status,
     avatar: form.avatar,
     roles: form.roles,
-    is_customer: form.is_customer,
-    is_factory: form.is_factory,
-    is_worker: form.is_worker,
+    worker: form.worker,
+    staff: form.staff,
     org_id: session.user_data.org_id,
   }
   formModel.value
     ?.validateFields()
-    .then(async (res: ReportUser) => {
+    .then(async (res: ReimUser) => {
       if (Ctl.isNew === true) {
         await store.apiSave(formValue)
       } else {
@@ -159,13 +155,14 @@ async function submit() {
     });
 }
 
-const editRecord = ref<ReportUser>();
+const editRecord = ref<ReimUser>();
 
 /**
  * 编辑
  * @param record
  */
-function edit(record: ReportUser) {
+function edit(record: ReimUser) {
+  console.log(toRaw(record))
   isViewForm.value = false
   createTimeRef.value = dayjs(record.create_at)
   Ctl.isNew = false;
@@ -177,7 +174,7 @@ function edit(record: ReportUser) {
   form.password = ''
   showModal.value = true;
 }
-function view(record: ReportUser) {
+function view(record: ReimUser) {
   createTimeRef.value = dayjs(record.create_at)
   Ctl.isNew = false;
   editRecord.value = record;
@@ -188,7 +185,7 @@ function view(record: ReportUser) {
 
 
 
-const deleteRecord = async (record: ReportUser) => {
+const deleteRecord = async (record: ReimUser) => {
   console.log('record:', record)
   await store.apiDelete(record.id)
   initializeData()
@@ -199,7 +196,7 @@ const onClickSearch = async () => {
   console.log('store.queryArgs.keyword:', store.queryArgs.keyword)
   store.apiQuery()
 }
-async function extractImg(file: Blob, user: ReportUser) {
+async function extractImg(file: Blob, user: ReimUser) {
   await getBase64(file).then((res) => {
     user.avatar = res;
   });
@@ -276,21 +273,18 @@ const statusDialogCancel = () => {
       <a-form-item label="Phone" name="phone">
         <a-input v-model:value="form.phone" />
       </a-form-item>
+      <a-form-item label="Worker Id" name="worker">
+        <a-input v-model:value="form.worker" />
+      </a-form-item>
+      <a-form-item label="Staff Id" name="staff">
+        <a-input v-model:value="form.staff" />
+      </a-form-item>
       <a-form-item label="Role" required name="roles">
         <a-select v-model:value="form.roles" mode="multiple" :options="roleStore.entities"
           :fieldNames="{ label: 'name', value: 'id' }" />
       </a-form-item>
       <a-form-item required label="Status" name="status">
         <a-select style="width: 100%" v-model:value="form.status" :options="ApproveStatusOptions" />
-      </a-form-item>
-      <a-form-item label="Is Customer" name="is_customer">
-        <a-switch v-model:checked="form.is_customer"></a-switch>
-      </a-form-item>
-      <a-form-item label="Is Factory" name="is_factory">
-        <a-switch v-model:checked="form.is_factory"></a-switch>
-      </a-form-item>
-      <a-form-item label="Is Worker" name="is_worker">
-        <a-switch v-model:checked="form.is_worker"></a-switch>
       </a-form-item>
     </a-form>
   </a-modal>
