@@ -55,6 +55,9 @@
                     <a-form-item label="remark">
                         <a-textarea v-model:value="store.reimShoppingPoint.remark" />
                     </a-form-item>
+                    <a-form-item :label="$t('base.ExpenseReceipts')" v-bind="validateInfos.images">
+                        <Uploader ref="imageUploaderRef" v-model="store.reimShoppingPoint.images" />
+                    </a-form-item>
                 </a-form>
             </a-modal>
 
@@ -65,6 +68,7 @@
 import { toRaw, defineProps, ref, reactive, computed } from "vue";
 import { toArray } from 'lodash-es';
 import BaseComponent from "./index.vue";
+import Uploader from "./uploader.vue";
 import { ReimRecordStore } from "@/store/record";
 import RemoteSelect from '@/components/remote_select/index.vue';
 import { i18n } from '@/lang/i18n';
@@ -155,17 +159,6 @@ const handleOk = () => {
     console.log('store.reimShoppingPoint:', toRaw(store.reimShoppingPoint))
     validate()
         .then((result) => {
-            console.log('result:', result)
-
-            let hasError = false
-
-            for (let item of toArray(validateInfos)) {
-                console.log('key:', item)
-                // if(validateInfos[key].errors.length > 0) {
-                //   hasError = true
-                //   break
-                // }
-            }
             if(editIndexRef.value !== null) {
                 store.reimRecordItem.items[editIndexRef.value] = { ...store.reimShoppingPoint }
                 editIndexRef.value = null
@@ -196,6 +189,7 @@ const onEdit = (index: number) => {
     store.reimShoppingPoint.purpose = store.reimRecordItem.items[index].purpose
     store.reimShoppingPoint.remark = store.reimRecordItem.items[index].remark
     store.reimShoppingPoint.start_at = store.reimRecordItem.items[index].start_at
+    store.reimShoppingPoint.images = [...store.reimRecordItem.items[index].images]
     modelVisible.value = true
 }
 const onDelete = (index: number) => {

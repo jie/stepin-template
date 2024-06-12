@@ -16,8 +16,12 @@ import MealForm from '@/components/reim_form/meal_bak.vue';
 import TransportationForm from '@/components/reim_form/transportation.vue';
 import OvertimeForm from '@/components/reim_form/overtime_bak.vue';
 import OtherForm from '@/components/reim_form/other_bak.vue';
+import { CurrencyStore } from '@/store';
+import { toArray } from 'lodash-es';
 import { toRaw } from 'vue';
 import { computed } from 'vue';
+import { Form } from 'ant-design-vue';
+const useForm = Form.useForm;
 const store = ReimRecordStore();
 const loadingStore = useLoadingStore()
 const expenseTypeStore = ExpenseTypeStore();
@@ -30,6 +34,9 @@ const transportationFormRef = ref(null);
 const overtimeFormRef = ref(null);
 const otherFormRef = ref(null);
 const accountStore = useAccountStore()
+const currencyStore = CurrencyStore()
+currencyStore.apiQuery()
+
 const expense_types = computed(() => {
   return expenseTypeStore.entities?.filter((item: any) => {
     return accountStore.account?.permission_keys.includes(item.permission_key)
@@ -37,11 +44,27 @@ const expense_types = computed(() => {
 })
 console.log('accountStore:', toRaw(accountStore.account))
 
+// const rulesRef = reactive({
+//   items: [
+//     {
+//       required: true,
+//       message: 'Please fill items',
+//     },
+//   ],
+// })
+
+// const { resetFields, validate, validateInfos, mergeValidateInfo } = useForm(store.reimAccommondationPoint, rulesRef);
+// const errorInfos = computed(() => {
+//     return mergeValidateInfo(toArray(validateInfos));
+// });
+
+
 const columns = [
   {
-    title: i18n.global.t('base.Name').toString(),
-    dataIndex: 'name',
+    title: i18n.global.t('base.expense_total').toString(),
+    dataIndex: 'totalItems',
   },
+  { title: i18n.global.t('base.Status').toString(), dataIndex: 'status' },
   { title: i18n.global.t('base.CreateAt').toString(), dataIndex: 'create_at' },
   { title: i18n.global.t('base.OP').toString(), dataIndex: 'edit', width: 80 },
 ];
@@ -88,24 +111,23 @@ const formLoading = ref(false);
 
 function submit() {
   formLoading.value = true;
-  formModel.value
-    ?.validateFields()
-    .then(async (res: ReimRecord) => {
+  return new Promise(async (resolve, reject) => {
+    try {
       if (store.isNew) {
-        await store.apiSave({ name: form.name, status: form.status })
+        await store.apiSave(store.reimRecord)
       } else {
-        await store.apiUpdate({ id: form.id, name: form.name, status: form.status })
+        await store.apiUpdate(store.reimRecord)
       }
       showModal.value = false;
       reset();
       initializeData()
-    })
-    .catch((e) => {
-      console.error(e);
-    })
-    .finally(() => {
       formLoading.value = false;
-    });
+      resolve(true);
+    } catch (e) {
+      formLoading.value = false;
+      reject(e);
+    }
+  })
 }
 
 const editRecord = ref<ReimRecord>();
@@ -119,12 +141,18 @@ function edit(record: ReimRecord) {
   editRecord.value = record;
   copyObject(form, record);
   form.id = record.id;
-  showModal.value = true;
+  showCreateModal.value = true;
 }
 
+const currencyMap = ref({})
 
 const initializeData = async () => {
   store.apiQuery()
+  await currencyStore.apiQuery()
+  currencyMap.value = currencyStore.entities.reduce((acc, cur) => {
+    acc[cur.code] = cur.name
+    return acc
+  }, {})
 };
 
 const deleteRecord = async (record: ReimRecord) => {
@@ -176,6 +204,20 @@ const onEdit = (index: number) => {
 }
 const onDelete = (index: number) => {
   store.reimRecord.items.splice(index, 1)
+}
+
+const formatTotalItems = (items) => {
+  let _items = []
+  for(let key of Object.keys(items)) {
+    let currency = currencyStore.entities.find((currency) => currency.id === key)
+    if(currency) {
+      _items.push({
+        total: items[key],
+        currency: currency.name
+      })
+    }
+  }
+  return _items
 }
 
 initializeData()
@@ -252,15 +294,15 @@ initializeData()
       </div>
     </template>
     <template #bodyCell="{ column, text, record }">
-      <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
+      <div class="flex items-stretch" v-if="column.dataIndex === 'totalItems'">
         <div class="flex-col flex justify-evenly ml-2">
-          <span class="text-title font-bold">{{ text }}</span>
+          <span class="text-title font-bold" v-for="key in Object.keys(record.totalItems)">{{ currencyMap[key] }}: {{ record.totalItems[key] }}</span>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
         <a-badge class="text-subtext" :color="'green'">
           <template #text>
-            <span class="text-subtext">{{ ApproveStatus[text] }}</span>
+            <span class="text-subtext">{{ ApproveStatus[record.status || '1'] }}</span>
           </template>
         </a-badge>
       </template>

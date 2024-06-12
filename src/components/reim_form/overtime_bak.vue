@@ -23,7 +23,7 @@
                                         <dollar-circle-outlined style="font-size: 32px;" />
                                     </template>
                                 </a-list-item-meta>
-                                <div>[{{ item?.dateRange[0]?.format('YYYY-MM-DD') }} ~ {{ item?.dateRange[1]?.format('YYYY-MM-DD') }}] {{ item.factory_name }}, hours: {{ item.overtime_hours }}</div>
+                                <div>[{{ item?.dateRange[0]?.format('YYYY-MM-DD') }}~{{ item?.dateRange[1]?.format('YYYY-MM-DD') }}] {{ item.factory_name }}, hours: {{ item.overtime_hours }}</div>
                             </div>
                         </a-list-item>
                     </template>
@@ -56,6 +56,9 @@
                     <a-form-item label="remark">
                         <a-textarea v-model:value="store.reimOvertimePoint.remark" />
                     </a-form-item>
+                    <a-form-item :label="$t('base.ExpenseReceipts')" v-bind="validateInfos.images">
+                        <Uploader ref="imageUploaderRef" v-model="store.reimOvertimePoint.images" />
+                    </a-form-item>
                 </a-form>
             </a-modal>
 
@@ -66,6 +69,7 @@
 import { toRaw, defineProps, ref, reactive, computed } from "vue";
 import { toArray } from 'lodash-es';
 import BaseComponent from "./index.vue";
+import Uploader from "./uploader.vue";
 import { ReimRecordStore } from "@/store/record";
 import RemoteSelect from '@/components/remote_select/index.vue';
 import { i18n } from '@/lang/i18n';
@@ -151,17 +155,6 @@ const handleOk = () => {
     console.log('store.reimOvertimePoint:', toRaw(store.reimOvertimePoint))
     validate()
         .then((result) => {
-            console.log('result:', result)
-
-            let hasError = false
-
-            for (let item of toArray(validateInfos)) {
-                console.log('key:', item)
-                // if(validateInfos[key].errors.length > 0) {
-                //   hasError = true
-                //   break
-                // }
-            }
             if(editIndexRef.value !== null) {
                 store.reimRecordItem.items[editIndexRef.value] = { ...store.reimOvertimePoint }
                 editIndexRef.value = null
@@ -198,6 +191,7 @@ const onEdit = (index: number) => {
     store.reimOvertimePoint.overtime_hours = store.reimRecordItem.items[index].overtime_hours
     store.reimOvertimePoint.remark = store.reimRecordItem.items[index].remark
     store.reimOvertimePoint.dateRange = [...store.reimRecordItem.items[index].dateRange]
+    store.reimOvertimePoint.images = [...store.reimRecordItem.items[index].images]
     modelVisible.value = true
 }
 const onDelete = (index: number) => {

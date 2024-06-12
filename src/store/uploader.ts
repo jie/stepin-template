@@ -47,6 +47,17 @@ export const ossUploadFiles = async (e, prefix="") => {
       if(prefix) {
         policyParams['prefix'] = prefix
       }
+
+      console.log('file.type:', file.type)
+      let file_type = file.type
+      if (file_type.includes('image')) {
+        file_type = 'Photo'
+      } else if (file_type.includes('pdf')) {
+        file_type = 'PDF'
+      } else {
+        file_type = 'File'
+      }
+
       console.log(policyParams)
       // 得到阿里云oss参数
       let policyResult = await getOssPolicy(policyParams)
@@ -63,7 +74,7 @@ export const ossUploadFiles = async (e, prefix="") => {
       let uploadResult = await uploadFile(formData)
       console.log("uploadResult:", uploadResult)
       if(uploadResult?.data?.status && uploadResult?.data?.data?.url) {
-        images.push(uploadResult?.data?.data?.url)
+        images.push({type: file_type, url :uploadResult?.data?.data?.url})
       }
     }
   } catch (e) {

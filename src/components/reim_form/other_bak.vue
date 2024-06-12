@@ -42,9 +42,11 @@
                     <a-form-item label="remark">
                         <a-textarea v-model:value="store.reimOtherPoint.remark" />
                     </a-form-item>
+                    <a-form-item :label="$t('base.ExpenseReceipts')" v-bind="validateInfos.images">
+                        <Uploader ref="imageUploaderRef" v-model="store.reimOtherPoint.images" />
+                    </a-form-item>
                 </a-form>
             </a-modal>
-
         </template>
     </BaseComponent>
 </template>
@@ -52,13 +54,16 @@
 import { toRaw, defineProps, ref, reactive, computed } from "vue";
 import { toArray } from 'lodash-es';
 import BaseComponent from "./index.vue";
+import Uploader from "./uploader.vue";
 import { ReimRecordStore } from "@/store/record";
-import RemoteSelect from '@/components/remote_select/index.vue';
-import { i18n } from '@/lang/i18n';
-import dayjs from 'dayjs';
+// import RemoteSelect from '@/components/remote_select/index.vue';
+// import { i18n } from '@/lang/i18n';
+// import { message } from 'ant-design-vue';
+// import dayjs from 'dayjs';
 import { Form } from 'ant-design-vue';
 const useForm = Form.useForm;
-const orderSelectRef = ref<any>(null);
+
+// const orderSelectRef = ref<any>(null);
 const baseModal = ref<any>(null);
 const modelVisible = ref<boolean>(false)
 const confirmLoading = ref<boolean>(false)
@@ -116,18 +121,7 @@ const handleOk = () => {
     console.log('store.reimOtherPoint:', toRaw(store.reimOtherPoint))
     validate()
         .then((result) => {
-            console.log('result:', result)
-
-            let hasError = false
-
-            for (let item of toArray(validateInfos)) {
-                console.log('key:', item)
-                // if(validateInfos[key].errors.length > 0) {
-                //   hasError = true
-                //   break
-                // }
-            }
-            if(editIndexRef.value !== null) {
+            if (editIndexRef.value !== null) {
                 store.reimRecordItem.items[editIndexRef.value] = { ...store.reimOtherPoint }
                 editIndexRef.value = null
             } else {
@@ -152,6 +146,7 @@ const onEdit = (index: number) => {
     store.reimOtherPoint.amount = store.reimRecordItem.items[index].amount
     store.reimOtherPoint.start_at = store.reimRecordItem.items[index].start_at
     store.reimOtherPoint.remark = store.reimRecordItem.items[index].remark
+    store.reimOtherPoint.images = [...store.reimRecordItem.items[index].images]
     modelVisible.value = true
 }
 const onDelete = (index: number) => {
@@ -160,3 +155,14 @@ const onDelete = (index: number) => {
 
 defineExpose({ toggleModal })
 </script>
+
+
+<style>
+.full-modal .ant-image {
+    margin-right: 10px;
+}
+
+.full-modal .ant-image-img {
+    width: 120px;
+    height: 120px;
+}</style>

@@ -29,8 +29,11 @@
 import { toRaw, defineProps, ref } from "vue";
 import BaseComponent from "./index.vue";
 import { ReimRecordStore } from "@/store/record";
+import { ossUploadFiles } from '@/store/uploader'
 import RemoteSelect from '@/components/remote_select/index.vue';
+import dayjs from 'dayjs';
 const orderSelectRef = ref<any>(null);
+const uploadFilesRef = ref<[]>()
 const baseModal = ref<any>(null);
 const modelVisible = ref<boolean>(false)
 const confirmLoading = ref<boolean>(false)
@@ -45,7 +48,7 @@ const props = defineProps({
 })
 const store = ReimRecordStore();
 
-const toggleModal = (item:any) => {
+const toggleModal = (item: any) => {
     baseModal.value.toggleModal(item)
 }
 
@@ -62,6 +65,39 @@ const handleOk = () => {
         store.resetItem('other')
     }, 2000)
 }
+
+
+const uploadFile = () => {
+  const input = document.createElement('input');
+  input.id = 'willUploadFileInput';
+  input.type = 'file';
+  let prefix = `reim/${dayjs().format('YYYYMMDD')}`
+
+  // if (editThirdpartyRecord.value?.order?.company?.id) {
+  //   prefix = `reim/${editThirdpartyRecord.value?.order?.company?.id}/${dayjs().format('YYYYMMDD')}`
+  // } else {
+  //   prefix = `reim/${dayjs().format('YYYYMMDD')}`
+  // }
+
+  input.onchange = async (e: any) => {
+    const files = e.target.files;
+    for (let file of files) {
+      //   uploadFilesRef.value.push({ file: file, kind: kind, item: item })
+      const fileSize = file.size;
+      const fileSizeInMB = fileSize / (1024 * 1024);
+      const fileSizeFormatted = fileSizeInMB.toFixed(2);
+      console.log(fileSizeFormatted);
+      let result = await ossUploadFiles(e, prefix)
+      console.log('upload-result:', result)
+      uploadFilesRef.value.push(result[0])
+      // remove child by ID
+      const willUploadFileInput = document.getElementById('willUploadFileInput');
+      willUploadFileInput?.parentNode?.removeChild(willUploadFileInput);
+    }
+  };
+  input.click();
+}
+
 
 defineExpose({ toggleModal })
 </script>

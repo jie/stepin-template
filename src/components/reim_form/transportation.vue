@@ -23,9 +23,11 @@
                     <dollar-circle-outlined style="font-size: 32px;" />
                   </template>
                 </a-list-item-meta>
-                <div>{{ item.trans_type }}</div>
-                <div>[{{ item?.dateRange[0]?.format('YYYY-MM-DD HH:mm') }} ~ {{ item?.dateRange[1]?.format('YYYY-MM-DD HH:mm') }}] </div>
-                <div>{{ item?.start_location }} ~ {{ item?.end_location }}</div>
+                <div v-if="item">
+                  <div>{{ item.trans_type }}</div>
+                  <div>[{{ item?.dateRange[0]?.format('YYYY-MM-DD HH:mm') }}~{{ item?.dateRange[1]?.format('YYYY-MM-DDHH:mm') }}] </div>
+                  <div>{{ item?.start_location }} ~ {{ item?.end_location }}</div>
+                </div>
               </div>
             </a-list-item>
           </template>
@@ -33,7 +35,8 @@
       </a-form-item>
       <a-modal width="100%" wrap-class-name="full-modal" v-model:visible="modelVisible" :title="props.title"
         :confirm-loading="confirmLoading" @ok="handleOk" @cancel="handleCancel" :afterClose="afterClose">
-        <a-form ref="formRef" style="max-width: 600px; margin: 0 auto;" layout="vertical" :validateOnRuleChange="true" :scrollToFirstError="true">
+        <a-form ref="formRef" style="max-width: 600px; margin: 0 auto;" layout="vertical" :scrollToFirstError="true"
+          :validateFirst="true">
           <a-form-item label="order">
             <RemoteSelect ref="orderSelectRef" type="order" v-model:value="store.reimTransportationPoint.order"
               searchKey="name" display_key="order_no" v-on:updateSelected="onUpdateOrderSelect" />
@@ -56,7 +59,7 @@
             v-bind="validateInfos.distance">
             <a-input v-model:value="store.reimTransportationPoint.distance" />
           </a-form-item>
-          <a-form-item label="time" v-bind="validateInfos.dateRange">
+          <a-form-item label="dateRange" v-bind="validateInfos.dateRange">
             <a-range-picker v-model:value="store.reimTransportationPoint.dateRange" :show-time="{ format: 'HH:mm' }"
               format="YYYY-MM-DD HH:mm" style="width: 100%;" />
           </a-form-item>
@@ -68,6 +71,9 @@
           </a-form-item>
           <a-form-item label="remark">
             <a-textarea v-model:value="store.reimTransportationPoint.remark" />
+          </a-form-item>
+          <a-form-item :label="$t('base.ExpenseReceipts')" v-bind="validateInfos.images">
+            <Uploader ref="imageUploaderRef" v-model="store.reimTransportationPoint.images" />
           </a-form-item>
         </a-form>
       </a-modal>
@@ -84,11 +90,13 @@ import RemoteSelect from '@/components/remote_select/index.vue';
 import { i18n } from '@/lang/i18n';
 import dayjs from 'dayjs';
 import { Form } from 'ant-design-vue';
+import Uploader from "./uploader.vue";
 const useForm = Form.useForm;
 const orderSelectRef = ref<any>(null);
 const baseModal = ref<any>(null);
 const modelVisible = ref<boolean>(false)
 const confirmLoading = ref<boolean>(false)
+const imageUploaderRef = ref(null)
 const editIndexRef = ref(null)
 const props = defineProps({
   expense_type_id: {
@@ -101,22 +109,7 @@ const props = defineProps({
 })
 
 const store = ReimRecordStore();
-const driverRules = {
-  gas_criteria: [
-    {
-      required: true,
-      message: 'Please select gas_criteria',
-      type: 'array',
-    },
-  ],
-  distance: [
-    {
-      required: true,
-      message: 'Please select distance',
-      type: 'array',
-    },
-  ],
-}
+
 const rulesRef = reactive({
   amount: [
     {
@@ -127,6 +120,17 @@ const rulesRef = reactive({
       type: 'number',
       message: 'Please input amount as number',
     },
+    // {
+    //   validator: (rule, value, callback) => {
+    //     return new Promise((resolve, reject) => {
+    //       if (value === '' || value == 0) {
+    //         reject('Please input amount')
+    //       } else {
+    //         resolve(true)
+    //       }
+    //     })
+    //   }
+    // }
   ],
   trans_type: [
     {
@@ -160,6 +164,51 @@ const rulesRef = reactive({
       message: 'Please enter end_location',
     },
   ],
+  images: [
+    {
+      validator: (rule, value, callback) => {
+        return new Promise((resolve, reject) => {
+          if (value === '' || value.length == 0) {
+            reject('Please upload expense receipt photo')
+          } else {
+            resolve(true)
+          }
+        })
+      }
+    }
+  ],
+  gas_criteria: [
+    {
+      validator: (rule, value) => {
+        return new Promise((resolve, reject) => {
+          if (store.reimTransportationPoint.trans_type != 'car') {
+            return resolve(true)
+          }
+          if (value === '' || value == 0) {
+            reject('Please input amount')
+          } else {
+            resolve(true)
+          }
+        })
+      }
+    }
+  ],
+  distance: [
+    {
+      validator: (rule, value) => {
+        return new Promise((resolve, reject) => {
+          if (store.reimTransportationPoint.trans_type != 'car') {
+            return resolve(true)
+          }
+          if (value === '' || value == 0) {
+            reject('Please input amount')
+          } else {
+            resolve(true)
+          }
+        })
+      }
+    }
+  ]
 });
 // const { resetFields, validate, validateInfos, mergeValidateInfo } = useForm(store.reimTransportationPoint, rulesRef, {
 //   onValidate: (...args) => {console.log('onValidate:', ...args); console.log('store:', toRaw(store.reimTransportationPoint))},
@@ -178,13 +227,13 @@ const trans_types = [
 
 const onChangeTransType = (e: Event) => {
   console.log('e.target.value:', e.target.value)
-  if (e.target.value == 'car') {
-    rulesRef.gas_criteria = driverRules.gas_criteria
-    rulesRef.distance = driverRules.distance
-  } else {
-    rulesRef.gas_criteria = []
-    rulesRef.distance = []
-  }
+  // if (e.target.value == 'car') {
+  //   rulesRef.gas_criteria = driverRules.gas_criteria
+  //   rulesRef.distance = driverRules.distance
+  // } else {
+  //   rulesRef.gas_criteria = []
+  //   rulesRef.distance = []
+  // }
 }
 
 const toggleModal = (item: any) => {
@@ -205,18 +254,7 @@ const handleOk = () => {
   console.log('store.reimTransportationPoint:', toRaw(store.reimTransportationPoint))
   validate()
     .then((result) => {
-      console.log('result:', result)
-
-      let hasError = false
-
-      for (let item of toArray(validateInfos)) {
-        console.log('key:', item)
-        // if(validateInfos[key].errors.length > 0) {
-        //   hasError = true
-        //   break
-        // }
-      }
-      if(editIndexRef.value !== null) {
+      if (editIndexRef.value !== null) {
         store.reimRecordItem.items[editIndexRef.value] = { ...store.reimTransportationPoint }
         editIndexRef.value = null
       } else {
@@ -254,6 +292,7 @@ const onEdit = (index: number) => {
   store.reimTransportationPoint.end_location = store.reimRecordItem.items[index].end_location
   store.reimTransportationPoint.remark = store.reimRecordItem.items[index].remark
   store.reimTransportationPoint.dateRange = [...store.reimRecordItem.items[index].dateRange]
+  store.reimTransportationPoint.images = [...store.reimRecordItem.items[index].images]
   modelVisible.value = true
 }
 const onDelete = (index: number) => {

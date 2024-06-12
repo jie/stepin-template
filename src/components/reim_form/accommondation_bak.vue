@@ -42,7 +42,8 @@
                         <a-input-number v-model:value="store.reimAccommondationPoint.amount" style="width: 100%;" />
                     </a-form-item>
                     <a-form-item label="time" v-bind="validateInfos.dateRange">
-                        <a-range-picker v-model:value="store.reimAccommondationPoint.dateRange" format="YYYY-MM-DD" style="width: 100%;" />
+                        <a-range-picker v-model:value="store.reimAccommondationPoint.dateRange" format="YYYY-MM-DD"
+                            style="width: 100%;" />
                     </a-form-item>
                     <a-form-item label="factory_name" v-bind="validateInfos.factory_name">
                         <a-input v-model:value="store.reimAccommondationPoint.factory_name" />
@@ -59,6 +60,9 @@
                     <a-form-item label="remark">
                         <a-textarea v-model:value="store.reimAccommondationPoint.remark" />
                     </a-form-item>
+                    <a-form-item :label="$t('base.ExpenseReceipts')" v-bind="validateInfos.images">
+                        <Uploader ref="imageUploaderRef" v-model="store.reimAccommondationPoint.images" />
+                    </a-form-item>
                 </a-form>
             </a-modal>
 
@@ -70,6 +74,7 @@ import { toRaw, defineProps, ref, reactive, computed } from "vue";
 import { toArray } from 'lodash-es';
 import BaseComponent from "./index.vue";
 import { ReimRecordStore } from "@/store/record";
+import Uploader from "./uploader.vue";
 import RemoteSelect from '@/components/remote_select/index.vue';
 import { i18n } from '@/lang/i18n';
 import dayjs from 'dayjs';
@@ -80,6 +85,7 @@ const baseModal = ref<any>(null);
 const modelVisible = ref<boolean>(false)
 const confirmLoading = ref<boolean>(false)
 const editIndexRef = ref(null)
+const imageUploaderRef = ref(null)
 const props = defineProps({
     expense_type_id: {
         type: String,
@@ -91,22 +97,6 @@ const props = defineProps({
 })
 
 const store = ReimRecordStore();
-const driverRules = {
-    gas_criteria: [
-        {
-            required: true,
-            message: 'Please select gas_criteria',
-            type: 'array',
-        },
-    ],
-    distance: [
-        {
-            required: true,
-            message: 'Please select distance',
-            type: 'array',
-        },
-    ],
-}
 const rulesRef = reactive({
     amount: [
         {
@@ -185,24 +175,12 @@ const handleOk = () => {
     console.log('store.reimAccommondationPoint:', toRaw(store.reimAccommondationPoint))
     validate()
         .then((result) => {
-            console.log('result:', result)
-
-            let hasError = false
-
-            for (let item of toArray(validateInfos)) {
-                console.log('key:', item)
-                // if(validateInfos[key].errors.length > 0) {
-                //   hasError = true
-                //   break
-                // }
-            }
-            if(editIndexRef.value !== null) {
+            if (editIndexRef.value !== null) {
                 store.reimRecordItem.items[editIndexRef.value] = { ...store.reimAccommondationPoint }
                 editIndexRef.value = null
             } else {
                 store.reimRecordItem.items.push({ ...store.reimAccommondationPoint })
             }
-            store.reimRecordItem.items.push({ ...store.reimAccommondationPoint })
             confirmLoading.value = true
             setTimeout(() => {
                 confirmLoading.value = false
@@ -234,6 +212,7 @@ const onEdit = (index: number) => {
     store.reimAccommondationPoint.people_num = store.reimRecordItem.items[index].people_num
     store.reimAccommondationPoint.remark = store.reimRecordItem.items[index].remark
     store.reimAccommondationPoint.dateRange = [...store.reimRecordItem.items[index].dateRange]
+    store.reimAccommondationPoint.images = [...store.reimRecordItem.items[index].images]
     modelVisible.value = true
 }
 const onDelete = (index: number) => {

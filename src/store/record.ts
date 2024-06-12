@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 
 
 export interface ReimRecordItem {
+  id?: string;
   expense_type?: ExpenseType;
   charge_to?: string;
   amount?: number;
@@ -71,7 +72,6 @@ export interface ReimOtherPoint extends ReimRecordPoint {
 export interface ReimRecord {
   id?: string;
   name?: string;
-  name_en?: string;
   totalItems?: object;
   items?: Array<ReimRecordItem>;
   remark?: string;
@@ -86,8 +86,8 @@ export const ReimRecordStore = defineStore('reim_record', {
   state: () => {
     return {
       reimRecordEditIndex: null,
-      reimRecord: { items: [] } as ReimRecord,
-      reimRecordItem: { currency: '1', target_currency: '1', amount: 0, items: [] } as ReimRecordItem,
+      reimRecord: { id: null, items: [], name: "", remark: "", totalItems: "" } as ReimRecord,
+      reimRecordItem: { id: null, currency: '1', target_currency: '1', amount: "", items: [] } as ReimRecordItem,
       reimRecordPoint: {
         order: "",
         remark: "",
@@ -99,19 +99,20 @@ export const ReimRecordStore = defineStore('reim_record', {
         start_location: "",
         end_location: "",
         trans_type: "",
-        distance: 0,
-        gas_criteria: 0,
-        people_num: 0,
+        distance: "",
+        gas_criteria: "",
+        people_num: "",
         hotel_name: "",
         factory_name: "",
-        meal_criteria: 0,
-        overtime_criteria: 0,
-        overtime_hours: 0,
-        num: 0,
+        meal_criteria: "",
+        overtime_criteria: "",
+        overtime_hours: "",
+        num: "",
         product_name: "",
-        price: 0,
+        price: "",
         purpose: "",
-        dateRange: []
+        dateRange: [],
+        images: []
       } as ReimRecordPoint,
       reimShoppingPoint: {
         amount: "",
@@ -120,14 +121,16 @@ export const ReimRecordStore = defineStore('reim_record', {
         num: "",
         start_at: "",
         purpose: "",
-        remark: ""
+        remark: "",
+        images: []
       } as ReimShoppingPoint,
       reimMealPoint: {
         factory_name: "",
         amount: "",
         start_at: "",
         meal_criteria: "",
-        remark: ""
+        remark: "",
+        images: []
       } as ReimMealPoint,
       reimOvertimePoint: {
         order: "",
@@ -136,7 +139,8 @@ export const ReimRecordStore = defineStore('reim_record', {
         overtime_hours: "",
         factory_name: "",
         remark: "",
-        dateRange: []
+        dateRange: [],
+        images: []
       } as ReimOvertimePoint,
       reimAccommondationPoint: {
         order: "",
@@ -146,24 +150,26 @@ export const ReimRecordStore = defineStore('reim_record', {
         hotel_name: "",
         start_location: "",
         dateRange: [],
-        remark: ""
+        remark: "",
+        images: []
       } as ReimAccommondationPoint,
       reimTransportationPoint: {
         order: "",
         remark: "",
         images: [],
-        amount: 0,
+        amount: "",
         start_location: "",
         end_location: "",
         trans_type: "",
-        distance: 0,
-        gas_criteria: 0,
+        distance: "",
+        gas_criteria: "",
         dateRange: []
       } as ReimTransportationPoint,
       reimOtherPoint: {
         amount: "",
         start_at: "",
-        remark: ""
+        remark: "",
+        images: []
       } as ReimOtherPoint,
       entities: <ReimRecord>[],
       orderEntities: [],
@@ -185,7 +191,8 @@ export const ReimRecordStore = defineStore('reim_record', {
             amount: "",
             start_at: "",
             meal_criteria: "",
-            remark: ""
+            remark: "",
+            images: []
           } as ReimMealPoint
           break
         case 'accommondation':
@@ -197,7 +204,8 @@ export const ReimRecordStore = defineStore('reim_record', {
             hotel_name: "",
             start_location: "",
             dateRange: [],
-            remark: ""
+            remark: "",
+            images: []
           } as ReimAccommondationPoint
           break
         case 'shppping':
@@ -208,7 +216,8 @@ export const ReimRecordStore = defineStore('reim_record', {
             num: "",
             start_at: "",
             purpose: "",
-            remark: ""
+            remark: "",
+            images: []
           } as ReimShoppingPoint
           break
         case 'overtime':
@@ -219,32 +228,37 @@ export const ReimRecordStore = defineStore('reim_record', {
             overtime_hours: "",
             factory_name: "",
             remark: "",
-            dateRange: []
+            dateRange: [],
+            images: []
           } as ReimOvertimePoint
           break
         case 'transportation':
           this.reimTransportationPoint = {
             order: "",
             remark: "",
-            images: [],
-            amount: 0,
+            amount: "",
             start_location: "",
             end_location: "",
             trans_type: "",
-            distance: 0,
-            gas_criteria: 0,
-            dateRange: []
+            distance: "",
+            gas_criteria: "",
+            dateRange: [],
+            images: []
           } as ReimTransportationPoint
           break
         case 'other':
           this.reimOtherPoint = {
             amount: "",
             start_at: "",
-            remark: ""
+            remark: "",
+            images: []
           } as ReimOtherPoint
           break
         case 'item':
-          this.reimRecordItem = { currency: '1', target_currency: '1', amount: 0, items: [] } as ReimRecordItem
+          this.reimRecordItem = { currency: '1', target_currency: '1', amount: "", items: [] } as ReimRecordItem
+          break
+        case 'record':
+          this.reimRecord = { id: null, items: [], name: "", remark: "", totalItems: "" } as ReimRecord
           break
       }
     },
