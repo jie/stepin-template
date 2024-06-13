@@ -14,7 +14,8 @@
         "personal": "个人设置",
         "my_report": "我的报告",
         "expense_type": "报销类型",
-        "record": "报销"
+        "record": "报销",
+        "record_approve": "审核报销"
     },
     "login": {
         "login": "登录",
@@ -218,6 +219,18 @@
         "What_is_the_Simplified_Version_Report_3": "在简化版本报告中，详细记录和已通过的检查将被排除或折叠。",
         "please_select_attachment_type": "请选择附件文件类型",
         "EmailCCList": "Email抄送列表",
-        "ExpenseReceipts": "报销凭证"
+        "ExpenseReceipts": "报销凭证",
+        "STATUS_CREATED": "未提交",
+        "STATUS_SUBMIT": "审核中",
+        "STATUS_APPROVE": "通过审核员审核",
+        "STATUS_DISAPPROVE": "未通过审核员审核",
+        "STATUS_ADMIN_APPROVE": "通过管理员审核",
+        "STATUS_ADMIN_DISAPPROVE": "未通过管理员审核",
+        "STATUS_SUBMIT_TICKET": "待提交报销凭据",
+        "STATUS_ACCOUNTANT_APPROVE": "通过财务审核",
+        "STATUS_ACCOUNTANT_REJECT": "未通过财务审核",
+        "STATUS_ACCOUNTANT_FINISH": "已审核",
+        "STATUS_REVOKE": "撤销",
+        "STATUS_DELETE": "删除"
     }
 }

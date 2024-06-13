@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
-import { FormInstance, message } from 'ant-design-vue';
+import { FormInstance } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, ReadOutlined } from '@ant-design/icons-vue';
@@ -10,12 +10,6 @@ import { ExpenseTypeStore } from '@/store/expense_type';
 import { i18n } from '@/lang/i18n';
 import { useLoadingStore } from '@/store/loading'
 import { useAccountStore } from '@/store/account'
-import ShoppingForm from '@/components/reim_form/shopping_bak.vue';
-import AccommondationForm from '@/components/reim_form/accommondation_bak.vue';
-import MealForm from '@/components/reim_form/meal_bak.vue';
-import TransportationForm from '@/components/reim_form/transportation.vue';
-import OvertimeForm from '@/components/reim_form/overtime_bak.vue';
-import OtherForm from '@/components/reim_form/other_bak.vue';
 import { CurrencyStore } from '@/store';
 import { toArray } from 'lodash-es';
 import { toRaw } from 'vue';
@@ -27,13 +21,6 @@ const store = ReimRecordStore();
 const loadingStore = useLoadingStore()
 const expenseTypeStore = ExpenseTypeStore();
 const activeKey = ref(null);
-const showCreateModal = ref(false);
-const shoppingFormRef = ref(null);
-const accommondationFormRef = ref(null);
-const mealFormRef = ref(null);
-const transportationFormRef = ref(null);
-const overtimeFormRef = ref(null);
-const otherFormRef = ref(null);
 const accountStore = useAccountStore()
 const currencyStore = CurrencyStore()
 
@@ -44,19 +31,6 @@ const expense_types = computed(() => {
 })
 console.log('accountStore:', toRaw(accountStore.account))
 
-// const rulesRef = reactive({
-//   items: [
-//     {
-//       required: true,
-//       message: 'Please fill items',
-//     },
-//   ],
-// })
-
-// const { resetFields, validate, validateInfos, mergeValidateInfo } = useForm(store.reimAccommondationPoint, rulesRef);
-// const errorInfos = computed(() => {
-//     return mergeValidateInfo(toArray(validateInfos));
-// });
 
 
 const columns = [
@@ -70,59 +44,71 @@ const columns = [
 ];
 
 
-const computedStatusOptions = [
-  {
-    label: i18n.global.t('base.Submit'),
-    value: '1'
-  },
-  {
-    label: i18n.global.t('base.Revoke'),
-    value: '-8'
+// status form
+const ApproveStatusOptionsMap = {
+  "1": [
+    { label: i18n.global.t("STATUS_APPROVE"), value: "2"},
+    { label: i18n.global.t("STATUS_DISAPPROVE"), value: "-2"},
+  ],
+  "2": [
+    { label: i18n.global.t("STATUS_APPROVE"), value: "2"},
+    { label: i18n.global.t("STATUS_DISAPPROVE"), value: "-2"},
+  ],
+  "3": [
+    { label: i18n.global.t("STATUS_ADMIN_APPROVE"), value: "3"},
+    { label: i18n.global.t("STATUS_ADMIN_DISAPPROVE"), value: "-3"},
+  ],
+  "4": [
+    { label: i18n.global.t("STATUS_ACCOUNTANT_APPROVE"), value: "5"},
+    { label: i18n.global.t("STATUS_ACCOUNTANT_REJECT"), value: "-5"},
+    { label: i18n.global.t("STATUS_ACCOUNTANT_FINISH"), value: "6"},
+  ]
+}
+
+const roleTypeMap = {
+  "报销财务审核员": "4",
+  "报销管理员": "3",
+  "报销高级审核员": "2",
+  "报销审核员": "1"
+}
+
+const computedStatusOptions = computed(() => {
+  for(let role of accountStore?.account?.roles) {
+    if(Object.keys(roleTypeMap).includes(role.name)) {
+      return ApproveStatusOptionsMap[roleTypeMap[role.name]]
+    }
   }
-]
+  return []
+})
+
 
 const statusForm = reactive({
-  record_id: "",
+  id: "",
   status: "",
-  staff_id: ""
+  reason: ""
 });
 const statusFormModel = ref<FormInstance>()
 
 const statusDialogRef = ref(false)
-const showStatusDialog = async (record: any) => {
-  if (record.status === '0') {
-    await store.apiQueryUsersByApproveRoleType('1')
-  }
-
+const showStatusDialog = (statusRecord: any) => {
   statusDialogRef.value = true
-  statusForm.record_id = record.id
-  statusForm.status = record.status
-  statusForm.staff_id = record.staff_id
+  statusForm.reason = statusRecord.reason || ''
+  statusForm.id = statusRecord.id
+  statusForm.status = statusRecord.status
 }
 const statusDialogConfirm = async () => {
-  if(statusForm.status == '1' && !statusForm.staff_id) {
-    message.error(i18n.global.t('base.please_select_approver'))
-    return
-  }
   await store.apiSetStatus(statusForm)
   initializeData(false)
   statusDialogRef.value = false
 }
 const statusDialogCancel = () => {
   statusDialogRef.value = false
-  statusForm.staff_id = ''
-  statusForm.record_id = ''
+  statusForm.reason = ''
+  statusForm.id = ''
   statusForm.status = ''
 }
 
 
-
-
-function addNew() {
-  // showModal.value = true;
-  // store.isNew = true;
-  showCreateModal.value = false
-}
 
 const showModal = ref(false);
 
@@ -178,26 +164,14 @@ function submit() {
   })
 }
 
-const editRecord = ref<ReimRecord>();
-
-/**
- * Edit
- * @param record
- */
-function edit(record: ReimRecord) {
-  store.isNew = false
-  editRecord.value = record;
-  copyObject(form, record);
-  form.id = record.id;
-  showCreateModal.value = true;
-}
 
 const currencyMap = ref({})
 
-const initializeData = async (isOnce: any) => {
-  store.apiQuery()
-  if (isOnce) {
-    await store.apiQueryUsersByApproveRoleType('1')
+const initializeData = async (isOnce:Boolean) => {
+  store.apiQuery({
+      is_approver: true
+    })
+  if(isOnce) {
     await currencyStore.apiQuery()
     currencyMap.value = currencyStore.entities.reduce((acc, cur) => {
       acc[cur.code] = cur.name
@@ -275,80 +249,24 @@ initializeData(true)
 
 </script>
 <template>
-  <ShoppingForm ref="shoppingFormRef" title="test shipping form" />
-  <AccommondationForm ref="accommondationFormRef" title="test accommondationFormRef form" />
-  <MealForm ref="mealFormRef" title="test mealFormRef form" />
-  <TransportationForm ref="transportationFormRef" title="test transportationFormRef form" />
-  <OvertimeForm ref="overtimeFormRef" title="test overtimeFormRef form" />
-  <OtherForm ref="otherFormRef" title="test otherFormRef form" />
   <!-- 审核dialog -->
   <a-modal :title="$t('base.SetStatus')" v-model:visible="statusDialogRef" @ok="statusDialogConfirm"
     @cancel="statusDialogCancel" width="660px">
     <a-form ref="statusFormModel" :model="statusForm" layout="vertical">
       <a-form-item required :label="$t('base.ReportResult')" name="status">
-        <a-select allowClear style="width: 100%" v-model:value="statusForm.status" :options="computedStatusOptions" />
+        {{ computedStatusOptions }}
+        <a-select style="width: 100%" v-model:value="statusForm.status" :options="computedStatusOptions" />
       </a-form-item>
-      <a-form-item  :label="$t('base.Approver')" name="approver" v-if="statusForm.status == '1'">
-        <a-select style="width: 100%" v-model:value="statusForm.staff_id" :options="store.approvers" :fieldNames="{label: 'name', value: 'id'}" />
+      <a-form-item :label="$t('base.Reason')" name="reason">
+        <a-textarea v-model:value="statusForm.reason" />
       </a-form-item>
     </a-form>
-  </a-modal>
-  <!-- 新建/编辑dialog -->
-  <a-modal width="100%" wrap-class-name="full-modal" :title="form._isNew ? 'Create' : 'Edit'"
-    v-model:visible="showCreateModal" @ok="submit" @cancel="cancel">
-    <div style="width: 100%; height: 100%;">
-      <a-spin tip="Loading..." v-if="loadingStore.pageLoading"></a-spin>
-      <div v-else>
-        <a-collapse v-model:activeKey="activeKey" :bordered="true">
-          <a-collapse-panel key="1" header="please choose expense type" style="width: 100%;">
-            <div style="padding: 20px; display: flex; flex-wrap: wrap; margin: 0 auto; align-items: center; width: 100%;">
-              <a-card :bordered="true" v-for="item in expense_types" style="margin: 10px; width: 180px;"
-                :title="i18n.global.locale == 'en' ? item.name_en : item.name">
-                <a-button type="default" @click="onClickCard(item)">add</a-button>
-              </a-card>
-            </div>
-          </a-collapse-panel>
-        </a-collapse>
-        <div v-if="store.reimRecord.items && store.reimRecord.items.length != 0">
-          <a-list class="demo-loadmore-list" item-layout="horizontal" :data-source="store.reimRecord.items">
-            <template #header>
-              <div :style="{ textAlign: 'left', height: '32px', lineHeight: '32px' }">Expense items</div>
-            </template>
-            <template #renderItem="{ item, index }">
-              <a-list-item>
-                <template #actions>
-                  <edit-outlined key="edit" @click="onEdit(index)" />
-                  <delete-outlined key="delete" @click="onDelete(index)" />
-                </template>
-                <div style="width: 100%;">
-                  <a-list-item-meta :description="item.remark">
-                    <template #title>
-
-                      <a href="#">{{ item.amount }} ({{ item.expense_type.name }})</a>
-                    </template>
-                    <template #avatar>
-                      <dollar-circle-outlined style="font-size: 32px;" />
-                    </template>
-                  </a-list-item-meta>
-                </div>
-              </a-list-item>
-            </template>
-          </a-list>
-        </div>
-      </div>
-    </div>
   </a-modal>
   <!-- 成员表格 -->
   <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
         <h4>{{ $t('menu.expense_type') }}</h4>
-        <a-button type="primary" @click="openCreateModal" :loading="formLoading">
-          <template #icon>
-            <PlusOutlined />
-          </template>
-          Create
-        </a-button>
       </div>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -359,8 +277,8 @@ initializeData(true)
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
-        <span v-if="record.status == '0' && record.create_by == accountStore.account?.id">
-          <a-button @click="showStatusDialog(record)">Submit</a-button>
+        <span v-if="record.status == '1' && record.create_by == accountStore.account?.id">
+          <a-button>Submit</a-button>
         </span>
         <a-badge class="text-subtext" :color="'green'" v-else>
           <template #text>
@@ -386,10 +304,10 @@ initializeData(true)
                   View
                 </a>
               </a-menu-item>
-              <a-menu-item key="1">
-                <a @click="edit(record)" rel="noopener noreferrer">
+              <a-menu-item key="2">
+                <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                   <EditOutlined />
-                  Edit
+                  Set Status
                 </a>
               </a-menu-item>
               <a-menu-item key="3">
@@ -400,6 +318,7 @@ initializeData(true)
                     Delete
                   </a>
                 </a-popconfirm>
+
               </a-menu-item>
             </a-menu>
           </template>

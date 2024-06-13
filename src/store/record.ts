@@ -85,6 +85,7 @@ export interface ReimRecord {
 export const ReimRecordStore = defineStore('reim_record', {
   state: () => {
     return {
+      approvers: [],
       reimRecordEditIndex: null,
       reimRecord: { id: null, items: [], name: "", remark: "", totalItems: "" } as ReimRecord,
       reimRecordItem: { id: null, currency: '1', target_currency: '1', amount: "", items: [] } as ReimRecordItem,
@@ -307,13 +308,19 @@ export const ReimRecordStore = defineStore('reim_record', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQuery() {
+    async apiQuery(queryObj: any) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       let bodyJson = {
         ...this.pagination,
         ...this.queryArgs
+      }
+      if(queryObj) {
+        bodyJson = {
+          ...bodyJson,
+          ...queryObj
+        }
       }
       return http
         .request('/platform/reim_api/record/query', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
@@ -360,6 +367,39 @@ export const ReimRecordStore = defineStore('reim_record', {
         .request('/platform/reim_api/record/get', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiQueryUsersByApproveRoleType(role_type:string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { role_type: role_type }
+      return http
+        .request('/platform/reim_api/record/query_user_by_approve_role_type', 'post_json', bodyJson, { headers: { reimsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            this.approvers = response.data?.data?.entities
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiSetStatus(statusObj: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      return http
+        .request('/platform/reim_api/record/set_status', 'post_json', {...statusObj}, { headers: { reimsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            this.approvers = response.data?.data?.entities
             return response.data?.data;
           } else {
             return Promise.reject(response);

@@ -97,7 +97,7 @@ const toggleModal = (item: any) => {
 }
 
 const initializeData = async () => {
-  currencyStore.apiQuery()
+  // currencyStore.apiQuery()
 };
 
 const afterClose = () => {

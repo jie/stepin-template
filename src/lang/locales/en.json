@@ -14,7 +14,8 @@
         "personal": "User Center",
         "my_report": "My Reports",
         "expense_type": "Expense Type",
-        "record": "Reim Record"
+        "record": "Reim Record",
+        "record_approve": "Audit Reimbursements"
     },
     "login": {
         "login": "Login",
@@ -218,6 +219,18 @@
         "What_is_the_Simplified_Version_Report_3": "The informative record and passed check points will be excluded or folded in the Simplified Report.",
         "please_select_attachment_type": "Please select attachment type",
         "EmailCCList": "Email CC List",
-        "ExpenseReceipts": "Expense Receipts"
+        "ExpenseReceipts": "Expense Receipts",
+        "STATUS_CREATED": "CREATED",
+        "STATUS_SUBMIT": "SUBMIT",
+        "STATUS_APPROVE": "APPROVE",
+        "STATUS_DISAPPROVE": "DISAPPROVE",
+        "STATUS_ADMIN_APPROVE": "ADMIN_APPROVE",
+        "STATUS_ADMIN_DISAPPROVE": "ADMIN_DISAPPROVE",
+        "STATUS_SUBMIT_TICKET": "SUBMIT_TICKET",
+        "STATUS_ACCOUNTANT_APPROVE": "ACCOUNTANT_APPROVE",
+        "STATUS_ACCOUNTANT_REJECT": "ACCOUNTANT_REJECT",
+        "STATUS_ACCOUNTANT_FINISH": "ACCOUNTANT_FINISH",
+        "STATUS_REVOKE": "REVOKE",
+        "STATUS_DELETE": "DELETE"
     }
 }

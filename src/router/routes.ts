@@ -71,6 +71,14 @@ const routes: RouteRecordRaw[] = [
          },
         component: () => import('@/pages/record'),
       },
+      {
+        path: 'record_approve',
+        name: 'record_approve',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/record_approve'),
+      },
       // {
       //   path: 'company',
       //   name: 'company',
