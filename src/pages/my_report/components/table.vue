@@ -36,7 +36,7 @@ const columns = [
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
   { title: i18n.global.t('base.Factory'), dataIndex: 'factory', width: 120 },
   { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
-  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
+  // { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
 
