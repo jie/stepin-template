@@ -80,7 +80,9 @@
                     {% if report.inspect_remark %}
                     <div style="min-height: 40px;">
                         <div style="font-weight: bold; color: #337fb5; padding: 10px; padding-bottom: 0;">Remarks</div>
-                        <div style="flex: 1; padding: 10px; line-height: 24px;">{{report.inspect_remark}}</div>
+                        <div style="flex: 1; padding: 10px; line-height: 24px;">
+                            <pre style="margin: 0; font-family: inherit; font-size: inherit; line-height: inherit;">{{report.inspect_remark}}</pre>
+                        </div>
                     </div>
                     {% endif %}
                 </div>

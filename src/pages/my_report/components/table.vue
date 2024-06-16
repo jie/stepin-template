@@ -36,7 +36,7 @@ const columns = [
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
   { title: i18n.global.t('base.Factory'), dataIndex: 'factory', width: 120 },
   { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
-  // { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
 
@@ -409,12 +409,12 @@ initializeData()
         </div>
         <template v-else-if="column.dataIndex === 'factory'">
           <div class="text-title font-bold">
-            {{ record.order._factory.name }}
+            {{ record.order?._factory?.name }}
           </div>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <div class="text-title font-bold">
-            {{ ReportResultStatus[record.status] }}
+            {{ ReportResultStatus[record.status] || '1' }}
           </div>
         </template>
         <template v-else-if="column.dataIndex === 'inspect_date'">
@@ -428,9 +428,6 @@ initializeData()
             {{ $t('base.ViewThirdpartyReport') }}
           </a>
         </template>
-        <div v-else class="text-subtext">
-          {{ text }}
-        </div>
       </template>
     </a-table>
   </div>
