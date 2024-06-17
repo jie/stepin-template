@@ -13,7 +13,7 @@ import { DayjsDateRangeSchema, statusFormSchema } from '@/types'
 import { ReportCategoryStore } from '@/store/category'
 import { useRouter } from 'vue-router'
 import { i18n } from "@/lang/i18n"
-import { openNewUrl } from "@/utils/helpers"
+import { openNewUrl, displayReportCategory, displayCompanyName } from "@/utils/helpers"
 import { openNotification } from '@/utils/notification';
 const router = useRouter()
 const store = ReportStore()
@@ -384,12 +384,7 @@ initializeData()
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
-          <div class="text-title font-bold" v-if="record.order">
-            {{ record.order_data.company.shortname }}
-          </div>
-          <div class="text-title font-bold" v-else>
-            {{ record.company.shortname }}
-          </div>
+          {{  displayCompanyName(report, i18n.global.locale) }}
         </div>
         <div class="" v-else-if="column.dataIndex === 'workers'">
           <div class="text-title font-bold" v-if="record.order">
@@ -401,15 +396,12 @@ initializeData()
         </div>
         <div class="" v-else-if="column.dataIndex === 'category'">
           <div class="text-title font-bold" v-if="record.order">
-            {{ record.order_data.category.name }}
-          </div>
-          <div class="text-title font-bold" v-else>
-            {{ record.workers }}
+            {{ displayReportCategory(record, i18n.global.locale) }}
           </div>
         </div>
         <template v-else-if="column.dataIndex === 'factory'">
           <div class="text-title font-bold">
-            {{ record.order?._factory?.name }}
+            {{ record?.order?._factory?.name || record?.order?.factory_name }}
           </div>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
@@ -421,7 +413,7 @@ initializeData()
           {{ text }}
         </template>
         <template v-else-if="column.dataIndex === 'edit'">
-          <a @click="goPublicReviewReport(record)" rel="noopener noreferrer" v-if="!record.is_thirdparty">
+          <a @click="goPublicReviewReport(record)" rel="noopener noreferrer" v-if="!record?.is_thirdparty">
             {{ $t('base.PublicView') }}
           </a>
           <a @click="goThirpartyReportReview(record)" rel="noopener noreferrer" v-else>
