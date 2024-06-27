@@ -216,7 +216,15 @@
         "What_is_the_Simplified_Version_Report_3": "在简化版本报告中，详细记录和已通过的检查将被排除或折叠。",
         "please_select_attachment_type": "请选择附件文件类型",
         "EmailCCList": "Email抄送列表",
-        "if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon": "多个邮箱请使用分号隔开"
-
+        "if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon": "多个邮箱请使用分号隔开",
+        "oldPassword": "旧密码",
+        "newPassword": "新密码",
+        "confirmPassword": "重复新密码",
+        "ChangePassword": "修改密码",
+        "please_enter_old_password": "请输入旧密码",
+        "password_length_error": "请输入最小长度为6的密码",
+        "please_enter_new_password": "请输入新密码",
+        "please_enter_confirm_password": "请输入旧密码",
+        "password_not_match": "重复密码不匹配"
     }
 }

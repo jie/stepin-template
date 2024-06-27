@@ -165,6 +165,14 @@ const routes: RouteRecordRaw[] = [
           renderMenu: true,
          },
         component: () => import('@/pages/defect'),
+      },
+      {
+        path: 'profile',
+        name: 'profile',
+        meta: {
+          renderMenu: true,
+         },
+        component: () => import('@/pages/profile'),
       }
     ],
   },

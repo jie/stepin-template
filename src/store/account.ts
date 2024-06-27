@@ -124,5 +124,20 @@ export const useAccountStore = defineStore('account', {
           }
         });
     },
+    async changePassword(oldPassword: string, newPassword: string) {
+      let session = getSessionInfo()
+      console.log('session:', session)
+      return http
+        .request('/platform/report_api/profile/change_password', 'post_json', { old_password: oldPassword, new_password: newPassword }, {headers: {rsessionid: session.sessionid}})
+        .then(async (response) => {
+          if (response?.data?.status) {
+            message.success(response.data.message)
+            return response.data.data.user_data;
+          } else {
+            message.error(response.data.message)
+            return Promise.reject(response);
+          }
+        });
+    }
   },
 });

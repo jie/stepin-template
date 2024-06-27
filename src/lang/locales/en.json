@@ -216,6 +216,15 @@
         "What_is_the_Simplified_Version_Report_3": "The informative record and passed check points will be excluded or folded in the Simplified Report.",
         "please_select_attachment_type": "Please select attachment type",
         "EmailCCList": "Email CC List",
-        "if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon": "If you have multiple email addresses, please separate them with a semicolon"
+        "if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon": "If you have multiple email addresses, please separate them with a semicolon",
+        "oldPassword": "Old Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm Password",
+        "ChangePassword": "Change Password",
+        "please_enter_old_password": "Please enter old password",
+        "password_length_error": "Please enter a password between 6 and 20 characters",
+        "please_enter_new_password": "Please enter new password",
+        "please_enter_confirm_password": "Please enter confirm password",
+        "password_not_match": "The new password and confirm password do not match"
     }
 }
