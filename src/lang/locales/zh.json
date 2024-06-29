@@ -225,6 +225,8 @@
         "password_length_error": "请输入最小长度为6的密码",
         "please_enter_new_password": "请输入新密码",
         "please_enter_confirm_password": "请输入旧密码",
-        "password_not_match": "重复密码不匹配"
+        "password_not_match": "重复密码不匹配",
+        "reset_password": "重置密码",
+        "will_reset_user_password_with_random_string": "将重置用户密码为随机字符串, 并将密码通过邮件发送给用户"
     }
 }

@@ -146,6 +146,22 @@ export const ReportUserStore = defineStore('reportUser', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiResetPassword(params: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { id: params.id, password: params.password }
+      return http
+        .request('/platform/report_api/report_user/reset_password', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
     async apiQueryByIds(ids: string[]) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)

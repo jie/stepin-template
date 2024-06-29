@@ -225,6 +225,8 @@
         "password_length_error": "Please enter a password between 6 and 20 characters",
         "please_enter_new_password": "Please enter new password",
         "please_enter_confirm_password": "Please enter confirm password",
-        "password_not_match": "The new password and confirm password do not match"
+        "password_not_match": "The new password and confirm password do not match",
+        "reset_password": "Reset Password",
+        "will_reset_user_password_with_random_string": "Will reset user password with random string, and send the new password to user's email"
     }
 }

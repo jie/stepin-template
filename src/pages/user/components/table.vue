@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
-import { FormInstance } from 'ant-design-vue';
+import { FormInstance, message } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
@@ -11,6 +11,7 @@ import { ReportUserStore, ReportUser } from "@/store/user"
 import { ReportRoleStore } from "@/store/role"
 import { getSessionInfo } from '@/utils/session'
 import { statusFormSchema } from "@/types"
+import { i18n } from "@/lang/i18n"
 const isViewForm = ref(false)
 const store = ReportUserStore()
 const roleStore = ReportRoleStore()
@@ -232,6 +233,27 @@ const statusDialogCancel = () => {
   statusForm.status = ''
 }
 
+const isShowResetPasswordRef = ref(false)
+
+const resetPasswordReactive = reactive({
+  id: ""
+})
+
+const showResetPasswordDialog = (record: any) => {
+  resetPasswordReactive.id = record.id
+  isShowResetPasswordRef.value = true
+}
+
+const confirmResetPassword = async () => {
+  await store.apiResetPassword(resetPasswordReactive)
+  isShowResetPasswordRef.value = false
+  resetPasswordReactive.id = ''
+}
+const cancelResetPassword = async () => {
+  isShowResetPasswordRef.value = false
+  resetPasswordReactive.id = ''
+}
+
 </script>
 <template>
   <!-- 审核dialog -->
@@ -268,7 +290,7 @@ const statusDialogCancel = () => {
         <a-input v-model:value="form.email" />
       </a-form-item>
       <a-form-item label="Password" name="password">
-        <a-input v-model:value="form.password" type="password"/>
+        <a-input v-model:value="form.password" type="password" />
       </a-form-item>
       <a-form-item label="Mobile" name="mobile">
         <a-input v-model:value="form.mobile" />
@@ -294,36 +316,41 @@ const statusDialogCancel = () => {
       </a-form-item>
     </a-form>
   </a-modal>
+  <!-- reset password dialog -->
+  <a-modal :title="$t('base.reset_password')" v-model:visible="isShowResetPasswordRef" @ok="confirmResetPassword" @cancel="cancelResetPassword"
+    width="660px">
+    <p>{{ $t('base.will_reset_user_password_with_random_string') }}</p>
+  </a-modal>
   <!-- 成员表格 -->
   <a-table v-bind="$attrs" :columns="columns" :dataSource="store.entities" @change="store.changePage" :pagination="{
     current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger: true, showQuickJumper: true
   }">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h4>User</h4>
+        <h4>{{ $t('menu.user') }}</h4>
         <div class="flex">
           <div class="mr-4">
-            <span class="mr-2">Status</span>
+            <span class="mr-2">{{ $t('base.Status') }}</span>
             <a-select ref="select" style="width: 200px" v-model:value="store.queryArgs.status" allowClear>
               <a-select-option :value="item.value" v-for="item in ApproveStatusOptions">{{ item.label }}</a-select-option>
             </a-select>
           </div>
           <a-input v-model:value="searchKeywords" style="width: 240px" class="mr-4" allowClear>
             <template #addonBefore>
-              Keywords
+              {{ $t('base.Keywords') }}
             </template>
           </a-input>
           <a-button class="mr-2" @click="onClickSearch">
             <template #icon>
               <SearchOutlined />
             </template>
-            Search
+            {{ $t('base.Search') }}
           </a-button>
           <a-button type="primary" @click="addNew" :loading="formLoading">
             <template #icon>
               <PlusOutlined />
             </template>
-            Create
+            {{ $t('base.Create') }}
           </a-button>
         </div>
       </div>
@@ -354,26 +381,33 @@ const statusDialogCancel = () => {
               <a-menu-item key="0">
                 <a @click="view(record)" rel="noopener noreferrer">
                   <ReadOutlined />
-                  View
+                  {{ $t('base.View') }}
                 </a>
               </a-menu-item>
               <a-menu-item key="0">
                 <a @click="edit(record)" rel="noopener noreferrer">
                   <EditOutlined />
-                  Edit
+                  {{ $t('base.Edit') }}
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
                 <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                   <VerifiedOutlined />
-                  Verify
+                  {{ $t('base.Verify') }}
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm title="删除" content="确认删除吗？" okText="确认" cancelText="取消" @confirm="deleteRecord(record)">
+                <a @click="showResetPasswordDialog(record)" rel="noopener noreferrer">
+                  <KeyOutlined />
+                  {{ $t('base.reset_password') }}
+                </a>
+              </a-menu-item>
+              <a-menu-item key="1">
+                <a-popconfirm :title="$t('base.Delete')" :content="$t('base.ConfirmDelete')" :okText="$t('base.Ok')" :cancelText="$t('base.Cancel')"
+                  @confirm="deleteRecord(record)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
-                    Delete
+                    {{ $t('base.Delete') }}
                   </a>
                 </a-popconfirm>
               </a-menu-item>
