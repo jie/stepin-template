@@ -146,6 +146,22 @@ export const ReportUserStore = defineStore('reportUser', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiGetByCustomerId(customerId: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { id: customerId }
+      return http
+        .request('/platform/report_api/report_user/get_by_customer_id', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
     async apiResetPassword(params: any) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
@@ -153,6 +169,22 @@ export const ReportUserStore = defineStore('reportUser', {
       let bodyJson = { id: params.id, password: params.password }
       return http
         .request('/platform/report_api/report_user/reset_password', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiSaveCcEmails(params: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { id: params.id, cc_emails: params.cc_emails }
+      return http
+        .request('/platform/report_api/report_user/save_cc_emails', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

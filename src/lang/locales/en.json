@@ -230,6 +230,8 @@
         "will_reset_user_password_with_random_string": "Will reset user password with random string, and send the new password to user's email",
         "Sended": "Sended",
         "SendStatus": "Send Status",
-        "HasSetPassword": "Password Seted"
+        "HasSetPassword": "Password Set",
+        "cc_emails": "CC Emails",
+        "SaveCcEmails": "Save CC Emails"
     }
 }

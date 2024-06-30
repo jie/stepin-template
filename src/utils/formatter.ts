@@ -39,7 +39,6 @@ export function formatThousand(value: number, fixed: number = 0): string {
 
 
 export const formatStatusColor = (status: string) => {
-  console.log('status', status)
   switch (status) {
     case '0':
       return 'red';

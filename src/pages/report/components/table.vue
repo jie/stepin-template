@@ -17,6 +17,8 @@ import { useRouter } from 'vue-router'
 import { i18n } from "@/lang/i18n"
 import { openNewUrl } from "@/utils/helpers"
 import { openNotification } from "@/utils/notification"
+import { ReportUserStore } from '@/store/user';
+const userStore = ReportUserStore()
 const router = useRouter()
 const store = ReportStore()
 const tagStore = ReportTagStore()
@@ -411,12 +413,22 @@ const uploadFile = (index: number, kind: string, item: any) => {
   input.click();
 }
 
+const currentReportCustomer = ref(null)
 
-const onClickShowEditThirdpartyReportModal = (record: Report) => {
+
+const onClickShowEditThirdpartyReportModal = async (record: Report) => {
+  console.log('record:', record.order.company_customer.id)
+  let userRes = await userStore.apiGetByCustomerId(record.order.company_customer.id)
+  console.log('userRes:', userRes)
+  currentReportCustomer.value = userRes.entity
   editThirdpartyRecord.value = record
   showEditThirdpartyModal.value = true
-  if(record.cc_emails && record.cc_emails.length > 0) {
+  if (record.cc_emails && record.cc_emails.length > 0) {
     ccEmailsRef.value = record.cc_emails.join(';')
+  } else {
+    if(!ccEmailsRef.value && userRes.entity.cc_emails && userRes.entity.cc_emails.length > 0){
+      ccEmailsRef.value = userRes.entity.cc_emails.join(';')
+    }
   }
   poNumberRef.value = record.po_number || ''
   inspectRemarkRef.value = record.inspect_remark || ''
@@ -511,6 +523,10 @@ const handleTagClose = (removedTag: any) => {
   tagsRef.value = tags;
 }
 
+const saveCcEmails = async () => {
+  await userStore.apiSaveCcEmails({id: currentReportCustomer.value.id, cc_emails: ccEmailsRef.value.split(';')})
+}
+
 initializeData()
 
 </script>
@@ -519,8 +535,15 @@ initializeData()
     @cancel="cancel" width="660px">
     <a-form>
       <div>
-        <a-form-item :label="$t('base.cc_emails')" :extra="$t('base.if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon')">
-          <a-textarea v-model:value="ccEmailsRef" />
+        <a-form-item :label="$t('base.cc_emails')">
+          <a-textarea v-model:value="ccEmailsRef" :rows="4" />
+          <div class="flex">
+            <div style="height: 24px; line-height: 24px; display: flex; flex: 1; padding-top: 5px;">{{ $t('base.if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon') }}</div>
+            <div class="flex-1">
+              <a-button type="primary" @click="saveCcEmails" style="float: right; margin-top: 10px;">{{ $t('base.SaveCcEmails') }}</a-button>
+            </div>
+          </div>
+
         </a-form-item>
         <div>{{ $t('base.ReportFiles') }}</div>
         <div style="margin-bottom: 20px;">
@@ -815,7 +838,8 @@ initializeData()
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
           <div class="text-title font-bold" v-if="record.order">
-            <a :href="`/report_system/workplace/user?keywords=${record.order_data.company_contact.mail}`">{{ record.order_data.company.shortname }}</a>
+            <a :href="`/report_system/workplace/user?keywords=${record.order_data.company_contact.mail}`">{{
+              record.order_data.company.shortname }}</a>
           </div>
           <div class="text-title font-bold" v-else>
             {{ record.company.shortname }}
@@ -841,7 +865,8 @@ initializeData()
             </template>
           </a-badge>
         </template>
-        <template v-else-if="column.dataIndex === 'send_status'">{{ record?.send_email_count ? $t('base.Sended'):''}}</template>
+        <template v-else-if="column.dataIndex === 'send_status'">{{ record?.send_email_count ?
+          $t('base.Sended') : '' }}</template>
         <template v-else-if="column.dataIndex === 'inspect_date'">
           {{ text }}
         </template>

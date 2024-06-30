@@ -230,6 +230,8 @@
         "will_reset_user_password_with_random_string": "将重置用户密码为随机字符串, 并将密码通过邮件发送给用户",
         "Sended": "已发送",
         "SendStatus": "发送状态",
-        "HasSetPassword": "已设置过密码"
+        "HasSetPassword": "已设置过密码",
+        "cc_emails": "抄送邮件",
+        "SaveCcEmails": "保存抄送邮箱"
     }
 }
