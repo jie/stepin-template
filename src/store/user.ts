@@ -4,7 +4,7 @@ import { getSessionInfo } from '@/utils/session'
 import { useLoadingStore } from '@/store';
 import { Pagination } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
-
+import { message } from 'ant-design-vue';
 
 export interface ReportUser {
   id?: string;
@@ -187,6 +187,7 @@ export const ReportUserStore = defineStore('reportUser', {
         .request('/platform/report_api/report_user/save_cc_emails', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
+            message.success(response.data.message)
             return response.data?.data;
           } else {
             return Promise.reject(response);

@@ -525,6 +525,7 @@ const handleTagClose = (removedTag: any) => {
 
 const saveCcEmails = async () => {
   await userStore.apiSaveCcEmails({id: currentReportCustomer.value.id, cc_emails: ccEmailsRef.value.split(';')})
+  message.success(i18n.global.t('base.SaveSuccess'))
 }
 
 initializeData()
