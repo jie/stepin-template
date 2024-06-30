@@ -11,7 +11,9 @@ import { ReportUserStore, ReportUser } from "@/store/user"
 import { ReportRoleStore } from "@/store/role"
 import { getSessionInfo } from '@/utils/session'
 import { statusFormSchema } from "@/types"
+import { useRoute } from 'vue-router';
 import { i18n } from "@/lang/i18n"
+const routeStore = useRoute()
 const isViewForm = ref(false)
 const store = ReportUserStore()
 const roleStore = ReportRoleStore()
@@ -25,6 +27,7 @@ const columns = [
   { title: 'Is Customer', dataIndex: 'is_customer' },
   { title: 'Is Factory', dataIndex: 'is_factory' },
   { title: 'Is Worker', dataIndex: 'is_worker' },
+  { title: 'Has Password', dataIndex: 'has_password' },
   { title: 'Create at', dataIndex: 'create_at' },
   { title: 'OP', dataIndex: 'edit', width: 40 },
 ];
@@ -42,13 +45,21 @@ const createTimeRef = ref<Dayjs>(dayjs());
 
 
 const initializeData = async () => {
-  let result = await store.apiQuery()
+  let result
+  if (routeStore.query.keywords) {
+    searchKeywords.value = routeStore.query.keywords
+    onClickSearch()
+  } else {
+    searchKeywords.value = ""
+    result = await store.apiQuery()
+  }
   console.log('result:', result)
+
   roleStore.pagination = { page: 1, pagesize: 1000 }
   roleStore.apiQuery()
 }
 
-initializeData()
+
 
 function addNew() {
   isViewForm.value = false
@@ -253,7 +264,7 @@ const cancelResetPassword = async () => {
   isShowResetPasswordRef.value = false
   resetPasswordReactive.id = ''
 }
-
+initializeData()
 </script>
 <template>
   <!-- 审核dialog -->
@@ -290,7 +301,12 @@ const cancelResetPassword = async () => {
         <a-input v-model:value="form.email" />
       </a-form-item>
       <a-form-item label="Password" name="password">
-        <a-input v-model:value="form.password" type="password" />
+        <a-input v-model:value="form.password" type="password" v-if="!form.password">
+          <template #addonAfter>
+            {{ $t('base.HasSetPassword') }}
+          </template>
+        </a-input>
+        <a-input v-model:value="form.password" type="password" v-else />
       </a-form-item>
       <a-form-item label="Mobile" name="mobile">
         <a-input v-model:value="form.mobile" />
@@ -317,8 +333,8 @@ const cancelResetPassword = async () => {
     </a-form>
   </a-modal>
   <!-- reset password dialog -->
-  <a-modal :title="$t('base.reset_password')" v-model:visible="isShowResetPasswordRef" @ok="confirmResetPassword" @cancel="cancelResetPassword"
-    width="660px">
+  <a-modal :title="$t('base.reset_password')" v-model:visible="isShowResetPasswordRef" @ok="confirmResetPassword"
+    @cancel="cancelResetPassword" width="660px">
     <p>{{ $t('base.will_reset_user_password_with_random_string') }}</p>
   </a-modal>
   <!-- 成员表格 -->
@@ -361,6 +377,18 @@ const cancelResetPassword = async () => {
           <span class="text-title font-bold">{{ text }}</span>
         </div>
       </div>
+      <template v-else-if="column.dataIndex === 'is_customer'">
+        {{ record.is_customer ? 'Yes' : 'No' }}
+      </template>
+      <template v-else-if="column.dataIndex === 'is_factory'">
+        {{ record.is_factory ? 'Yes' : 'No' }}
+      </template>
+      <template v-else-if="column.dataIndex === 'is_worker'">
+        {{ record.is_worker ? 'Yes' : 'No' }}
+      </template>
+      <template v-else-if="column.dataIndex === 'has_password'">
+        {{ record.password ? 'Yes' : 'No' }}
+      </template>
       <template v-else-if="column.dataIndex === 'status'">
         <a-badge class="text-subtext" :color="'green'">
           <template #text>
@@ -403,8 +431,8 @@ const cancelResetPassword = async () => {
                 </a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a-popconfirm :title="$t('base.Delete')" :content="$t('base.ConfirmDelete')" :okText="$t('base.Ok')" :cancelText="$t('base.Cancel')"
-                  @confirm="deleteRecord(record)">
+                <a-popconfirm :title="$t('base.Delete')" :content="$t('base.ConfirmDelete')" :okText="$t('base.Ok')"
+                  :cancelText="$t('base.Cancel')" @confirm="deleteRecord(record)">
                   <a rel="noopener noreferrer">
                     <DeleteOutlined />
                     {{ $t('base.Delete') }}

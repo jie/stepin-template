@@ -55,13 +55,14 @@ const columns = [
     title: i18n.global.t('base.Report'),
     dataIndex: 'name',
     fixed: 'left',
-    width: 260,
+    // width: 260,
   },
-  { title: i18n.global.t('base.DateOfInspection'), dataIndex: 'inspect_date', width: 120 },
+  { title: i18n.global.t('base.DateOfInspection'), dataIndex: 'inspect_date', width: 200 },
   { title: i18n.global.t('base.Customer'), dataIndex: 'company', width: 200 },
   { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
   { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
+  { title: i18n.global.t('base.SendStatus'), dataIndex: 'send_status', width: 100 },
   { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
 
@@ -814,7 +815,7 @@ initializeData()
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
           <div class="text-title font-bold" v-if="record.order">
-            {{ record.order_data.company.shortname }}
+            <a :href="`/report_system/workplace/user?keywords=${record.order_data.company_contact.mail}`">{{ record.order_data.company.shortname }}</a>
           </div>
           <div class="text-title font-bold" v-else>
             {{ record.company.shortname }}
@@ -840,6 +841,7 @@ initializeData()
             </template>
           </a-badge>
         </template>
+        <template v-else-if="column.dataIndex === 'send_status'">{{ record?.send_email_count ? $t('base.Sended'):''}}</template>
         <template v-else-if="column.dataIndex === 'inspect_date'">
           {{ text }}
         </template>

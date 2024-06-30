@@ -227,6 +227,9 @@
         "please_enter_confirm_password": "Please enter confirm password",
         "password_not_match": "The new password and confirm password do not match",
         "reset_password": "Reset Password",
-        "will_reset_user_password_with_random_string": "Will reset user password with random string, and send the new password to user's email"
+        "will_reset_user_password_with_random_string": "Will reset user password with random string, and send the new password to user's email",
+        "Sended": "Sended",
+        "SendStatus": "Send Status",
+        "HasSetPassword": "Password Seted"
     }
 }
