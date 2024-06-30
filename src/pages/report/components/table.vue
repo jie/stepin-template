@@ -418,6 +418,7 @@ const currentReportCustomer = ref(null)
 
 const onClickShowEditThirdpartyReportModal = async (record: Report) => {
   console.log('record:', record.order.company_customer.id)
+  ccEmailsRef.value = ""
   let userRes = await userStore.apiGetByCustomerId(record.order.company_customer.id)
   console.log('userRes:', userRes)
   currentReportCustomer.value = userRes.entity
