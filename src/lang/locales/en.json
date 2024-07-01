@@ -232,6 +232,9 @@
         "SendStatus": "Send Status",
         "HasSetPassword": "Password Set",
         "cc_emails": "CC Emails",
-        "SaveCcEmails": "Save CC Emails"
+        "SaveCcEmails": "Save CC Emails",
+        "FillinCcEmails": "Fill in CC Emails",
+        "ConfirmSaveCcEmails": "Confirm save CC Emails?",
+        "reset_password_email_send": "The reset password email has been sent"
     }
 }

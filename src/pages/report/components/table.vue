@@ -18,6 +18,7 @@ import { i18n } from "@/lang/i18n"
 import { openNewUrl } from "@/utils/helpers"
 import { openNotification } from "@/utils/notification"
 import { ReportUserStore } from '@/store/user';
+import { message } from 'ant-design-vue'
 const userStore = ReportUserStore()
 const router = useRouter()
 const store = ReportStore()
@@ -427,7 +428,7 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
   if (record.cc_emails && record.cc_emails.length > 0) {
     ccEmailsRef.value = record.cc_emails.join(';')
   } else {
-    if(!ccEmailsRef.value && userRes.entity.cc_emails && userRes.entity.cc_emails.length > 0){
+    if (!ccEmailsRef.value && userRes.entity.cc_emails && userRes.entity.cc_emails.length > 0) {
       ccEmailsRef.value = userRes.entity.cc_emails.join(';')
     }
   }
@@ -525,8 +526,15 @@ const handleTagClose = (removedTag: any) => {
 }
 
 const saveCcEmails = async () => {
-  await userStore.apiSaveCcEmails({id: currentReportCustomer.value.id, cc_emails: ccEmailsRef.value.split(';')})
-  message.success(i18n.global.t('base.SaveSuccess'))
+  await userStore.apiSaveCcEmails({ id: currentReportCustomer.value.id, cc_emails: ccEmailsRef.value.split(';') })
+  message.success(i18n.global.t('base.Success'))
+}
+
+const fillinCcEmails = async () => {
+  console.log('currentReportCustomer.value?.cc_emails:', toRaw(currentReportCustomer.value?.cc_emails))
+  if (currentReportCustomer.value?.cc_emails && currentReportCustomer.value?.cc_emails.length > 0) {
+    ccEmailsRef.value = currentReportCustomer.value.cc_emails.join(';')
+  }
 }
 
 initializeData()
@@ -540,9 +548,17 @@ initializeData()
         <a-form-item :label="$t('base.cc_emails')">
           <a-textarea v-model:value="ccEmailsRef" :rows="4" />
           <div class="flex">
-            <div style="height: 24px; line-height: 24px; display: flex; flex: 1; padding-top: 5px;">{{ $t('base.if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon') }}</div>
+            <div style="height: 24px; line-height: 24px; display: flex; flex: 1; padding-top: 5px;">{{
+              $t('base.if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon') }}</div>
             <div class="flex-1">
-              <a-button type="primary" @click="saveCcEmails" style="float: right; margin-top: 10px;">{{ $t('base.SaveCcEmails') }}</a-button>
+              <a-button type="primary" @click="fillinCcEmails" style="float: right; margin-top: 10px;">{{
+                $t('base.FillinCcEmails') }}</a-button>
+
+              <a-popconfirm :title="$t('base.ConfirmSaveCcEmails')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"
+                @confirm="saveCcEmails">
+                <a-button type="primary" style="float: right; margin-top: 10px;">{{ $t('base.SaveCcEmails') }}</a-button>
+
+              </a-popconfirm>
             </div>
           </div>
 

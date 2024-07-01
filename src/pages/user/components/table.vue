@@ -257,6 +257,7 @@ const showResetPasswordDialog = (record: any) => {
 
 const confirmResetPassword = async () => {
   await store.apiResetPassword(resetPasswordReactive)
+  message.success(i18n.global.t('base.reset_password_email_send'))
   isShowResetPasswordRef.value = false
   resetPasswordReactive.id = ''
 }
