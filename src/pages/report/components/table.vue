@@ -537,6 +537,15 @@ const fillinCcEmails = async () => {
   }
 }
 
+const onTableChange = (pagination, filters, sorter, { currentDataSource }) => {
+      console.log(pagination);
+      store.pagination = {
+        page: pagination.current,
+        pagesize: pagination.pageSize
+      }
+      store.apiQuery()
+    };
+
 initializeData()
 
 </script>
@@ -765,7 +774,7 @@ initializeData()
   <div style="width: 100%">
     <a-table v-bind="$attrs" :loading="store.loading" :columns="columns" :dataSource="store.entities" :pagination="{
       current: store.pagination.page, pageSize: store.pagination.pagesize, total: store.pagination.total, showSizeChanger: true, showQuickJumper: true
-    }" :scroll="{ y: 600 }">
+    }" :scroll="{ y: 600 }" @change="onTableChange">
       <template #title>
         <div class="">
           <h4>{{ $t('base.Report') }}</h4>
