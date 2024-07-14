@@ -48,6 +48,7 @@
         "View": "查看",
         "Edit": "编辑",
         "Delete": "删除",
+        "CreateBy": "发送人",
         "Submit": "提交",
         "Verify": "审核",
         "SendToCustomer": "发送给客户",

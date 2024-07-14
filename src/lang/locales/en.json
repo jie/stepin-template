@@ -48,6 +48,7 @@
         "View": "View",
         "Edit": "Edit",
         "Delete": "Delete",
+        "CreateBy": "Create By",
         "Submit": "Submit",
         "Verify": "Verify",
         "SendToCustomer": "Send To Customer",

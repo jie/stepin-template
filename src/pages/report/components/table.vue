@@ -65,6 +65,7 @@ const columns = [
   { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
   { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
+  { title: i18n.global.t('base.CreateBy'), dataIndex: 'creator', width: 80 },
   { title: i18n.global.t('base.SendStatus'), dataIndex: 'send_status', width: 100 },
   { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
 ];
@@ -894,6 +895,9 @@ initializeData()
         </template>
         <template v-else-if="column.dataIndex === 'send_status'">{{ record?.send_email_count ?
           $t('base.Sended') : '' }}</template>
+        <template v-else-if="column.dataIndex === 'creator'">
+          {{ record?._create_by?.name }}
+        </template>
         <template v-else-if="column.dataIndex === 'inspect_date'">
           {{ text }}
         </template>
