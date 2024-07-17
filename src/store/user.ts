@@ -123,6 +123,7 @@ export const ReportUserStore = defineStore('reportUser', {
           if (response.data?.data) {
             this.pagination.total = response.data?.data?.total
             this.entities = response.data?.data?.entities
+            this.entities.map(c=>c.hasSetPassword = c.password ? true : false)
             return response.data?.data;
           } else {
             return Promise.reject(response);

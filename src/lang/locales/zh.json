@@ -236,6 +236,9 @@
         "SaveCcEmails": "保存抄送邮箱",
         "FillinCcEmails": "填入客户常用邮箱",
         "ConfirmSaveCcEmails": "是否保存客户常用邮箱?",
-        "reset_password_email_send": "重置密码邮件已发送"
+        "reset_password_email_send": "重置密码邮件已发送",
+        "SetDuplicateRow": "设置可增加的行",
+        "onlyCouldAddRowNumber": "当前可增加的行的行号",
+        "NotSetPasswordYet": "未设置密码"
     }
 }

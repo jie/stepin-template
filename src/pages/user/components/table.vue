@@ -104,7 +104,7 @@ const newReportUser = (reportUser?: ReportUser) => {
     reportUser.is_customer = false;
     reportUser.is_factory = false;
     reportUser.is_worker = false;
-    reportUser.create_at = create_at;
+    reportUser.create_at = create_at
     return reportUser;
   }
 };
@@ -149,7 +149,7 @@ async function submit() {
     is_customer: form.is_customer,
     is_factory: form.is_factory,
     is_worker: form.is_worker,
-    org_id: session.user_data.org_id,
+    org_id: session.user_data.org_id
   }
   formModel.value
     ?.validateFields()
@@ -178,6 +178,7 @@ const editRecord = ref<ReportUser>();
  * @param record
  */
 function edit(record: ReportUser) {
+  console.log('edit - record:', toRaw(record))
   isViewForm.value = false
   createTimeRef.value = dayjs(record.create_at)
   Ctl.isNew = false;
@@ -291,7 +292,7 @@ initializeData()
             <template #icon>
               <UploadOutlined />
             </template>
-            Upload
+            {{ $t('base.Upload') }}
           </a-button>
         </a-upload>
       </a-form-item>
@@ -302,12 +303,11 @@ initializeData()
         <a-input v-model:value="form.email" />
       </a-form-item>
       <a-form-item label="Password" name="password">
-        <a-input v-model:value="form.password" type="password" v-if="!form.password">
+        <a-input v-model:value="form.password" type="password">
           <template #addonAfter>
-            {{ $t('base.HasSetPassword') }}
+            {{ form.hasSetPassword ? $t('base.HasSetPassword') : $t('base.NotSetPasswordYet') }}
           </template>
         </a-input>
-        <a-input v-model:value="form.password" type="password" v-else />
       </a-form-item>
       <a-form-item label="Mobile" name="mobile">
         <a-input v-model:value="form.mobile" />

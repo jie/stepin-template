@@ -3,7 +3,8 @@
     <BaseSlot :item="props?.item">
       <div v-if="props.mode == 'preview'">
         <a-table class="report-table" :columns="tableDataRef.columns" :data-source="previewRows" bordered size="small"
-          :scroll="{ x: 1500 }" :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
+          :scroll="{ x: props?.data?.width || 1200 }"
+          :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
           :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }">
           <template #bodyCell="{ text, record, index, column }">
             <template v-if="props.mode == 'preview'">
@@ -28,9 +29,9 @@
       </div>
       <div v-else>
         <a-table class="report-table" :columns="tableDataRef.columns" :data-source="props.value" bordered size="small"
-          :scroll="{ x: 1500 }" :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
+          :scroll="{ x: props?.data?.width || 1200 }"
+          :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
           :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }">
-
           <template #bodyCell="{ text, record, index, column }">
             <template
               v-if="record?.fieldOptions[column.key]?.fieldType == 'input' || record?.fieldOptions[column.key]?.fieldType == 'number'">
@@ -51,11 +52,12 @@
       </div>
     </BaseSlot>
     <a-modal v-model:visible="AddRowDialogVisible" :title="$t('base.AddRow')" :ok-text="$t('base.Confirm')"
-      :cancel-text="$t('base.Cancel')" @ok="handleConfirmAddRow" @onCancel="handleCancelAddRow" :z-index="1001" style="width: 100%;max-width: 900px; margin: 20px auto"
-      :getContainer="() => $refs.allModal">
+      :cancel-text="$t('base.Cancel')" @ok="handleConfirmAddRow" @onCancel="handleCancelAddRow" :z-index="1001"
+      style="width: 100%;max-width: 900px; margin: 20px auto" :getContainer="() => $refs.allModal">
       <a-form name="basic" autocomplete="off" layout="vertical">
-
-        <template v-for="row in formRows">
+        {{ computedFormRows }}
+        <template v-for="row in computedFormRows">
+          {{ row }}
           <div v-for="col in tableDataRef.columns">
             <div>{{ row[col.key] }}</div>
             <a-form-item :label="col.title"
@@ -75,11 +77,8 @@
                   </div>
                 </template>
               </a-auto-complete>
-
               <a-input v-model:value="row.fieldOptions[col.key].val" allowClear v-else />
             </a-form-item>
-
-
             <div v-if="col.children && col.children.length != 0">
               <div v-for="child in col.children">
                 <a-form-item :label="`${col.title} - ${child.title}`"
@@ -122,8 +121,6 @@
                 </div>
               </div>
             </div>
-
-
           </div>
         </template>
       </a-form>
@@ -177,14 +174,28 @@ type MyTableColumnsType = TableColumnsType & {
 }
 const formRows = ref([])
 
+
 const tableDataRef = ref({
   columns: [],
   rows: [],
   rowSchema: [],
   pageSize: 0,
   hasAddRowButton: false,
-  addRowCount: 1
+  addRowCount: 1,
+  duplicateRows: []
 })
+
+const computedFormRows = computed(() => {
+  let _rows = []
+  if(tableDataRef.value.duplicateRows && tableDataRef.value.duplicateRows.length != 0) {
+    for(let item of tableDataRef.value.duplicateRows) {
+      _rows.push(copyObject(item))
+    }
+  }
+
+  return _rows
+})
+
 
 // add computed column
 const previewRows = computed(() => {
@@ -194,7 +205,7 @@ const previewRows = computed(() => {
   })
 })
 
-
+// tableDataRef.columns
 const tableDataColumnsComputed = computed(() => {
   return tableDataRef.value?.columns.map((col, index) => {
     col.responsive = ['small']
@@ -266,6 +277,13 @@ const confirmDeleteRowItem = () => {
   deleteSelectedRows()
 }
 
+const setDuplicateRow = () => {
+  console.log('state.selectedRowKeys:', state.selectedRowKeys)
+  let duplicateRows = copyObject(state.selectedRowKeys)
+  state.selectedRowKeys = []
+  return duplicateRows
+}
+
 
 const handleConfirmAddRow = () => {
   let newRows = [...props.value]
@@ -333,6 +351,7 @@ const initialization = () => {
     }
     console.log('tableDataRef.value:', toRaw(tableDataRef.value))
   }
+  console.log('computedFormRows:', computedFormRows.value)
 }
 
 initialization()
@@ -346,6 +365,7 @@ defineExpose({
   exportValue,
   exportData,
   refreshValue,
+  setDuplicateRow
 })
 
 
@@ -353,9 +373,13 @@ defineExpose({
 </script>
 
 
-<style>
-.report-table .ant-table-cell.ant-table-selection-column {
-  min-width: 30px !important;
-  width: 30px !important
-}
+<style scoped> .report-table .ant-table-cell.ant-table-selection-column {
+   min-width: 30px !important;
+   width: 30px !important
+ }
+
+ :deep(.ant-table-selection-column) {
+   min-width: 30px !important;
+   width: 30px !important
+ }
 </style>

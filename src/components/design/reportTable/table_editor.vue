@@ -54,12 +54,17 @@
             <a-input-number v-model:value="itemParam.width" placeholder="Basic usage" />
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
-            <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">{{ $t('base.AddColumn') }}</a-button>
-            <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>{{ $t('base.AddChildColumn') }}</a-button>
-            <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">{{ $t('base.EditColumn') }}</a-button>
+            <a-button type="primary" class="mr-2" @click="onClickAdd" :disabled="columns ? true : false">{{
+              $t('base.AddColumn') }}</a-button>
+            <a-button type="primary" class="mr-2" @click="onClickChildAdd" :disabled="columns ? false : true" ghost>{{
+              $t('base.AddChildColumn') }}</a-button>
+            <a-button type="default" class="mr-2" @click="onClickEdit" :disabled="columns ? false : true">{{
+              $t('base.EditColumn') }}</a-button>
 
-            <a-popconfirm :title="$t('base.ConfirmDelete')" @confirm="onClickDelete(itemParam.key)" ok-text="Yes" no-text="No">
-              <a-button type="default" class="mr-2" :disabled="itemParam.key ? false : true">{{ $t('base.DeleteColumn') }}</a-button>
+            <a-popconfirm :title="$t('base.ConfirmDelete')" @confirm="onClickDelete(itemParam.key)" ok-text="Yes"
+              no-text="No">
+              <a-button type="default" class="mr-2" :disabled="itemParam.key ? false : true">{{ $t('base.DeleteColumn')
+              }}</a-button>
             </a-popconfirm>
           </a-form-item>
         </a-form>
@@ -74,16 +79,21 @@
           autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed" layout="vertical">
           <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
             <Table ref="presetTable" :item="currentItem" mode="preview" v-on:edit-table-row="editTableRow"></Table>
+            <p v-if="TableSettings.duplicateRows &&  TableSettings.duplicateRows.length != 0">{{$t('base.onlyCouldAddRowNumber')}}: {{ TableSettings.duplicateRows }}</p>
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 3, span: 19 }">
             <a-button type="primary" class="mr-2" @click="onClickAddPresetRow">{{ $t('base.AddRow') }}</a-button>
-            <a-popconfirm :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')" @confirm="onClickDelPresetRow">
-              <a-button type="danger" class="mr-2">{{ $t('base.DeleteRow')  }}</a-button>
+            <a-popconfirm :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"
+              @confirm="onClickDelPresetRow">
+              <a-button type="danger" class="mr-2">{{ $t('base.DeleteRow') }}</a-button>
             </a-popconfirm>
+            <a-button type="warning" class="mr-2" @click="onClickSetDuplicateRow">{{ $t('base.SetDuplicateRow')
+            }}</a-button>
           </a-form-item>
+
         </a-form>
-        <a-modal v-model:visible="rowEditDialogVisible" :title="$t('base.EditRow')" :ok-text="$t('base.Confirm')" :cancel-text="$t('base.Cancel')"
-          @ok="onRowEditFinish" @onCancel="cancelRowEditModal" :z-index="1001">
+        <a-modal v-model:visible="rowEditDialogVisible" :title="$t('base.EditRow')" :ok-text="$t('base.Confirm')"
+          :cancel-text="$t('base.Cancel')" @ok="onRowEditFinish" @onCancel="cancelRowEditModal" :z-index="1001">
           <a-form :model="rowItemParam" name="basic" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }"
             autocomplete="off">
             <a-form-item :label="$t('base.Text')" name="text">
@@ -114,7 +124,7 @@ import Table from "./index.vue"
 import BaseForm from "../base_editor.vue"
 import type { TreeSelectProps } from 'ant-design-vue';
 import { ReportTable } from '@/types/components';
-
+import { copyJson } from "@/utils/helpers"
 const currentItem = ref<any>()
 const baseForm = ref(null)
 const columns = ref<any>();
@@ -145,7 +155,8 @@ const TableSettings = ref<any>({
   hasTotal: false,
   tableHeight: 300,
   tableWidth: "100%",
-  pageSize: 0
+  pageSize: 0,
+  duplicateRows: [],
 })
 
 const resetItemParam = () => {
@@ -243,12 +254,6 @@ function createRow(row: any, columns: any) {
   }
 }
 
-
-function copyJson(obj, k, v) {
-  let data = JSON.parse(JSON.stringify(obj))
-  data[k] = v
-  return data
-}
 const onClickAdd = () => {
   console.log('onClickAdd')
   if (columns.value) {
@@ -380,7 +385,7 @@ const initializeData = (item: any) => {
   rows.value = item?.data?.rowSchema || []
   console.log('rows:', toRaw(rows.value))
   setTimeout(() => {
-    console.log('data:', item.data)
+    console.log('data:', toRaw(item.data))
     let { _columns, _rows } = item?.data
     if (_columns && _columns.length != 0) {
       itemParam.title = _columns[0].title
@@ -398,6 +403,7 @@ const initializeData = (item: any) => {
     TableSettings.value.tableHeight = item?.data?.heigth
     TableSettings.value.tableWidth = item?.data?.width
     TableSettings.value.pageSize = item?.data?.pageSize
+    TableSettings.value.duplicateRows = item?.data?.duplicateRows || []
     currentItem.value = item
 
     presetTable.value.updateTableData({ columns: convertColumnToTableData(treeData.value), rows: rows.value })
@@ -417,6 +423,7 @@ const exportData = () => {
     addRowCount: TableSettings.value.hasAddRowButton ? data.rows.length : 0,
     hasAddRowButton: TableSettings.value.hasAddRowButton,
     hasTotal: TableSettings.value.hasTotal,
+    duplicateRows: TableSettings.value.duplicateRows
   }
   let result = new ReportTable(baseForm.value.exportData())
   result.data = tableData
@@ -442,6 +449,10 @@ const onClickDelPresetRow = () => {
   presetTable.value.deleteSelectedRows()
 }
 
+const onClickSetDuplicateRow = () => {
+  let _rows = presetTable.value.setDuplicateRow()
+  TableSettings.value.duplicateRows = _rows
+}
 
 
 

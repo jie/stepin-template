@@ -51,3 +51,9 @@ export const displayCompanyName = (report: any, locale: string) => {
     }
   }
 }
+
+export const copyJson = (obj, k, v) => {
+  let data = JSON.parse(JSON.stringify(obj))
+  data[k] = v
+  return data
+}
