@@ -39,6 +39,7 @@ const editThirdpartyRecord = ref<Report>()
 const poNumberRef = ref('')
 const inspectRemarkRef = ref('')
 const ccEmailsRef = ref('')
+const emailTitleRef = ref('')
 const attachments = ref([{
   name: '',
   type: '',
@@ -342,7 +343,8 @@ const submitThirdpartyReport = async () => {
     send_email: true,
     po_number: poNumberRef.value,
     inspect_remark: inspectRemarkRef.value,
-    cc_emails: ccEmailsRef.value.split(';')
+    cc_emails: ccEmailsRef.value.split(';'),
+    email_title: emailTitleRef.value
   })
   await store.apiQuery()
   showEditThirdpartyModal.value = false
@@ -455,7 +457,11 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
     }]
 
   }
-
+  if(record.email_title){
+    emailTitleRef.value = record.email_title
+  } else {
+    emailTitleRef.value = `New Report Received: ${record.title}`
+  }
 }
 
 const addNewThirdpartyReportFiles = () => {
@@ -539,13 +545,13 @@ const fillinCcEmails = async () => {
 }
 
 const onTableChange = (pagination, filters, sorter, { currentDataSource }) => {
-      console.log(pagination);
-      store.pagination = {
-        page: pagination.current,
-        pagesize: pagination.pageSize
-      }
-      store.apiQuery()
-    };
+  console.log(pagination);
+  store.pagination = {
+    page: pagination.current,
+    pagesize: pagination.pageSize
+  }
+  store.apiQuery()
+};
 
 initializeData()
 
@@ -554,6 +560,11 @@ initializeData()
   <a-modal :title="$t('base.EditThirdpartyReport')" v-model:visible="showEditThirdpartyModal" @ok="submitThirdpartyReport"
     @cancel="cancel" width="660px">
     <a-form>
+      <div>
+        <a-form-item :label="$t('base.email_title')">
+          <a-textarea v-model:value="emailTitleRef" :rows="4" />
+        </a-form-item>
+      </div>
       <div>
         <a-form-item :label="$t('base.cc_emails')">
           <a-textarea v-model:value="ccEmailsRef" :rows="4" />

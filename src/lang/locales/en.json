@@ -239,6 +239,7 @@
         "reset_password_email_send": "The reset password email has been sent",
         "SetDuplicateRow": "Set addable rows",
         "onlyCouldAddRowNumber": "Currently addable rows",
-        "NotSetPasswordYet": "Not set yet"
+        "NotSetPasswordYet": "Not set yet",
+        "email_title": "E-mail Title"
     }
 }
