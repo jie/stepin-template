@@ -240,6 +240,7 @@
         "SetDuplicateRow": "设置可增加的行",
         "onlyCouldAddRowNumber": "当前可增加的行的行号",
         "NotSetPasswordYet": "未设置密码",
-        "email_title": "邮件标题"
+        "email_title": "邮件标题",
+        "please_confirm_email_theme_is_right": "请确认邮件主题是否正确？"
     }
 }

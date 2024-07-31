@@ -40,6 +40,7 @@ const poNumberRef = ref('')
 const inspectRemarkRef = ref('')
 const ccEmailsRef = ref('')
 const emailTitleRef = ref('')
+const isConfirmEmailThemeRef = ref(false)
 const attachments = ref([{
   name: '',
   type: '',
@@ -317,9 +318,16 @@ const goDesign = (record) => {
     }
   })
 }
+const handleConfirmOK = async () => {
+  await _submitThirdpartyReport()
 
+}
+const handleConfirmCancel = () => {
+  isConfirmEmailThemeRef.value = false
+  showEditThirdpartyModal.value = true
+}
 
-const submitThirdpartyReport = async () => {
+const _submitThirdpartyReport = async () => {
   if (!editThirdpartyRecord.value?.id) {
     return
   }
@@ -334,8 +342,6 @@ const submitThirdpartyReport = async () => {
     }
   }
 
-
-
   await store.apiEditThirdpartyReport({
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
@@ -348,6 +354,11 @@ const submitThirdpartyReport = async () => {
   })
   await store.apiQuery()
   showEditThirdpartyModal.value = false
+  isConfirmEmailThemeRef.value = false
+}
+
+const submitThirdpartyReport = async () => {
+  isConfirmEmailThemeRef.value = true
 }
 
 const uploadFile = (index: number, kind: string, item: any) => {
@@ -457,7 +468,7 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
     }]
 
   }
-  if(record.email_title){
+  if (record.email_title) {
     emailTitleRef.value = record.email_title
   } else {
     emailTitleRef.value = `New Report Received: ${record.title}`
@@ -553,10 +564,16 @@ const onTableChange = (pagination, filters, sorter, { currentDataSource }) => {
   store.apiQuery()
 };
 
+
+
 initializeData()
 
 </script>
 <template>
+  <a-modal v-model:visible="isConfirmEmailThemeRef"
+    @ok="handleConfirmOK" @cancel="handleConfirmCancel" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"> 
+    {{ $t('base.please_confirm_email_theme_is_right') }}
+  </a-modal>
   <a-modal :title="$t('base.EditThirdpartyReport')" v-model:visible="showEditThirdpartyModal" @ok="submitThirdpartyReport"
     @cancel="cancel" width="660px">
     <a-form>
