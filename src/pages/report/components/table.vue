@@ -572,7 +572,10 @@ initializeData()
 <template>
   <a-modal v-model:visible="isConfirmEmailThemeRef"
     @ok="handleConfirmOK" @cancel="handleConfirmCancel" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"> 
-    {{ $t('base.please_confirm_email_theme_is_right') }}
+    <div>
+      <div>{{ $t('base.please_confirm_email_theme_is_right') }}</div>
+      <div>{{ emailTitleRef }}</div>
+    </div>
   </a-modal>
   <a-modal :title="$t('base.EditThirdpartyReport')" v-model:visible="showEditThirdpartyModal" @ok="submitThirdpartyReport"
     @cancel="cancel" width="660px">
