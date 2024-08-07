@@ -36,6 +36,7 @@ export const ReportUserStore = defineStore('reportUser', {
     return {
       reportReportUser: {} as ReportUser,
       entities: <ReportUser>[],
+      role_entities: [],
       pagination: {} as Pagination,
       queryArgs: { status: "", keyword: "" },
     }
@@ -130,6 +131,31 @@ export const ReportUserStore = defineStore('reportUser', {
           }
         })
         .finally(() => setPageLoading(false));
+    },
+    async apiQueryByRole(role_id:string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      this.loading = true
+      let session = getSessionInfo()
+      let bodyJson = {
+        page: 1,
+        pagesize: 1000,
+        role_id: role_id
+      }
+      return http
+        .request('/platform/report_api/report_user/query', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          console.log('response:', response)
+          if (response.data?.data) {
+            this.role_entities = response.data?.data?.entities.map(item=>{
+              return item
+            }) 
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => {setPageLoading(false);this.loading = false});
     },
     async apiGet(id: string) {
       const { setPageLoading } = useLoadingStore();

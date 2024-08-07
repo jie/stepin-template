@@ -42,7 +42,7 @@ export const ReportStore = defineStore('report', {
       reportReport: {} as Report,
       entities: <any>[],
       pagination: {page: 1, pagesize: 20, total: 0} as Pagination,
-      queryArgs: { tag: "", status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:"", query_by_creator: true},
+      queryArgs: { create_by: "", tag: "", status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:"", query_by_creator: true},
     }
   },
   getters: {

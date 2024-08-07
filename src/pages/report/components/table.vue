@@ -256,7 +256,10 @@ const goPublicReviewReport = (report: any) => {
   })
 }
 
-const initializeData = async () => {
+const initializeData = async (isFirst) => {
+  if(isFirst) {
+    userStore.apiQueryByRole("65ddec7ae06322f206dd2995")
+  }
   await store.apiQuery()
   await categoryStore.apiQueryParent()
   tagStore.pagination.pagesize = 1000
@@ -566,7 +569,7 @@ const onTableChange = (pagination, filters, sorter, { currentDataSource }) => {
 
 
 
-initializeData()
+initializeData(true)
 
 </script>
 <template>
@@ -863,7 +866,12 @@ initializeData()
               </div>
             </a-col>
             <a-col :span="6">
-
+              <div class="mr-2">{{ $t('base.CreateBy') }}</div>
+              <div>
+                <a-select v-model:value="store.queryArgs.create_by" style="width: 100%" :options="userStore.role_entities"
+                :fieldNames="{ label: 'name', value: 'id' }"
+                  allow-clear></a-select>
+              </div>
             </a-col>
             <a-col :span="6">
               <a-button type="primary" @click="addNew" :loading="formLoading" style="float: right;">
