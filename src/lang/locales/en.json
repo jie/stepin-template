@@ -241,6 +241,7 @@
         "onlyCouldAddRowNumber": "Currently addable rows",
         "NotSetPasswordYet": "Not set yet",
         "email_title": "E-mail Title",
-        "please_confirm_email_theme_is_right": "Please confirm the email theme is right?"
+        "please_confirm_email_theme_is_right": "Please confirm the email theme is right?",
+        "cc_emails_invalid": "CC Emails invalid, please check"
     }
 }

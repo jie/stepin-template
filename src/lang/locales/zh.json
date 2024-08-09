@@ -241,6 +241,7 @@
         "onlyCouldAddRowNumber": "当前可增加的行的行号",
         "NotSetPasswordYet": "未设置密码",
         "email_title": "邮件标题",
-        "please_confirm_email_theme_is_right": "请确认邮件主题是否正确？"
+        "please_confirm_email_theme_is_right": "请确认邮件主题是否正确？",
+        "cc_emails_invalid": "抄送邮件格式不正确，请勿包含空额等特殊字符，如有多个邮箱请使用;分割"
     }
 }

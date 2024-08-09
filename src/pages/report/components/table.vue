@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
 import { FormInstance, Upload } from 'ant-design-vue';
-import { reactive, ref, toRaw, nextTick } from 'vue';
+import { reactive, ref, toRaw, nextTick, watchEffect } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined, TaobaoSquareFilled, TagsOutlined } from '@ant-design/icons-vue';
 import { formatStatusColor } from "@/utils/formatter";
@@ -361,6 +361,10 @@ const _submitThirdpartyReport = async () => {
 }
 
 const submitThirdpartyReport = async () => {
+  if(!isCCemailValid.value) {
+    message.error(i18n.global.t('base.cc_emails_invalid'))
+    return
+  }
   isConfirmEmailThemeRef.value = true
 }
 
@@ -567,7 +571,18 @@ const onTableChange = (pagination, filters, sorter, { currentDataSource }) => {
   store.apiQuery()
 };
 
+const isCCemailValid = ref(true)
 
+function validate_ccemails(str) {
+  const regex = /^[a-zA-Z0-9@.;_-]+$/i;
+  const isValid = regex.test(str); // true
+  return isValid
+}
+
+
+watchEffect(() => {
+  isCCemailValid.value = validate_ccemails(ccEmailsRef.value)
+})
 
 initializeData(true)
 
@@ -591,6 +606,7 @@ initializeData(true)
       <div>
         <a-form-item :label="$t('base.cc_emails')">
           <a-textarea v-model:value="ccEmailsRef" :rows="4" />
+          <div v-if="!isCCemailValid" style="color: orangered">{{  $t('base.cc_emails_invalid')}}</div>
           <div class="flex">
             <div style="height: 24px; line-height: 24px; display: flex; flex: 1; padding-top: 5px;">{{
               $t('base.if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon') }}</div>
