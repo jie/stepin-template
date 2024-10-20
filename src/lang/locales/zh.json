@@ -242,6 +242,7 @@
         "NotSetPasswordYet": "未设置密码",
         "email_title": "邮件标题",
         "please_confirm_email_theme_is_right": "请确认邮件主题是否正确？",
-        "cc_emails_invalid": "抄送邮件格式不正确，请勿包含空格等特殊字符，如有多个邮箱请使用;分割"
+        "cc_emails_invalid": "抄送邮件格式不正确，请勿包含空格等特殊字符，如有多个邮箱请使用;分割",
+        "send_report_customer": "发送报告"
     }
 }

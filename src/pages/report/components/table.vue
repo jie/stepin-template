@@ -3,7 +3,7 @@ import { getBase64 } from '@/utils/file';
 import { FormInstance, Upload } from 'ant-design-vue';
 import { reactive, ref, toRaw, nextTick, watchEffect } from 'vue';
 import dayjs from 'dayjs';
-import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined, TaobaoSquareFilled, TagsOutlined } from '@ant-design/icons-vue';
+import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined, TaobaoSquareFilled, TagsOutlined, MailOutlined } from '@ant-design/icons-vue';
 import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
@@ -64,6 +64,7 @@ const columns = [
   },
   { title: i18n.global.t('base.DateOfInspection'), dataIndex: 'inspect_date', width: 200 },
   { title: i18n.global.t('base.Customer'), dataIndex: 'company', width: 200 },
+  { title: i18n.global.t('base.Factory'), dataIndex: 'factory', width: 200 },
   { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
   { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
@@ -478,7 +479,7 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
   if (record.email_title) {
     emailTitleRef.value = record.email_title
   } else {
-    emailTitleRef.value = `New Report Received: ${record.title}`
+    emailTitleRef.value = `New Report Received: ${record.name}`
   }
 }
 
@@ -595,7 +596,7 @@ initializeData(true)
       <div>{{ emailTitleRef }}</div>
     </div>
   </a-modal>
-  <a-modal :title="$t('base.EditThirdpartyReport')" v-model:visible="showEditThirdpartyModal" @ok="submitThirdpartyReport"
+  <a-modal :title="$t('base.send_report_customer')" v-model:visible="showEditThirdpartyModal" @ok="submitThirdpartyReport"
     @cancel="cancel" width="660px">
     <a-form>
       <div>
@@ -917,6 +918,12 @@ initializeData(true)
             <span v-if="record.tags && record.tags.length != 0">
               <a-tag v-for="tag in record.tags"> {{ tag }} </a-tag>
             </span>
+            <span v-if="record.is_thirdparty">
+              <a-tag color="#87d068">外部报告</a-tag>
+            </span>
+            <span v-else>
+              <a-tag color="#108ee9">系统报告</a-tag>
+            </span>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'company'">
@@ -926,6 +933,11 @@ initializeData(true)
           </div>
           <div class="text-title font-bold" v-else>
             {{ record.company.shortname }}
+          </div>
+        </div>
+        <div class="" v-else-if="column.dataIndex === 'factory'">
+          <div class="text-title font-bold">
+            {{ record.order.factory_name }}
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'workers'">
@@ -996,16 +1008,16 @@ initializeData(true)
                     {{ $t('base.SetReportResult') }}
                   </a>
                 </a-menu-item>
-                <a-menu-item key="1">
+                <a-menu-item key="1" v-if="!record.is_thirdparty">
                   <a @click="goPublicFillReport(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
                     {{ $t('base.PublicView') }}
                   </a>
                 </a-menu-item>
-                <a-menu-item key="1" v-if="record.is_thirdparty">
+                <a-menu-item key="1">
                   <a @click="onClickShowEditThirdpartyReportModal(record)" rel="noopener noreferrer">
-                    <EditOutlined />
-                    {{ $t('base.EditThirdpartyReport') }}
+                    <MailOutlined />
+                    {{ $t('base.send_report_customer') }}
                   </a>
                 </a-menu-item>
                 <!-- <a-menu-item key="1">
