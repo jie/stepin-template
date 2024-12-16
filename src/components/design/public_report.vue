@@ -1,7 +1,8 @@
 <template>
   <div class="report relative" v-if="store.report?.schema">
-    <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog" :title="$t('base.LoginToFillForm')"
-      @ok="handleLoginOk">
+    <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog"
+      :title="$t('base.LoginToFillForm')" :maskClosable="false" :closable="false" @ok="handleLoginOk"
+      :cancelButtonProps="{ hidden: true, }">
       <a-form :model="loginFormData" layout="vertical">
         <a-form-item label="E-mail" name="email" required>
           <a-input v-model:value="loginFormData.email"></a-input>
@@ -27,8 +28,7 @@
 
       </div>
     </a-modal>
-    <div
-      style="max-width: 1024px;  padding: 20px 20px 100px 20px; height: 100%; background-color: #fff; margin: 0 auto; position: relative;">
+    <div v-show="!isShowSubmitDialog" class="report-items-wrapper">
 
       <div v-if="loadingRef"
         style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
@@ -48,7 +48,8 @@
         </div>
       </div>
       <div v-if="store.report?.status == '0'">
-        <a-alert :message="$t('base.report_fail_need_refill')" :description="store.report?.reason" type="warning" show-icon />
+        <a-alert :message="$t('base.report_fail_need_refill')" :description="store.report?.reason" type="warning"
+          show-icon />
       </div>
       <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
@@ -110,8 +111,8 @@
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
             <a-form-item required :label="$t('base.ArrivalTime')">
-              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }" v-model:value="formState['ArrivalTime']"
-                :getPopupContainer="triggerNode => triggerNode.parentNode" />
+              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
+                v-model:value="formState['ArrivalTime']" :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
@@ -224,13 +225,14 @@
                 @confirm="onSubmitReport" :title="$t('base.ConfirmSubmitReport')" :ok-text="$t('base.Yes')"
                 :cancel-text="$t('base.No')">
                 <a-button type="primary" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit')
-                }}</a-button>
+                  }}</a-button>
               </a-popconfirm>
 
-              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Save') }}</a-button>
+              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Save')
+                }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
-              }}</a-button>
+                }}</a-button>
             </div>
             <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
           </div>
@@ -676,6 +678,29 @@ defineExpose({
   width: 100%;
   padding: 20px;
   width: 100%;
+
+}
+
+.report-items-wrapper {
+  max-width: 1024px;
+  padding: 20px 20px 100px 20px;
+  height: 100%;
+  background-color: #fff;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* mobile */
+@media screen and (max-width: 768px) {
+  .report-items-wrapper {
+    max-width: 1024px;
+    padding: 10px 10px 100px 10px;
+    height: 100%;
+    background-color: #fff;
+    margin: 0 auto;
+    position: relative;
+  }
+
 
 }
 </style>

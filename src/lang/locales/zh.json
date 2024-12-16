@@ -178,7 +178,7 @@
         "GeneralInspectionLevel": "通用检验等级",
         "InspectionType": "检验类型",
         "ReInspectionType": "Re检验类型",
-        "LoginToFillForm": "请登录填写表单",
+        "LoginToFillForm": "请登录填写报告",
         "layout_settings": "布局设置",  
         "logout": "退出登录",
         "NameInEnglish": "英文名称",

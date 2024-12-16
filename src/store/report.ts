@@ -119,6 +119,7 @@ export const ReportStore = defineStore('report', {
       this.loading = true
       let session = getSessionInfo()
       let bodyJson = {
+        is_thirdparty: false,
         ...this.pagination,
         ...this.queryArgs
       }
