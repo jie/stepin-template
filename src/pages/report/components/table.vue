@@ -60,19 +60,25 @@ const columns = [
     title: i18n.global.t('base.Report'),
     dataIndex: 'name',
     fixed: 'left',
-    // width: 260,
+    width: 300,
   },
   { title: i18n.global.t('base.DateOfInspection'), dataIndex: 'inspect_date', width: 200 },
   { title: i18n.global.t('base.Customer'), dataIndex: 'company', width: 200 },
   { title: i18n.global.t('base.Factory'), dataIndex: 'factory', width: 200 },
   { title: i18n.global.t('base.Workers'), dataIndex: 'workers', width: 200 },
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
-  { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120 },
   { title: i18n.global.t('base.CreateBy'), dataIndex: 'creator', width: 80 },
-  { title: i18n.global.t('base.SendStatus'), dataIndex: 'send_status', width: 100 },
-  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80 },
+  { title: i18n.global.t('base.SendStatus'), dataIndex: 'send_status', width: 100, fixed: 'right' },
+  { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120, fixed: 'right'},
+  { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80, fixed: 'right' },
 ];
 
+const securitySettingRef = reactive({
+  is_require_pwd: true,
+  is_email_contain_pwd: false,
+  is_set_pwd_manully: false,
+  review_pwd: ""
+})
 
 function addNew() {
   reset();
@@ -258,7 +264,7 @@ const goPublicReviewReport = (report: any) => {
 }
 
 const initializeData = async (isFirst) => {
-  if(isFirst) {
+  if (isFirst) {
     userStore.apiQueryByRole("65ddec7ae06322f206dd2995")
   }
   await store.apiQuery()
@@ -337,7 +343,7 @@ const _submitThirdpartyReport = async () => {
   }
 
   for (let item of attachments.value) {
-    if (!item.type) {
+    if (item.url && !item.type) {
       openNotification({
         type: "error",
         message: i18n.global.t("base.please_select_attachment_type"),
@@ -350,19 +356,25 @@ const _submitThirdpartyReport = async () => {
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
     attachments: attachments.value,
-    send_email: true,
+    // send_email: true,
     po_number: poNumberRef.value,
     inspect_remark: inspectRemarkRef.value,
     cc_emails: ccEmailsRef.value.split(';'),
-    email_title: emailTitleRef.value
+    email_title: emailTitleRef.value,
+    is_require_pwd: securitySettingRef.is_require_pwd,
+    is_email_contain_pwd: securitySettingRef.is_email_contain_pwd,
+    is_set_pwd_manully: securitySettingRef.is_set_pwd_manully,
+    review_pwd: securitySettingRef.review_pwd
   })
+
+
   await store.apiQuery()
   showEditThirdpartyModal.value = false
   isConfirmEmailThemeRef.value = false
 }
 
 const submitThirdpartyReport = async () => {
-  if(!isCCemailValid.value) {
+  if (!isCCemailValid.value) {
     message.error(i18n.global.t('base.cc_emails_invalid'))
     return
   }
@@ -438,9 +450,8 @@ const uploadFile = (index: number, kind: string, item: any) => {
 
 const currentReportCustomer = ref(null)
 
-
 const onClickShowEditThirdpartyReportModal = async (record: Report) => {
-  console.log('record:', record.order.company_customer.id)
+  console.log('record:', toRaw(record))
   ccEmailsRef.value = ""
   let userRes = await userStore.apiGetByCustomerId(record.order.company_customer.id)
   console.log('userRes:', userRes)
@@ -459,11 +470,21 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
   if (record.report_files && record.report_files.length > 0) {
     reportFiles.value = record.report_files
   } else {
-    reportFiles.value = [{
-      name: '',
-      simple_url: '',
-      detail_url: ''
-    }]
+    if(record.is_thirdparty) {
+      reportFiles.value = [{
+        name: '',
+        simple_url: '',
+        detail_url: ''
+      }]
+    } else {
+
+      reportFiles.value = [{
+        name: '',
+        simple_url: `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/review/${record.id}?is_simple=true`,
+        detail_url: `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/review/${record.id}`
+      }]
+    }
+
   }
   if (record.attachments && record.attachments.length > 0) {
     attachments.value = record.attachments
@@ -481,7 +502,104 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
   } else {
     emailTitleRef.value = `New Report Received: ${record.name}`
   }
+
+  securitySettingRef.is_require_pwd = record.is_require_pwd
+  securitySettingRef.is_email_contain_pwd = record.is_email_contain_pwd
+  securitySettingRef.is_set_pwd_manully = record.is_set_pwd_manully
+  if (record.is_set_pwd_manully) {
+    securitySettingRef.review_pwd = record.review_pwd
+  } else {
+    securitySettingRef.review_pwd = ""
+  }
 }
+
+
+const sendReportToWorkerModal = ref(false)
+const sendReportToWorkerRecord = ref(null)
+const isWorkerCCemailValid = ref(true)
+const sendToWorkerForm = reactive({
+  email_title: '',
+  cc_emails: '',
+  email: '',
+  url: '',
+  worker_remark: ''
+})
+
+
+const onClickShowSendToWorkerModal = async (record: Report) => {
+  console.log('record:', toRaw(record))
+  sendReportToWorkerRecord.value = record
+  sendReportToWorkerModal.value = true
+  if(record?.order?.workers) {
+    let emails = []
+    for (let worker of record.order.workers) {
+      console.log('worker:', worker)
+      if(worker?.worker?.mail) {
+        emails.push(worker.worker.mail)
+      }
+    }
+    sendToWorkerForm.email = emails.join(';')
+  }
+  sendToWorkerForm.email_title = record.title || record.name
+  sendToWorkerForm.cc_emails = record._create_by.email
+  sendToWorkerForm.url = `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/fill/${record.id}`
+}
+
+const sendReportToWorker = async () => {
+  if (!isWorkerCCemailValid.value) {
+    message.error(i18n.global.t('base.cc_emails_invalid'))
+    return
+  }
+  let worker_emails = []
+  for (let worker of sendToWorkerForm.email.split(';')) {
+    if (worker) {
+      let name;
+      for(let item of sendReportToWorkerRecord.value?.order?.workers) {
+        if(item?.worker?.mail.toLowerCase() === worker.toLowerCase()) {
+          name = item.worker.name || worker.split('@')[0]
+          break
+        }
+      }
+      worker_emails.push({
+        email: worker,
+        name: name
+      })
+    }
+  }
+  console.log('worker_emails:', toRaw(worker_emails))
+
+  worker_emails = [{email: "zy410@qq.com", name: "zy"}]
+
+  await store.apiSendReportToWorker({
+    id: sendReportToWorkerRecord.value.id,
+    email_title: sendToWorkerForm.email_title,
+    cc_emails: sendToWorkerForm.cc_emails.split(';'),
+    worker_emails: worker_emails,
+    url: sendToWorkerForm.url,
+    worker_remark: sendToWorkerForm.worker_remark,
+    send_email: true
+  })
+  sendReportToWorkerModal.value = false
+  sendReportToWorkerRecord.value = null
+  sendToWorkerForm.email_title = ''
+  sendToWorkerForm.cc_emails = ''
+  sendToWorkerForm.email = ''
+  sendToWorkerForm.url = ''
+  sendToWorkerForm.worker_remark = ''
+}
+
+
+const cancelSendReportToWorker = ()=>{
+  sendReportToWorkerModal.value = false
+  sendReportToWorkerRecord.value = null
+  sendToWorkerForm.email_title = ''
+  sendToWorkerForm.worker_remark = ''
+  sendToWorkerForm.cc_emails = ''
+  sendToWorkerForm.email = ''
+  sendToWorkerForm.url = ''
+}
+
+
 
 const addNewThirdpartyReportFiles = () => {
   reportFiles.value.push({
@@ -572,6 +690,60 @@ const onTableChange = (pagination, filters, sorter, { currentDataSource }) => {
   store.apiQuery()
 };
 
+function updateUrlArgs(link: string, key: string, value: string) {
+  let url = new URL(link)
+  let searchParams = new URLSearchParams(url.search)
+  searchParams.set(key, value)
+  url.search = searchParams.toString()
+  return url.toString()
+}
+
+// create a function to remove the query parameter
+function removeUrlArgs(link: string, key: string) {
+  let url = new URL(link)
+  let searchParams = new URLSearchParams(url.search)
+  searchParams.delete(key)
+  url.search = searchParams.toString()
+  return url.toString()
+}
+
+const onChangeContainPasswordInEmailLink = async (status: any) => {
+  console.log('status:', toRaw(status))
+  if(status) {
+    let pwd = Math.floor(Math.random() * 1000000).toString().padStart(6, '0')
+    if(reportFiles.value[0].simple_url) {
+      let simple_url = updateUrlArgs(reportFiles.value[0].simple_url, 'spwd', pwd)
+      reportFiles.value[0].simple_url = simple_url
+    }
+    if(reportFiles.value[0].detail_url) {
+      let detail_url = updateUrlArgs(reportFiles.value[0].detail_url, 'spwd', pwd)
+      reportFiles.value[0].detail_url = detail_url
+    }
+
+    securitySettingRef.review_pwd = pwd
+  } else {
+    if(reportFiles.value[0].simple_url) {
+      reportFiles.value[0].simple_url = removeUrlArgs(reportFiles.value[0].simple_url, 'spwd')
+    }
+    if(reportFiles.value[0].detail_url) {
+      reportFiles.value[0].detail_url = removeUrlArgs(reportFiles.value[0].detail_url, 'spwd')
+    }
+  }
+}
+
+const onChangePasswordManully = (event:any) => {
+  console.log('event:', event.target.value)
+  if(reportFiles.value[0].simple_url) {
+    let simple_url = updateUrlArgs(reportFiles.value[0].simple_url, 'spwd', event.target.value)
+    reportFiles.value[0].simple_url = simple_url
+  }
+  if(reportFiles.value[0].detail_url) {
+    let detail_url = updateUrlArgs(reportFiles.value[0].detail_url, 'spwd', event.target.value)
+    reportFiles.value[0].detail_url = detail_url
+  }
+  securitySettingRef.review_pwd = event.target.value
+}
+
 const isCCemailValid = ref(true)
 
 function validate_ccemails(str) {
@@ -584,20 +756,23 @@ function validate_ccemails(str) {
 watchEffect(() => {
   isCCemailValid.value = validate_ccemails(ccEmailsRef.value)
 })
+watchEffect(() => {
+  isWorkerCCemailValid.value = validate_ccemails(sendToWorkerForm.cc_emails)
+})
 
 initializeData(true)
 
 </script>
 <template>
-  <a-modal v-model:visible="isConfirmEmailThemeRef"
-    @ok="handleConfirmOK" @cancel="handleConfirmCancel" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"> 
+  <a-modal v-model:visible="isConfirmEmailThemeRef" @ok="handleConfirmOK" @cancel="handleConfirmCancel"
+    :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
     <div>
       <div>{{ $t('base.please_confirm_email_theme_is_right') }}</div>
       <div>{{ emailTitleRef }}</div>
     </div>
   </a-modal>
-  <a-modal :title="$t('base.send_report_customer')" v-model:visible="showEditThirdpartyModal" @ok="submitThirdpartyReport"
-    @cancel="cancel" width="660px">
+  <a-modal :title="$t('base.send_report_customer')" v-model:visible="showEditThirdpartyModal"
+    @ok="submitThirdpartyReport" @cancel="cancel" width="660px">
     <a-form>
       <div>
         <a-form-item :label="$t('base.email_title')">
@@ -607,7 +782,7 @@ initializeData(true)
       <div>
         <a-form-item :label="$t('base.cc_emails')">
           <a-textarea v-model:value="ccEmailsRef" :rows="4" />
-          <div v-if="!isCCemailValid" style="color: orangered">{{  $t('base.cc_emails_invalid')}}</div>
+          <div v-if="!isCCemailValid" style="color: orangered">{{ $t('base.cc_emails_invalid') }}</div>
           <div class="flex">
             <div style="height: 24px; line-height: 24px; display: flex; flex: 1; padding-top: 5px;">{{
               $t('base.if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon') }}</div>
@@ -615,15 +790,34 @@ initializeData(true)
               <a-button type="primary" @click="fillinCcEmails" style="float: right; margin-top: 10px;">{{
                 $t('base.FillinCcEmails') }}</a-button>
 
-              <a-popconfirm :title="$t('base.ConfirmSaveCcEmails')" :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')"
-                @confirm="saveCcEmails">
-                <a-button type="primary" style="float: right; margin-top: 10px;">{{ $t('base.SaveCcEmails') }}</a-button>
+              <a-popconfirm :title="$t('base.ConfirmSaveCcEmails')" :ok-text="$t('base.Yes')"
+                :cancel-text="$t('base.No')" @confirm="saveCcEmails">
+                <a-button type="primary" style="float: right; margin-top: 10px;">{{ $t('base.SaveCcEmails')
+                  }}</a-button>
 
               </a-popconfirm>
             </div>
           </div>
 
         </a-form-item>
+
+        <div style="margin-bottom: 40px; border-bottom: 1px solid #ddd; border-top: 1px solid #ddd; padding-top: 20px;display:none" v-if="!editThirdpartyRecord.is_thirdparty">
+          <div style="margin-bottom: 20px;">{{ $t('base.SecuritySettings') }}</div>
+          <div>
+            <a-form-item :label="$t('base.is_require_password_to_read')">
+              <a-switch v-model:checked="securitySettingRef.is_require_pwd" />
+            </a-form-item>
+            <a-form-item :label="$t('base.is_contain_password_in_email_link')">
+              <a-switch v-model:checked="securitySettingRef.is_email_contain_pwd" @change="onChangeContainPasswordInEmailLink"/>
+            </a-form-item>
+            <a-form-item :label="$t('base.is_set_password_manully')">
+              <a-switch v-model:checked="securitySettingRef.is_set_pwd_manully" />
+            </a-form-item>
+            <a-form-item :label="$t('base.review_pwd')">
+              <a-input v-model:value="securitySettingRef.review_pwd" @change="onChangePasswordManully" :readonly="!securitySettingRef.is_set_pwd_manully"/>
+            </a-form-item>
+          </div>
+        </div>
         <div>{{ $t('base.ReportFiles') }}</div>
         <div style="margin-bottom: 20px;">
           <div v-for="(item, index) in reportFiles" class="report-file">
@@ -716,7 +910,7 @@ initializeData(true)
       </div>
       <div>
         <div>
-          <a-form-item :label="$t('base.po_number')">
+          <a-form-item :label="$t('base.po_number')" v-if="editThirdpartyRecord.is_thirdparty">
             <a-input v-model:value="poNumberRef"></a-input>
           </a-form-item>
           <a-form-item :label="$t('base.inspect_remark')">
@@ -726,6 +920,38 @@ initializeData(true)
       </div>
     </a-form>
   </a-modal>
+
+  <a-modal :title="$t('base.send_report_worker')" v-model:visible="sendReportToWorkerModal" @ok="sendReportToWorker"
+     @cancel="cancelSendReportToWorker" width="660px" :okText="$t('base.SendToWorker')">
+    <a-form  :label-col="{ style: { width: '130px' } }">
+      <div>
+        <a-form-item :label="$t('base.email_title')">
+          <a-textarea v-model:value="sendToWorkerForm.email_title" :rows="2" />
+        </a-form-item>
+      </div>
+      <div>
+        <a-form-item :label="$t('base.WorkerEmail')">
+          <a-textarea v-model:value="sendToWorkerForm.email" :rows="2" />
+        </a-form-item>
+      </div>
+      <div>
+        <a-form-item :label="$t('base.cc_emails')">
+          <a-textarea v-model:value="sendToWorkerForm.cc_emails" :rows="2" />
+        </a-form-item>
+      </div>
+      <div>
+        <a-form-item :label="$t('base.worker_remark')">
+            <a-textarea v-model:value="sendToWorkerForm.worker_remark" :rows="2" />
+          </a-form-item>
+      </div>
+      <div>
+        <a-form-item :label="$t('base.email_report_link')">
+          <a-textarea v-model:value="sendToWorkerForm.url" :rows="4" />
+        </a-form-item>
+      </div>
+    </a-form>
+  </a-modal>
+
 
   <a-modal :title="form._isNew ? $t('base.Create') : $t('base.Edit')" v-model:visible="showModal" @ok="submit"
     @cancel="cancel" width="660px">
@@ -857,7 +1083,7 @@ initializeData(true)
                 <div>
                   <a-select class="w-full" ref="select" v-model:value="store.queryArgs.status" allowClear>
                     <a-select-option :value="item.value" v-for="item in ReportResultStatusOptions">{{ item.label
-                    }}</a-select-option>
+                      }}</a-select-option>
                   </a-select>
                 </div>
               </div>
@@ -885,8 +1111,8 @@ initializeData(true)
             <a-col :span="6">
               <div class="mr-2">{{ $t('base.CreateBy') }}</div>
               <div>
-                <a-select v-model:value="store.queryArgs.create_by" style="width: 100%" :options="userStore.role_entities"
-                :fieldNames="{ label: 'name', value: 'id' }"
+                <a-select v-model:value="store.queryArgs.create_by" style="width: 100%"
+                  :options="userStore.role_entities" :fieldNames="{ label: 'name', value: 'id' }"
                   allow-clear></a-select>
               </div>
             </a-col>
@@ -909,10 +1135,11 @@ initializeData(true)
         </div>
       </template>
       <template #bodyCell="{ column, text, record }">
-        <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
-          <div class="flex-col flex justify-evenly" style="max-width: 100%;">
+        <div class="" v-if="column.dataIndex === 'name'">
+          <div class="" >
             <div class="text-title font-bold whitespace-normal">{{ text }}</div>
-            <div class="text-title cursor-pointer template-name" v-if="record?.template?.name" @click="goDesign(record)">
+            <div class="text-title cursor-pointer template-name" v-if="record?.template?.name"
+              @click="goDesign(record)">
               {{ record?.template?.name
               }}</div>
             <span v-if="record.tags && record.tags.length != 0">
@@ -946,6 +1173,9 @@ initializeData(true)
           </div>
           <div class="text-title font-bold" v-else>
             {{ record.workers }}
+          </div>
+          <div v-if="record.send_worker_count">
+            <a-tag color="#0F954D">{{ $t('base.Sended') }}</a-tag>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'category'">
@@ -1018,6 +1248,12 @@ initializeData(true)
                   <a @click="onClickShowEditThirdpartyReportModal(record)" rel="noopener noreferrer">
                     <MailOutlined />
                     {{ $t('base.send_report_customer') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="1">
+                  <a @click="onClickShowSendToWorkerModal(record)" rel="noopener noreferrer">
+                    <MailOutlined />
+                    {{ $t('base.send_report_worker') }}
                   </a>
                 </a-menu-item>
                 <!-- <a-menu-item key="1">

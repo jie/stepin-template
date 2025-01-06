@@ -6,7 +6,8 @@
         <a-form-item :label="$t('base.Status')" name="approve_status">
           <a-select :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
             v-model:value="submitFormData.approve_status" style="width: 100%">
-            <a-select-option :value="option.value" v-for="option in approveStatuses">{{ option.label }}</a-select-option>
+            <a-select-option :value="option.value" v-for="option in approveStatuses">{{ option.label
+              }}</a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item :label="$t('base.Reason')" name="approve_reason">
@@ -42,39 +43,52 @@
       </div>
 
       <div class="component meta" style="border-bottom: 1px solid #eee; margin-bottom: 20px;">
-
         <div class="flex">
+          <div style="width: 50%;" class="flex">
+            <div class="flex-1"><strong>{{ $t('base.ReportResult') }}:</strong></div>
+            <div class="flex" style="align-self: flex-end;">
+              <div style="color: green; align-items: center;" class="flex pr-3">
+                <span class="result-opt-box flex">
+                  <span class="square" v-if="store.report.values.ReportResult == '3'">
+                    <CheckOutlined style="font-size: 14px" />
+                  </span>
+                  <span class="square-empty" v-else style="display: inline-block; width: 20px;"></span>
+                </span>
+                <span class="result-opt-face">{{ $t('base.ResultPassed') }}</span>
+              </div>
+              <div style="color: orange; align-items: center;" class="flex pr-3">
+                <span class="result-opt-box flex">
+                  <span class="square" v-if="store.report.values.ReportResult == '1'">
+                    <CheckOutlined style="font-size: 14px" />
+                  </span>
+                  <span class="square-empty" v-else style="display: inline-block; width: 20px;"></span>
 
-          <div style="flex: 1">
-            <div><strong>{{ $t('base.ReportResult') }}:</strong></div>
-            <div style="font-size: 120%; color: green">
-              <span class="result-opt-box">
-                <CheckSquareOutlined v-if="store.report.values.ReportResult == '3'" />
-              </span><span class="result-opt-face">{{ $t('base.ResultPassed') }}</span>
-            </div>
-            <div style="font-size: 120%; color: orange">
-              <span class="result-opt-box">
-                <CheckSquareOutlined v-if="store.report.values.ReportResult == '1'" />
-              </span><span class="result-opt-face">{{ $t('base.ResultPending') }}</span>
-            </div>
-            <div style="font-size: 120%; color: red">
-              <span class="result-opt-box">
-                <CheckSquareOutlined v-if="store.report.values.ReportResult == '0'" />
-              </span><span class="result-opt-face">{{ $t('base.ResultFailed') }}</span>
+                </span><span class="result-opt-face">{{ $t('base.ResultPending') }}</span>
+              </div>
+              <div style="color: red; align-items: center;" class="flex pr-3">
+                <span class="result-opt-box flex">
+                  <span class="square" v-if="store.report.values.ReportResult == '0'">
+                    <CheckOutlined style="font-size: 14px" />
+                  </span>
+                  <span class="square-empty" v-else style="display: inline-block; width: 20px;"></span>
+                </span><span class="result-opt-face">{{ $t('base.ResultFailed') }}</span>
+              </div>
             </div>
           </div>
           <div style="flex: 1">
             <div style="padding-top: 20px;"
               v-if="store.report.values.ReportResultRemark && (store.report.values.ReportResult == '1' || store.report.values.ReportResult == '0')">
               <strong>{{ $t('base.Reason') }}:</strong>
-              {{ store.report.values.ReportResultRemark }}</div>
+              {{ store.report.values.ReportResultRemark }}
+            </div>
           </div>
         </div>
       </div>
 
 
       <div v-if="reportInspectDetailRef.length != 0" style="margin-left: 10px; margin-right: 10px;">
-        <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index" style="margin-bottom: 20px">
+        <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index"
+          style="margin-bottom: 20px">
           <a-col :span="12" v-for="(item, index) in row" :key="index">
             <div><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right">{{ item.value }}</span>
             </div>
@@ -82,9 +96,9 @@
         </a-row>
       </div>
 
-      <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
-        @finishFailed="onFinishFailed">
-        <div v-for="(item, index) in store.report.schema" :key="item.key">
+      <a-form layout="vertical" :model="formState" v-if="store.report && !route.query.is_simple"
+        @finish="onFinishSubmit" @finishFailed="onFinishFailed">
+        <div v-for="(item, index) in store.report.schema" :key="item.key" class="component-wrapper">
           <div class="component" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
           </div>
@@ -144,7 +158,7 @@
     </div>
   </div>
 </template>
-  
+
 <script lang="ts" setup>
 import { defineProps, ref, computed, toRaw, reactive } from 'vue';
 import reportTable from "./reportTable/view.vue"
@@ -166,6 +180,9 @@ import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import dayjs from 'dayjs';
 import { i18n } from '@/lang/i18n';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
 const document = window.document
 const store = ReportFillStore()
 const isAffixedRef = ref(false)
@@ -386,7 +403,7 @@ defineExpose({
   loadLocalData
 })
 </script>
-  
+
 <style scoped>
 .report {
   color: #333
@@ -470,5 +487,31 @@ defineExpose({
 
 .ant-col.ant-form-item-label label {
   font-weight: bold;
-}</style>
-  
+}
+
+.result-opt-box {
+  margin-right: 5px;
+}
+
+.result-opt-box .square {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.square-empty {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.component-wrapper {
+  border: 1px solid #ccc;
+}
+</style>

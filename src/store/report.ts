@@ -224,6 +224,24 @@ export const ReportStore = defineStore('report', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiSendReportToWorker(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/send_report_to_worker', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            successNotification("Success")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to send", description: response.data?.message || "Fail to send" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
     async changePage(args: any) {
       console.log('args:', args)
       this.pagination.page = args.current

@@ -218,6 +218,11 @@
         "please_select_attachment_type": "请选择附件文件类型",
         "EmailCCList": "Email抄送列表",
         "if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon": "多个邮箱请使用分号隔开",
+        "is_require_password_to_read": "是否需要密码才能浏览报告",
+        "is_contain_password_in_email_link": "是否在邮件链接中包含密码",
+        "is_set_password_manully": "是否手动设置密码",
+        "SecuritySettings": "安全设置",
+        "send_report_worker": "发送报告给检验员",
         "oldPassword": "旧密码",
         "newPassword": "新密码",
         "confirmPassword": "重复新密码",
@@ -243,6 +248,12 @@
         "email_title": "邮件标题",
         "please_confirm_email_theme_is_right": "请确认邮件主题是否正确？",
         "cc_emails_invalid": "抄送邮件格式不正确，请勿包含空格等特殊字符，如有多个邮箱请使用;分割",
-        "send_report_customer": "发送报告"
+        "send_report_customer": "发送报告给客户",
+        "WorkerEmail": "检验员邮箱",
+        "email_report_link": "报告链接",
+        "worker_remark": "给检验员的备注",
+        "review_pwd": "浏览报告密码",
+        "NextItem": "下一项",
+        "PrevItem": "上一项"
     }
 }

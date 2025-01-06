@@ -1,5 +1,50 @@
 <template>
   <div class="report relative" v-if="store.report?.schema">
+    <a-modal :getContainer="() => document.body" v-model:visible="isShowEditModeDialog"
+      :title="currentEditComponentRef?.title" width="100%" wrap-class-name="full-modal"
+      :cancelButtonProps="{ hidden: true, }">
+      <div ref="editModeRef">
+        <a-form layout="vertical" v-if="currentEditComponentRef">
+          <div class="component" v-if="currentEditComponentRef.type == 'text'">
+            <reportText :item="currentEditComponentRef" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'input'">
+            <reportInput :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'input_group'">
+            <reportInputGroup :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'radio'">
+            <reportRadio :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'checkbox'">
+            <reportCheckbox :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'image'">
+            <reportImage :item="currentEditComponentRef" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'image_upload'">
+            <reportImageUpload :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'table'">
+            <reportTable :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+          </div>
+          <div class="component" v-else-if="currentEditComponentRef.type == 'container'">
+            <reportContainer :item="currentEditComponentRef"></reportContainer>
+          </div>
+        </a-form>
+      </div>
+      <template #footer>
+        <a-button>{{ $t('base.Cancel') }}</a-button>
+        <a-button type="success" @click="goPrevItem" :disabled="currentEditComponentIndexRef == 0">{{
+          $t('base.PrevItem') }}</a-button>
+        <a-button type="success" @click="goNextItem"
+          :disabled="currentEditComponentIndexRef == (schemaRef.length - 1)">{{
+            $t('base.NextItem') }}</a-button>
+        <a-button type="primary" @click="onClickConfirmEditMode">{{ $t('base.Confirm') }}</a-button>
+      </template>
+    </a-modal>
+
     <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog"
       :title="$t('base.LoginToFillForm')" :maskClosable="false" :closable="false" @ok="handleLoginOk"
       :cancelButtonProps="{ hidden: true, }">
@@ -28,6 +73,25 @@
 
       </div>
     </a-modal>
+
+    <!-- <a-drawer v-model:visible="isShowCatalogRef" class="custom-class" style="color: red" title="Basic Drawer"
+      placement="right">
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+    </a-drawer> -->
+    <div v-if="isShowCatalogRef" class="catalog">
+      <a-button type="primary" class="hide-catalog" shape="circle" size="large" @click="isShowCatalogRef = false">
+        <template #icon>
+          <VerticalRightOutlined />
+        </template>
+      </a-button>
+
+      <div v-for="item in schemaRef" class="item">
+        <div @click="goAnchor(item.key)">{{ item.title }}</div>
+      </div>
+    </div>
+
     <div v-show="!isShowSubmitDialog" class="report-items-wrapper">
 
       <div v-if="loadingRef"
@@ -54,6 +118,13 @@
       <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
         <div v-if="store.report">
+
+          <a-button class="catalog-show" v-if="!isShowCatalogRef" type="primary" shape="circle" size="large"
+            @click="isShowCatalogRef = true">
+            <template #icon>
+              <VerticalLeftOutlined />
+            </template>
+          </a-button>
           <div class="component meta">
             <a-form-item required :label="$t('base.ReportResult')">
               <a-radio-group v-model:value="formState['ReportResult']" :options="reportResultOptions">
@@ -185,37 +256,37 @@
             </a-form-item>
           </div>
         </div>
-        <div v-for="(item, index) in schemaRef" :key="item.key">
-          <div class="component" v-if="item.type == 'text'">
+        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper">
+          <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'input'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'input'">
             <reportInput :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
           </div>
-          <div class="component" v-else-if="item.type == 'input_group'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'input_group'">
             <reportInputGroup :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
           </div>
-          <div class="component" v-else-if="item.type == 'radio'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'radio'">
             <reportRadio :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'checkbox'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'checkbox'">
             <reportCheckbox :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'image'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'image'">
             <reportImage :item="item" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'image_upload'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'image_upload'">
             <reportImageUpload :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'table'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'table'">
             <reportTable :item="item" v-model:value="formState[item.key]" ref="itemRefs"></reportTable>
           </div>
-          <div class="component" v-else-if="item.type == 'container'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'container'">
             <reportContainer :item="item" ref="itemRefs"></reportContainer>
           </div>
-          <div v-else>unsupported components: {{ item }}</div>
+          <div class="component" :id="`com-${item.key}`" v-else>unsupported components: {{ item }}</div>
+          <div class="edit-mode" @click="onClickShowEditMode(item, index)">EDIT</div>
         </div>
-
 
         <a-affix :offset-bottom="20" @change="affixedChange">
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
@@ -232,7 +303,7 @@
                 }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
-                }}</a-button>
+              }}</a-button>
             </div>
             <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
           </div>
@@ -245,7 +316,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, ref, computed, toRaw, reactive } from 'vue';
+import { defineProps, ref, computed, toRaw, reactive, watchEffect, readonly } from 'vue';
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
@@ -256,7 +327,7 @@ import reportImage from "./reportImage/index.vue"
 import reportImageUpload from "./reportImageUpload/index.vue"
 import reportContainer from "./container.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
-import { CheckOutlined } from '@ant-design/icons-vue';
+import { CheckOutlined, VerticalRightOutlined } from '@ant-design/icons-vue';
 import { openNotification, successNotification } from '@/utils/notification';
 // import { copyObject } from "@/utils/objectUtils"
 import { i18n } from '@/lang/i18n';
@@ -276,9 +347,14 @@ const schemaRef = ref([])
 const loadLocalDataDialogRef = ref(false)
 const localDataRecord = ref(null)
 const startedRef = ref(false)
+const currentEditComponentRef = ref(null)
+const currentEditComponentIndexRef = ref(-1)
+const isShowCatalogRef = ref(false)
+
 const affixedChange = (affixed: boolean) => {
   isAffixedRef.value = affixed
 };
+const isShowEditModeDialog = ref(false)
 
 const reportResultOptions = [
   { label: i18n.global.t(`base.ResultPassed`), value: '3' },
@@ -296,14 +372,14 @@ const initialization = async () => {
   // }
   schemaRef.value = store.report.template?.items
   // loadLocalData()
-  loadRemoteData()
-  let localData = await loadLocalData()
-  console.log('localData:', localData)
-  if (localData && localData.values && localData.values.length != 0) {
-    if (dayjs(localData.update_at) > dayjs(store.report.update_at)) {
-      localDataRecord.value = localData
-    }
-  }
+  // loadRemoteData()
+  // let localData = await loadLocalData()
+  // console.log('localData:', localData)
+  // if (localData && localData.values && localData.values.length != 0) {
+  //   if (dayjs(localData.update_at) > dayjs(store.report.update_at)) {
+  //     localDataRecord.value = localData
+  //   }
+  // }
 }
 
 const showLocalDataDialog = () => {
@@ -437,7 +513,7 @@ const editableComponents = [
 const refresh = (data: any) => {
   loadingRef.value = true
   reportDataRef.value = data
-  store.report.values = {}
+  // store.report.values = data.values
   setTimeout(() => {
     store.report.schema.map((item: any) => {
       // if (item.refreshValue && item.props.item.data) {
@@ -461,6 +537,7 @@ const refresh = (data: any) => {
     })
     loadingRef.value = false
     startedRef.value = true
+    loadRemoteData()
   }, 2000)
 
 }
@@ -596,6 +673,61 @@ const getFillSession = () => {
   }
 }
 
+const onClickShowEditMode = (item: any, index: number) => {
+  isShowEditModeDialog.value = true
+  console.log('item:', item)
+  // item to editModeRef
+  currentEditComponentRef.value = item
+  currentEditComponentIndexRef.value = index
+}
+
+const goNextItem = () => {
+  let index = schemaRef.value.findIndex((item) => item.key == currentEditComponentRef.value.key)
+  if (index < schemaRef.value.length - 1) {
+    currentEditComponentRef.value = schemaRef.value[index + 1]
+    currentEditComponentIndexRef.value = index + 1
+  }
+}
+
+const goPrevItem = () => {
+  let index = schemaRef.value.findIndex((item) => item.key == currentEditComponentRef.value.key)
+  if (index > 0) {
+    currentEditComponentRef.value = schemaRef.value[index - 1]
+    currentEditComponentIndexRef.value = index - 1
+  }
+}
+
+const onClickConfirmEditMode = () => {
+  isShowEditModeDialog.value = false
+  currentEditComponentRef.value = null
+  currentEditComponentIndexRef.value = null
+}
+
+
+const goAnchor = (key: string) => {
+  let anchor = document.getElementById(`com-${key}`)
+  if (anchor) {
+    anchor.scrollIntoView({
+      behavior: "smooth"
+    })
+    // window.scrollTo({
+    //   top: anchor.offsetTop - 100,
+    //   behavior: "smooth"
+    // })
+  }
+}
+
+watchEffect(() => {
+  if (isShowEditModeDialog.value) {
+    // add overflow hidden to <html> element to prevent scrolling
+    document.documentElement.style.overflow = 'hidden'
+  } else {
+    document.documentElement.style.overflow = 'auto'
+    currentEditComponentRef.value = null
+    currentEditComponentIndexRef.value = -1
+  }
+})
+
 onOpenForm()
 
 defineExpose({
@@ -630,7 +762,7 @@ defineExpose({
 }
 
 .component {
-  margin: 30px 0;
+  /* margin: 30px 0; */
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
@@ -683,11 +815,81 @@ defineExpose({
 
 .report-items-wrapper {
   max-width: 1024px;
-  padding: 20px 20px 100px 20px;
+  /* padding: 20px 20px 100px 20px; */
+  padding-bottom: 100px;
   height: 100%;
   background-color: #fff;
   margin: 0 auto;
   position: relative;
+}
+
+
+.component-wrapper {
+  border-bottom: 1px solid #ccc;
+  padding: 20px;
+  position: relative
+}
+
+.component-wrapper:hover {
+  background-color: #f9f9f9;
+}
+
+.component-wrapper .edit-mode {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.component-wrapper .edit-mode:hover {
+  color: #000;
+}
+
+.catalog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 5px;
+  margin: 20px;
+  font-size: 12px;
+  z-index: 5;
+  box-shadow: 1px 1px 5px #ccc;
+}
+
+.catalog .item {
+  min-height: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.catalog .item:hover {
+  text-decoration: underline;
+}
+
+
+.toggle-catalog {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.catalog-show {
+  position: fixed;
+  top: 100px;
+  left: -10px;
+}
+
+.hide-catalog {
+  position: absolute;
+  left: -30px;
+  top: 80px;
 }
 
 /* mobile */

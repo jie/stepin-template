@@ -218,6 +218,11 @@
         "please_select_attachment_type": "Please select attachment type",
         "EmailCCList": "Email CC List",
         "if_you_have_multiple_email_addresses_please_separate_them_with_a_semicolon": "If you have multiple email addresses, please separate them with a semicolon",
+        "is_require_password_to_read": "Is require password to read",
+        "is_contain_password_in_email_link": "Is contain password in E-mail link",
+        "is_set_password_manully": "Is set password manually",
+        "SecuritySettings": "Security Settings",
+        "send_report_worker": "Send report to inspector",
         "oldPassword": "Old Password",
         "newPassword": "New Password",
         "confirmPassword": "Confirm Password",
@@ -243,6 +248,12 @@
         "email_title": "E-mail Title",
         "please_confirm_email_theme_is_right": "Please confirm the email theme is right?",
         "cc_emails_invalid": "CC Emails invalid, please check",
-        "send_report_customer": "Send report"
+        "send_report_customer": "Send report to customer",
+        "WorkerEmail": "Inspector E-mail",
+        "email_report_link": "Report Link",
+        "worker_remark": "Inspector Remark",
+        "review_pwd": "Review Password",
+        "NextItem": "Next",
+        "PrevItem": "Prev"
     }
 }

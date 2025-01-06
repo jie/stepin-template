@@ -1,11 +1,11 @@
 <template>
-  <div class="clearfix">
+  <div class="clearfix" style="position: relative;">
     <BaseSlot :item="props?.item">
       <div>
         <a-row type="flex" v-for="items in computedItems" :gutter="[16, 16]" style="margin-bottom: 20px">
           <a-col flex="1" v-for="item in items">
             <div v-if="item?.url">
-              <div style="margin-bottom: 10px;">
+              <div style="margin-bottom: 10px">
                 <a-image :src="item.url" height="200px" width="100%"
                   style="border: 1px solid #ccc; border-radius: 5px; object-fit: contain;" />
               </div>
@@ -27,7 +27,7 @@
                   <a-textarea style="width: 100%;" v-model:value="item.desc" v-else />
                 </a-col>
                 <a-col flex="60px">
-                  <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+                  <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body }"
                     @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')"
                     :cancel-text="$t('base.No')">
                     <a-button shape="circle" style="margin-top: 10px;">
@@ -35,7 +35,12 @@
                         <DeleteOutlined />
                       </template>
                     </a-button>
-                  </a-popconfirm>
+                  </a-popconfirm> -->
+                  <a-button shape="circle" style="margin-top: 10px;" @click="onClickDeleteImage(item)">
+                    <template #icon>
+                      <DeleteOutlined />
+                    </template>
+                  </a-button>
                 </a-col>
               </a-row>
             </div>
@@ -53,7 +58,13 @@
       </div>
       <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
         :accept="props?.item?.data?.accept" multiple />
+
     </BaseSlot>
+    <a-modal @ok="confirmDeleteImage" :ok-text="$t('base.Yes')"
+      :getContainer="() => documentRef.body"
+      v-model:visible="showDeleteImageRef" :cancel-text="$t('base.No')">
+      <div>{{ $t('base.ConfirmDelete') }}</div>
+    </a-modal>
 
   </div>
 </template>
@@ -69,6 +80,7 @@ import { ImageType } from "@/types/components/image"
 import { ReportFillStore } from "@/store/report_fill"
 import { toRaw } from "vue";
 const store = ReportFillStore()
+const documentRef = document
 const props = defineProps({
   item: {
     type: Object,
@@ -87,6 +99,8 @@ const fileBtnRef = ref(null);
 const previewVisible = ref(false);
 const previewImage = ref('');
 const previewTitle = ref('');
+const targetDeleteImageRef = ref(null);
+const showDeleteImageRef = ref(false);
 const emits = defineEmits(["update:value"])
 
 const defectOptions = ref([])
@@ -104,6 +118,10 @@ const onClickTriggerButton = async () => {
   fileBtnRef.value.click()
 }
 
+const onClickDeleteImage = (image: any) => {
+  targetDeleteImageRef.value = image
+  showDeleteImageRef.value = true
+}
 
 const onUploadInputChange = async (e: Event) => {
   let filelist = [...props.value]
@@ -146,7 +164,13 @@ const deleteImage = (image: ImageType) => {
   let filelist = [...props.value]
   filelist = filelist.filter(item => item.url !== image.url)
   console.log('props.value:', toRaw(props.value))
-  emits('update:value',filelist || [])
+  emits('update:value', filelist || [])
+}
+
+const confirmDeleteImage = () => {
+  deleteImage(targetDeleteImageRef.value)
+  showDeleteImageRef.value = false
+  targetDeleteImageRef.value = null
 }
 
 const refreshValue = (data: any) => {

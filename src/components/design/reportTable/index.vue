@@ -91,7 +91,7 @@
             </template>
           </template>
           <template v-else>
-            <template v-if="tableDataRef.duplicateRows.length != 0">
+            <template v-if="tableDataRef.duplicateRows?.length != 0">
               <template v-for="(rowIndex, index) in tableDataRef.duplicateRows">
                 <a-divider style="border-width: 4px; border-color: #7cb305; font-weight: bold;">Row {{ rowIndex + 1
                   }}th.</a-divider>
@@ -247,7 +247,7 @@ const exportValue = () => {
 
 const refreshValue = (data: any) => {
   // tableDataRef.value = data
-  console.log('data:', toRaw(data))
+  console.log('refreshValue=data:', toRaw(data))
   // tableDataRef.value = data
   tableDataRef.value = {
     ...data,
@@ -292,8 +292,17 @@ const showAddRowDialog = () => {
   loadSchemaFromColumnsAndRows()
   editRowIndexRef.value = null
   let _formRows = []
-  if (props?.item?.data?.duplicateRows && props?.item?.data?.duplicateRows.length != 0) {
-    for (let rowIndex of props?.item?.data?.duplicateRows) {
+
+  let duplicateRows = props?.item?.data?.duplicateRows
+  console.log('duplicateRows1:', toRaw(duplicateRows))
+  if(!duplicateRows && props?.item?.data?.hasAddRowButton){
+    duplicateRows = [0]
+    tableDataRef.value.duplicateRows = [0]
+  }
+  console.log('duplicateRows2:', toRaw(duplicateRows))
+
+  if (duplicateRows && duplicateRows.length != 0) {
+    for (let rowIndex of duplicateRows) {
       _formRows.push(copyObject(props?.item?.data?.rowSchema[rowIndex]))
     }
   } else {
@@ -450,6 +459,7 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
 
 const initialization = () => {
   console.log('props?.item:', toRaw(props?.item))
+
   if (props?.item?.data && !props?.item?.data?.hasAddRowButton) {
     tableDataRef.value = props?.item?.data
   } else {
@@ -457,17 +467,17 @@ const initialization = () => {
       ...props?.item?.data,
       rows: []
     }
-
-
-
     if (props.item?.data?.rowSchema && props.item?.data?.rowSchema.length != 0) {
       setTimeout(() => {
         emits('update:value', props.item?.data?.rowSchema)
       }, 500)
     }
-
   }
-  console.log('computedFormRows:', computedFormRows.value)
+
+  setTimeout(() => {
+    console.log('1111props?.value:', toRaw(props?.value))
+    tableDataRef.value.rows = props?.value
+  }, 2000)
 }
 
 initialization()
