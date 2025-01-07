@@ -160,6 +160,24 @@ export const ReportFillStore = defineStore('report_fill', {
           }
         })
         .finally(() => setPageLoading(false));
-    }
+    },
+    async apiSubmitReviewComment(data:any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/review_comment/submit', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            successNotification("Success")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to send", description: response.data?.message || "Fail to send" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
   },
 })

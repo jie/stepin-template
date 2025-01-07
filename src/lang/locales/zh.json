@@ -254,6 +254,10 @@
         "worker_remark": "给检验员的备注",
         "review_pwd": "浏览报告密码",
         "NextItem": "下一项",
-        "PrevItem": "上一项"
+        "PrevItem": "上一项",
+        "Pass": "通过",
+        "NotPass": "不通过",
+        "Comment": "审核意见",
+        "ReviewFinished": "已完成审核"
     }
 }

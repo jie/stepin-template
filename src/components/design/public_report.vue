@@ -35,7 +35,7 @@
         </a-form>
       </div>
       <template #footer>
-        <a-button>{{ $t('base.Cancel') }}</a-button>
+        <a-button @click="onClickCancelEditMode">{{ $t('base.Cancel') }}</a-button>
         <a-button type="success" @click="goPrevItem" :disabled="currentEditComponentIndexRef == 0">{{
           $t('base.PrevItem') }}</a-button>
         <a-button type="success" @click="goNextItem"
@@ -80,18 +80,6 @@
       <p>Some contents...</p>
       <p>Some contents...</p>
     </a-drawer> -->
-    <div v-if="isShowCatalogRef" class="catalog">
-      <a-button type="primary" class="hide-catalog" shape="circle" size="large" @click="isShowCatalogRef = false">
-        <template #icon>
-          <VerticalRightOutlined />
-        </template>
-      </a-button>
-
-      <div v-for="item in schemaRef" class="item">
-        <div @click="goAnchor(item.key)">{{ item.title }}</div>
-      </div>
-    </div>
-
     <div v-show="!isShowSubmitDialog" class="report-items-wrapper">
 
       <div v-if="loadingRef"
@@ -118,13 +106,6 @@
       <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
         <div v-if="store.report">
-
-          <a-button class="catalog-show" v-if="!isShowCatalogRef" type="primary" shape="circle" size="large"
-            @click="isShowCatalogRef = true">
-            <template #icon>
-              <VerticalLeftOutlined />
-            </template>
-          </a-button>
           <div class="component meta">
             <a-form-item required :label="$t('base.ReportResult')">
               <a-radio-group v-model:value="formState['ReportResult']" :options="reportResultOptions">
@@ -312,6 +293,39 @@
 
       </a-form>
     </div>
+    <div class="catalog" v-if="isShowCatalogRef">
+      <a-button type="primary" class="hide-catalog" shape="circle" size="large" @click="isShowCatalogRef = false">
+        <template #icon>
+          <VerticalRightOutlined />
+        </template>
+      </a-button>
+
+      <div v-for="item in schemaRef" class="item">
+        <div @click="goAnchor(item.key)">{{ item.title }}</div>
+      </div>
+    </div>
+
+    <a-affix :offset-top="60">
+      <a-button class="catalog-show" v-if="!isShowCatalogRef" type="primary" shape="circle" size="large"
+        @click="isShowCatalogRef = true">
+        <template #icon>
+          <VerticalLeftOutlined />
+        </template>
+      </a-button>
+    </a-affix>
+
+    <!-- <div v-if="isShowCatalogRef" class="catalog">
+      <a-button type="primary" class="hide-catalog" shape="circle" size="large" @click="isShowCatalogRef = false">
+        <template #icon>
+          <VerticalRightOutlined />
+        </template>
+      </a-button>
+
+      <div v-for="item in schemaRef" class="item">
+        <div @click="goAnchor(item.key)">{{ item.title }}</div>
+      </div>
+    </div> -->
+
   </div>
 </template>
 
@@ -704,16 +718,18 @@ const onClickConfirmEditMode = () => {
 }
 
 
+const onClickCancelEditMode = () => {
+  isShowEditModeDialog.value = false
+  currentEditComponentRef.value = null
+  currentEditComponentIndexRef.value = null
+}
+
 const goAnchor = (key: string) => {
   let anchor = document.getElementById(`com-${key}`)
   if (anchor) {
     anchor.scrollIntoView({
       behavior: "smooth"
     })
-    // window.scrollTo({
-    //   top: anchor.offsetTop - 100,
-    //   behavior: "smooth"
-    // })
   }
 }
 
@@ -775,7 +791,15 @@ defineExpose({
 
 .component.meta {
   margin: 0;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-bottom: 1px solid #ccc;
 }
+
+.component.meta:hover {
+  background-color: #f9f9f9;
+}
+
 
 .affixed-style {
   border: 2px solid #ccc;
@@ -851,13 +875,13 @@ defineExpose({
   top: 0;
   left: 0;
   width: 200px;
-  padding: 20px;
+  padding: 10px;
   border: 1px solid #ccc;
   background-color: #fff;
   border-radius: 5px;
   margin: 20px;
   font-size: 12px;
-  z-index: 5;
+  z-index: 10000;
   box-shadow: 1px 1px 5px #ccc;
 }
 
@@ -865,6 +889,9 @@ defineExpose({
   min-height: 16px;
   margin-bottom: 10px;
   cursor: pointer;
+}
+.catalog .item:last-child {
+  margin-bottom: 0;
 }
 
 .catalog .item:hover {
@@ -896,7 +923,8 @@ defineExpose({
 @media screen and (max-width: 768px) {
   .report-items-wrapper {
     max-width: 1024px;
-    padding: 10px 10px 100px 10px;
+    /* padding: 10px 10px 100px 10px; */
+    padding-bottom: 100px;
     height: 100%;
     background-color: #fff;
     margin: 0 auto;

@@ -43,7 +43,7 @@
               <a-input v-model:value="record[column.key]" :placeholder="record.fieldOptions[column.key].placeholder"
                 allowClear />
             </template>
-            <template v-else-if="column.key == '_operation'">
+            <!-- <template v-else-if="column.key == '_operation'">
               <a-dropdown :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }">
                 <a class="ant-dropdown-link" @click.prevent>
                   <SettingOutlined />
@@ -66,7 +66,31 @@
                 </template>
               </a-dropdown>
 
-            </template>
+            </template> -->
+            <div style="z-index:10000"  v-else-if="column.key == '_operation'">
+              <a-dropdown :getPopupContainer="triggerNode => { return document.body; }" placement="bottomLeft">
+                <a class="ant-dropdown-link" @click.prevent  style="z-index:5" >
+                  <SettingOutlined />
+                </a>
+                <template #overlay>
+                  <a-menu @click="onTableMenuClick($event, index, record)" style="z-index: 100">
+                    <a-menu-item  style="z-index:5"  key="edit-row">
+                      <EditOutlined /> {{ $t('base.Edit') }}
+                    </a-menu-item>
+                    <a-menu-item  style="z-index:5"  key="delete-row"  v-if="!tableDataRef.duplicateRows?.includes(index)">
+                      <DeleteOutlined /> {{ $t('base.Delete') }}
+                    </a-menu-item>
+                    <a-menu-item  style="z-index:5"  key="row-moveup" v-if="!tableDataRef.duplicateRows?.includes(index)">
+                      <VerticalAlignTopOutlined /> {{ $t('base.MoveUp') }}
+                    </a-menu-item>
+                    <a-menu-item  style="z-index:5"  key="row-movedown" v-if="!tableDataRef.duplicateRows?.includes(index)">
+                      <VerticalAlignBottomOutlined /> {{ $t('base.MoveDown') }}
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </div>
+
             <template v-else>{{ text }}</template>
           </template>
         </a-table>
@@ -122,9 +146,8 @@ import { copyObject } from "@/utils/objectUtils"
 import { ReportFillStore } from "@/store/report_fill"
 import InputWrapper from "@/components/design/reportTable/input_wrapper.vue"
 import { DeleteOutlined, EditOutlined, SettingOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from "@ant-design/icons-vue";
-import { emit } from "process";
-import { table } from "console";
 // const reportTemplateStore = ReportTemplateStore()
+const document = window.document
 const store = ReportFillStore()
 const props = defineProps({
   item: {
@@ -469,7 +492,8 @@ const initialization = () => {
     }
     if (props.item?.data?.rowSchema && props.item?.data?.rowSchema.length != 0) {
       setTimeout(() => {
-        emits('update:value', props.item?.data?.rowSchema)
+        // emits('update:value', props.item?.data?.rowSchema)
+        console.log('props.item?.data?.rowSchema:', toRaw(props.item?.data?.rowSchema))
       }, 500)
     }
   }
@@ -498,7 +522,16 @@ defineExpose({
 
 </script>
 
+<style>
+.ant-dropdown {
+  z-index: 1001;
+}
 
+:deep(.ant-dropdown-menu-item) {
+  z-index: 1001!important;
+}
+
+</style>
 <style scoped>
 .report-table .ant-table-cell.ant-table-selection-column {
   min-width: 30px !important;
@@ -523,6 +556,9 @@ defineExpose({
 
 .ant-dropdown {
   z-index: 1001;
+}
+:deep(.ant-dropdown-menu-item) {
+  z-index: 1001!important;
 }
 </style>
 

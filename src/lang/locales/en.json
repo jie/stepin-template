@@ -254,6 +254,10 @@
         "worker_remark": "Inspector Remark",
         "review_pwd": "Review Password",
         "NextItem": "Next",
-        "PrevItem": "Prev"
+        "PrevItem": "Prev",
+        "Pass": "Pass",
+        "NotPass": "Not Pass",
+        "Comment": "Comment",
+        "ReviewFinished": "Review Finished"
     }
 }
