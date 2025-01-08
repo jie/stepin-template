@@ -2,6 +2,7 @@
   <div ref="allModal">
     <BaseSlot :item="props?.item">
       <div v-if="props.mode == 'preview'">
+        <!-- :scroll="{ x: props?.data?.width || 1200 }" -->
         <a-table class="report-table" :columns="tableDataRef.columns" :data-source="previewRows" bordered size="small"
           :scroll="{ x: props?.data?.width || 1200 }"
           :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }"
@@ -560,6 +561,7 @@ defineExpose({
 :deep(.ant-dropdown-menu-item) {
   z-index: 1001!important;
 }
+
 </style>
 
 <style lang="less">
@@ -595,3 +597,8 @@ defineExpose({
   }
 }
 </style>
+
+<style>
+.ant-form-item-label > label {
+  font-weight: bold;
+}</style>

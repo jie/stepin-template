@@ -15,7 +15,6 @@ import Spin from "@/components/spin/index.vue"
 import { useRouter, useRoute } from "vue-router"
 import { reportDatabase } from "@/hook/dexie_hook"
 import dayjs from "dayjs"
-import { has } from "lodash"
 const router = useRouter()
 const route = useRoute()
 const designerRef = ref(null)

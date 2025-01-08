@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
-import { FormInstance, Upload } from 'ant-design-vue';
+import { FormInstance, Modal, Upload } from 'ant-design-vue';
 import { reactive, ref, toRaw, nextTick, watchEffect } from 'vue';
 import dayjs from 'dayjs';
 import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined, TaobaoSquareFilled, TagsOutlined, MailOutlined } from '@ant-design/icons-vue';
@@ -16,9 +16,10 @@ import { ossUploadFiles } from '@/store/uploader'
 import { useRouter } from 'vue-router'
 import { i18n } from "@/lang/i18n"
 import { openNewUrl } from "@/utils/helpers"
-import { openNotification } from "@/utils/notification"
 import { ReportUserStore } from '@/store/user';
 import { message } from 'ant-design-vue'
+import { openNotification, successNotification } from '@/utils/notification';
+const document = window.document
 const userStore = ReportUserStore()
 const router = useRouter()
 const store = ReportStore()
@@ -41,6 +42,12 @@ const inspectRemarkRef = ref('')
 const ccEmailsRef = ref('')
 const emailTitleRef = ref('')
 const isConfirmEmailThemeRef = ref(false)
+const currentRecordRef = ref(null)
+const reviewStatuses = [
+  { "label": i18n.global.t("base.review_pending"), "value": "1" },
+  { "label": i18n.global.t("base.review_disapprove"), "value": "-1" },
+  { "label": i18n.global.t("base.review_approved"), "value": "2" }
+]
 const attachments = ref([{
   name: '',
   type: '',
@@ -69,7 +76,7 @@ const columns = [
   { title: i18n.global.t('base.Category'), dataIndex: 'category', width: 160 },
   { title: i18n.global.t('base.CreateBy'), dataIndex: 'creator', width: 80 },
   { title: i18n.global.t('base.SendStatus'), dataIndex: 'send_status', width: 100, fixed: 'right' },
-  { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120, fixed: 'right'},
+  { title: i18n.global.t('base.ReportResult'), dataIndex: 'status', width: 120, fixed: 'right' },
   { title: i18n.global.t('base.OP'), dataIndex: 'edit', width: 80, fixed: 'right' },
 ];
 
@@ -174,7 +181,7 @@ function submit() {
 
 
       showModal.value = false;
-      initializeData()
+      initializeData(false)
       reset();
     })
     .catch((e) => {
@@ -233,7 +240,7 @@ function edit(record: any) {
 const deleteRecord = async (record: Report) => {
   console.log('record:', record)
   await store.apiDelete(record.id)
-  initializeData()
+  initializeData(false)
 }
 
 const setTag = (record: Report) => {
@@ -290,7 +297,7 @@ const showStatusDialog = (record: Report) => {
 }
 const statusDialogConfirm = async () => {
   await store.apiSetStatus(statusForm)
-  initializeData()
+  initializeData(false)
   statusDialogRef.value = false
 }
 const statusDialogCancel = () => {
@@ -307,6 +314,17 @@ const goPublicFillReport = (report: any) => {
     name: 'report_fill',
     params: {
       reportId: report.id
+    }
+  })
+}
+
+const goCustomerReviewReport = (record: Report) => {
+  console.log('record:', toRaw(record))
+  openNewUrl(router, {
+    name: 'customer_review',
+    params: {
+      customerId: record.users_review[0],
+      reportId: record.id
     }
   })
 }
@@ -470,7 +488,7 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
   if (record.report_files && record.report_files.length > 0) {
     reportFiles.value = record.report_files
   } else {
-    if(record.is_thirdparty) {
+    if (record.is_thirdparty) {
       reportFiles.value = [{
         name: '',
         simple_url: '',
@@ -480,8 +498,8 @@ const onClickShowEditThirdpartyReportModal = async (record: Report) => {
 
       reportFiles.value = [{
         name: '',
-        simple_url: `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/review/${record.id}?is_simple=true`,
-        detail_url: `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/review/${record.id}`
+        simple_url: `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/customer_report/${record.id}?is_simple=true`,
+        detail_url: `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/customer_report/${record.id}`
       }]
     }
 
@@ -525,16 +543,32 @@ const sendToWorkerForm = reactive({
   worker_remark: ''
 })
 
+const onClickReviewReport = (record: Report) => {
+  console.log('record:', toRaw(record))
+  openNewUrl(router, {
+    name: 'report_review',
+    params: {
+      reportId: record.id
+    }
+  })
+}
+const onClickSetReviewResult = (record: Report) => {
+  console.log('record:', toRaw(record))
+  currentRecordRef.value = record
+  isShowReviewResultDialog.value = true
+  reviewResultData.review_reason = record.review_reason || ''
+  reviewResultData.review_status = record.review_status || false
+}
 
 const onClickShowSendToWorkerModal = async (record: Report) => {
   console.log('record:', toRaw(record))
   sendReportToWorkerRecord.value = record
   sendReportToWorkerModal.value = true
-  if(record?.order?.workers) {
+  if (record?.order?.workers) {
     let emails = []
     for (let worker of record.order.workers) {
       console.log('worker:', worker)
-      if(worker?.worker?.mail) {
+      if (worker?.worker?.mail) {
         emails.push(worker.worker.mail)
       }
     }
@@ -554,8 +588,8 @@ const sendReportToWorker = async () => {
   for (let worker of sendToWorkerForm.email.split(';')) {
     if (worker) {
       let name;
-      for(let item of sendReportToWorkerRecord.value?.order?.workers) {
-        if(item?.worker?.mail.toLowerCase() === worker.toLowerCase()) {
+      for (let item of sendReportToWorkerRecord.value?.order?.workers) {
+        if (item?.worker?.mail.toLowerCase() === worker.toLowerCase()) {
           name = item.worker.name || worker.split('@')[0]
           break
         }
@@ -568,7 +602,7 @@ const sendReportToWorker = async () => {
   }
   console.log('worker_emails:', toRaw(worker_emails))
 
-  worker_emails = [{email: "zy410@qq.com", name: "zy"}]
+  worker_emails = [{ email: "zhouyangme@foxmail.com", name: "zy" }]
 
   await store.apiSendReportToWorker({
     id: sendReportToWorkerRecord.value.id,
@@ -589,7 +623,7 @@ const sendReportToWorker = async () => {
 }
 
 
-const cancelSendReportToWorker = ()=>{
+const cancelSendReportToWorker = () => {
   sendReportToWorkerModal.value = false
   sendReportToWorkerRecord.value = null
   sendToWorkerForm.email_title = ''
@@ -709,35 +743,35 @@ function removeUrlArgs(link: string, key: string) {
 
 const onChangeContainPasswordInEmailLink = async (status: any) => {
   console.log('status:', toRaw(status))
-  if(status) {
+  if (status) {
     let pwd = Math.floor(Math.random() * 1000000).toString().padStart(6, '0')
-    if(reportFiles.value[0].simple_url) {
+    if (reportFiles.value[0].simple_url) {
       let simple_url = updateUrlArgs(reportFiles.value[0].simple_url, 'spwd', pwd)
       reportFiles.value[0].simple_url = simple_url
     }
-    if(reportFiles.value[0].detail_url) {
+    if (reportFiles.value[0].detail_url) {
       let detail_url = updateUrlArgs(reportFiles.value[0].detail_url, 'spwd', pwd)
       reportFiles.value[0].detail_url = detail_url
     }
 
     securitySettingRef.review_pwd = pwd
   } else {
-    if(reportFiles.value[0].simple_url) {
+    if (reportFiles.value[0].simple_url) {
       reportFiles.value[0].simple_url = removeUrlArgs(reportFiles.value[0].simple_url, 'spwd')
     }
-    if(reportFiles.value[0].detail_url) {
+    if (reportFiles.value[0].detail_url) {
       reportFiles.value[0].detail_url = removeUrlArgs(reportFiles.value[0].detail_url, 'spwd')
     }
   }
 }
 
-const onChangePasswordManully = (event:any) => {
+const onChangePasswordManully = (event: any) => {
   console.log('event:', event.target.value)
-  if(reportFiles.value[0].simple_url) {
+  if (reportFiles.value[0].simple_url) {
     let simple_url = updateUrlArgs(reportFiles.value[0].simple_url, 'spwd', event.target.value)
     reportFiles.value[0].simple_url = simple_url
   }
-  if(reportFiles.value[0].detail_url) {
+  if (reportFiles.value[0].detail_url) {
     let detail_url = updateUrlArgs(reportFiles.value[0].detail_url, 'spwd', event.target.value)
     reportFiles.value[0].detail_url = detail_url
   }
@@ -752,6 +786,47 @@ function validate_ccemails(str) {
   return isValid
 }
 
+const isShowReviewResultDialog = ref(false)
+const reviewResultData = reactive({
+  email: "",
+  password: "",
+  review_status: false,
+  review_reason: ""
+})
+const confirmReviewResult = async () => {
+  let result;
+  try {
+    result = await store.apiReview({ id: currentRecordRef.value.id, review_status: reviewResultData.review_status, review_reason: reviewResultData.review_reason })
+  } catch (e) {
+    console.error(e)
+    openNotification({
+      type: "error",
+      message: i18n.global.t("base.AuditReportFailed"),
+      description: ""
+    })
+  }
+  if (result) {
+
+    reviewResultData.email = ""
+    reviewResultData.password = ""
+    reviewResultData.review_status = false
+    reviewResultData.review_reason = ""
+    successNotification("submit_report")
+    isShowReviewResultDialog.value = false
+    currentRecordRef.value = null
+    initializeData(false)
+  }
+}
+
+const showReviewReason = (record:any) => {
+  if(record.review_reason) {
+    Modal.info({
+      title: i18n.global.t('base.review_reason'),
+      content: record.review_reason,
+      onOk() { },
+    });
+  }
+}
 
 watchEffect(() => {
   isCCemailValid.value = validate_ccemails(ccEmailsRef.value)
@@ -764,6 +839,21 @@ initializeData(true)
 
 </script>
 <template>
+  <a-modal :getContainer="() => document.body" v-model:visible="isShowReviewResultDialog"
+    :title="$t('base.PleaseEnterReviewComments')" @ok="confirmReviewResult">
+    <a-form :model="reviewResultData" layout="vertical">
+      <a-form-item :label="$t('base.Status')" name="approve_status">
+        <a-select :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+          v-model:value="reviewResultData.review_status" style="width: 100%">
+          <a-select-option :value="option.value" v-for="option in reviewStatuses">{{ option.label
+            }}</a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item :label="$t('base.Reason')" name="review_reason">
+        <a-textarea v-model:value="reviewResultData.review_reason" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
   <a-modal v-model:visible="isConfirmEmailThemeRef" @ok="handleConfirmOK" @cancel="handleConfirmCancel"
     :ok-text="$t('base.Yes')" :cancel-text="$t('base.No')">
     <div>
@@ -801,20 +891,24 @@ initializeData(true)
 
         </a-form-item>
 
-        <div style="margin-bottom: 40px; border-bottom: 1px solid #ddd; border-top: 1px solid #ddd; padding-top: 20px;display:none" v-if="!editThirdpartyRecord.is_thirdparty">
+        <div
+          style="margin-bottom: 40px; border-bottom: 1px solid #ddd; border-top: 1px solid #ddd; padding-top: 20px;display:none"
+          v-if="!editThirdpartyRecord.is_thirdparty">
           <div style="margin-bottom: 20px;">{{ $t('base.SecuritySettings') }}</div>
           <div>
             <a-form-item :label="$t('base.is_require_password_to_read')">
               <a-switch v-model:checked="securitySettingRef.is_require_pwd" />
             </a-form-item>
             <a-form-item :label="$t('base.is_contain_password_in_email_link')">
-              <a-switch v-model:checked="securitySettingRef.is_email_contain_pwd" @change="onChangeContainPasswordInEmailLink"/>
+              <a-switch v-model:checked="securitySettingRef.is_email_contain_pwd"
+                @change="onChangeContainPasswordInEmailLink" />
             </a-form-item>
             <a-form-item :label="$t('base.is_set_password_manully')">
               <a-switch v-model:checked="securitySettingRef.is_set_pwd_manully" />
             </a-form-item>
             <a-form-item :label="$t('base.review_pwd')">
-              <a-input v-model:value="securitySettingRef.review_pwd" @change="onChangePasswordManully" :readonly="!securitySettingRef.is_set_pwd_manully"/>
+              <a-input v-model:value="securitySettingRef.review_pwd" @change="onChangePasswordManully"
+                :readonly="!securitySettingRef.is_set_pwd_manully" />
             </a-form-item>
           </div>
         </div>
@@ -922,8 +1016,8 @@ initializeData(true)
   </a-modal>
 
   <a-modal :title="$t('base.send_report_worker')" v-model:visible="sendReportToWorkerModal" @ok="sendReportToWorker"
-     @cancel="cancelSendReportToWorker" width="660px" :okText="$t('base.SendToWorker')">
-    <a-form  :label-col="{ style: { width: '130px' } }">
+    @cancel="cancelSendReportToWorker" width="660px" :okText="$t('base.SendToWorker')">
+    <a-form :label-col="{ style: { width: '130px' } }">
       <div>
         <a-form-item :label="$t('base.email_title')">
           <a-textarea v-model:value="sendToWorkerForm.email_title" :rows="2" />
@@ -941,8 +1035,8 @@ initializeData(true)
       </div>
       <div>
         <a-form-item :label="$t('base.worker_remark')">
-            <a-textarea v-model:value="sendToWorkerForm.worker_remark" :rows="2" />
-          </a-form-item>
+          <a-textarea v-model:value="sendToWorkerForm.worker_remark" :rows="2" />
+        </a-form-item>
       </div>
       <div>
         <a-form-item :label="$t('base.email_report_link')">
@@ -1136,7 +1230,7 @@ initializeData(true)
       </template>
       <template #bodyCell="{ column, text, record }">
         <div class="" v-if="column.dataIndex === 'name'">
-          <div class="" >
+          <div class="">
             <div class="text-title font-bold whitespace-normal">{{ text }}</div>
             <div class="text-title cursor-pointer template-name" v-if="record?.template?.name"
               @click="goDesign(record)">
@@ -1175,7 +1269,10 @@ initializeData(true)
             {{ record.workers }}
           </div>
           <div v-if="record.send_worker_count">
-            <a-tag color="#0F954D">{{ $t('base.Sended') }}</a-tag>
+            <a-tag style="cursor: pointer;" color="#0F954D">{{ $t('base.Sended') }}</a-tag>
+          </div>
+          <div v-if="record.review_status != '0'">
+            <a-tag style="cursor: pointer;" :color="record.review_status == '-1'?'red':'#118EE9'" @click="showReviewReason(record)">{{ $t(`base.review_status_${record.review_status}`) }}</a-tag>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'category'">
@@ -1223,7 +1320,7 @@ initializeData(true)
                     {{ $t('base.SetTag') }}
                   </a>
                 </a-menu-item>
-                <a-menu-item key="1">
+                <a-menu-item key="2">
                   <a-popconfirm :title="$t('base.ConfirmDelete')" :okText="$t('base.Yes')" :cancelText="$t('base.No')"
                     @confirm="deleteRecord(record)">
                     <a rel="noopener noreferrer">
@@ -1232,30 +1329,49 @@ initializeData(true)
                     </a>
                   </a-popconfirm>
                 </a-menu-item>
-                <a-menu-item key="1">
+                <a-menu-item key="3" v-if="!record.is_thirdparty && record.review_status != '0'">
+                  <a @click="onClickReviewReport(record)" rel="noopener noreferrer">
+                    <VerifiedOutlined />
+                    {{ $t('base.review_report') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="4" v-if="!record.is_thirdparty">
+                  <a @click="onClickSetReviewResult(record)" rel="noopener noreferrer">
+                    <VerifiedOutlined />
+                    {{ $t('base.SetReviewResult') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="5">
                   <a @click="showStatusDialog(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
                     {{ $t('base.SetReportResult') }}
                   </a>
                 </a-menu-item>
-                <a-menu-item key="1" v-if="!record.is_thirdparty">
+                <a-menu-item key="6" v-if="!record.is_thirdparty">
                   <a @click="goPublicFillReport(record)" rel="noopener noreferrer">
-                    <VerifiedOutlined />
+                    <LinkOutlined />
                     {{ $t('base.PublicView') }}
                   </a>
                 </a-menu-item>
-                <a-menu-item key="1">
+                <a-menu-item key="9" v-if="!record.is_thirdparty">
+                  <a @click="goCustomerReviewReport(record)" rel="noopener noreferrer">
+                    <LinkOutlined />
+                    {{ $t('base.CustomerViewReport') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="7">
                   <a @click="onClickShowEditThirdpartyReportModal(record)" rel="noopener noreferrer">
                     <MailOutlined />
                     {{ $t('base.send_report_customer') }}
                   </a>
                 </a-menu-item>
-                <a-menu-item key="1">
+                <a-menu-item key="8" v-if="!record.is_thirdparty">
                   <a @click="onClickShowSendToWorkerModal(record)" rel="noopener noreferrer">
                     <MailOutlined />
                     {{ $t('base.send_report_worker') }}
                   </a>
                 </a-menu-item>
+
                 <!-- <a-menu-item key="1">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <MailOutlined />

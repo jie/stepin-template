@@ -5,32 +5,45 @@
       :cancelButtonProps="{ hidden: true, }">
       <div ref="editModeRef">
         <a-form layout="vertical" v-if="currentEditComponentRef">
-          <div class="component" v-if="currentEditComponentRef.type == 'text'">
-            <reportText :item="currentEditComponentRef" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'input'">
-            <reportInput :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'input_group'">
-            <reportInputGroup :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'radio'">
-            <reportRadio :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'checkbox'">
-            <reportCheckbox :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'image'">
-            <reportImage :item="currentEditComponentRef" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'image_upload'">
-            <reportImageUpload :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'table'">
-            <reportTable :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
-          </div>
-          <div class="component" v-else-if="currentEditComponentRef.type == 'container'">
-            <reportContainer :item="currentEditComponentRef"></reportContainer>
+          <div v-for="(item, index) in schemaRef" :key="item.key">
+            <div class="component"
+              v-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'text'">
+              <reportText :item="currentEditComponentRef" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'input'">
+              <reportInput :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'input_group'">
+              <reportInputGroup :item="currentEditComponentRef"
+                v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'radio'">
+              <reportRadio :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'checkbox'">
+              <reportCheckbox :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'image'">
+              <reportImage :item="currentEditComponentRef" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'image_upload'">
+              <reportImageUpload :item="currentEditComponentRef"
+                v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'table'">
+              <reportTable :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'container'">
+              <reportContainer :item="currentEditComponentRef"></reportContainer>
+            </div>
           </div>
         </a-form>
       </div>
@@ -41,18 +54,26 @@
         <a-button type="success" @click="goNextItem"
           :disabled="currentEditComponentIndexRef == (schemaRef.length - 1)">{{
             $t('base.NextItem') }}</a-button>
-        <a-button type="primary" @click="onClickConfirmEditMode">{{ $t('base.Confirm') }}</a-button>
+        <a-button type="primary" @click="onClickConfirmSaveSingle"
+          :disabled="store.report?.review_status == '1' || store.report?.review_status == '2'">{{ $t('base.Save')
+          }}
+
+          <template #icon>
+            <SaveOutlined />
+          </template>
+
+        </a-button>
       </template>
     </a-modal>
 
-    <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog"
+    <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog" :okText="$t('base.Login')"
       :title="$t('base.LoginToFillForm')" :maskClosable="false" :closable="false" @ok="handleLoginOk"
       :cancelButtonProps="{ hidden: true, }">
       <a-form :model="loginFormData" layout="vertical">
-        <a-form-item label="E-mail" name="email" required>
+        <a-form-item :label="$t('base.Email')" name="email" required>
           <a-input v-model:value="loginFormData.email"></a-input>
         </a-form-item>
-        <a-form-item label="Password" name="password" required>
+        <a-form-item :label="$t('base.Password')" name="password" required>
           <a-input type="password" v-model:value="loginFormData.password"></a-input>
         </a-form-item>
       </a-form>
@@ -86,22 +107,28 @@
         style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
         <Spin font-size="60px" />
       </div>
-      <div class="flex mb-9" style="border-bottom: 1px solid #eee; padding-bottom: 20px;">
-        <div style="width: 200px;">
-          <img src="https://qcplatform.oss-cn-shanghai.aliyuncs.com/logo/report_logo.jpg" alt="">
-        </div>
+      <div class="flex">
+        <img style="width:100%;" src="https://qcplatformassets.yilaw-ec.com/logo/ecqa_email_banner_hd.jpg"
+          data-v-c2fb76a6="">
+      </div>
+      <div class="flex" style="padding: 10px;" v-if="store.report?.title">
         <div style="flex: 1">
           <div class="title">
             <div>{{ store.report?.title }}</div>
           </div>
-          <div class="summary">
+          <div class="summary" v-if="store.report?.summary">
             <div>{{ store.report?.summary }}</div>
           </div>
         </div>
       </div>
-      <div v-if="store.report?.status == '0'">
-        <a-alert :message="$t('base.report_fail_need_refill')" :description="store.report?.reason" type="warning"
-          show-icon />
+      <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '-1'">
+        <a-alert :message="$t('base.report_fail_need_refill')" type="error" show-icon />
+      </div>
+      <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '1'">
+        <a-alert :message="$t('base.report_waiting_review')" type="info" show-icon />
+      </div>
+      <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '2'">
+        <a-alert :message="$t('base.report_pass_review')" type="success" show-icon />
       </div>
       <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
@@ -237,7 +264,8 @@
             </a-form-item>
           </div>
         </div>
-        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper">
+        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
+          :class="{ 'notpass': store.report?.review_comments[item.key]?.status == false, 'pass': store.report?.review_comments[item.key]?.status == true }">
           <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
           </div>
@@ -266,31 +294,37 @@
             <reportContainer :item="item" ref="itemRefs"></reportContainer>
           </div>
           <div class="component" :id="`com-${item.key}`" v-else>unsupported components: {{ item }}</div>
-          <div class="edit-mode" @click="onClickShowEditMode(item, index)">EDIT</div>
+          <div v-if="store.report?.review_comments[item.key]?.comment">{{ $t('base.Comment') }}: {{
+            store.report?.review_comments[item.key].comment }}</div>
+          <div class="edit-mode" @click="onClickShowEditMode(item, index)">{{ $t('base.Edit') }}</div>
         </div>
 
         <a-affix :offset-bottom="20" @change="affixedChange">
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
             style="">
             <div v-if="['1', '0'].includes(store.report.status)">
-              <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+              <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
                 @confirm="onSubmitReport" :title="$t('base.ConfirmSubmitReport')" :ok-text="$t('base.Yes')"
                 :cancel-text="$t('base.No')">
-                <a-button type="primary" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit')
+                <a-button type="primary" style="width: 140px; margin-left: 10px;"
+                  :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{
+                    $t('base.Submit')
                   }}</a-button>
-              </a-popconfirm>
-
-              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Save')
+              </a-popconfirm> -->
+              <a-button type="primary" style="width: 140px; margin-left: 10px;" @click="onClickSubmit"
+                :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{
+                  $t('base.Submit')
+                }}</a-button>
+              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;"
+                :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{ $t('base.Save')
                 }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
-              }}</a-button>
+                }}</a-button>
             </div>
             <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
           </div>
         </a-affix>
-
-
       </a-form>
     </div>
     <div class="catalog" v-if="isShowCatalogRef">
@@ -330,7 +364,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, ref, computed, toRaw, reactive, watchEffect, readonly } from 'vue';
+import { defineProps, ref, computed, toRaw, reactive, watchEffect, readonly, createVNode } from 'vue';
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
@@ -341,7 +375,8 @@ import reportImage from "./reportImage/index.vue"
 import reportImageUpload from "./reportImageUpload/index.vue"
 import reportContainer from "./container.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
-import { CheckOutlined, VerticalRightOutlined } from '@ant-design/icons-vue';
+import { useRoute } from "vue-router"
+import { CheckCircleFilled, CheckOutlined, VerticalRightOutlined } from '@ant-design/icons-vue';
 import { openNotification, successNotification } from '@/utils/notification';
 // import { copyObject } from "@/utils/objectUtils"
 import { i18n } from '@/lang/i18n';
@@ -349,7 +384,11 @@ import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import { approveStatusDisplayMsg, customerApproveStatusMsg } from "@/utils/constant"
 import { useAccountStore } from '@/store';
+import { Modal } from 'ant-design-vue';
+import { message } from 'ant-design-vue';
 import dayjs from 'dayjs';
+import { fill } from 'lodash';
+const route = useRoute()
 const document = window.document
 const store = ReportFillStore()
 const isAffixedRef = ref(false)
@@ -401,6 +440,20 @@ const showLocalDataDialog = () => {
 }
 
 const onOpenForm = async () => {
+  if(route.query.fill_token) {
+    console.log('formState:', toRaw(formState))
+    let result;
+    try {
+      result = await accountStore.apiFillFormLogin("", "")
+      console.log('onOpenForm=result:', result)
+    } catch (e) {
+      openNotification({
+        type: "error",
+        message: i18n.global.t(`base.LoginFail`),
+        description: i18n.global.t(`base.LoginFailByFillToken`)
+      })
+    }
+  }
   let fillSession = getFillSession()
   if (!fillSession) {
     isShowSubmitDialog.value = true
@@ -571,7 +624,7 @@ const onSubmitReport = async () => {
     return
   }
   try {
-    await store.apiSubmit(fillSession.email, fillSession.password, formState)
+    await store.apiSubmit(fillSession.email, fillSession.password, formState, route?.query?.fill_token)
   } catch (e) {
     console.log(e)
     openNotification({
@@ -586,8 +639,8 @@ const onSubmitReport = async () => {
 
   openNotification({
     type: "success",
-    message: "Success",
-    description: "Report submitted"
+    message: "OK",
+    description: i18n.global.t('base."ReportSubmitted"')
   })
 
 }
@@ -601,7 +654,7 @@ const onFinishSubmit = async () => {
   }
   try {
 
-    await store.apiFill(fillSession.email, fillSession.password, formState)
+    await store.apiFill(fillSession.email, fillSession.password, formState, route?.query?.fill_token)
   } catch (e) {
     console.log(e)
     openNotification({
@@ -616,8 +669,8 @@ const onFinishSubmit = async () => {
 
   openNotification({
     type: "success",
-    message: "Success",
-    description: "Report saved"
+    message: 'OK',
+    description: i18n.global.t('base.SuccessSaved')
   })
 }
 const onFinishFailed = (e) => {
@@ -654,7 +707,6 @@ const handleLoginOk = async () => {
     initialization()
   }
 }
-
 
 const handleConfirmUseLocalData = async () => {
   for (let key of Object.keys(localDataRecord.value.values)) {
@@ -711,10 +763,93 @@ const goPrevItem = () => {
   }
 }
 
-const onClickConfirmEditMode = () => {
-  isShowEditModeDialog.value = false
-  currentEditComponentRef.value = null
-  currentEditComponentIndexRef.value = null
+const onClickConfirmSaveSingle = async () => {
+  console.log('onClickConfirmSaveSingle:', toRaw(formState))
+  if (currentEditComponentIndexRef.value < schemaRef.value.length - 1) {
+    loadingRef.value = true
+    let fillSession = getFillSession()
+    if (!fillSession) {
+      message.error(i18n.global.t('base.PleaseLoginFirst'))
+      return
+    }
+    console.log('fillSession:', fillSession)
+
+    try {
+      await store.apiFillSingle({
+        id: store.report.id,
+        values: { [currentEditComponentRef.value.key]: formState[currentEditComponentRef.value.key] },
+        email: fillSession.email,
+        password: fillSession.password
+      })
+
+      Modal.confirm({
+        content: i18n.global.t('base.SuccessSaved'),
+        getContainer: () => document.body,
+        async onOk() {
+          currentEditComponentRef.value = schemaRef.value[currentEditComponentIndexRef.value + 1]
+          currentEditComponentIndexRef.value = currentEditComponentIndexRef.value + 1
+        },
+        icon: createVNode(CheckCircleFilled),
+        cancelText: i18n.global.t('base.Cancel'),
+        okText: i18n.global.t('base.NextItem'),
+        onCancel() {
+          Modal.destroyAll();
+        },
+      });
+
+    } catch (e) {
+      console.error(e)
+      openNotification({
+        type: "error",
+        message: i18n.global.t('base.LoginFailByFillToken'),
+        description: i18n.global.t('base.LoginFailByFillToken')
+      })
+      return
+    } finally {
+      onLocalSave()
+      loadingRef.value = false
+    }
+
+
+  } else {
+    isShowEditModeDialog.value = false
+    currentEditComponentRef.value = null
+    currentEditComponentIndexRef.value = null
+
+    Modal.confirm({
+      content: i18n.global.t('base.YouHaveCompleteAllItemsNeedSubmit'),
+      getContainer: () => document.body,
+      async onOk() {
+        await onSubmitReport()
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      },
+      cancelText: i18n.global.t('base.Cancel'),
+      okText: i18n.global.t('base.Submit'),
+      onCancel() {
+        Modal.destroyAll();
+      },
+    });
+  }
+}
+
+const onClickSubmit = () => {
+  Modal.confirm({
+    content: i18n.global.t('base.ConfirmSubmitReport'),
+    getContainer: () => document.body,
+    async onOk() {
+      await onSubmitReport()
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+    },
+    cancelText: i18n.global.t('base.Cancel'),
+    okText: i18n.global.t('base.Submit'),
+    onCancel() {
+      Modal.destroyAll();
+    },
+  });
 }
 
 
@@ -890,6 +1025,7 @@ defineExpose({
   margin-bottom: 10px;
   cursor: pointer;
 }
+
 .catalog .item:last-child {
   margin-bottom: 0;
 }
@@ -919,6 +1055,15 @@ defineExpose({
   top: 80px;
 }
 
+.component-wrapper.notpass {
+  background-color: #f9e8e8;
+}
+
+.component-wrapper.pass {
+  background-color: #DDFFFA;
+}
+
+
 /* mobile */
 @media screen and (max-width: 768px) {
   .report-items-wrapper {
@@ -930,7 +1075,6 @@ defineExpose({
     margin: 0 auto;
     position: relative;
   }
-
 
 }
 </style>

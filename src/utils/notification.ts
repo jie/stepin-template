@@ -10,6 +10,7 @@ export interface SysNotification {
 
 
 export const openNotification = (data: SysNotification) => {
+    console.log('data:', data)
     notification[data.type]({
         message: data.message,
         description: data.description,
