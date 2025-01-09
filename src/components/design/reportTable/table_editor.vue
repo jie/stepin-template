@@ -8,6 +8,9 @@
           <a-form-item :label="$t('base.HasAddButton')" name="hasAddRowButton">
             <a-switch v-model:checked="TableSettings.hasAddRowButton" />
           </a-form-item>
+          <a-form-item :label="$t('base.AddRowAfterTarget')" name="addRowAfterTarget">
+            <a-switch v-model:checked="TableSettings.addRowAfterTarget" />
+          </a-form-item>
           <a-form-item :label="$t('base.HasTotal')" name="hasTotal">
             <a-switch v-model:checked="TableSettings.hasTotal" />
           </a-form-item>
@@ -125,6 +128,7 @@ import BaseForm from "../base_editor.vue"
 import type { TreeSelectProps } from 'ant-design-vue';
 import { ReportTable } from '@/types/components';
 import { copyJson } from "@/utils/helpers"
+import { add } from 'lodash';
 const currentItem = ref<any>()
 const baseForm = ref(null)
 const columns = ref<any>();
@@ -152,6 +156,7 @@ const itemParam = ref<any>({
 
 const TableSettings = ref<any>({
   hasAddRowButton: false,
+  addRowAfterTarget: false,
   hasTotal: false,
   tableHeight: 300,
   tableWidth: "100%",
@@ -399,6 +404,7 @@ const initializeData = (item: any) => {
 
     baseForm.value.initializeData(item)
     TableSettings.value.hasAddRowButton = item?.data?.hasAddRowButton
+    TableSettings.value.addRowAfterTarget = item?.data?.addRowAfterTarget|| false
     TableSettings.value.hasTotal = item?.data?.hasTotal
     TableSettings.value.tableHeight = item?.data?.heigth
     TableSettings.value.tableWidth = item?.data?.width
@@ -422,6 +428,7 @@ const exportData = () => {
     pageSize: TableSettings.value.pageSize,
     addRowCount: TableSettings.value.hasAddRowButton ? data.rows.length : 0,
     hasAddRowButton: TableSettings.value.hasAddRowButton,
+    addRowAfterTarget: TableSettings.value.addRowAfterTarget,
     hasTotal: TableSettings.value.hasTotal,
     duplicateRows: TableSettings.value.duplicateRows
   }
@@ -465,22 +472,6 @@ const updateRowsWhenUpdateColumn = () => {
 }
 
 const editTableRow = (rowVal: any) => {
-  // console.log('editTableRow:', text, record, index, column)
-  // let { columns, rows } = presetTable.value.getTableData()
-  // let row = rows.value[index]
-  // let col = columns.value[column]
-  // console.log('row:', toRaw(row))
-  // console.log('col:', toRaw(col))
-  // let fieldOptions = row.fieldOptions[col.key]
-  // console.log('fieldOptions:', toRaw(fieldOptions))
-  // baseForm.value.initializeData(fieldOptions)
-  console.log('*******************')
-  console.log('rows5:', toRaw(rows.value))
-  console.log('columns5:', toRaw(columns.value))
-  console.log(toRaw(rowVal.text))
-  console.log(toRaw(rowVal.record))
-  console.log(toRaw(rowVal.index))
-  console.log(toRaw(rowVal.column))
   rowItemParam.value.rowIndex = rowVal.index
   rowItemParam.value.key = rowVal.column.key
   rowItemParam.value.text = rowVal.text
@@ -490,11 +481,6 @@ const editTableRow = (rowVal: any) => {
 }
 
 const onRowEditFinish = () => {
-  // rows.value[rowItemParam.rowIndex].text = rowItemParam.text
-  // rows.value[rowItemParam.rowIndex].fieldType = 
-  console.log('rows2:', toRaw(rows.value))
-  console.log('columns2:', toRaw(columns.value))
-  console.log('dataIndex:', toRaw(rowItemParam.value))
   rows.value[rowItemParam.value.rowIndex][rowItemParam.value.key] = rowItemParam.value.text
   rows.value[rowItemParam.value.rowIndex].fieldOptions[rowItemParam.value.key].fieldType = rowItemParam.value.fieldType
   rows.value[rowItemParam.value.rowIndex].fieldOptions[rowItemParam.value.key].is_defect = rowItemParam.value.is_defect

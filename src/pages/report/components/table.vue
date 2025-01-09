@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { getBase64 } from '@/utils/file';
 import { FormInstance, Modal, Upload } from 'ant-design-vue';
-import { reactive, ref, toRaw, nextTick, watchEffect } from 'vue';
+import { reactive, ref, toRaw, nextTick, watchEffect, createVNode } from 'vue';
 import dayjs from 'dayjs';
-import { EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined, TaobaoSquareFilled, TagsOutlined, MailOutlined } from '@ant-design/icons-vue';
+import { ExclamationCircleOutlined, EditOutlined, SearchOutlined, ReadOutlined, DeleteOutlined, TaobaoSquareFilled, TagsOutlined, MailOutlined } from '@ant-design/icons-vue';
 import { formatStatusColor } from "@/utils/formatter";
 import RemoteSelect from "@/components/remote_select/index.vue"
 import { ApproveStatus, ApproveStatusOptions } from "@/utils/constant";
@@ -579,6 +579,28 @@ const onClickShowSendToWorkerModal = async (record: Report) => {
   sendToWorkerForm.url = `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/fill/${record.id}`
 }
 
+const onClickReloadSchema = async (record: any) => {
+  Modal.confirm({
+    content: i18n.global.t('base.confirm_reload_schema'),
+    getContainer: () => document.body,
+    icon: createVNode(ExclamationCircleOutlined),
+    async onOk() {
+      try {
+        await store.apiReloadSchema(record.id)
+        message.success(i18n.global.t('base.Success'))
+      } catch (e) {
+        console.error(e)
+        message.error(i18n.global.t('base.Failed'))
+      }
+    },
+    cancelText: i18n.global.t('base.Cancel'),
+    okText: i18n.global.t('base.Confirm'),
+    onCancel() {
+      Modal.destroyAll();
+    },
+  });
+}
+
 const sendReportToWorker = async () => {
   if (!isWorkerCCemailValid.value) {
     message.error(i18n.global.t('base.cc_emails_invalid'))
@@ -818,8 +840,8 @@ const confirmReviewResult = async () => {
   }
 }
 
-const showReviewReason = (record:any) => {
-  if(record.review_reason) {
+const showReviewReason = (record: any) => {
+  if (record.review_reason) {
     Modal.info({
       title: i18n.global.t('base.review_reason'),
       content: record.review_reason,
@@ -1272,7 +1294,8 @@ initializeData(true)
             <a-tag style="cursor: pointer;" color="#0F954D">{{ $t('base.Sended') }}</a-tag>
           </div>
           <div v-if="record.review_status != '0'">
-            <a-tag style="cursor: pointer;" :color="record.review_status == '-1'?'red':'#118EE9'" @click="showReviewReason(record)">{{ $t(`base.review_status_${record.review_status}`) }}</a-tag>
+            <a-tag style="cursor: pointer;" :color="record.review_status == '-1' ? 'red' : '#118EE9'"
+              @click="showReviewReason(record)">{{ $t(`base.review_status_${record.review_status}`) }}</a-tag>
           </div>
         </div>
         <div class="" v-else-if="column.dataIndex === 'category'">
@@ -1371,7 +1394,12 @@ initializeData(true)
                     {{ $t('base.send_report_worker') }}
                   </a>
                 </a-menu-item>
-
+                <a-menu-item key="10" v-if="!record.is_thirdparty">
+                  <a @click="onClickReloadSchema(record)" rel="noopener noreferrer">
+                    <reload-outlined />
+                    {{ $t('base.reload_report_schema') }}
+                  </a>
+                </a-menu-item>
                 <!-- <a-menu-item key="1">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <MailOutlined />

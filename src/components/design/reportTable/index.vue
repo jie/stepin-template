@@ -194,6 +194,7 @@ const tableDataRef = ref({
   rowSchema: [],
   pageSize: 0,
   hasAddRowButton: false,
+  addRowAfterTarget: false,
   addRowCount: 1,
   duplicateRows: [],
 
@@ -369,8 +370,23 @@ const handleConfirmAddRow = () => {
   if (editRowIndexRef.value != null) {
     newRows[editRowIndexRef.value] = copyObject(formRows.value[0])
   } else {
-    for (let item of formRows.value) {
-      newRows.push(copyObject(item))
+    if(!props?.item?.data?.addRowAfterTarget){
+      for (let item of formRows.value) {
+        newRows.push(copyObject(item))
+      }
+    } else {
+      let tempRows = []
+      // duplicateRows
+      for (let item of formRows.value) {
+        tempRows.push(copyObject(item))
+      }
+      // append tempRows after duplicateRows last one
+      let duplicateRows = props?.item?.data?.duplicateRows
+      // get max value of duplicateRows
+      let lastRowIndex = Math.max(...duplicateRows)
+      let targetIndex = (newRows.length - props.item?.data?.rowSchema.length) + lastRowIndex
+      console.log('lastRowIndex:', lastRowIndex, ',  targetIndex:', targetIndex)
+      newRows.splice(targetIndex + 1, 0, ...tempRows);
     }
   }
   newRows = newRows.map((row: any, index: number) => {
@@ -481,6 +497,8 @@ const onSelectChange = (selectedRowKeys: Key[]) => {
   state.selectedRowKeys = selectedRowKeys;
 };
 
+const initialedRowSchema = ref(false)
+
 const initialization = () => {
   console.log('props?.item:', toRaw(props?.item))
 
@@ -493,15 +511,16 @@ const initialization = () => {
     }
     if (props.item?.data?.rowSchema && props.item?.data?.rowSchema.length != 0) {
       setTimeout(() => {
+        // TODO: fix initialize will be called twice
         // emits('update:value', props.item?.data?.rowSchema)
-        console.log('props.item?.data?.rowSchema:', toRaw(props.item?.data?.rowSchema))
+        console.log('initialization-props.item?.data?.rowSchema:', toRaw(props.item?.data?.rowSchema))
       }, 500)
     }
   }
 
   setTimeout(() => {
-    console.log('1111props?.value:', toRaw(props?.value))
-    tableDataRef.value.rows = props?.value
+    console.log('initialization--?.value:', toRaw(props?.value))
+    // tableDataRef.value.rows = props?.value
   }, 2000)
 }
 

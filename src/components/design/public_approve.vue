@@ -1,6 +1,8 @@
 <template>
   <div class="report relative review" :class="{ 'is-staff': isStaffReview }" v-if="store.report?.schema">
-
+    <div class="skip-view" v-if="store?.report?.review_status == '1'">
+      <div>{{ $t('base.report_waiting_review_for_customer') }}</div>
+    </div>
     <a-modal :getContainer="() => document.body" v-model:visible="isShowReviewModeDialog" :title="$t('base.Review')"
       width="100%" wrap-class-name="full-modal" :cancelButtonProps="{ hidden: true, }">
       <div ref="ReviewModeRef">
@@ -813,7 +815,6 @@ defineExpose({
   width: 100%;
   padding: 20px;
   width: 100%;
-
 }
 
 .ant-col.ant-form-item-label label {
@@ -930,5 +931,21 @@ defineExpose({
 
 .is-staff .component-wrapper.pass {
   background-color: #DDFFFA;
+}
+.skip-view {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.99);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.is-staff .skip-view {
+  display: none;
 }
 </style>

@@ -103,10 +103,11 @@ export const ReportFillStore = defineStore('report_fill', {
     async apiSubmit(email: string, password: string, values: any, token: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
-      let bodyJson: { id: any; email: string; password: string; values: any; fill_token?: string } = { id: this.report.id, email: email, password: password, values: values }
+      let bodyJson: { id: any; email: string; password: string; values: any; fill_token?: string, send_email?: boolean } = { id: this.report.id, email: email, password: password, values: values }
       if (token) {
         bodyJson.fill_token = token
       }
+      bodyJson.send_email = true
       return http
         .request('/platform/report_api/report/submit', 'post_json', bodyJson, {})
         .then((response) => {

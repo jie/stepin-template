@@ -3,7 +3,8 @@
         <div v-if="props.col.fieldType == 'text'">
             <div style="border-left: 1px solid; padding-left: 20px">
                 <a-form-item :label="props.col.title" v-if="props.col?.children?.length == 0">
-                    <a-input v-model:value="props.value[props.col.key]" allowClear readonly />
+                    <!-- <a-input v-model:value="props.value[props.col.key]" allowClear readonly /> -->
+                    <a-input v-model:value="props.value[props.col.key]" allowClear />
                 </a-form-item>
                 <div v-else style="padding-left: 10px;">
                     <div>{{ props.col.title }}</div>

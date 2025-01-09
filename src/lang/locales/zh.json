@@ -118,6 +118,7 @@
         "AddRow": "添加行",
         "DeleteRow": "删除行",
         "HasAddButton": "显示添加按钮",
+        "AddRowAfterTarget": "在目标行后添加行",
         "Layout": "布局",
         "Option": "选项",
         "Add": "添加",
@@ -278,10 +279,15 @@
         "SetReviewResult": "设置审核结果",
         "CustomerViewReport": "客户查看报告页面",
         "SuccessSaved": "保存成功",
+        "Success": "操作成功",
         "PleaseLoginFirst": "请登录后操作",
         "IfGoNextItem": "是否跳转到下一项",
         "LoginFail": "登录失败",
         "LoginFailByFillToken": "token过期",
-        "ReportSubmitted": "报告提交成功"
+        "ReportSubmitted": "报告提交成功",
+        "report_waiting_review_for_customer": "报告正在审核中...",
+        "reload_report_schema": "重新载入模版",
+        "confirm_reload_schema": "确认是否执行重新载入报告模版?",
+        "LoginSuccess": "登录成功"
     }
 }

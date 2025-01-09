@@ -88,13 +88,10 @@ export const useAccountStore = defineStore('account', {
     setLogged(logged: boolean) {
       this.logged = logged;
     },
-    async apiFillFormLogin(email: string, password: string) {
+    async apiFillFormLogin(email: string, password: string, token?: string) {
       let bodyJson: { email: string; password: string; token?: string } = { email: email, password: password }
-      if (useRoute().query?.fill_token) {
-        const fillToken = useRoute().query.fill_token;
-        if (typeof fillToken === 'string') {
-          bodyJson.token = fillToken;
-        }
+      if (token) {
+        bodyJson.token = token;
       }
       return http
         .request('/platform/report_api/report_fill/login', 'post_json', bodyJson)

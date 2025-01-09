@@ -302,15 +302,7 @@
         <a-affix :offset-bottom="20" @change="affixedChange">
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
             style="">
-            <div v-if="['1', '0'].includes(store.report.status)">
-              <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-                @confirm="onSubmitReport" :title="$t('base.ConfirmSubmitReport')" :ok-text="$t('base.Yes')"
-                :cancel-text="$t('base.No')">
-                <a-button type="primary" style="width: 140px; margin-left: 10px;"
-                  :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{
-                    $t('base.Submit')
-                  }}</a-button>
-              </a-popconfirm> -->
+            <div v-if="['-1', '0'].includes(store.report.review_status)">
               <a-button type="primary" style="width: 140px; margin-left: 10px;" @click="onClickSubmit"
                 :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{
                   $t('base.Submit')
@@ -320,9 +312,9 @@
                 }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
-                }}</a-button>
+              }}</a-button>
             </div>
-            <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
+            <div v-else>{{ $t('base.report_not_in_fill_status') }}: {{ store.report.review_status }}</div>
           </div>
         </a-affix>
       </a-form>
@@ -440,7 +432,7 @@ const showLocalDataDialog = () => {
 }
 
 const onOpenForm = async () => {
-  if(route.query.fill_token) {
+  if (route.query.fill_token) {
     console.log('formState:', toRaw(formState))
     let result;
     try {
@@ -640,7 +632,7 @@ const onSubmitReport = async () => {
   openNotification({
     type: "success",
     message: "OK",
-    description: i18n.global.t('base."ReportSubmitted"')
+    description: i18n.global.t('base.ReportSubmitted')
   })
 
 }
@@ -695,14 +687,24 @@ const handleLoginOk = async () => {
     result = await accountStore.apiFillFormLogin(loginFormData.email, loginFormData.password)
     console.log('result:', result)
   } catch (e) {
-    openNotification({
-      type: "error",
-      message: "Login Fail",
-      description: e.message
-    })
+    console.log('e:', toRaw(e))
+    if (e?.data?.status == false) {
+      openNotification({
+        type: "error",
+        message: "Error",
+        description: e.data.message
+      })
+    } else {
+      openNotification({
+        type: "error",
+        message: "Error",
+        description: e.message
+      })
+    }
+
   }
   if (result) {
-    successNotification("Login Success")
+    successNotification(i18n.global.t('base.LoginSuccess'))
     isShowSubmitDialog.value = false
     initialization()
   }
@@ -765,50 +767,53 @@ const goPrevItem = () => {
 
 const onClickConfirmSaveSingle = async () => {
   console.log('onClickConfirmSaveSingle:', toRaw(formState))
+
+  loadingRef.value = true
+  let fillSession = getFillSession()
+  if (!fillSession) {
+    message.error(i18n.global.t('base.PleaseLoginFirst'))
+    return
+  }
+  console.log('fillSession:', fillSession)
+
+  try {
+    await store.apiFillSingle({
+      id: store.report.id,
+      values: { [currentEditComponentRef.value.key]: formState[currentEditComponentRef.value.key] },
+      email: fillSession.email,
+      password: fillSession.password
+    })
+
+    Modal.confirm({
+      content: i18n.global.t('base.SuccessSaved'),
+      getContainer: () => document.body,
+      async onOk() {
+        currentEditComponentRef.value = schemaRef.value[currentEditComponentIndexRef.value + 1]
+        currentEditComponentIndexRef.value = currentEditComponentIndexRef.value + 1
+      },
+      icon: createVNode(CheckCircleFilled),
+      cancelText: i18n.global.t('base.Cancel'),
+      okText: i18n.global.t('base.NextItem'),
+      onCancel() {
+        Modal.destroyAll();
+      },
+    });
+
+  } catch (e) {
+    console.error(e)
+    openNotification({
+      type: "error",
+      message: i18n.global.t('base.LoginFailByFillToken'),
+      description: i18n.global.t('base.LoginFailByFillToken')
+    })
+    return
+  } finally {
+    onLocalSave()
+    loadingRef.value = false
+  }
+
+
   if (currentEditComponentIndexRef.value < schemaRef.value.length - 1) {
-    loadingRef.value = true
-    let fillSession = getFillSession()
-    if (!fillSession) {
-      message.error(i18n.global.t('base.PleaseLoginFirst'))
-      return
-    }
-    console.log('fillSession:', fillSession)
-
-    try {
-      await store.apiFillSingle({
-        id: store.report.id,
-        values: { [currentEditComponentRef.value.key]: formState[currentEditComponentRef.value.key] },
-        email: fillSession.email,
-        password: fillSession.password
-      })
-
-      Modal.confirm({
-        content: i18n.global.t('base.SuccessSaved'),
-        getContainer: () => document.body,
-        async onOk() {
-          currentEditComponentRef.value = schemaRef.value[currentEditComponentIndexRef.value + 1]
-          currentEditComponentIndexRef.value = currentEditComponentIndexRef.value + 1
-        },
-        icon: createVNode(CheckCircleFilled),
-        cancelText: i18n.global.t('base.Cancel'),
-        okText: i18n.global.t('base.NextItem'),
-        onCancel() {
-          Modal.destroyAll();
-        },
-      });
-
-    } catch (e) {
-      console.error(e)
-      openNotification({
-        type: "error",
-        message: i18n.global.t('base.LoginFailByFillToken'),
-        description: i18n.global.t('base.LoginFailByFillToken')
-      })
-      return
-    } finally {
-      onLocalSave()
-      loadingRef.value = false
-    }
 
 
   } else {

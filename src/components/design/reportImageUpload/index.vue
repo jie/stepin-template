@@ -2,8 +2,8 @@
   <div class="clearfix" style="position: relative;">
     <BaseSlot :item="props?.item">
       <div>
-        <a-row type="flex" v-for="items in computedItems" :gutter="[16, 16]" style="margin-bottom: 20px">
-          <a-col flex="1" v-for="item in items">
+        <a-row type="flex" v-for="(items, index) in computedItems" :gutter="[16, 16]" style="margin-bottom: 20px">
+          <a-col flex="1" v-for="(item, sIndex) in items">
             <div v-if="item?.url">
               <div style="margin-bottom: 10px">
                 <a-image :src="item.url" height="200px" width="100%"
@@ -26,7 +26,7 @@
                   </a-auto-complete>
                   <a-textarea style="width: 100%;" v-model:value="item.desc" v-else />
                 </a-col>
-                <a-col flex="60px">
+                <a-col flex="120px">
                   <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body }"
                     @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')"
                     :cancel-text="$t('base.No')">
@@ -36,11 +36,19 @@
                       </template>
                     </a-button>
                   </a-popconfirm> -->
-                  <a-button shape="circle" style="margin-top: 10px;" @click="onClickDeleteImage(item)">
-                    <template #icon>
-                      <DeleteOutlined />
-                    </template>
-                  </a-button>
+                  <div class="flex" style="justify-content: space-around;">
+                    <a-button shape="circle" style="margin-top: 10px;" @click="onClickDeleteImage(item)">
+                      <template #icon>
+                        <DeleteOutlined />
+                      </template>
+                    </a-button>
+                    <a-button shape="circle" style="margin-top: 10px;" @click="onClickEditImage(item)">
+                      <template #icon>
+                        <EditOutlined />
+                      </template>
+                    </a-button>
+                  </div>
+
                 </a-col>
               </a-row>
             </div>
@@ -57,11 +65,9 @@
         </a-button>
       </div>
       <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
-        :accept="props?.item?.data?.accept" multiple />
-
+        :accept="props?.item?.data?.accept" :multiple="targetEditImageRef===null" />
     </BaseSlot>
-    <a-modal @ok="confirmDeleteImage" :ok-text="$t('base.Yes')"
-      :getContainer="() => documentRef.body"
+    <a-modal @ok="confirmDeleteImage" :ok-text="$t('base.Yes')" :getContainer="() => documentRef.body"
       v-model:visible="showDeleteImageRef" :cancel-text="$t('base.No')">
       <div>{{ $t('base.ConfirmDelete') }}</div>
     </a-modal>
@@ -70,7 +76,7 @@
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { EditOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ref, computed } from 'vue';
 import { groupArrayWithPatch } from "@/utils/objectUtils"
 import { getBase64 } from "@/utils/file"
@@ -101,6 +107,8 @@ const previewImage = ref('');
 const previewTitle = ref('');
 const targetDeleteImageRef = ref(null);
 const showDeleteImageRef = ref(false);
+
+const targetEditImageRef = ref(null);
 const emits = defineEmits(["update:value"])
 
 const defectOptions = ref([])
@@ -115,28 +123,47 @@ const onClickTriggerButton = async () => {
   // if (targetElement != null && targetElement.value) {
   //   targetElement.value = ''
   // }
-  fileBtnRef.value.click()
+  targetEditImageRef.value = null
+  setTimeout(() => {
+    fileBtnRef.value.click()
+  }, 500)
+
 }
 
 const onClickDeleteImage = (image: any) => {
   targetDeleteImageRef.value = image
   showDeleteImageRef.value = true
 }
+const onClickEditImage = (image: any) => {
+  targetEditImageRef.value = image
+  setTimeout(() => {
+    fileBtnRef.value.click()
+  }, 500)
+}
 
 const onUploadInputChange = async (e: Event) => {
   let filelist = [...props.value]
   let images = await ossUploadFiles(e)
-  console.log('images:', images)
-  for (let item of images) {
-    filelist.push({
-      name: "",
-      url: item,
-      status: "done",
-      uid: item,
-      desc: ""
-    })
+  console.log('images:', images, ', targetEditImageRef.value:', targetEditImageRef.value)
+  if (targetEditImageRef.value !== null) {
+    let targetImage = props.value.find(item => item.url === targetEditImageRef.value.url)
+    if(targetImage) {
+      targetImage.url = images[0]
+      targetImage.uid = images[0]
+    }
+  } else {
+    for (let item of images) {
+      filelist.push({
+        name: "",
+        url: item,
+        status: "done",
+        uid: item,
+        desc: ""
+      })
+    }
   }
   emits('update:value', filelist)
+
 }
 
 

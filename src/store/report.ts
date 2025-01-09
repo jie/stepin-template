@@ -247,9 +247,26 @@ export const ReportStore = defineStore('report', {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
-      let bodyJson = { ...data }
+      let bodyJson = { send_email: true, ...data }
       return http
         .request('/platform/report_api/report/review', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          console.log('response:', response.data)
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiReloadSchema(id: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { id }
+      return http
+        .request('/platform/report_api/report/reload_schema', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response.data)
           if (response.data?.status) {
