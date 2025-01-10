@@ -4,9 +4,9 @@ import { Response } from '@/types';
 import { useMenuStore } from './menu';
 import { useAuthStore } from '@/plugins';
 import { useLoadingStore } from './loading';
-import {getSessionInfo} from '@/utils/session'
+import { getSessionInfo } from '@/utils/session'
 import { message } from 'ant-design-vue';
-import router from '@/router';
+import { useRoute } from 'vue-router'
 export interface Profile {
   account: Account;
   permissions: string[];
@@ -65,7 +65,7 @@ export const useAccountStore = defineStore('account', {
       let session = getSessionInfo()
       console.log('session:', session)
       return http
-        .request<Account, Response<Profile>>('/platform/report_api/report_user/profile', 'post_json', {}, {headers: {rsessionid: session.sessionid}})
+        .request<Account, Response<Profile>>('/platform/report_api/report_user/profile', 'post_json', {}, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('profile-response:', response)
           if (response.code === 200) {
@@ -88,14 +88,18 @@ export const useAccountStore = defineStore('account', {
     setLogged(logged: boolean) {
       this.logged = logged;
     },
-    async apiFillFormLogin(email: string, password: string) {
+    async apiFillFormLogin(email: string, password: string, token?: string) {
+      let bodyJson: { email: string; password: string; token?: string } = { email: email, password: password }
+      if (token) {
+        bodyJson.token = token;
+      }
       return http
-        .request('/platform/report_api/report_fill/login', 'post_json', { email, password })
+        .request('/platform/report_api/report_fill/login', 'post_json', bodyJson)
         .then(async (response) => {
-          console.log('response:', response)
+          console.log('apiFillFormLogin-response:', response)
           if (response?.data?.status) {
             localStorage.setItem("fill_session", JSON.stringify({
-              email: email,
+              email: response.data.data?.user_data?.email,
               password: password,
               ...response.data.data
             }))
@@ -128,7 +132,7 @@ export const useAccountStore = defineStore('account', {
       let session = getSessionInfo()
       console.log('session:', session)
       return http
-        .request('/platform/report_api/profile/change_password', 'post_json', { old_password: oldPassword, new_password: newPassword }, {headers: {rsessionid: session.sessionid}})
+        .request('/platform/report_api/profile/change_password', 'post_json', { old_password: oldPassword, new_password: newPassword }, { headers: { rsessionid: session.sessionid } })
         .then(async (response) => {
           if (response?.data?.status) {
             message.success(response.data.message)

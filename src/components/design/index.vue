@@ -33,7 +33,7 @@
       </div>
 
       <a-form layout="vertical" v-model="formState">
-      <div v-for="item in reportTemplateStore.reportTemplate.items" :key="item.key">
+      <div v-for="item in reportTemplateStore.reportTemplate.items" :key="item.key" class="component-wrapper">
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-if="item.type == 'text'">
           <div class="options">
@@ -564,4 +564,9 @@ const onClickSaveReportTemplate = async () => {
 .component .options {
   text-align: left;
   margin-bottom: 10px;
-}</style>
+}
+
+.component-wrapper {
+  border: 1px solid #ccc;
+}
+</style>

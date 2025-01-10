@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!store.loading">
+  <div v-if="!store.loading && store.report?.id">
     <Designer ref="designerRef" />
     <!-- <div class="flex" style="justify-content: center; align-items:center; min-height: 800px; ">
       <div style="width: 460px;display:block;">
@@ -34,7 +34,7 @@
 </template>
   
 <script lang="ts" setup>
-import { ref, reactive, toRaw } from "vue"
+import { ref, reactive, toRaw, watchEffect } from "vue"
 import Designer from "@/components/design/public_report.vue"
 import { ReportFillStore } from "@/store/report_fill"
 import Spin from "@/components/spin/index.vue"
@@ -99,6 +99,19 @@ const initialization = async () => {
   //   isLocal: true 
   // })
 }
+
+watchEffect(() => {
+  if (store?.report?.id) {
+    designerRef?.value?.refresh({ 
+      items: store.report.schema, 
+      values: store.report.values, 
+      title: store.report.title, 
+      summary: store.report.summary, 
+      id: store.report.id, 
+      isLocal: true 
+    })
+  }
+})
 
 const onClickLogin = async () => {
   store.loading = true

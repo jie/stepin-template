@@ -11,7 +11,6 @@
                 @change="onDefectChange"
                 @search="handleSearchDefect"
                 allowClear
-
             >
                 <template #option="{ content_en: content_en, id: id }">
                 <div style="display:flex" @click="onDefectSelect(id)">

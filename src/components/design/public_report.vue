@@ -1,12 +1,79 @@
 <template>
   <div class="report relative" v-if="store.report?.schema">
-    <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog" :title="$t('base.LoginToFillForm')"
-      @ok="handleLoginOk">
+    <a-modal :getContainer="() => document.body" v-model:visible="isShowEditModeDialog"
+      :title="currentEditComponentRef?.title" width="100%" wrap-class-name="full-modal"
+      :cancelButtonProps="{ hidden: true, }">
+      <div ref="editModeRef">
+        <a-form layout="vertical" v-if="currentEditComponentRef">
+          <div v-for="(item, index) in schemaRef" :key="item.key">
+            <div class="component"
+              v-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'text'">
+              <reportText :item="currentEditComponentRef" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'input'">
+              <reportInput :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'input_group'">
+              <reportInputGroup :item="currentEditComponentRef"
+                v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'radio'">
+              <reportRadio :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'checkbox'">
+              <reportCheckbox :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'image'">
+              <reportImage :item="currentEditComponentRef" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'image_upload'">
+              <reportImageUpload :item="currentEditComponentRef"
+                v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'table'">
+              <reportTable :item="currentEditComponentRef" v-model:value="formState[currentEditComponentRef.key]" />
+            </div>
+            <div class="component"
+              v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'container'">
+              <reportContainer :item="currentEditComponentRef"></reportContainer>
+            </div>
+          </div>
+        </a-form>
+      </div>
+      <template #footer>
+        <a-button @click="onClickCancelEditMode">{{ $t('base.Cancel') }}</a-button>
+        <a-button type="success" @click="goPrevItem" :disabled="currentEditComponentIndexRef == 0">{{
+          $t('base.PrevItem') }}</a-button>
+        <a-button type="success" @click="goNextItem"
+          :disabled="currentEditComponentIndexRef == (schemaRef.length - 1)">{{
+            $t('base.NextItem') }}</a-button>
+        <a-button type="primary" @click="onClickConfirmSaveSingle"
+          :disabled="store.report?.review_status == '1' || store.report?.review_status == '2'">{{ $t('base.Save')
+          }}
+
+          <template #icon>
+            <SaveOutlined />
+          </template>
+
+        </a-button>
+      </template>
+    </a-modal>
+
+    <a-modal :getContainer="() => document.body" v-model:visible="isShowSubmitDialog" :okText="$t('base.Login')"
+      :title="$t('base.LoginToFillForm')" :maskClosable="false" :closable="false" @ok="handleLoginOk"
+      :cancelButtonProps="{ hidden: true, }">
       <a-form :model="loginFormData" layout="vertical">
-        <a-form-item label="E-mail" name="email" required>
+        <a-form-item :label="$t('base.Email')" name="email" required>
           <a-input v-model:value="loginFormData.email"></a-input>
         </a-form-item>
-        <a-form-item label="Password" name="password" required>
+        <a-form-item :label="$t('base.Password')" name="password" required>
           <a-input type="password" v-model:value="loginFormData.password"></a-input>
         </a-form-item>
       </a-form>
@@ -27,28 +94,41 @@
 
       </div>
     </a-modal>
-    <div
-      style="max-width: 1024px;  padding: 20px 20px 100px 20px; height: 100%; background-color: #fff; margin: 0 auto; position: relative;">
+
+    <!-- <a-drawer v-model:visible="isShowCatalogRef" class="custom-class" style="color: red" title="Basic Drawer"
+      placement="right">
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+    </a-drawer> -->
+    <div v-show="!isShowSubmitDialog" class="report-items-wrapper">
 
       <div v-if="loadingRef"
         style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
         <Spin font-size="60px" />
       </div>
-      <div class="flex mb-9" style="border-bottom: 1px solid #eee; padding-bottom: 20px;">
-        <div style="width: 200px;">
-          <img src="https://qcplatform.oss-cn-shanghai.aliyuncs.com/logo/report_logo.jpg" alt="">
-        </div>
+      <div class="flex">
+        <img style="width:100%;" src="https://qcplatformassets.yilaw-ec.com/logo/ecqa_email_banner_hd.jpg"
+          data-v-c2fb76a6="">
+      </div>
+      <div class="flex" style="padding: 10px;" v-if="store.report?.title">
         <div style="flex: 1">
           <div class="title">
             <div>{{ store.report?.title }}</div>
           </div>
-          <div class="summary">
+          <div class="summary" v-if="store.report?.summary">
             <div>{{ store.report?.summary }}</div>
           </div>
         </div>
       </div>
-      <div v-if="store.report?.status == '0'">
-        <a-alert :message="$t('base.report_fail_need_refill')" :description="store.report?.reason" type="warning" show-icon />
+      <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '-1'">
+        <a-alert :message="$t('base.report_fail_need_refill')" type="error" show-icon />
+      </div>
+      <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '1'">
+        <a-alert :message="$t('base.report_waiting_review')" type="info" show-icon />
+      </div>
+      <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '2'">
+        <a-alert :message="$t('base.report_pass_review')" type="success" show-icon />
       </div>
       <a-form layout="vertical" :model="formState" v-if="store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
@@ -110,8 +190,8 @@
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
             <a-form-item required :label="$t('base.ArrivalTime')">
-              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }" v-model:value="formState['ArrivalTime']"
-                :getPopupContainer="triggerNode => triggerNode.parentNode" />
+              <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
+                v-model:value="formState['ArrivalTime']" :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
@@ -184,66 +264,99 @@
             </a-form-item>
           </div>
         </div>
-        <div v-for="(item, index) in schemaRef" :key="item.key">
-          <div class="component" v-if="item.type == 'text'">
+        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
+          :class="{ 'notpass': store.report?.review_comments[item.key]?.status == false, 'pass': store.report?.review_comments[item.key]?.status == true }">
+          <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'input'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'input'">
             <reportInput :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
           </div>
-          <div class="component" v-else-if="item.type == 'input_group'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'input_group'">
             <reportInputGroup :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
           </div>
-          <div class="component" v-else-if="item.type == 'radio'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'radio'">
             <reportRadio :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'checkbox'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'checkbox'">
             <reportCheckbox :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'image'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'image'">
             <reportImage :item="item" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'image_upload'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'image_upload'">
             <reportImageUpload :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
           </div>
-          <div class="component" v-else-if="item.type == 'table'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'table'">
             <reportTable :item="item" v-model:value="formState[item.key]" ref="itemRefs"></reportTable>
           </div>
-          <div class="component" v-else-if="item.type == 'container'">
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'container'">
             <reportContainer :item="item" ref="itemRefs"></reportContainer>
           </div>
-          <div v-else>unsupported components: {{ item }}</div>
+          <div class="component" :id="`com-${item.key}`" v-else>unsupported components: {{ item }}</div>
+          <div v-if="store.report?.review_comments[item.key]?.comment">{{ $t('base.Comment') }}: {{
+            store.report?.review_comments[item.key].comment }}</div>
+          <div class="edit-mode" @click="onClickShowEditMode(item, index)">{{ $t('base.Edit') }}</div>
         </div>
-
 
         <a-affix :offset-bottom="20" @change="affixedChange">
           <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
             style="">
-            <div v-if="['1', '0'].includes(store.report.status)">
-              <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
-                @confirm="onSubmitReport" :title="$t('base.ConfirmSubmitReport')" :ok-text="$t('base.Yes')"
-                :cancel-text="$t('base.No')">
-                <a-button type="primary" style="width: 140px; margin-left: 10px;">{{ $t('base.Submit')
+            <div v-if="['-1', '0'].includes(store.report.review_status)">
+              <a-button type="primary" style="width: 140px; margin-left: 10px;" @click="onClickSubmit"
+                :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{
+                  $t('base.Submit')
                 }}</a-button>
-              </a-popconfirm>
-
-              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;">{{ $t('base.Save') }}</a-button>
+              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;"
+                :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{ $t('base.Save')
+                }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
               }}</a-button>
             </div>
-            <div v-else>{{ $t('base.report_not_in_fill_status') }}</div>
+            <div v-else>{{ $t('base.report_not_in_fill_status') }}: {{ store.report.review_status }}</div>
           </div>
         </a-affix>
-
-
       </a-form>
     </div>
+    <div class="catalog" v-if="isShowCatalogRef">
+      <a-button type="primary" class="hide-catalog" shape="circle" size="large" @click="isShowCatalogRef = false">
+        <template #icon>
+          <VerticalRightOutlined />
+        </template>
+      </a-button>
+
+      <div v-for="item in schemaRef" class="item">
+        <div @click="goAnchor(item.key)">{{ item.title }}</div>
+      </div>
+    </div>
+
+    <a-affix :offset-top="60">
+      <a-button class="catalog-show" v-if="!isShowCatalogRef" type="primary" shape="circle" size="large"
+        @click="isShowCatalogRef = true">
+        <template #icon>
+          <VerticalLeftOutlined />
+        </template>
+      </a-button>
+    </a-affix>
+
+    <!-- <div v-if="isShowCatalogRef" class="catalog">
+      <a-button type="primary" class="hide-catalog" shape="circle" size="large" @click="isShowCatalogRef = false">
+        <template #icon>
+          <VerticalRightOutlined />
+        </template>
+      </a-button>
+
+      <div v-for="item in schemaRef" class="item">
+        <div @click="goAnchor(item.key)">{{ item.title }}</div>
+      </div>
+    </div> -->
+
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineProps, ref, computed, toRaw, reactive } from 'vue';
+import { defineProps, ref, computed, toRaw, reactive, watchEffect, readonly, createVNode } from 'vue';
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
@@ -254,7 +367,8 @@ import reportImage from "./reportImage/index.vue"
 import reportImageUpload from "./reportImageUpload/index.vue"
 import reportContainer from "./container.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
-import { CheckOutlined } from '@ant-design/icons-vue';
+import { useRoute } from "vue-router"
+import { CheckCircleFilled, CheckOutlined, VerticalRightOutlined } from '@ant-design/icons-vue';
 import { openNotification, successNotification } from '@/utils/notification';
 // import { copyObject } from "@/utils/objectUtils"
 import { i18n } from '@/lang/i18n';
@@ -262,7 +376,11 @@ import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import { approveStatusDisplayMsg, customerApproveStatusMsg } from "@/utils/constant"
 import { useAccountStore } from '@/store';
+import { Modal } from 'ant-design-vue';
+import { message } from 'ant-design-vue';
 import dayjs from 'dayjs';
+import { fill } from 'lodash';
+const route = useRoute()
 const document = window.document
 const store = ReportFillStore()
 const isAffixedRef = ref(false)
@@ -274,9 +392,14 @@ const schemaRef = ref([])
 const loadLocalDataDialogRef = ref(false)
 const localDataRecord = ref(null)
 const startedRef = ref(false)
+const currentEditComponentRef = ref(null)
+const currentEditComponentIndexRef = ref(-1)
+const isShowCatalogRef = ref(false)
+
 const affixedChange = (affixed: boolean) => {
   isAffixedRef.value = affixed
 };
+const isShowEditModeDialog = ref(false)
 
 const reportResultOptions = [
   { label: i18n.global.t(`base.ResultPassed`), value: '3' },
@@ -294,14 +417,14 @@ const initialization = async () => {
   // }
   schemaRef.value = store.report.template?.items
   // loadLocalData()
-  loadRemoteData()
-  let localData = await loadLocalData()
-  console.log('localData:', localData)
-  if (localData && localData.values && localData.values.length != 0) {
-    if (dayjs(localData.update_at) > dayjs(store.report.update_at)) {
-      localDataRecord.value = localData
-    }
-  }
+  // loadRemoteData()
+  // let localData = await loadLocalData()
+  // console.log('localData:', localData)
+  // if (localData && localData.values && localData.values.length != 0) {
+  //   if (dayjs(localData.update_at) > dayjs(store.report.update_at)) {
+  //     localDataRecord.value = localData
+  //   }
+  // }
 }
 
 const showLocalDataDialog = () => {
@@ -309,6 +432,20 @@ const showLocalDataDialog = () => {
 }
 
 const onOpenForm = async () => {
+  if (route.query.fill_token) {
+    console.log('formState:', toRaw(formState))
+    let result;
+    try {
+      result = await accountStore.apiFillFormLogin("", "")
+      console.log('onOpenForm=result:', result)
+    } catch (e) {
+      openNotification({
+        type: "error",
+        message: i18n.global.t(`base.LoginFail`),
+        description: i18n.global.t(`base.LoginFailByFillToken`)
+      })
+    }
+  }
   let fillSession = getFillSession()
   if (!fillSession) {
     isShowSubmitDialog.value = true
@@ -435,7 +572,7 @@ const editableComponents = [
 const refresh = (data: any) => {
   loadingRef.value = true
   reportDataRef.value = data
-  store.report.values = {}
+  // store.report.values = data.values
   setTimeout(() => {
     store.report.schema.map((item: any) => {
       // if (item.refreshValue && item.props.item.data) {
@@ -459,6 +596,7 @@ const refresh = (data: any) => {
     })
     loadingRef.value = false
     startedRef.value = true
+    loadRemoteData()
   }, 2000)
 
 }
@@ -478,7 +616,7 @@ const onSubmitReport = async () => {
     return
   }
   try {
-    await store.apiSubmit(fillSession.email, fillSession.password, formState)
+    await store.apiSubmit(fillSession.email, fillSession.password, formState, route?.query?.fill_token)
   } catch (e) {
     console.log(e)
     openNotification({
@@ -493,8 +631,8 @@ const onSubmitReport = async () => {
 
   openNotification({
     type: "success",
-    message: "Success",
-    description: "Report submitted"
+    message: "OK",
+    description: i18n.global.t('base.ReportSubmitted')
   })
 
 }
@@ -508,7 +646,7 @@ const onFinishSubmit = async () => {
   }
   try {
 
-    await store.apiFill(fillSession.email, fillSession.password, formState)
+    await store.apiFill(fillSession.email, fillSession.password, formState, route?.query?.fill_token)
   } catch (e) {
     console.log(e)
     openNotification({
@@ -523,8 +661,8 @@ const onFinishSubmit = async () => {
 
   openNotification({
     type: "success",
-    message: "Success",
-    description: "Report saved"
+    message: 'OK',
+    description: i18n.global.t('base.SuccessSaved')
   })
 }
 const onFinishFailed = (e) => {
@@ -549,19 +687,28 @@ const handleLoginOk = async () => {
     result = await accountStore.apiFillFormLogin(loginFormData.email, loginFormData.password)
     console.log('result:', result)
   } catch (e) {
-    openNotification({
-      type: "error",
-      message: "Login Fail",
-      description: e.message
-    })
+    console.log('e:', toRaw(e))
+    if (e?.data?.status == false) {
+      openNotification({
+        type: "error",
+        message: "Error",
+        description: e.data.message
+      })
+    } else {
+      openNotification({
+        type: "error",
+        message: "Error",
+        description: e.message
+      })
+    }
+
   }
   if (result) {
-    successNotification("Login Success")
+    successNotification(i18n.global.t('base.LoginSuccess'))
     isShowSubmitDialog.value = false
     initialization()
   }
 }
-
 
 const handleConfirmUseLocalData = async () => {
   for (let key of Object.keys(localDataRecord.value.values)) {
@@ -593,6 +740,149 @@ const getFillSession = () => {
     return null
   }
 }
+
+const onClickShowEditMode = (item: any, index: number) => {
+  isShowEditModeDialog.value = true
+  console.log('item:', item)
+  // item to editModeRef
+  currentEditComponentRef.value = item
+  currentEditComponentIndexRef.value = index
+}
+
+const goNextItem = () => {
+  let index = schemaRef.value.findIndex((item) => item.key == currentEditComponentRef.value.key)
+  if (index < schemaRef.value.length - 1) {
+    currentEditComponentRef.value = schemaRef.value[index + 1]
+    currentEditComponentIndexRef.value = index + 1
+  }
+}
+
+const goPrevItem = () => {
+  let index = schemaRef.value.findIndex((item) => item.key == currentEditComponentRef.value.key)
+  if (index > 0) {
+    currentEditComponentRef.value = schemaRef.value[index - 1]
+    currentEditComponentIndexRef.value = index - 1
+  }
+}
+
+const onClickConfirmSaveSingle = async () => {
+  console.log('onClickConfirmSaveSingle:', toRaw(formState))
+
+  loadingRef.value = true
+  let fillSession = getFillSession()
+  if (!fillSession) {
+    message.error(i18n.global.t('base.PleaseLoginFirst'))
+    return
+  }
+  console.log('fillSession:', fillSession)
+
+  try {
+    await store.apiFillSingle({
+      id: store.report.id,
+      values: { [currentEditComponentRef.value.key]: formState[currentEditComponentRef.value.key] },
+      email: fillSession.email,
+      password: fillSession.password
+    })
+
+    Modal.confirm({
+      content: i18n.global.t('base.SuccessSaved'),
+      getContainer: () => document.body,
+      async onOk() {
+        currentEditComponentRef.value = schemaRef.value[currentEditComponentIndexRef.value + 1]
+        currentEditComponentIndexRef.value = currentEditComponentIndexRef.value + 1
+      },
+      icon: createVNode(CheckCircleFilled),
+      cancelText: i18n.global.t('base.Cancel'),
+      okText: i18n.global.t('base.NextItem'),
+      onCancel() {
+        Modal.destroyAll();
+      },
+    });
+
+  } catch (e) {
+    console.error(e)
+    openNotification({
+      type: "error",
+      message: i18n.global.t('base.LoginFailByFillToken'),
+      description: i18n.global.t('base.LoginFailByFillToken')
+    })
+    return
+  } finally {
+    onLocalSave()
+    loadingRef.value = false
+  }
+
+
+  if (currentEditComponentIndexRef.value < schemaRef.value.length - 1) {
+
+
+  } else {
+    isShowEditModeDialog.value = false
+    currentEditComponentRef.value = null
+    currentEditComponentIndexRef.value = null
+
+    Modal.confirm({
+      content: i18n.global.t('base.YouHaveCompleteAllItemsNeedSubmit'),
+      getContainer: () => document.body,
+      async onOk() {
+        await onSubmitReport()
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      },
+      cancelText: i18n.global.t('base.Cancel'),
+      okText: i18n.global.t('base.Submit'),
+      onCancel() {
+        Modal.destroyAll();
+      },
+    });
+  }
+}
+
+const onClickSubmit = () => {
+  Modal.confirm({
+    content: i18n.global.t('base.ConfirmSubmitReport'),
+    getContainer: () => document.body,
+    async onOk() {
+      await onSubmitReport()
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+    },
+    cancelText: i18n.global.t('base.Cancel'),
+    okText: i18n.global.t('base.Submit'),
+    onCancel() {
+      Modal.destroyAll();
+    },
+  });
+}
+
+
+const onClickCancelEditMode = () => {
+  isShowEditModeDialog.value = false
+  currentEditComponentRef.value = null
+  currentEditComponentIndexRef.value = null
+}
+
+const goAnchor = (key: string) => {
+  let anchor = document.getElementById(`com-${key}`)
+  if (anchor) {
+    anchor.scrollIntoView({
+      behavior: "smooth"
+    })
+  }
+}
+
+watchEffect(() => {
+  if (isShowEditModeDialog.value) {
+    // add overflow hidden to <html> element to prevent scrolling
+    document.documentElement.style.overflow = 'hidden'
+  } else {
+    document.documentElement.style.overflow = 'auto'
+    currentEditComponentRef.value = null
+    currentEditComponentIndexRef.value = -1
+  }
+})
 
 onOpenForm()
 
@@ -628,7 +918,7 @@ defineExpose({
 }
 
 .component {
-  margin: 30px 0;
+  /* margin: 30px 0; */
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
@@ -641,7 +931,15 @@ defineExpose({
 
 .component.meta {
   margin: 0;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-bottom: 1px solid #ccc;
 }
+
+.component.meta:hover {
+  background-color: #f9f9f9;
+}
+
 
 .affixed-style {
   border: 2px solid #ccc;
@@ -676,6 +974,112 @@ defineExpose({
   width: 100%;
   padding: 20px;
   width: 100%;
+
+}
+
+.report-items-wrapper {
+  max-width: 1024px;
+  /* padding: 20px 20px 100px 20px; */
+  padding-bottom: 100px;
+  height: 100%;
+  background-color: #fff;
+  margin: 0 auto;
+  position: relative;
+}
+
+
+.component-wrapper {
+  border-bottom: 1px solid #ccc;
+  padding: 20px;
+  position: relative
+}
+
+.component-wrapper:hover {
+  background-color: #f9f9f9;
+}
+
+.component-wrapper .edit-mode {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.component-wrapper .edit-mode:hover {
+  color: #000;
+}
+
+.catalog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 5px;
+  margin: 20px;
+  font-size: 12px;
+  z-index: 10000;
+  box-shadow: 1px 1px 5px #ccc;
+}
+
+.catalog .item {
+  min-height: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.catalog .item:last-child {
+  margin-bottom: 0;
+}
+
+.catalog .item:hover {
+  text-decoration: underline;
+}
+
+
+.toggle-catalog {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.catalog-show {
+  position: fixed;
+  top: 100px;
+  left: -10px;
+}
+
+.hide-catalog {
+  position: absolute;
+  left: -30px;
+  top: 80px;
+}
+
+.component-wrapper.notpass {
+  background-color: #f9e8e8;
+}
+
+.component-wrapper.pass {
+  background-color: #DDFFFA;
+}
+
+
+/* mobile */
+@media screen and (max-width: 768px) {
+  .report-items-wrapper {
+    max-width: 1024px;
+    /* padding: 10px 10px 100px 10px; */
+    padding-bottom: 100px;
+    height: 100%;
+    background-color: #fff;
+    margin: 0 auto;
+    position: relative;
+  }
 
 }
 </style>

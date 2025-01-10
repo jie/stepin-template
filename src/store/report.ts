@@ -4,7 +4,6 @@ import { getSessionInfo } from '@/utils/session'
 import { useLoadingStore } from '@/store';
 import { Pagination, statusFormSchema } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
-import { inspect } from 'util';
 
 export interface Report {
   id?: string;
@@ -32,6 +31,8 @@ export interface Report {
   address?: boolean;
   reason?:string
   is_thirdparty?:boolean
+  review_status?:boolean
+  review_reason?:string
 }
 
 
@@ -41,6 +42,7 @@ export const ReportStore = defineStore('report', {
       loading: false,
       reportReport: {} as Report,
       entities: <any>[],
+      isQueryThirdparty: true,
       pagination: {page: 1, pagesize: 20, total: 0} as Pagination,
       queryArgs: { create_by: "", tag: "", status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:"", query_by_creator: true},
     }
@@ -119,6 +121,7 @@ export const ReportStore = defineStore('report', {
       this.loading = true
       let session = getSessionInfo()
       let bodyJson = {
+        is_thirdparty: this.isQueryThirdparty,
         ...this.pagination,
         ...this.queryArgs
       }
@@ -137,7 +140,6 @@ export const ReportStore = defineStore('report', {
                   factory_contact: item.order.factory_contacts[0],
                   workers: item.order.workers.map(c=>{return c.worker.name}).join(','),
                 }
-
               }
               return item
             }) 
@@ -218,6 +220,58 @@ export const ReportStore = defineStore('report', {
             return response.data?.data;
           } else {
             openNotification({ type: "error", message: "Fail to save", description: response.data?.message || "Fail to save" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiSendReportToWorker(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/send_report_to_worker', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            successNotification("Success")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to send", description: response.data?.message || "Fail to send" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiReview(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { send_email: true, ...data }
+      return http
+        .request('/platform/report_api/report/review', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          console.log('response:', response.data)
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiReloadSchema(id: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { id }
+      return http
+        .request('/platform/report_api/report/reload_schema', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          console.log('response:', response.data)
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
             return Promise.reject(response);
           }
         })

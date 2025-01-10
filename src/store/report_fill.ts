@@ -4,13 +4,12 @@ import { getSessionInfo } from '@/utils/session'
 import { useLoadingStore } from '@/store';
 import { Pagination, statusFormSchema } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
-
-
 const permissionInfoKey = "reportPermissionInfo"
 
 export const ReportFillStore = defineStore('report_fill', {
   state: () => {
     return {
+      queryParameters: {},
       loading: false,
       permissionForm: {
         email: "",
@@ -24,11 +23,14 @@ export const ReportFillStore = defineStore('report_fill', {
 
   },
   actions: {
+    setQueryParameters(query) {
+      this.queryParameters = query;
+    },
     async apiCheckPermission(data: any) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let permissionInfo
-      if(data) {
+      if (data) {
         permissionInfo = data
       } else {
         permissionInfo = localStorage.getItem(permissionInfoKey)
@@ -80,10 +82,13 @@ export const ReportFillStore = defineStore('report_fill', {
     async apiUpdate() {
 
     },
-    async apiFill(email: string, password: string, values: any) {
+    async apiFill(email: string, password: string, values: any, token: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
-      let bodyJson = { id: this.report.id, email: email, password: password, values: values }
+      let bodyJson: { id: any; email: string; password: string; values: any; fill_token?: string } = { id: this.report.id, email: email, password: password, values: values }
+      if (token) {
+        bodyJson.fill_token = token
+      }
       return http
         .request('/platform/report_api/report/fill', 'post_json', bodyJson, {})
         .then((response) => {
@@ -95,10 +100,14 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiSubmit(email: string, password: string, values: any) {
+    async apiSubmit(email: string, password: string, values: any, token: string) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
-      let bodyJson = { id: this.report.id, email: email, password: password, values: values }
+      let bodyJson: { id: any; email: string; password: string; values: any; fill_token?: string, send_email?: boolean } = { id: this.report.id, email: email, password: password, values: values }
+      if (token) {
+        bodyJson.fill_token = token
+      }
+      bodyJson.send_email = true
       return http
         .request('/platform/report_api/report/submit', 'post_json', bodyJson, {})
         .then((response) => {
@@ -110,12 +119,47 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiReview(email: string, password: string, approve_status: string, approve_reason: string) {
+    async apiReview(data: any) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
-      let bodyJson = { id: this.report.id, email: email, password: password, approve_status: approve_status, approve_reason: approve_reason}
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
       return http
-        .request('/platform/report_api/report/review', 'post_json', bodyJson, {})
+        .request('/platform/report_api/report/review', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          console.log('response:', response.data)
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiFillSingle(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/fill_single', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          console.log('response:', response.data)
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
+    async apiFillSingleByStaff(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/fill_single_by_staff', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response.data)
           if (response.data?.status) {
@@ -130,7 +174,7 @@ export const ReportFillStore = defineStore('report_fill', {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
-      let bodyJson = { id: this.report.id, approve_status: approve_status, approve_reason: approve_reason}
+      let bodyJson = { id: this.report.id, approve_status: approve_status, approve_reason: approve_reason }
       return http
         .request('/platform/report_api/report/audit', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
@@ -146,7 +190,7 @@ export const ReportFillStore = defineStore('report_fill', {
     async apiQueryDefectByReportId() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
-      let bodyJson = { report_id: this.report.id, pagesize: 10000, page: 1}
+      let bodyJson = { report_id: this.report.id, pagesize: 10000, page: 1 }
       return http
         .request('/platform/report_api/report_defect/public_query', 'post_json', bodyJson, {})
         .then((response) => {
@@ -160,6 +204,24 @@ export const ReportFillStore = defineStore('report_fill', {
           }
         })
         .finally(() => setPageLoading(false));
-    }
+    },
+    async apiSubmitReviewComment(data: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson = { ...data }
+      return http
+        .request('/platform/report_api/report/review_comment/submit', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            successNotification("Success")
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to send", description: response.data?.message || "Fail to send" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
   },
 })

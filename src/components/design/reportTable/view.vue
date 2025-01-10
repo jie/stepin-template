@@ -2,7 +2,7 @@
     <div ref="allModal">
       <BaseSlot :item="props?.item">
         <div>
-          <a-table class="report-table" :columns="tableDataRef.columns" :data-source="props.value" bordered size="small" :scroll="{ x: 1500 }"
+          <a-table class="report-table" :columns="tableDataRef.columns" :data-source="props.value" bordered size="small"
             :pagination="tableDataRef?.pageSize == 0 ? false : { size: tableDataRef.addRowCount }">
             <template #bodyCell="{ text, record, index, column }">
               <template v-if="props.mode == 'preview'">

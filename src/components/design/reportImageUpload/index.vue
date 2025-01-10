@@ -1,11 +1,11 @@
 <template>
-  <div class="clearfix">
+  <div class="clearfix" style="position: relative;">
     <BaseSlot :item="props?.item">
       <div>
-        <a-row type="flex" v-for="items in computedItems" :gutter="[16, 16]" style="margin-bottom: 20px">
-          <a-col flex="1" v-for="item in items">
+        <a-row type="flex" v-for="(items, index) in computedItems" :gutter="[16, 16]" style="margin-bottom: 20px">
+          <a-col flex="1" v-for="(item, sIndex) in items">
             <div v-if="item?.url">
-              <div style="margin-bottom: 10px;">
+              <div style="margin-bottom: 10px">
                 <a-image :src="item.url" height="200px" width="100%"
                   style="border: 1px solid #ccc; border-radius: 5px; object-fit: contain;" />
               </div>
@@ -14,7 +14,7 @@
                   <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-model:value="item.desc"
                     v-if="props.item?.is_defect" style="width: 100%" :options="defectOptions"
                     @search="handleSearchDefect" allowClear>
-                    <a-textarea style="width: 100%;" />
+                    <a-textarea style="width: 100%;" :data-url="item.url" @drop.prevent="onDropImage" />
                     <template
                       #option="{ content_en: content_en, id: id, content: content, types: types, product: product, product_en: product_en }">
                       <div @click="onDefectSelect(item, id)">
@@ -24,10 +24,11 @@
                       </div>
                     </template>
                   </a-auto-complete>
-                  <a-textarea style="width: 100%;" v-model:value="item.desc" v-else />
+                  <a-textarea style="width: 100%;" :data-url="item.url" v-model:value="item.desc" v-else
+                    @drop.prevent="onDropImage" />
                 </a-col>
-                <a-col flex="60px">
-                  <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body; }"
+                <a-col flex="120px">
+                  <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body }"
                     @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')"
                     :cancel-text="$t('base.No')">
                     <a-button shape="circle" style="margin-top: 10px;">
@@ -35,7 +36,20 @@
                         <DeleteOutlined />
                       </template>
                     </a-button>
-                  </a-popconfirm>
+                  </a-popconfirm> -->
+                  <div class="flex" style="justify-content: space-around;">
+                    <a-button shape="circle" style="margin-top: 10px;" @click="onClickDeleteImage(item)">
+                      <template #icon>
+                        <DeleteOutlined />
+                      </template>
+                    </a-button>
+                    <a-button shape="circle" style="margin-top: 10px;" @click="onClickEditImage(item)">
+                      <template #icon>
+                        <EditOutlined />
+                      </template>
+                    </a-button>
+                  </div>
+
                 </a-col>
               </a-row>
             </div>
@@ -52,14 +66,18 @@
         </a-button>
       </div>
       <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
-        :accept="props?.item?.data?.accept" multiple />
+        :accept="props?.item?.data?.accept" :multiple="targetEditImageRef === null" />
     </BaseSlot>
+    <a-modal @ok="confirmDeleteImage" :ok-text="$t('base.Yes')" :getContainer="() => documentRef.body"
+      v-model:visible="showDeleteImageRef" :cancel-text="$t('base.No')">
+      <div>{{ $t('base.ConfirmDelete') }}</div>
+    </a-modal>
 
   </div>
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { EditOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ref, computed } from 'vue';
 import { groupArrayWithPatch } from "@/utils/objectUtils"
 import { getBase64 } from "@/utils/file"
@@ -69,6 +87,7 @@ import { ImageType } from "@/types/components/image"
 import { ReportFillStore } from "@/store/report_fill"
 import { toRaw } from "vue";
 const store = ReportFillStore()
+const documentRef = document
 const props = defineProps({
   item: {
     type: Object,
@@ -87,6 +106,10 @@ const fileBtnRef = ref(null);
 const previewVisible = ref(false);
 const previewImage = ref('');
 const previewTitle = ref('');
+const targetDeleteImageRef = ref(null);
+const showDeleteImageRef = ref(false);
+
+const targetEditImageRef = ref(null);
 const emits = defineEmits(["update:value"])
 
 const defectOptions = ref([])
@@ -101,24 +124,47 @@ const onClickTriggerButton = async () => {
   // if (targetElement != null && targetElement.value) {
   //   targetElement.value = ''
   // }
-  fileBtnRef.value.click()
+  targetEditImageRef.value = null
+  setTimeout(() => {
+    fileBtnRef.value.click()
+  }, 500)
+
 }
 
+const onClickDeleteImage = (image: any) => {
+  targetDeleteImageRef.value = image
+  showDeleteImageRef.value = true
+}
+const onClickEditImage = (image: any) => {
+  targetEditImageRef.value = image
+  setTimeout(() => {
+    fileBtnRef.value.click()
+  }, 500)
+}
 
 const onUploadInputChange = async (e: Event) => {
   let filelist = [...props.value]
   let images = await ossUploadFiles(e)
-  console.log('images:', images)
-  for (let item of images) {
-    filelist.push({
-      name: "",
-      url: item,
-      status: "done",
-      uid: item,
-      desc: ""
-    })
+  console.log('images:', images, ', targetEditImageRef.value:', targetEditImageRef.value)
+  if (targetEditImageRef.value !== null) {
+    let targetImage = props.value.find(item => item.url === targetEditImageRef.value.url)
+    if (targetImage) {
+      targetImage.url = images[0]
+      targetImage.uid = images[0]
+    }
+  } else {
+    for (let item of images) {
+      filelist.push({
+        name: "",
+        url: item,
+        status: "done",
+        uid: item,
+        desc: ""
+      })
+    }
   }
   emits('update:value', filelist)
+
 }
 
 
@@ -146,12 +192,34 @@ const deleteImage = (image: ImageType) => {
   let filelist = [...props.value]
   filelist = filelist.filter(item => item.url !== image.url)
   console.log('props.value:', toRaw(props.value))
-  emits('update:value',filelist || [])
+  emits('update:value', filelist || [])
+}
+
+const confirmDeleteImage = () => {
+  deleteImage(targetDeleteImageRef.value)
+  showDeleteImageRef.value = false
+  targetDeleteImageRef.value = null
 }
 
 const refreshValue = (data: any) => {
   fileList.value = data.images
 }
+
+const onDropImage = (e: Event, originUrl: string) => {
+  console.log('e:', toRaw(e))
+  if (e?.target?.dataset?.url) {
+    let targetImage = props.value.find(item => item.url === e?.target?.dataset?.url)
+    if (targetImage) {
+      targetEditImageRef.value = targetImage
+      if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
+        // let file = e.dataTransfer.files[0]
+        onUploadInputChange({ target: { files: e.dataTransfer.files} })
+      }
+    }
+
+  }
+}
+
 
 defineExpose({
   props,
