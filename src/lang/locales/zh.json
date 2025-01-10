@@ -98,7 +98,7 @@
         "Checkbox": "多选",
         "Table": "表格",
         "Image": "图片",
-        "Upload": "上传",
+        "Upload": "上传或拍照",
         "EditComponent": "编辑组件",
         "FullWidth": "占满整行",
         "Width": "宽度",
@@ -288,6 +288,7 @@
         "report_waiting_review_for_customer": "报告正在审核中...",
         "reload_report_schema": "重新载入模版",
         "confirm_reload_schema": "确认是否执行重新载入报告模版?",
-        "LoginSuccess": "登录成功"
+        "LoginSuccess": "登录成功",
+        "QueryThirdpartyReport": "搜索第三方报告"
     }
 }

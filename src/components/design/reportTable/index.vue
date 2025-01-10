@@ -512,14 +512,20 @@ const initialization = () => {
     if (props.item?.data?.rowSchema && props.item?.data?.rowSchema.length != 0) {
       setTimeout(() => {
         // TODO: fix initialize will be called twice
-        // emits('update:value', props.item?.data?.rowSchema)
-        console.log('initialization-props.item?.data?.rowSchema:', toRaw(props.item?.data?.rowSchema))
+        console.log('initialization-value1:', toRaw(props?.value))
+        if(!props?.value || props?.value.length == 0){
+          emits('update:value', props.item?.data?.rowSchema)
+        }
+
+        console.log('initialization-rowSchema:', toRaw(props.item?.data?.rowSchema))
+        // console.log('initialization-data:', toRaw(props.item?.data))
+        console.log('initialization-value2:', toRaw(props?.value))
       }, 500)
     }
   }
 
   setTimeout(() => {
-    console.log('initialization--?.value:', toRaw(props?.value))
+    // console.log('initialization--?.value:', toRaw(props?.value))
     // tableDataRef.value.rows = props?.value
   }, 2000)
 }

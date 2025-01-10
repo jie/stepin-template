@@ -42,6 +42,7 @@ export const ReportStore = defineStore('report', {
       loading: false,
       reportReport: {} as Report,
       entities: <any>[],
+      isQueryThirdparty: true,
       pagination: {page: 1, pagesize: 20, total: 0} as Pagination,
       queryArgs: { create_by: "", tag: "", status: "", keyword: "", worker_name: "", company_name: "", inspect_start: "", inspect_end: "", category_id:"", query_by_creator: true},
     }
@@ -120,7 +121,7 @@ export const ReportStore = defineStore('report', {
       this.loading = true
       let session = getSessionInfo()
       let bodyJson = {
-        is_thirdparty: false,
+        is_thirdparty: this.isQueryThirdparty,
         ...this.pagination,
         ...this.queryArgs
       }
@@ -139,7 +140,6 @@ export const ReportStore = defineStore('report', {
                   factory_contact: item.order.factory_contacts[0],
                   workers: item.order.workers.map(c=>{return c.worker.name}).join(','),
                 }
-
               }
               return item
             }) 

@@ -374,7 +374,7 @@ const _submitThirdpartyReport = async () => {
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
     attachments: attachments.value,
-    // send_email: true,
+    send_email: editThirdpartyRecord.value?.is_thirdparty ? true: false, // TODO:暂时不给系统邮件发送客户报告
     po_number: poNumberRef.value,
     inspect_remark: inspectRemarkRef.value,
     cc_emails: ccEmailsRef.value.split(';'),
@@ -850,6 +850,15 @@ const showReviewReason = (record: any) => {
   }
 }
 
+
+const onToggleQueryThirdparty = (value: boolean) => {
+  console.log('value:', value)
+  setTimeout(() => {
+    store.apiQuery()
+  }, 500)
+
+}
+
 watchEffect(() => {
   isCCemailValid.value = validate_ccemails(ccEmailsRef.value)
 })
@@ -1097,14 +1106,14 @@ initializeData(true)
       <a-form-item :label="$t('base.IsThirdparty')" name="is_thirdparty">
         <a-switch v-model:checked="form.is_thirdparty" />
       </a-form-item>
-      <!-- <hr />
-      <a-form-item :label="$t('base.FillByPassword')" name="validate_password">
+      <hr />
+      <!-- <a-form-item :label="$t('base.FillByPassword')" name="validate_password">
         <a-switch v-model:checked="form.settings.validate_password" />
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item :label="$t('base.FillByPermission')" name="validate_permission">
         <a-switch v-model:checked="form.settings.validate_permission" />
       </a-form-item>
-      <a-form-item :label="$t('base.ReviewByPassword')" name="approve_password">
+      <!-- <a-form-item :label="$t('base.ReviewByPassword')" name="approve_password">
         <a-switch v-model:checked="form.settings.approve_password" />
       </a-form-item>
       <a-form-item :label="$t('base.ReviewByPermission')" name="approve_permission">
@@ -1233,19 +1242,26 @@ initializeData(true)
               </div>
             </a-col>
             <a-col :span="6">
-              <a-button type="primary" @click="addNew" :loading="formLoading" style="float: right;">
-                <template #icon>
-                  <PlusOutlined />
-                </template>
-                {{ $t('base.Create') }}
-              </a-button>
-              <a-button class="mr-2" @click="onClickSearch" style="float: right;">
-                <template #icon>
-                  <SearchOutlined />
-                </template>
-                {{ $t('base.Search') }}
-              </a-button>
+              <div class="flex" style="padding-top: 20px; align-items: center; justify-content: space-between;">
+                <div class="flex">
+                  <a-switch v-model:checked="store.isQueryThirdparty" @change="onToggleQueryThirdparty" /> {{ $t('base.QueryThirdpartyReport') }}
+                </div>
+                <div class="flex space-x-2">
+                  <a-button type="primary" @click="addNew" :loading="formLoading" style="float: right;">
+                    <template #icon>
+                      <PlusOutlined />
+                    </template>
+                    {{ $t('base.Create') }}
+                  </a-button>
+                  <a-button class="mr-2" @click="onClickSearch" style="float: right;">
+                    <template #icon>
+                      <SearchOutlined />
+                    </template>
+                    {{ $t('base.Search') }}
+                  </a-button>
+                </div>
 
+              </div>
             </a-col>
           </a-row>
         </div>
@@ -1352,7 +1368,7 @@ initializeData(true)
                     </a>
                   </a-popconfirm>
                 </a-menu-item>
-                <a-menu-item key="3" v-if="!record.is_thirdparty && record.review_status != '0'">
+                <a-menu-item key="3" v-if="!record.is_thirdparty">
                   <a @click="onClickReviewReport(record)" rel="noopener noreferrer">
                     <VerifiedOutlined />
                     {{ $t('base.review_report') }}
@@ -1394,12 +1410,12 @@ initializeData(true)
                     {{ $t('base.send_report_worker') }}
                   </a>
                 </a-menu-item>
-                <a-menu-item key="10" v-if="!record.is_thirdparty">
+                <!-- <a-menu-item key="10" v-if="!record.is_thirdparty">
                   <a @click="onClickReloadSchema(record)" rel="noopener noreferrer">
                     <reload-outlined />
                     {{ $t('base.reload_report_schema') }}
                   </a>
-                </a-menu-item>
+                </a-menu-item> -->
                 <!-- <a-menu-item key="1">
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <MailOutlined />

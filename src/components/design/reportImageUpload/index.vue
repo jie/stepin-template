@@ -14,7 +14,7 @@
                   <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-model:value="item.desc"
                     v-if="props.item?.is_defect" style="width: 100%" :options="defectOptions"
                     @search="handleSearchDefect" allowClear>
-                    <a-textarea style="width: 100%;" />
+                    <a-textarea style="width: 100%;" :data-url="item.url" @drop.prevent="onDropImage" />
                     <template
                       #option="{ content_en: content_en, id: id, content: content, types: types, product: product, product_en: product_en }">
                       <div @click="onDefectSelect(item, id)">
@@ -24,7 +24,8 @@
                       </div>
                     </template>
                   </a-auto-complete>
-                  <a-textarea style="width: 100%;" v-model:value="item.desc" v-else />
+                  <a-textarea style="width: 100%;" :data-url="item.url" v-model:value="item.desc" v-else
+                    @drop.prevent="onDropImage" />
                 </a-col>
                 <a-col flex="120px">
                   <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body }"
@@ -65,7 +66,7 @@
         </a-button>
       </div>
       <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
-        :accept="props?.item?.data?.accept" :multiple="targetEditImageRef===null" />
+        :accept="props?.item?.data?.accept" :multiple="targetEditImageRef === null" />
     </BaseSlot>
     <a-modal @ok="confirmDeleteImage" :ok-text="$t('base.Yes')" :getContainer="() => documentRef.body"
       v-model:visible="showDeleteImageRef" :cancel-text="$t('base.No')">
@@ -147,7 +148,7 @@ const onUploadInputChange = async (e: Event) => {
   console.log('images:', images, ', targetEditImageRef.value:', targetEditImageRef.value)
   if (targetEditImageRef.value !== null) {
     let targetImage = props.value.find(item => item.url === targetEditImageRef.value.url)
-    if(targetImage) {
+    if (targetImage) {
       targetImage.url = images[0]
       targetImage.uid = images[0]
     }
@@ -203,6 +204,22 @@ const confirmDeleteImage = () => {
 const refreshValue = (data: any) => {
   fileList.value = data.images
 }
+
+const onDropImage = (e: Event, originUrl: string) => {
+  console.log('e:', toRaw(e))
+  if (e?.target?.dataset?.url) {
+    let targetImage = props.value.find(item => item.url === e?.target?.dataset?.url)
+    if (targetImage) {
+      targetEditImageRef.value = targetImage
+      if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
+        // let file = e.dataTransfer.files[0]
+        onUploadInputChange({ target: { files: e.dataTransfer.files} })
+      }
+    }
+
+  }
+}
+
 
 defineExpose({
   props,

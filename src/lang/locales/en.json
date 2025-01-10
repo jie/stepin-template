@@ -288,6 +288,7 @@
         "report_waiting_review_for_customer": "Your report is waiting for approve",
         "reload_report_schema": "Reload report template",
         "confirm_reload_schema": "Confirm to reload the report template?",
-        "LoginSuccess": "Login success"
+        "LoginSuccess": "Login success",
+        "QueryThirdpartyReport": "Query Thirdparty"
     }
 }
