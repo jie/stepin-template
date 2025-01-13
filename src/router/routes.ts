@@ -215,6 +215,17 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/report_review/index.vue'),
       },
       {
+        path: 'report/help/:reportId',
+        name: 'inspect_help',
+        meta: {
+          icon: 'LoginOutlined',
+          view: 'blank',
+          target: '_blank',
+          cacheable: false,
+        },
+        component: () => import('@/pages/report_help/index.vue'),
+      },
+      {
         path: 'report/customer_review/:customerId/:reportId',
         name: 'customer_review',
         meta: {
