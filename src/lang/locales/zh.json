@@ -289,6 +289,15 @@
         "reload_report_schema": "重新载入模版",
         "confirm_reload_schema": "确认是否执行重新载入报告模版?",
         "LoginSuccess": "登录成功",
-        "QueryThirdpartyReport": "搜索第三方报告"
+        "QueryThirdpartyReport": "搜索第三方报告",
+        "inspection_standards": "验货标准",
+        "version_requirements": "版本要求",
+        "general_requirements": "通用要求",
+        "special_requirements": "特殊要求",
+        "other_requirements": "其他要求",
+        "complained_cases": "投诉案例",
+        "inspection_requirement_pdfs": "验货要求PDF",
+        "requirement_pdfs": "要求PDFs",
+        "open_in_new_page": "在新页面打开"
     }
 }

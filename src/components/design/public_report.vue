@@ -436,7 +436,7 @@ const onOpenForm = async () => {
     console.log('formState:', toRaw(formState))
     let result;
     try {
-      result = await accountStore.apiFillFormLogin("", "")
+      result = await accountStore.apiFillFormLogin("", "", route?.query?.fill_token)
       console.log('onOpenForm=result:', result)
     } catch (e) {
       openNotification({

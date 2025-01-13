@@ -73,6 +73,22 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiGetForView(id: string) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let bodyJson = { id: id }
+      return http
+        .request('/platform/report_api/report/get', 'post_json', bodyJson, {})
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            openNotification({ type: "error", message: "Fail to get report", description: response.data?.message || "Fail to get report" })
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
     async dbSave() {
 
     },

@@ -289,6 +289,15 @@
         "reload_report_schema": "Reload report template",
         "confirm_reload_schema": "Confirm to reload the report template?",
         "LoginSuccess": "Login success",
-        "QueryThirdpartyReport": "Query Thirdparty"
+        "inspection_standards": "Inspection Standards",
+        "QueryThirdpartyReport": "Query Thirdparty",
+        "version_requirements": "Version Requirements",
+        "general_requirements": "General Requirements",
+        "special_requirements": "Special Requirements",
+        "other_requirements": "Other Requirements",
+        "complained_cases": "Complained Cases",
+        "inspection_requirement_pdfs": "Inspection Requirement PDFs",
+        "requirement_pdfs": "Requirement PDFs",
+        "open_in_new_page": "Open in new page"
     }
 }

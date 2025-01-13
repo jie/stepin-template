@@ -294,6 +294,28 @@
         </template>
       </a-button>
     </a-affix>
+    <a-affix :offset-top="80" v-if="isStaffReview">
+      <a-button class="help-menu" type="primary" shape="circle" size="large" @click="isShowHelpMenu = true">
+        <template #icon>
+          <tool-outlined />
+        </template>
+      </a-button>
+    </a-affix>
+    <a-drawer placement="right" :visible="isShowHelpMenu" @close="onCloseHelpMenu" width="500">
+      <template #extra>
+        <a-button style="margin-right: 8px" @click="onOpenHelpMenuInNewPage">{{ $t('base.open_in_new_page') }}</a-button>
+      </template>
+      <div>
+        <InspectRequirementBlock type="aql" fieldKey="inspection_standards" />
+        <InspectRequirementBlock type="string" fieldKey="general_requirements" />
+        <InspectRequirementBlock type="string" fieldKey="special_requirements" />
+        <InspectRequirementBlock type="string" fieldKey="other_requirements" />
+        <InspectRequirementBlock type="case" fieldKey="complained_cases" />
+        <InspectRequirementBlock type="pdfs" fieldKey="inspection_requirement_pdfs" />
+        <!-- <InspectRequirementBlock type="pdfs" fieldKey="requirement_pdfs" /> -->
+      </div>
+  
+    </a-drawer>
   </div>
 </template>
 
@@ -316,7 +338,7 @@ import reportEditRadio from "./reportRadio/index.vue"
 import reportEditCheckbox from "./reportCheckbox/index.vue"
 import reportEditImageUpload from "./reportImageUpload/index.vue"
 import { Modal } from 'ant-design-vue';
-
+import InspectRequirementBlock from "./inspect_require_block.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
 import { CheckOutlined, SaveOutlined, CheckCircleFilled } from '@ant-design/icons-vue';
 import { openNotification, successNotification } from '@/utils/notification';
@@ -325,16 +347,18 @@ import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import dayjs from 'dayjs';
 import { i18n } from '@/lang/i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
 const isShowCatalogRef = ref(false)
 const route = useRoute()
+const router = useRouter()
 const document = window.document
 const store = ReportFillStore()
 const isAffixedRef = ref(false)
 const startedRef = ref(false)
 const loadingRef = ref(false)
 const formState = reactive({})
+const isShowHelpMenu = ref(false)
 const isStaffReview = ref(false)
 const isShowReviewModeDialog = ref(false)
 const currentReviewComponentRef = ref(null)
@@ -349,6 +373,21 @@ const reportInspectDetailRef = ref([])
 const initialization = () => {
   refresh(store.report)
   console.log('store.report?.reim_session:', toRaw(store.report?.reim_session))
+}
+
+const onCloseHelpMenu = () => {
+  isShowHelpMenu.value = false
+}
+
+const onOpenHelpMenuInNewPage = () => {
+  onCloseHelpMenu()
+  let url = router.resolve({
+    name: 'inspect_help',
+    query: {
+      id: store.report.id
+    }
+  })
+  window.open(url.href, '_blank')
 }
 
 const updateReviewComments = () => {
@@ -909,6 +948,12 @@ defineExpose({
   left: -10px;
 }
 
+.help-menu {
+  position: fixed;
+  top: 100px;
+  right: -10px;
+}
+
 .hide-catalog {
   position: absolute;
   left: -30px;
@@ -932,6 +977,7 @@ defineExpose({
 .is-staff .component-wrapper.pass {
   background-color: #DDFFFA;
 }
+
 .skip-view {
   position: fixed;
   width: 100%;
