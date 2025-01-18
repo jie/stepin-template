@@ -12,7 +12,7 @@
 
 <script lang="ts" setup>
 import { defineEmits, defineProps, ref, h } from 'vue';
-import { BorderOutlined, FieldStringOutlined, TableOutlined, ExpandOutlined, CheckSquareOutlined, CheckCircleOutlined, FileImageOutlined, UploadOutlined } from '@ant-design/icons-vue';
+import { BorderOutlined, GoldOutlined, FileDoneOutlined, FieldStringOutlined, TableOutlined, ExpandOutlined, CheckSquareOutlined, CheckCircleOutlined, FileImageOutlined, UploadOutlined } from '@ant-design/icons-vue';
 import { i18n } from '@/lang/i18n';
 // const item = {
 //     icon: BorderOutlined
@@ -139,6 +139,20 @@ const items = ref([
     icon: h(UploadOutlined, {
     }),
     defaultData: { title: "Here is the image upload", sort: "0", desc: "Here is the description", type: "image_upload" }
+  },
+  {
+    name: i18n.global.t('base.Conclusion'),
+    type: 'Conclusion',
+    icon: h(FileDoneOutlined, {
+    }),
+    defaultData: { title: "Here is the Conclusion", sort: "0", desc: "Here is the description", type: "conclusion" }
+  },
+  {
+    name: i18n.global.t('base.Collector'),
+    type: 'Collector',
+    icon: h(GoldOutlined, {
+    }),
+    defaultData: { title: "Here is the Collector", sort: "0", desc: "Here is the description", type: "collector" }
   },
   // {
   //   name: 'Container',

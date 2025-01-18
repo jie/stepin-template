@@ -97,7 +97,7 @@ const initializeData = (item: ComponentType) => {
   baseData.value.key = item.key
   baseData.value.sort = item.sort
   baseData.value.desc = item.desc
-  baseData.value.data.options = item.data.options
+  baseData.value.data.options = item?.data?.options || []
   baseData.value.layout = item.layout
 }
 

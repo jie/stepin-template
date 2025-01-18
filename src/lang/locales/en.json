@@ -298,6 +298,20 @@
         "complained_cases": "Complained Cases",
         "inspection_requirement_pdfs": "Inspection Requirement PDFs",
         "requirement_pdfs": "Requirement PDFs",
-        "open_in_new_page": "Open in new page"
+        "open_in_new_page": "Open in new page",
+        "Conclusion": "Conclusion",
+        "Collector": "Collector",
+        "SingleLanguage": "Single Language",
+        "MultipleLanguage": "Multiple Language",
+        "ParentConclusion": "Parent Conclusion",
+        "ParentConclusionItem": "Parent Conclusion Item",
+        "AddConclusion": "Add Conclusion",
+        "EditOption": "Edit Option",
+        "EditConclusion": "Edit Conclusion",
+        "hasCollector": "Has Collector",
+        "hasStatus": "Has Status",
+        "hasImages": "Has Images",
+        "hasRemarks": "Has Remarks",
+        "StatusOptions": "Status Options"
     }
 }

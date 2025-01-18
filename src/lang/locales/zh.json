@@ -298,6 +298,20 @@
         "complained_cases": "投诉案例",
         "inspection_requirement_pdfs": "验货要求PDF",
         "requirement_pdfs": "要求PDFs",
-        "open_in_new_page": "在新页面打开"
+        "open_in_new_page": "在新页面打开",
+        "Conclusion": "结论",
+        "Collector": "采集器",
+        "SingleLanguage": "单语言",
+        "MultipleLanguage": "多语言",
+        "ParentConclusion": "上级结论",
+        "ParentConclusionItem": "上级结论项目",
+        "AddConclusion": "增加项目",
+        "EditOption": "增加选项",
+        "EditConclusion": "编辑项目",
+        "hasCollector": "需要数组采集组件",
+        "hasStatus": "需要状态",
+        "hasImages": "需要图片",
+        "hasRemarks": "需要备注",
+        "StatusOptions": "状态选项"
     }
 }
