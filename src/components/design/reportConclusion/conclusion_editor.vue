@@ -334,9 +334,6 @@ const initializeData = (item: any) => {
 }
 const exportData = () => {
     let baseData = baseForm.value.exportData()
-    // console.log('exportData', toRaw(baseData))
-    console.log('itemData', toRaw(itemData.value))
-    // baseData.data = {...itemData.value}
     return {...baseData, data: {...itemData.value}}
 }
 

@@ -160,9 +160,4 @@ defineExpose({
     refreshValue
 })
 
-
-
-function h(MessageOutlined: MessageOutlinedIconType, arg1: { style: { color: string; }; }) {
-    throw new Error("Function not implemented.");
-}
 </script>

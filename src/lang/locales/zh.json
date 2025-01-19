@@ -312,6 +312,12 @@
         "hasStatus": "需要状态",
         "hasImages": "需要图片",
         "hasRemarks": "需要备注",
-        "StatusOptions": "状态选项"
+        "StatusOptions": "状态选项",
+        "ConclusionItem": "结论项目",
+        "CollectorFields": "采集器字段",
+        "EditField": "编辑字段",
+        "ValueAlreadyExists": "数据中已存在正在添加的值",
+        "AddChild": "添加子项",
+        "AddRemark": "添加备注"
     }
 }

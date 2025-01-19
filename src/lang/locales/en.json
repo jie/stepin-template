@@ -312,6 +312,12 @@
         "hasStatus": "Has Status",
         "hasImages": "Has Images",
         "hasRemarks": "Has Remarks",
-        "StatusOptions": "Status Options"
+        "StatusOptions": "Status Options",
+        "ConclusionItem": "Conclusion Item",
+        "CollectorFields": "Collector Fields",
+        "EditField": "Edit Field",
+        "ValueAlreadyExists": "Value already exists",
+        "AddChild": "Add Child",
+        "AddRemark": "Add Remark"
     }
 }

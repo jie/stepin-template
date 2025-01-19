@@ -69,3 +69,95 @@ export const generateUUID = () => {
     return v.toString(16)
   })
 }
+
+// 根据oldValue更新节点
+export const updateNodeLabel = (treeData:any, oldValue:string, newObj:object) => {
+  for (let node of treeData) {
+      if (node.value === oldValue) {
+          for(let key of Object.keys(newObj)) {
+            node[key] = newObj[key]
+          }
+          break
+      }
+
+      if (node.children) {
+          updateNodeLabel(node.children, oldValue, newObj);
+      }
+  }
+}
+
+// 找到等于value的节点
+export const findNodeLabel = (treeData: any, value: string) => {
+  for (let node of treeData) {
+      if (node.value === value) {
+          return node
+      }
+
+      if (node.children) {
+          const foundNode = findNodeLabel(node.children, value);
+          // 如果在子节点中找到了匹配的节点，返回该节点
+          if (foundNode) {
+              return foundNode;
+          }
+      }
+  }
+}
+
+// 删除等于value的节点
+export const deleteNode = (treeData: any, value: string) => {
+  for (let node of treeData) {
+      if (node.value === value) {
+          treeData.splice(treeData.indexOf(node), 1)
+          break
+      }
+
+      if (node.children) {
+          deleteNode(node.children, value);
+      }
+  }
+}
+
+// 找到等于value的节点，并将该节点和前一个节点交换位置
+export const moveUpNode = (treeData: any, value: string) => {
+  for (let i = 0; i < treeData.length; i++) {
+      if (treeData[i].value === value && i > 0) {
+          let temp = treeData[i]
+          treeData[i] = treeData[i - 1]
+          treeData[i - 1] = temp
+          break
+      }
+
+      if (treeData[i].children) {
+          moveUpNode(treeData[i].children, value);
+      }
+  }
+}
+
+// 找到等于value的节点，并将该节点和后一个节点交换位置
+export const moveDownNode = (treeData: any, value: string) => {
+  for (let i = 0; i < treeData.length; i++) {
+      if (treeData[i].value === value && i < treeData.length - 1) {
+          let temp = treeData[i]
+          treeData[i] = treeData[i + 1]
+          treeData[i + 1] = temp
+          break
+      }
+
+      if (treeData[i].children) {
+          moveDownNode(treeData[i].children, value);
+      }
+  }
+}
+
+// 找到没有children或者children为空数组的节点
+export const findLeafNode = (treeData: any) => {
+  let leafNodes = []
+  for (let node of treeData) {
+      if (!node.children || node.children.length === 0) {
+          leafNodes.push(node)
+      } else {
+          leafNodes = leafNodes.concat(findLeafNode(node.children))
+      }
+  }
+  return leafNodes
+}
