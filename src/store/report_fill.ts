@@ -203,10 +203,10 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryDefectByReportId() {
+    async apiQueryDefectByReportId(reportId:string | undefined) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
-      let bodyJson = { report_id: this.report.id, pagesize: 10000, page: 1 }
+      let bodyJson = { report_id: reportId || this.report.id, pagesize: 10000, page: 1 }
       return http
         .request('/platform/report_api/report_defect/public_query', 'post_json', bodyJson, {})
         .then((response) => {

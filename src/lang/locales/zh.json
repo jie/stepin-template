@@ -45,6 +45,7 @@
         "OrderID": "订单ID",
         "Review": "审核",
         "OP": "操作",
+        "Close": "关闭",
         "View": "查看",
         "Edit": "编辑",
         "Delete": "删除",
@@ -318,6 +319,12 @@
         "EditField": "编辑字段",
         "ValueAlreadyExists": "数据中已存在正在添加的值",
         "AddChild": "添加子项",
-        "AddRemark": "添加备注"
+        "AddRemark": "添加备注",
+        "AddField": "添加字段",
+        "FieldManagement": "字段管理",
+        "FieldName": "字段名称",
+        "FieldValue": "字段值",
+        "pleaseEnterDefectKeywords": "请输入缺陷的关键词",
+        "AddRecord": "添加记录"
     }
 }

@@ -45,6 +45,7 @@
         "OrderID": "Order ID",
         "Review": "Review",
         "OP": "OP",
+        "Close": "Close",
         "View": "View",
         "Edit": "Edit",
         "Delete": "Delete",
@@ -318,6 +319,12 @@
         "EditField": "Edit Field",
         "ValueAlreadyExists": "Value already exists",
         "AddChild": "Add Child",
-        "AddRemark": "Add Remark"
+        "AddRemark": "Add Remark",
+        "AddField": "Add Field",
+        "FieldManagement": "Field Settings",
+        "FieldName": "Field Name",
+        "FieldValue": "Field Value",
+        "pleaseEnterDefectKeywords": "Please enter defect keywords",
+        "AddRecord": "Add Record"
     }
 }
