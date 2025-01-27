@@ -32,7 +32,7 @@
         <div>{{ reportTemplateStore.reportTemplate.summary }}</div>
       </div>
 
-      <a-form layout="vertical" v-model="formState">
+      <a-form layout="vertical" v-model="store.formState">
       <div v-for="item in reportTemplateStore.reportTemplate.items" :key="item.key" class="component-wrapper">
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-if="item.type == 'text'">
@@ -112,7 +112,7 @@
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
               v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
           </div>
-          <reportCollector :item="item" ref="itemRefs"></reportCollector>
+          <reportCollector :item="item" ref="itemRefs" v-model:value="store.formState[item.key]"></reportCollector>
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'container'">
@@ -167,7 +167,7 @@
   </a-drawer>
 </template>
 <script lang="ts" setup>
-import { defineProps, ref, computed, toRaw } from 'vue';
+import { defineProps, ref, computed, toRaw, watch } from 'vue';
 import ComMenu from './com_menu.vue'
 import ComGallery from './com_gallery.vue'
 import ReportSetting from './report_setting.vue'
@@ -207,6 +207,7 @@ import {
   ReportConclusion,
   ReportCollector
 } from "@/types/components"
+import { ReportFillStore } from '@/store/report_fill';
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { useRoute, useRouter } from "vue-router";
 import { openNewUrl } from '@/utils/helpers';
@@ -235,9 +236,9 @@ const imageUploadEditor = ref(null)
 const conclusionEditor = ref(null)
 const collectorEditor = ref(null)
 const itemRefs = ref([])
+const store = ReportFillStore()
 const currentEditItem = ref(null)
 const currentEditRef = ref(null)
-const formState = ref({})
 const onOpenEditor = (item: any) => {
   editDrawerVisible.value = true;
   drawerTitle.value = `${item.type} - Editor`;
@@ -544,7 +545,33 @@ const onClickSaveReportTemplate = async () => {
   }))})
   
 }
+// const initialization = () => {
+//   console.log('111112222:', toRaw(reportTemplateStore.reportTemplate))
+//   if(reportTemplateStore.reportTemplate.items && reportTemplateStore.reportTemplate.items.length > 0) {
+//     for(let item of store.report.template.items) {
+//       console.log('initialization-item:', item)
+//       if(item.type == 'collector') {
+//         store.formState[item.key] = item.data
+//       }
+//     }
+//   }
 
+
+// }
+
+
+// watch(() => reportTemplateStore?.reportTemplate?.items, (value) => {
+//   if(value && value?.length > 0) {
+//     for(let item of value) {
+//       console.log('initialization-item:', toRaw(item))
+//       if(item.type == 'collector') {
+//         store.formState[item.key] = item.data
+//       }
+//     }
+//   }
+// })
+
+// initialization()
 
 </script>
 

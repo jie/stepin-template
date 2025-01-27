@@ -218,14 +218,14 @@ const onChangeField = (e) => {
 const initializeData = (item: any) => {
   console.log('initializeData:', toRaw(item))
   conclustionComponents.value = reportTemplateStore.reportTemplate.items.filter(c => c.type === 'conclusion' && c.key != item.key)
-  if (itemData.value.conclusion_key) {
-    conclustionComponentRecords.value = reportTemplateStore.reportTemplate.items.find(c => c.key === itemData.value.conclusion_key).data.conclusions
+
+  if (item?.data?.conclusion_key) {
+    conclustionComponentRecords.value = reportTemplateStore.reportTemplate.items.find(c => c.key === item.data.conclusion_key).data.conclusions
   }
-  itemData.value = item
   baseForm.value.initializeData(item)
   if (item.data) {
-    itemData.value.conclusion_key = item.data.conclusion_key
-    itemData.value.conclusion_item_key = item.data.conclusion_item_key
+    itemData.value.conclusion_key = item.data.conclusion_key || ''
+    itemData.value.conclusion_item_key = item.data.conclusion_item_key || ''
     itemData.value.fields = item.data.fields || []
   } else {
     itemData.value.conclusion_key = ''

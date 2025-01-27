@@ -17,6 +17,7 @@ export const ReportFillStore = defineStore('report_fill', {
       },
       report: <any>{},
       defects: <any>[],
+      formState: {}
     }
   },
   getters: {

@@ -67,9 +67,9 @@ const props = defineProps({
     }
 })
 
-watch(() => props.item, (value) => {
-    refreshValue(value)
-}, { deep: true })
+// watch(() => props.item, (value) => {
+//     refreshValue(value)
+// }, { deep: true })
 
 const columns = ref([])
 const dataSource = ref([])
@@ -87,6 +87,10 @@ const onChange = (e) => {
     console.log('onChange:', e)
     emits('update:value', exportValue())
 }
+
+// watch(() => itemData.value, (value) => {
+//     emits('update:value', exportValue())
+// }, { deep: true })
 
 
 const exportData = () => {
@@ -151,13 +155,18 @@ const refreshValue = (data: any) => {
     dataSource.value = dataSourceRecords
 }
 
+const initialization = () => {
+    refreshValue(props.item)
+}
 
+initialization()
 defineExpose({
     props,
     itemData,
     exportValue,
     exportData,
-    refreshValue
+    refreshValue,
+    initialization
 })
 
 </script>

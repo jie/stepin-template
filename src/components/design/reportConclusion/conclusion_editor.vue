@@ -312,7 +312,7 @@ const handleConclusionOK = () => {
 
 const initializeData = (item: any) => {
 
-    console.log('initializeData:', toRaw(item), toRaw(props))
+    console.log('conclusion.initializeData:', toRaw(item), toRaw(props))
     itemData.value = item
     baseForm.value.initializeData(item)
 
@@ -334,7 +334,7 @@ const initializeData = (item: any) => {
 }
 const exportData = () => {
     let baseData = baseForm.value.exportData()
-    return {...baseData, data: {...itemData.value}}
+    return {...baseData, ...itemData.value}
 }
 
 
