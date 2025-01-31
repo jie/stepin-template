@@ -161,3 +161,30 @@ export const findLeafNode = (treeData: any) => {
   }
   return leafNodes
 }
+
+export const statusColorMap = {
+  "conformed": "green",
+  "not_conformed": "volcano",
+  "not_applicable": "red",
+  "pending": "purple",
+}
+
+
+export const getStatusLabelColor = (fields: any) => {
+  let status = "cyan"
+  for (let field of fields) {
+    if (field.value === 'status') {
+      if (field.data == "conformed") {
+        status = "green"
+      } else if (field.data == "not_conformed") {
+        status = "volcano"
+      } else if (field.data == "not_applicable") {
+        status = "red"
+      } else if (field.data == "pending") {
+        status = "purple"
+      }
+    }
+  }
+  return status
+}
+

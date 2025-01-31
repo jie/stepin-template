@@ -81,6 +81,7 @@ import { message, Modal } from "ant-design-vue";
 import { i18n } from '@/lang/i18n';
 import { CloseCircleFilled, EditFilled, PlusCircleFilled, PlusOutlined, VerticalAlignTopOutlined } from "@ant-design/icons-vue";
 import { newJsonObject, generateUUID } from "@/utils/helpers";
+
 const reportTemplateStore = ReportTemplateStore()
 const document = window.document
 const isShowFieldDialogRef = ref(false)
@@ -89,6 +90,10 @@ const isAddChildRef = ref(false)
 const props = defineProps({
   item: {
     type: Object,
+  },
+  value: {
+    type: Object,
+    default: {}
   }
 })
 const conclustionComponents = ref([])
@@ -216,7 +221,7 @@ const onChangeField = (e) => {
 }
 
 const initializeData = (item: any) => {
-  console.log('initializeData:', toRaw(item))
+  console.log('initializeData:', toRaw(item), toRaw(props.value))
   conclustionComponents.value = reportTemplateStore.reportTemplate.items.filter(c => c.type === 'conclusion' && c.key != item.key)
 
   if (item?.data?.conclusion_key) {

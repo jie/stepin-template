@@ -325,6 +325,10 @@
         "FieldName": "Field Name",
         "FieldValue": "Field Value",
         "pleaseEnterDefectKeywords": "Please enter defect keywords",
-        "AddRecord": "Add Record"
+        "AddRecord": "Add Record",
+        "conformed": "Conformed",
+        "not_conformed": "Not Conformed",
+        "not_applicable": "Not Applicable",
+        "pending": "Pending"
     }
 }

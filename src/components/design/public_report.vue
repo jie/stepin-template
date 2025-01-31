@@ -12,7 +12,8 @@
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'input'">
-              <reportInput :item="currentEditComponentRef" v-model:value="store.formState[currentEditComponentRef.key]" />
+              <reportInput :item="currentEditComponentRef"
+                v-model:value="store.formState[currentEditComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'input_group'">
@@ -21,11 +22,13 @@
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'radio'">
-              <reportRadio :item="currentEditComponentRef" v-model:value="store.formState[currentEditComponentRef.key]" />
+              <reportRadio :item="currentEditComponentRef"
+                v-model:value="store.formState[currentEditComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'checkbox'">
-              <reportCheckbox :item="currentEditComponentRef" v-model:value="store.formState[currentEditComponentRef.key]" />
+              <reportCheckbox :item="currentEditComponentRef"
+                v-model:value="store.formState[currentEditComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'image'">
@@ -38,7 +41,8 @@
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'table'">
-              <reportTable :item="currentEditComponentRef" v-model:value="store.formState[currentEditComponentRef.key]" />
+              <reportTable :item="currentEditComponentRef"
+                v-model:value="store.formState[currentEditComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'container'">
@@ -46,18 +50,14 @@
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'conclusion'">
-              <reportConclusion :item="currentEditComponentRef" v-model:value="store.formState[currentEditComponentRef.key]"></reportConclusion>
+              <reportConclusion :item="currentEditComponentRef"
+                v-model:value="store.formState[currentEditComponentRef.key]"></reportConclusion>
             </div>
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'collector'">
-              item.key: {{ currentEditComponentRef.key }}
-              <br />
-              <br />
-              {{ store.formState[currentEditComponentRef.key] }}
-              <br />
-              <br />
-              {{ currentEditComponentRef }}
-              <reportCollector :item="currentEditComponentRef" v-model:value="store.formState[currentEditComponentRef.key]"></reportCollector>
+              <reportCollector :item="currentEditComponentRef"
+                v-model:value="store.formState[currentEditComponentRef.key]" v-on:updateCollector="onUpdateCollector">
+              </reportCollector>
             </div>
           </div>
         </a-form>
@@ -145,7 +145,7 @@
       <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '2'">
         <a-alert :message="$t('base.report_pass_review')" type="success" show-icon />
       </div>
-      <a-form layout="vertical" :model="store.formState" v-if="store.report" @finish="onFinishSubmit"
+      <a-form layout="vertical" :model="store.formState" v-if="store.formState && store.report" @finish="onFinishSubmit"
         @finishFailed="onFinishFailed">
         <div v-if="store.report">
           <div class="component meta">
@@ -157,7 +157,8 @@
               </a-radio-group>
             </a-form-item>
           </div>
-          <div class="component meta" v-if="store.formState['ReportResult'] == '0' || store.formState['ReportResult'] == '1'">
+          <div class="component meta"
+            v-if="store.formState['ReportResult'] == '0' || store.formState['ReportResult'] == '1'">
             <a-form-item required :label="$t('base.ReportResultRemark')">
               <a-textarea v-model:value="store.formState['ReportResultRemark']"></a-textarea>
             </a-form-item>
@@ -206,13 +207,15 @@
           <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
             <a-form-item required :label="$t('base.ArrivalTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
-                v-model:value="store.formState['ArrivalTime']" :getPopupContainer="triggerNode => triggerNode.parentNode" />
+                v-model:value="store.formState['ArrivalTime']"
+                :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
             <a-form-item required :label="$t('base.DepartureTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
-                v-model:value="store.formState['DepartureTime']" :getPopupContainer="triggerNode => triggerNode.parentNode" />
+                v-model:value="store.formState['DepartureTime']"
+                :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Inspector">
@@ -236,7 +239,8 @@
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.SampleSize">
             <a-form-item required :label="$t('base.SampleSize')">
-              <a-input-number v-model:value="store.formState['SampleSize']" style="width: 100%;" allowClear></a-input-number>
+              <a-input-number v-model:value="store.formState['SampleSize']" style="width: 100%;"
+                allowClear></a-input-number>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
@@ -312,11 +316,8 @@
             <reportConclusion :item="item" ref="itemRefs" v-model:value="store.formState[item.key]"></reportConclusion>
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'collector'">
-            {{item.key}}
-            <br />
-              {{ store.formState[item.key] }}
-              <br />
-            <reportCollector :item="item" ref="itemRefs" v-model:value="store.formState[item.key]"></reportCollector>
+            <reportCollector :item="item" ref="itemRefs" v-model:value="store.formState[item.key]"
+              v-on:updateCollector="onUpdateCollector"></reportCollector>
           </div>
           <div class="component" :id="`com-${item.key}`" v-else>unsupported components: {{ item }}</div>
           <div v-if="store.report?.review_comments[item.key]?.comment">{{ $t('base.Comment') }}: {{
@@ -337,7 +338,7 @@
                 }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
-              }}</a-button>
+                }}</a-button>
             </div>
             <div v-else>{{ $t('base.report_not_in_fill_status') }}: {{ store.report.review_status }}</div>
           </div>
@@ -442,14 +443,17 @@ const initialization = async () => {
   // }
   schemaRef.value = store.report.template?.items
 
-  if(store.report.template?.items && store.report.template?.items.length > 0) {
-    for(let item of store.report.template.items) {
-      console.log('initialization-item:', item)
-      if(item.type == 'collector') {
-        store.formState[item.key] = null
-      }
-    }
-  }
+  // if(store.report.template?.items && store.report.template?.items.length > 0) {
+  //   for(let item of store.report.template.items) {
+  //     console.log('initialization-item:', item)
+  //     if(item.type == 'collector') {
+  //       store.formState[item.key] = null
+  //       if(store.report.values && store.report.values[item.key]) {
+  //         store.formState[item.key] = store.report.values[item.key]
+  //       }
+  //     }
+  //   }
+  // }
 
 
   // loadLocalData()
@@ -531,14 +535,6 @@ const loadLocalData = async () => {
 }
 
 const loadRemoteData = async () => {
-  if (store?.report?.values && Object.keys(store.report.values).length != 0) {
-    for (let key of Object.keys(store.report.values)) {
-      store.formState[key] = store.report.values[key]
-    }
-  }
-
-
-  console.log('schema:', toRaw(store?.report?.schema))
 
   if (store?.report?.template?.settings) {
     store.formState["ReportNumber"] = store.report.values["ReportNumber"] || ""
@@ -803,16 +799,12 @@ const goPrevItem = () => {
 }
 
 const onClickConfirmSaveSingle = async () => {
-  console.log('onClickConfirmSaveSingle:', toRaw(store.formState))
-
   loadingRef.value = true
   let fillSession = getFillSession()
   if (!fillSession) {
     message.error(i18n.global.t('base.PleaseLoginFirst'))
     return
   }
-  console.log('fillSession:', fillSession)
-
   try {
     await store.apiFillSingle({
       id: store.report.id,
@@ -900,6 +892,104 @@ const onClickCancelEditMode = () => {
   currentEditComponentRef.value = null
   currentEditComponentIndexRef.value = null
 }
+
+const onUpdateCollector = (collector: any) => {
+  console.log('onUpdateCollector:', toRaw(collector))
+  let conclusionCom = store.report.template?.items.find(c => c.key == collector?.data?.conclusion_key)
+  let conclusionItem
+  console.log('conclusionCom:', toRaw(conclusionCom))
+  if (conclusionCom?.data?.conclusions) {
+    conclusionItem = conclusionCom?.data?.conclusions.find(c => c.key == collector?.data?.conclusion_item_key)
+    console.log('conclusionItem:', toRaw(conclusionItem))
+  }
+  // console.log('onUpdateCollector:', toRaw(collectorItem), toRaw(conclusionCom), toRaw(conclusionItem))
+  let collectorValue = store.formState[collector.key]
+  console.log('collectorValue:', toRaw(collectorValue))
+  if (collectorValue && collectorValue?.data?.dataRecords && collectorValue?.data?.dataRecords.length > 0) {
+    let statuses = []
+    for (let record of collectorValue?.data?.dataRecords) {
+      for (let field of record) {
+        if (field.value == 'status') {
+          statuses.push({status: field.data})
+        }
+      }
+    }
+
+    console.log('store.formState[conclusionCom.key]:', toRaw(store.formState[conclusionCom.key]), conclusionCom.key)
+    store.formState[conclusionCom.key].data.conclusions.find(c=>c.key == conclusionItem.key).userStatus = determineStatus(statuses)
+  }
+  console.log('parentItemKey:', toRaw(conclusionCom?.data?.parent_key), toRaw(store.report.template?.items))
+  if(conclusionCom?.data?.parent_com_key) {
+    let parentCom = store.report.template?.items.find(c => c.key == conclusionCom?.data?.parent_com_key)
+    console.log('parentCom:', toRaw(parentCom))
+    if(parentCom) {
+      let parentItem = parentCom?.data?.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+      if(parentItem) {
+        let parentStatuses = []
+        for(let item of store.formState[conclusionCom.key].data.conclusions) {
+          parentStatuses.push({status: item.status || item.userStatus})
+        }
+        console.log('parentStatuses:', toRaw(parentStatuses))
+        if(!store.formState[parentCom.key]) {
+          store.formState[parentCom.key] = {"data": {"conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions}}
+        }
+        let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c=>c.key == conclusionCom?.data?.parent_key)
+        console.log('ParentConclusionItem:', toRaw(ParentConclusionItem), determineStatus(parentStatuses))
+        ParentConclusionItem.userStatus = determineStatus(parentStatuses)
+
+      }
+    }
+  }
+}
+
+
+const determineStatus = (arr) => {
+  let hasNotConformed = false;
+  let hasPending = false;
+  let hasNotApplicable = false;
+  let allConformed = true;
+
+  for (const item of arr) {
+    switch (item.status) {
+      case 'not_conformed':
+        hasNotConformed = true;
+        break;
+      case 'pending':
+        hasPending = true;
+        break;
+      case 'not_applicable':
+        hasNotApplicable = true;
+        break;
+      case 'conformed':
+        break;
+      default:
+        break;
+    }
+
+    if (item.status !== 'conformed') {
+      allConformed = false;
+    }
+  }
+
+  if (hasNotConformed) {
+    return 'not_conformed';
+  }
+  if (hasPending) {
+    return 'pending';
+  }
+  if (hasNotApplicable) {
+    return 'not_applicable';
+  }
+  if (allConformed) {
+    return 'conformed';
+  }
+
+  return 'unknown';
+}
+
+
+
+
 
 const goAnchor = (key: string) => {
   let anchor = document.getElementById(`com-${key}`)

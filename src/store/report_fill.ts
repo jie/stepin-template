@@ -17,7 +17,7 @@ export const ReportFillStore = defineStore('report_fill', {
       },
       report: <any>{},
       defects: <any>[],
-      formState: {}
+      formState: <any>{},
     }
   },
   getters: {
@@ -65,6 +65,9 @@ export const ReportFillStore = defineStore('report_fill', {
         .request('/platform/report_api/report/get', 'post_json', bodyJson, {})
         .then((response) => {
           if (response.data?.data) {
+            if(response.data?.data?.entity?.values) {
+              this.formState = response.data?.data?.entity?.values
+            }
             this.report = response.data?.data?.entity
             return response.data?.data;
           } else {

@@ -325,6 +325,10 @@
         "FieldName": "字段名称",
         "FieldValue": "字段值",
         "pleaseEnterDefectKeywords": "请输入缺陷的关键词",
-        "AddRecord": "添加记录"
+        "AddRecord": "添加记录",
+        "conformed": "Conformed",
+        "not_conformed": "Not Conformed",
+        "not_applicable": "Not Applicable",
+        "pending": "Pending"
     }
 }

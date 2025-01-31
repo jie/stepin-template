@@ -14,7 +14,8 @@
                       {{ field.label }}
                     </div>
                     <div>
-                      <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data" />
+                      <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data"
+                        @change="onChange" />
                     </div>
                   </div>
                   <div class="field" v-else-if="field.value == 'item_count'">
@@ -22,7 +23,8 @@
                       {{ field.label }}
                     </div>
                     <div>
-                      <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data" />
+                      <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data"
+                        @change="onChange" />
                     </div>
                   </div>
                   <div class="field" v-else-if="field.value == 'status'">
@@ -31,7 +33,7 @@
                     </div>
                     <div>
                       <a-select v-model:value="field.data" style="width: 100%"
-                        :getPopupContainer="triggerNode => triggerNode.parentNode">
+                        :getPopupContainer="triggerNode => triggerNode.parentNode" @change="onChangeStatus">
                         <a-select-option v-for="option in conclusionRef?.data?.options" :key="option.value"
                           :value="option.value">
                           {{ option.label }}
@@ -45,7 +47,7 @@
                     </div>
                     <div>
                       <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-if="remarkIsDefect"
-                        v-model:value="field.data" style="width: 100%" :options="defectOptions"
+                        v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
                         @search="handleSearchDefect" allowClear>
                         <template #option="{ content_en: content_en, id: id }">
                           <div style="display:flex" @click="onDefectSelect(id, field)">
@@ -56,7 +58,7 @@
                         <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }"
                           :placeholder="$t('base.pleaseEnterDefectKeywords')" />
                       </a-auto-complete>
-                      <a-input v-model:value="field.data" allowClear v-else></a-input>
+                      <a-input v-model:value="field.data" allowClear @change="onChange" v-else></a-input>
                     </div>
                   </div>
                   <div class="field" v-else-if="field.value == 'images'">
@@ -68,8 +70,7 @@
                         <a-row type="flex" :gutter="[16, 16]">
                           <a-col v-for="item in field.data" :key="item.url" :span="8">
                             <div style="width: 100%; aspect-ratio: 1 / 1;">
-                              <a-image :src="item.url"
-                                style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover; " />
+                              <a-image :src="item.url" style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
                               <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
                               <div class="flex pt-2" style="justify-content: space-around;">
                                 <a-button size="small" type="primary" @click="editImage(field, item)">
@@ -199,7 +200,8 @@ import { message, Modal } from "ant-design-vue";
 import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
-import { dataTool } from "echarts";
+import { getStatusLabelColor } from "@/utils/helpers"
+const emits = defineEmits(["update:value", "updateCollector"])
 const document = window.document
 const route = useRoute()
 const reportTemplateStore = ReportTemplateStore()
@@ -237,40 +239,44 @@ const fieldForm = reactive({
   label: '',
   value: '',
 })
-// watch(() => props.item, (value) => {
-//   console.log('watch.item:', toRaw(value))
-// }, { deep: true })
 
-
-watch(() => itemData, (value) => {
-  store.formState[props.item.key] = exportValue()
-}, { deep: true })
-
-// watch(() => props.value, (value) => {
-//   console.log('watch.value:', toRaw(value), toRaw(itemData))
-//   itemData.dataRecords = value.dataRecords
-//   updateItemDataByValue(value)
-// }, { deep: true })
-
-
-const updateItemDataByValue = (value) => {
-  console.log('updateItemDataByValue:', toRaw(value.dataRecords), toRaw(value.dataSchema))
-  if (value.dataRecords && value.dataRecords.length > 0) {
-    itemData.dataRecords = value.dataRecords
-  } else if (value.dataSchema && value.dataSchema.length > 0) {
-    itemData.dataSchema = value.dataSchema
-    itemData.dataRecords = [newJsonObject(value.dataSchema)]
-  }
-}
 
 const onChange = (e) => {
-  console.log('onChange:', e)
+  console.log('onChange:', toRaw(exportValue()))
   emits('update:value', exportValue())
+}
+
+const onChangeStatus = (e) => {
+  emits('update:value', exportValue())
+  emits('updateCollector', props.item)
 }
 
 
 const onClickAdd = () => {
-  itemData.dataRecords.push(newJsonObject(itemData.dataSchema))
+  console.log('props.value?.data?.dataSchema:', toRaw(props.value?.data?.dataSchema))
+  if (props.value?.data?.dataSchema) {
+    console.log('1111')
+    let dataSchema = []
+    for (let item of props.value?.data?.dataSchema) {
+      console.log('item:', typeof (item?.data))
+      if (typeof item?.data === 'string') {
+        dataSchema.push({
+          label: item.label,
+          value: item.value,
+          data: ''
+        })
+      } else {
+        dataSchema.push({
+          label: item.label,
+          value: item.value,
+          data: []
+        })
+      }
+    }
+    itemData.dataRecords.push(newJsonObject(dataSchema))
+  } else {
+    itemData.dataRecords.push(newJsonObject(itemData.dataSchema))
+  }
 }
 
 
@@ -280,24 +286,6 @@ const onClickUpload = (field: any) => {
   setTimeout(() => {
     fileBtnRef.value.click()
   }, 500)
-}
-
-const getStatusLabelColor = (fields: any) => {
-  let status = "cyan"
-  for (let field of fields) {
-    if (field.value === 'status') {
-      if (field.data == "conformed") {
-        status = "green"
-      } else if (field.data == "non_conformed") {
-        status = "volcano"
-      } else if (field.data == "not_applicable") {
-        status = "red"
-      } else if (field.data == "pending") {
-        status = "purple"
-      }
-    }
-  }
-  return status
 }
 
 
@@ -325,6 +313,7 @@ const onUploadInputChange = async (e: Event) => {
       })
     }
   }
+  emits('update:value', exportValue())
 }
 
 
@@ -345,9 +334,11 @@ const deleteImage = (field: any, item: any) => {
   Modal.confirm({
     title: i18n.global.t('base.Delete'),
     content: i18n.global.t('base.Delete'),
+    getContainer: () => document.body,
     zIndex: 1001,
     onOk() {
       field.data = field.data.filter(i => i.url !== item.url)
+      emits('update:value', exportValue())
     },
     onCancel() {
     },
@@ -359,6 +350,7 @@ const handleRemarkOK = () => {
   targetEditImageRef.value.desc = imageRemarkRef.value
   targetEditImageRef.value = null
   imageRemarkRef.value = ''
+  emits('update:value', exportValue())
 }
 
 
@@ -367,9 +359,10 @@ const onClickDeleteRecord = (index: number) => {
     title: i18n.global.t('base.Delete'),
     content: i18n.global.t('base.Delete'),
     zIndex: 1001,
-    getContainer: "triggerNode => triggerNode.parentNode",
+    getContainer: () => document.body,
     onOk() {
       itemData.dataRecords.splice(index, 1)
+      emits('update:value', exportValue())
     },
     onCancel() {
     },
@@ -378,10 +371,10 @@ const onClickDeleteRecord = (index: number) => {
 
 const onClickAddField = (index: number) => {
   isShowAddFieldDialog.value = true
-
 }
 
 const handleAddFieldOK = () => {
+  console.log('handleAddFieldOK1:', toRaw(itemData))
   for (let record of itemData.dataRecords) {
     let needAdd = true
     for (let field of record) {
@@ -399,10 +392,18 @@ const handleAddFieldOK = () => {
         value: fieldForm.label,
         data: fieldForm.value
       })
+      if (!itemData.dataSchema.find(c => c.label === fieldForm.label || c.value === fieldForm.label)) {
+        itemData.dataSchema.push({
+          label: fieldForm.label,
+          value: fieldForm.label
+        })
+      }
+      emits('update:value', exportValue())
     } else {
       message.error('Field already exists')
     }
   }
+  console.log('handleAddFieldOK2:', toRaw(itemData))
   fieldForm.label = ''
   fieldForm.value = ''
 }
@@ -435,7 +436,7 @@ const onDefectSelect = (e, field) => {
   }
 }
 
-const emits = defineEmits(["update:value"])
+
 
 
 // const exportData = () => {
@@ -457,112 +458,97 @@ const exportValue = () => {
 
 
 const refreshValue = (data: any) => {
-  console.log('refresh-value-data:', toRaw(data))
-  if (!data) {
-    console.log('refresh-value-data2:', toRaw(props.item))
-    itemData.conclusions = props.item?.data?.conclusions || []
-    itemData.dataSchema = props.item?.data?.dataSchema || {}
-    itemData.dataRecords = props.item?.data?.dataRecords || []
-    itemData.dataExtraFields = props.item?.data?.dataExtraFields || []
-    itemData.fields = props.item?.data?.fields || []
-  } else {
-    itemData.conclusions = data.conclusions || []
-    itemData.dataSchema = data.dataSchema || {}
-    itemData.dataRecords = data.dataRecords || []
-    itemData.dataExtraFields = data.dataExtraFields || []
-    itemData.fields = data.fields || []
-  }
-
-  console.log('refresh:', toRaw(data))
-  if (!itemData.dataExtraFields) {
-    itemData.dataExtraFields = []
-  }
-  let sourceItems = []
-  if (route.path.includes('template/design'))
-    if (itemData?.data?.conclusion_key) {
-      conclusionRef.value = reportTemplateStore?.reportTemplate?.items?.find(c => c.key === itemData?.data?.conclusion_key)
-      if (itemData?.data?.conclusion_item_key) {
-        conclusionItemRef.value = conclusionRef.value?.data?.conclusions.find(c => c.key === itemData?.data?.conclusion_item_key)
-      } else {
-        conclusionItemRef.value = null
-      }
-    } else {
-      conclusionRef.value = null
-      conclusionItemRef.value = null
-    }
-  else {
-    if (itemData?.data?.conclusion_key) {
-      conclusionRef.value = store.report.template?.items?.find(c => c.key === itemData?.data?.conclusion_key)
-      if (itemData?.data?.conclusion_item_key) {
-        conclusionItemRef.value = conclusionRef.value?.data?.conclusions?.find(c => c.key === itemData?.data?.conclusion_item_key)
-      } else {
-        conclusionItemRef.value = null
-      }
-    } else {
-      conclusionRef.value = null
-      conclusionItemRef.value = null
-    }
-  }
-
-  if (conclusionItemRef.value && conclusionItemRef.value?.hasStatus) {
-    sourceItems.push({
-      label: 'Status',
-      value: 'status',
-      data: ""
-    })
-  }
-  if (conclusionItemRef.value && conclusionItemRef.value?.hasRemarks) {
-    sourceItems.push({
-      label: 'Remark',
-      value: 'remark',
-      data: ""
-    })
-  }
-  if (conclusionItemRef.value && conclusionItemRef.value?.hasImages) {
-    sourceItems.push({
-      label: 'Images',
-      value: 'images',
-      data: []
-    })
-  }
-  if (conclusionItemRef.value && conclusionItemRef.value?.IsDefect) {
-    remarkIsDefect.value = true
-  }
-  if (data) {
-    if (data?.data?.dataRecords && data?.data?.dataRecords.length > 0) {
-      itemData.dataRecords = data?.data?.dataRecords
-      itemData.dataSchema = data?.data?.dataSchema
-      itemData.dataExtraFields = data?.data?.dataExtraFields
-    } else {
-      if (data?.data?.fields && data?.data?.fields.length > 0) {
-        let nodes = findLeafNode(data?.data?.fields)
-        itemData.dataSchema = newJsonObject([...sourceItems, ...nodes])
-        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
-      } else {
-        itemData.dataSchema = newJsonObject([...sourceItems])
-        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
-      }
-    }
-  } else {
-    if (itemData?.fields && itemData?.fields.length > 0) {
-        let nodes = findLeafNode(itemData?.fields)
-        itemData.dataSchema = newJsonObject([...sourceItems, ...nodes])
-        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
-      } else {
-        itemData.dataSchema = newJsonObject([...sourceItems])
-        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
-      }
-  }
 
 }
 
 const initialization = () => {
-  if (store.formState[props.item.key] === null) {
-    refreshValue(props.item)
+  itemData.conclusions = props.item?.data?.conclusions || []
+  itemData.dataSchema = props.item?.data?.dataSchema || {}
+  itemData.dataRecords = props.item?.data?.dataRecords || []
+  itemData.fields = props.item?.data?.fields || []
+  itemData.dataExtraFields = props.item?.data?.dataExtraFields || []
+  if (props?.item?.data?.conclusion_key) {
+    conclusionRef.value = store.report.template?.items?.find(c => c.key === props?.item?.data?.conclusion_key)
+    if (props?.item?.data?.conclusion_item_key) {
+      conclusionItemRef.value = conclusionRef.value?.data?.conclusions?.find(c => c.key === props?.item?.data?.conclusion_item_key)
+    } else {
+      conclusionItemRef.value = null
+    }
   } else {
-    refreshValue(store.formState[props.item.key])
+    conclusionRef.value = null
+    conclusionItemRef.value = null
   }
 
+  if (route.path.includes('/template/design')) {
+    if (props?.item?.data?.conclusion_key) {
+      conclusionRef.value = reportTemplateStore.reportTemplate?.items?.find(c => c.key === props?.item?.data?.conclusion_key)
+      if (props?.item?.data?.conclusion_item_key) {
+        conclusionItemRef.value = conclusionRef.value?.data?.conclusions?.find(c => c.key === props?.item?.data?.conclusion_item_key)
+      } else {
+        conclusionItemRef.value = null
+      }
+    } else {
+      conclusionRef.value = null
+      conclusionItemRef.value = null
+    }
+  }
+
+  if (!props.value) {
+    console.log('props.value:', toRaw(props.value))
+    let sourceItems = []
+
+    if (conclusionItemRef.value && conclusionItemRef.value?.hasStatus) {
+      sourceItems.push({
+        label: 'Status',
+        value: 'status',
+        data: ""
+      })
+    }
+    if (conclusionItemRef.value && conclusionItemRef.value?.hasRemarks) {
+      sourceItems.push({
+        label: 'Remark',
+        value: 'remark',
+        data: ""
+      })
+    }
+    if (conclusionItemRef.value && conclusionItemRef.value?.hasImages) {
+      sourceItems.push({
+        label: 'Images',
+        value: 'images',
+        data: []
+      })
+    }
+    if (conclusionItemRef.value && conclusionItemRef.value?.IsDefect) {
+      remarkIsDefect.value = true
+    }
+    if (itemData?.fields && itemData?.fields.length > 0) {
+      let nodes = findLeafNode(itemData?.fields)
+      itemData.dataSchema = newJsonObject([...sourceItems, ...nodes])
+      itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      console.log('itemData.dataRecords1:', toRaw(itemData.dataRecords), toRaw(sourceItems))
+    } else {
+      itemData.dataSchema = newJsonObject([...sourceItems])
+      itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      console.log('itemData.dataRecords2:', toRaw(itemData.dataRecords))
+    }
+  } else {
+    console.log('props.value?.data?.dataRecords:', toRaw(props.value?.data?.dataRecords))
+    if (props.value?.data?.dataRecords && props.value?.data?.dataRecords.length > 0) {
+      itemData.dataRecords = props.value?.data?.dataRecords
+      itemData.dataSchema = props.value?.data?.dataSchema
+      itemData.dataExtraFields = props.value?.data?.dataExtraFields
+    } else {
+      if (props.value?.data?.fields && props.value?.data?.fields.length > 0) {
+        let nodes = findLeafNode(props.value?.data?.fields)
+        itemData.dataSchema = newJsonObject([...nodes])
+        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      } else {
+        itemData.dataSchema = newJsonObject([])
+        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      }
+    }
+  }
+  emits('updateCollector', props.item)
 }
 
 initialization()
