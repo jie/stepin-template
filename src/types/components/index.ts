@@ -46,3 +46,16 @@ export class ReportContainer extends BaseComponent {
     type = "container"
     defaultData = ""
 }
+
+
+export class ReportConclusion extends BaseComponent {
+    type = "conclusion"
+    defaultData = ""
+}
+
+
+export class ReportCollector extends BaseComponent {
+    type = "collector"
+    defaultData = ""
+}
+

@@ -32,7 +32,7 @@
         <div>{{ reportTemplateStore.reportTemplate.summary }}</div>
       </div>
 
-      <a-form layout="vertical" v-model="formState">
+      <a-form layout="vertical" v-model="store.formState">
       <div v-for="item in reportTemplateStore.reportTemplate.items" :key="item.key" class="component-wrapper">
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-if="item.type == 'text'">
@@ -99,6 +99,22 @@
           <reportTable :item="item" ref="itemRefs"></reportTable>
         </div>
         <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
+         v-else-if="item.type == 'conclusion'">
+          <div class="options">
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
+          </div>
+          <reportConclusion :item="item" ref="itemRefs"></reportConclusion>
+        </div>
+        <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
+         v-else-if="item.type == 'collector'">
+          <div class="options">
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
+          </div>
+          <reportCollector :item="item" ref="itemRefs" v-model:value="store.formState[item.key]"></reportCollector>
+        </div>
+        <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
           @click="onSetCurrentCom(item)" v-else-if="item.type == 'container'">
           <div class="options">
             <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
@@ -130,6 +146,8 @@
         <ImageEditor ref="imageEditor" v-else-if="currentEditItem?.type == 'image'" />
         <ImageUploadEditor ref="imageUploadEditor" v-else-if="currentEditItem?.type == 'image_upload'" />
         <ContainerEditor ref="containerEditor" v-else-if="currentEditItem?.type == 'container'" />
+        <ConclusionEditor ref="conclusionEditor" v-else-if="currentEditItem?.type == 'conclusion'" />
+        <CollectorEditor ref="collectorEditor" v-else-if="currentEditItem?.type == 'collector'" />
       </div>
     </a-spin>
 
@@ -149,7 +167,7 @@
   </a-drawer>
 </template>
 <script lang="ts" setup>
-import { defineProps, ref, computed, toRaw } from 'vue';
+import { defineProps, ref, computed, toRaw, watch } from 'vue';
 import ComMenu from './com_menu.vue'
 import ComGallery from './com_gallery.vue'
 import ReportSetting from './report_setting.vue'
@@ -163,6 +181,8 @@ import CheckboxEditor from "./reportCheckbox/checkbox_editor.vue"
 import ImageEditor from "./reportImage/image_editor.vue"
 import ImageUploadEditor from "./reportImageUpload/image_upload_editor.vue"
 import ContainerEditor from "./reportContainer/container_editor.vue"
+import CollectorEditor from "./reportCollector/collector_editor.vue"
+import ConclusionEditor from "./reportConclusion/conclusion_editor.vue"
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
@@ -171,6 +191,8 @@ import reportRadio from "./reportRadio/index.vue"
 import reportCheckbox from "./reportCheckbox/index.vue"
 import reportImage from "./reportImage/index.vue"
 import reportImageUpload from "./reportImageUpload/index.vue"
+import reportConclusion from "./reportConclusion/index.vue"
+import reportCollector from "./reportCollector/index.vue"
 import reportContainer from "./container.vue"
 import {
   ReportTitle,
@@ -182,7 +204,10 @@ import {
   ReportRadio,
   ReportCheckbox,
   ReportContainer,
+  ReportConclusion,
+  ReportCollector
 } from "@/types/components"
+import { ReportFillStore } from '@/store/report_fill';
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { useRoute, useRouter } from "vue-router";
 import { openNewUrl } from '@/utils/helpers';
@@ -208,16 +233,15 @@ const radioEditor = ref(null)
 const checkboxEditor = ref(null)
 const imageEditor = ref(null)
 const imageUploadEditor = ref(null)
+const conclusionEditor = ref(null)
+const collectorEditor = ref(null)
 const itemRefs = ref([])
+const store = ReportFillStore()
 const currentEditItem = ref(null)
 const currentEditRef = ref(null)
-const formState = ref({})
 const onOpenEditor = (item: any) => {
   editDrawerVisible.value = true;
   drawerTitle.value = `${item.type} - Editor`;
-  console.log('onOpenEditor:', item)
-  console.log('item.type:', item.type)
-  console.log('currentEditItem:', toRaw(currentEditItem.value))
   isDrawerLoading.value = true
   setTimeout(() => {
     // const itemRef = itemRefs.value.find(r => r?.props?.item?.key == item.key)
@@ -259,6 +283,14 @@ const onOpenEditor = (item: any) => {
         currentEditRef.value = imageUploadEditor.value
         imageUploadEditor.value.initializeData(item)
         break;
+      case 'conclusion':
+        currentEditRef.value = conclusionEditor.value
+        conclusionEditor.value.initializeData(item)
+        break;
+      case 'collector':
+        currentEditRef.value = collectorEditor.value
+        collectorEditor.value.initializeData(item)
+        break;
       case 'container':
         break;
       default:
@@ -275,23 +307,8 @@ const onOpenEditor = (item: any) => {
 
 const onApply = () => {
   let exportData = currentEditRef.value.exportData()
-  console.log('exportData2:', toRaw(exportData))
-  // itemRef.updateTableData(exportData.data)
-  reportTemplateStore.reportTemplate.items = reportTemplateStore.reportTemplate.items.map((c: any, index: number) => {
-    if (c.key == exportData.key) {
-      return JSON.parse(JSON.stringify(exportData))
-    }
-    return c
-  })
-  // let index;
-  // for(let i = 0; i < reportTemplateStore.reportTemplate.items.length; i++) {
-  //   if (reportTemplateStore.reportTemplate.items[i].key == exportData.key) {
-  //     index = i
-  //     break
-  //   }
-  // }
-  // reportTemplateStore.reportTemplate.items[index] = exportData
-  // sort items by sort
+  let targetIndex = reportTemplateStore.reportTemplate.items.findIndex(c=>c.key == exportData.key) 
+  reportTemplateStore.reportTemplate.items[targetIndex] = JSON.parse(JSON.stringify(exportData))
   reportTemplateStore.reportTemplate.items.sort((a: any, b: any) => {
     return a.sort - b.sort
   })
@@ -299,9 +316,8 @@ const onApply = () => {
 }
 
 const onEditCom = (item: any) => {
-  console.log('onEditCom:', item)
-  currentEditItem.value = item
-  onOpenEditor(item)
+  currentEditItem.value = reportTemplateStore.reportTemplate.items.find(c=>c.key == item.key)
+  onOpenEditor(currentEditItem.value)
 }
 
 const onDelComponent = (item: any) => {
@@ -342,6 +358,12 @@ const onAddComponent = (com: any) => {
       break
     case "checkbox":
       newItem = new ReportCheckbox(com.com.defaultData)
+      break
+    case "conclusion":
+      newItem = new ReportConclusion(com.com.defaultData)
+      break
+    case "collector":
+      newItem = new ReportCollector(com.com.defaultData)
       break
     default:
       break
@@ -387,6 +409,15 @@ const onAddAfterComponent = (item: any) => {
       break
     case "checkbox":
       newItem = new ReportCheckbox(item)
+      break
+    case "checkbox":
+      newItem = new ReportCheckbox(item)
+      break
+    case "conclusion":
+      newItem = new ReportConclusion(item)
+      break
+    case "collector":
+      newItem = new ReportCollector(item)
       break
     default:
       break
@@ -514,7 +545,33 @@ const onClickSaveReportTemplate = async () => {
   }))})
   
 }
+// const initialization = () => {
+//   console.log('111112222:', toRaw(reportTemplateStore.reportTemplate))
+//   if(reportTemplateStore.reportTemplate.items && reportTemplateStore.reportTemplate.items.length > 0) {
+//     for(let item of store.report.template.items) {
+//       console.log('initialization-item:', item)
+//       if(item.type == 'collector') {
+//         store.formState[item.key] = item.data
+//       }
+//     }
+//   }
 
+
+// }
+
+
+// watch(() => reportTemplateStore?.reportTemplate?.items, (value) => {
+//   if(value && value?.length > 0) {
+//     for(let item of value) {
+//       console.log('initialization-item:', toRaw(item))
+//       if(item.type == 'collector') {
+//         store.formState[item.key] = item.data
+//       }
+//     }
+//   }
+// })
+
+// initialization()
 
 </script>
 

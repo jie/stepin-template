@@ -17,6 +17,7 @@ export const ReportFillStore = defineStore('report_fill', {
       },
       report: <any>{},
       defects: <any>[],
+      formState: <any>{},
     }
   },
   getters: {
@@ -64,6 +65,9 @@ export const ReportFillStore = defineStore('report_fill', {
         .request('/platform/report_api/report/get', 'post_json', bodyJson, {})
         .then((response) => {
           if (response.data?.data) {
+            if(response.data?.data?.entity?.values) {
+              this.formState = response.data?.data?.entity?.values
+            }
             this.report = response.data?.data?.entity
             return response.data?.data;
           } else {
@@ -203,10 +207,10 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryDefectByReportId() {
+    async apiQueryDefectByReportId(reportId:string | undefined) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
-      let bodyJson = { report_id: this.report.id, pagesize: 10000, page: 1 }
+      let bodyJson = { report_id: reportId || this.report.id, pagesize: 10000, page: 1 }
       return http
         .request('/platform/report_api/report_defect/public_query', 'post_json', bodyJson, {})
         .then((response) => {
