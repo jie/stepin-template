@@ -21,9 +21,9 @@
           <a-form-item :label="$t('base.IsRequire')" name="required">
             <a-switch v-model:checked="baseData.required" />
           </a-form-item>
-          <a-form-item :label="$t('base.IsDefect')" name="is_defect">
+          <!-- <a-form-item :label="$t('base.IsDefect')" name="is_defect">
             <a-switch v-model:checked="baseData.is_defect" />
-          </a-form-item>
+          </a-form-item> -->
         </a-form>
       </div>
     </div>

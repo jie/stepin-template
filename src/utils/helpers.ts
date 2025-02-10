@@ -188,3 +188,51 @@ export const getStatusLabelColor = (fields: any) => {
   return status
 }
 
+
+export const determineStatus = (arr) => {
+  if(arr.length === 0) {
+    return ''
+  }
+  let hasNotConformed = false;
+  let hasPending = false;
+  let hasNotApplicable = false;
+  let allConformed = true;
+
+  for (const item of arr) {
+    switch (item.status) {
+      case 'not_conformed':
+        hasNotConformed = true;
+        break;
+      case 'pending':
+        hasPending = true;
+        break;
+      case 'not_applicable':
+        hasNotApplicable = true;
+        break;
+      case 'conformed':
+        break;
+      default:
+        break;
+    }
+
+    if (item.status !== 'conformed') {
+      allConformed = false;
+    }
+  }
+
+  if (hasNotConformed) {
+    return 'not_conformed';
+  }
+  if (hasPending) {
+    return 'pending';
+  }
+  if (hasNotApplicable) {
+    return 'not_applicable';
+  }
+  if (allConformed) {
+    return 'conformed';
+  }
+
+  return 'unknown';
+}
+

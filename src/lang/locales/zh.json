@@ -137,7 +137,7 @@
         "po_number": "PO号",
         "inspect_remark": "备注",
         "PurchaseOrder": "订单号",
-        "ItemNumber": "物品编号",
+        "ItemNumber": "款号",
         "ProductDescription": "产品描述",
         "AddressOfInspection": "检验地址",
         "DateOfInspection": "验货日期",
@@ -313,6 +313,8 @@
         "hasStatus": "需要状态",
         "hasImages": "需要图片",
         "hasRemarks": "需要备注",
+        "hasItemNumber": "需要款号",
+        "hasSampleSize": "需要数量",
         "StatusOptions": "状态选项",
         "ConclusionItem": "结论项目",
         "CollectorFields": "采集器字段",
@@ -329,6 +331,19 @@
         "conformed": "Conformed",
         "not_conformed": "Not Conformed",
         "not_applicable": "Not Applicable",
-        "pending": "Pending"
+        "pending": "Pending",
+        "languageType": "语言类型",
+        "defect_types": "缺陷类型",
+        "HasFieldsManagement": "检验员是否可自定义字段",
+        "ItemNumberLabel": "款号标签名称",
+        "SampleSizeLabel": "数量标签名称",
+        "InspectResultLabel": "检验结果标签名称",
+        "RemarksLabel": "备注/缺陷标签名称",
+        "ImagesLabel": "图片标签名称",
+        "TakePhotoLabel": "拍摄/上传照片标签名称",
+        "DefectTypeLabel": "缺陷类型标签名称",
+        "InspectResult": "检验结果",
+        "pleaseSelectInspectResult": "请选择检验结果",
+        "pleaseSetFieldValue": "请填写{label}"
     }
 }

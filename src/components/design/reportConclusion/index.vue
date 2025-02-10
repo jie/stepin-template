@@ -6,10 +6,10 @@
         <div v-for="(item, index) in itemData?.conclusions" class="conclusion-item flex">
           <div class="flex-1">
             <div>{{ item.title }}</div>
-            <a-tag v-if="statusColorMap[item?.status || item?.userStatus]" :color="statusColorMap[item?.status || item?.userStatus]">{{ $t(`base.${item?.status || item?.userStatus}`) }}</a-tag>
+            <a-tag v-if="statusColorMap[item?.status]" :color="statusColorMap[item?.status]">{{ $t(`base.${item?.status}`) }}</a-tag>
             <div v-if="item?.remark" class="item-remark">{{ item?.remark }}</div>
           </div>
-          <div class="buttons w-1/4 flex justify-end">
+          <div class="buttons w-1/4 flex justify-end" v-if="!readonlyRef">
             <div>
               <a-button @click="onClickSetConclusion(index)" type="text">
                 <template #icon>
@@ -26,7 +26,7 @@
       <a-modal :getContainer="() => document.body" v-model:visible="isShowStatusDialog" :title="$t('base.AddRemark')"
         @ok="handleStatusOK">
         <a-form layout="vertical">
-          <a-form-item :label="$t('base.Status')" name="status">
+          <a-form-item :label="$t('base.InspectResult')" name="status">
             <a-radio-group size="small"  v-model:value="statusForm.status" button-style="solid">
               <a-radio-button style="font-size: 12px" v-for="option in props.item?.data?.options" :value="option.value">{{
                 option.label
@@ -43,13 +43,16 @@
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
-import { defineProps, ref, PropType, reactive, toRaw } from 'vue'
+import { defineProps, ref, PropType, reactive, toRaw, readonly } from 'vue'
 import Icon, { CheckSquareOutlined, CloseCircleFilled } from '@ant-design/icons-vue';
 import { MessageOutlined } from '@ant-design/icons-vue';
 import { MessageOutlinedIconType } from "@ant-design/icons-vue/lib/icons/MessageOutlined";
 import { getStatusLabelColor, statusColorMap } from "@/utils/helpers"
+import { useRoute } from "vue-router";
 const document = window.document
 const isShowStatusDialog = ref(false)
+const route = useRoute()
+const readonlyRef = ref(route.path.includes('/customer_report/'))
 
 const props = defineProps({
   item: {
@@ -136,14 +139,12 @@ const initialization = () => {
   itemData.languageType = props.item?.data?.languageType || "single"
   itemData.conclusions = props.item?.data?.conclusions || []
   itemData.options = props.item?.data?.options || []
-  console.log('props.value11:', toRaw(props.value), toRaw(props.item?.data?.conclusions))
   if(props.value && props.value?.length !== 0) {
     itemData.parent_com_key = props.value?.data?.parent_com_key || ""
     itemData.parent_key = props.value?.data?.parent_key || ""
     itemData.languageType = props.value?.data?.languageType || "single"
     itemData.conclusions = props.value?.data?.conclusions || []
     itemData.options = props.value?.data?.options || []
-    console.log('props.value1122:', toRaw(props.value?.data?.conclusions))
   }
 }
 
@@ -179,4 +180,11 @@ defineExpose({
 .status-conformed {
   color: green;
 }
+
+
 </style>
+
+<style>
+.record .ant-form-item-label > label {
+  font-size: 13px;
+}</style>

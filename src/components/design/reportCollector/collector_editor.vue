@@ -7,6 +7,30 @@
     <div style="padding-left: 40px">
       <div style="margin-top:10px;">
         <a-form layout="vertical">
+          <a-form-item :label="$t('base.HasFieldsManagement')" name="has_fields_management">
+            <a-switch v-model:checked="itemData.has_fields_management" />
+          </a-form-item>
+          <a-form-item :label="$t('base.ItemNumberLabel')" name="item_number_label">
+            <a-input v-model:value="itemData.item_number_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.SampleSizeLabel')" name="sample_size_label">
+            <a-input v-model:value="itemData.sample_size_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.InspectResultLabel')" name="inspect_result_label">
+            <a-input v-model:value="itemData.inspect_result_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.RemarksLabel')" name="remarks_label">
+            <a-input v-model:value="itemData.remarks_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.ImagesLabel')" name="images_label">
+            <a-input v-model:value="itemData.images_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.TakePhotoLabel')" name="take_photo_label">
+            <a-input v-model:value="itemData.take_photo_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.DefectTypeLabel')" name="defect_type_label">
+            <a-input v-model:value="itemData.defect_type_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
           <a-form-item :label="$t('base.Conclusion')" name="conclusion_key">
             <a-select v-model:value="itemData.conclusion_key" style="width: 100%;" allow-clear
               @change="onChangeConclusionComponent">
@@ -110,7 +134,15 @@ const baseForm = ref(null)
 const itemData = ref({
   conclusion_key: '',
   conclusion_item_key: '',
-  fields: []
+  fields: [],
+  item_number_label: 'Item No.',
+  sample_size_label: 'Sample Size',
+  inspect_result_label: 'Inspect Result',
+  remarks_label: 'Remarks',
+  images_label: 'Images',
+  take_photo_label: 'Upload / Take Photo',
+  defect_type_label: 'Defect Type',
+  has_fields_management: true
 })
 
 const onChangeConclusionComponent = () => {
@@ -232,10 +264,26 @@ const initializeData = (item: any) => {
     itemData.value.conclusion_key = item.data.conclusion_key || ''
     itemData.value.conclusion_item_key = item.data.conclusion_item_key || ''
     itemData.value.fields = item.data.fields || []
+    itemData.value.item_number_label = item.data.item_number_label || 'Item No.'
+    itemData.value.sample_size_label = item.data.sample_size_label || 'Sample Size'
+    itemData.value.inspect_result_label = item.data.inspect_result_label || 'Inspect Result'
+    itemData.value.remarks_label = item.data.remarks_label || 'Remarks'
+    itemData.value.images_label = item.data.images_label || 'Images'
+    itemData.value.defect_type_label = item.data.defect_type_label || 'Defect Type'
+    itemData.value.take_photo_label = item.data.take_photo_label || 'Upload / Take Photo'
+    itemData.value.has_fields_management = item.data.has_fields_management || true
   } else {
     itemData.value.conclusion_key = ''
     itemData.value.conclusion_item_key = ''
     itemData.value.fields = []
+    itemData.value.item_number_label = 'Item No.'
+    itemData.value.sample_size_label = 'Sample Size'
+    itemData.value.inspect_result_label = 'Inspect Result'
+    itemData.value.remarks_label = 'Remarks'
+    itemData.value.images_label = 'Images'
+    itemData.value.defect_type_label = 'Defect Type'
+    itemData.value.take_photo_label = 'Upload / Take Photo'
+    itemData.value.has_fields_management = true
   }
 }
 const exportData = () => {

@@ -1,6 +1,6 @@
 <template>
   <div v-if="!store.loading && store.report?.id">
-    <Designer ref="designerRef" />
+    <Designer ref="designerRef" mode="fill" />
     <!-- <div class="flex" style="justify-content: center; align-items:center; min-height: 800px; ">
       <div style="width: 460px;display:block;">
         <div
@@ -57,8 +57,8 @@ const initialization = async () => {
   // }
   // store.loading = false
   hasPermissionRef.value = true
+  await store.apiQueryDefectByReportId(route.params.reportId)
   await store.apiGet(route.params.reportId)
-  await store.apiQueryDefectByReportId()
   console.log('defects:', toRaw(store.defects))
   store.loading = false
 

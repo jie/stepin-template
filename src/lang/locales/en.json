@@ -313,6 +313,8 @@
         "hasStatus": "Has Status",
         "hasImages": "Has Images",
         "hasRemarks": "Has Remarks",
+        "hasItemNumber": "Has Item Number",
+        "hasSampleSize": "Has Sample Size",
         "StatusOptions": "Status Options",
         "ConclusionItem": "Conclusion Item",
         "CollectorFields": "Collector Fields",
@@ -329,6 +331,19 @@
         "conformed": "Conformed",
         "not_conformed": "Not Conformed",
         "not_applicable": "Not Applicable",
-        "pending": "Pending"
+        "pending": "Pending",
+        "languageType": "Language Type",
+        "defect_types": "Defect Types",
+        "HasFieldsManagement": "Has Fields Management",
+        "ItemNumberLabel": "Item Number Label",
+        "SampleSizeLabel": "Sample Size Label",
+        "InspectResultLabel": "Inspect Result Label",
+        "RemarksLabel": "Remarks Label",
+        "ImagesLabel": "Images Label",
+        "TakePhotoLabel": "Take Photo Label",
+        "DefectTypeLabel": "Defect Type Label",
+        "InspectResult": "Inspect Result",
+        "pleaseSelectInspectResult": "Please select inspect result",
+        "pleaseSetFieldValue": "Please enter {label} value"
     }
 }

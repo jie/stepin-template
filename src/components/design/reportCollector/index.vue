@@ -1,116 +1,146 @@
 <template>
   <div>
     <BaseSlot :item="props?.item">
-      <a-form-item :label="props?.item?.data?.label"
-        :rules="[{ required: props?.item?.required, message: `Please enter ${props?.item?.title}`, trigger: 'change' }]">
+
+      <a-form-item :label="props?.item?.data?.label" :name="props?.item?.key" :id="props?.item?.key"
+        :rules="[{ required: props?.item?.required, message: $t('base.pleaseSetFieldValue', {'label': props?.item?.title}), trigger: 'change' }]">
         <div>
+          <div :id="`status-null-${props.item.key}`">
+            <a-form-item :label="$t('base.InspectResult')" :name="`status-null-${props.item.key}`"
+              :rules="[{ required: true, message: $t('base.pleaseSelectInspectResult'), validator: validateRequired, trigger: 'change' }]">
+              <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
+                @change="onConclusionChangeStatus">
+                <a-radio-button style="font-size: 12px" v-for="option in conclusionRef?.data?.options"
+                  :value="option.value">{{
+                    option.label
+                  }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+            <a-form-item :label="$t('base.Remark')" name="remark" v-if="conclusionItemRef?.value?.hasRemarks">
+              <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
+            </a-form-item>
+          </div>
           <div class="records">
             <a-badge-ribbon placement="start" :text="index + 1" :color="getStatusLabelColor(record)"
               v-for="(record, index) in itemData.dataRecords">
               <div class="record">
-                <div class="record-fields" v-for="field in record">
-                  <div class="field" v-if="field.value == 'item_number'">
-                    <div class="label">
-                      {{ field.label }}
+                <div class="record-fields" v-for="field in record" :id="`${field.value}-${index}-${props.item.key}`">
+                  <a-form-item :label="field.label" :name="`${field.value}-${index}-${props.item.key}`"
+                    :rules="[{ required: true, message: $t('base.pleaseSetFieldValue', {'label': field.label}), validator: validateRequired, trigger: 'change' }]">
+                    <div class="field" v-if="field.value == 'item_number'">
+                      <div v-if="!readonlyRef">
+                        <a-select v-model:value="field.data" style="width: 100%" mode="tags"
+                          :options="store.formState['ItemNumber']?.map(c => ({ 'label': c, 'value': c }))"
+                          :getPopupContainer="triggerNode => triggerNode.parentNode" :disabled="readonlyRef"></a-select>
+                      </div>
+                      <div v-else>
+                        <a-tag v-for="tag in field.data">{{ tag }}</a-tag>
+                      </div>
+
                     </div>
-                    <div>
-                      <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data"
-                        @change="onChange" />
-                    </div>
-                  </div>
-                  <div class="field" v-else-if="field.value == 'item_count'">
-                    <div class="label">
-                      {{ field.label }}
-                    </div>
-                    <div>
-                      <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data"
-                        @change="onChange" />
-                    </div>
-                  </div>
-                  <div class="field" v-else-if="field.value == 'status'">
-                    <div class="label">
-                      {{ field.label }}
-                    </div>
-                    <div>
-                      <a-select v-model:value="field.data" style="width: 100%"
-                        :getPopupContainer="triggerNode => triggerNode.parentNode" @change="onChangeStatus">
-                        <a-select-option v-for="option in conclusionRef?.data?.options" :key="option.value"
-                          :value="option.value">
-                          {{ option.label }}
-                        </a-select-option>
-                      </a-select>
-                    </div>
-                  </div>
-                  <div class="field" v-else-if="field.value == 'remark'">
-                    <div class="label">
-                      {{ field.label }}
-                    </div>
-                    <div>
-                      <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-if="remarkIsDefect"
-                        v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
-                        @search="handleSearchDefect" allowClear>
-                        <template #option="{ content_en: content_en, id: id }">
-                          <div style="display:flex" @click="onDefectSelect(id, field)">
-                            <span style="flex: 1">{{ content_en }}</span>
-                            <span style="font-weight: bold; width: 150px;">{{ content_en }}</span>
-                          </div>
-                        </template>
-                        <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }"
-                          :placeholder="$t('base.pleaseEnterDefectKeywords')" />
-                      </a-auto-complete>
-                      <a-input v-model:value="field.data" allowClear @change="onChange" v-else></a-input>
-                    </div>
-                  </div>
-                  <div class="field" v-else-if="field.value == 'images'">
-                    <div class="label">
-                      {{ field.label }}
-                    </div>
-                    <div>
+                    <div class="field" v-else-if="field.value == 'quantity'">
                       <div>
-                        <a-row type="flex" :gutter="[16, 16]">
-                          <a-col v-for="item in field.data" :key="item.url" :span="8">
-                            <div style="width: 100%; aspect-ratio: 1 / 1;">
-                              <a-image :src="item.url" style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
-                              <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
-                              <div class="flex pt-2" style="justify-content: space-around;">
-                                <a-button size="small" type="primary" @click="editImage(field, item)">
-                                  <template #icon>
-                                    <EditOutlined />
-                                  </template>
-                                </a-button>
-                                <a-button size="small" type="danger" @click="deleteImage(field, item)">
-                                  <template #icon>
-                                    <DeleteOutlined />
-                                  </template>
-                                </a-button>
-                                <a-button size="small" type="default" @click="remarkImage(field, item)">
-                                  <template #icon>
-                                    <FormOutlined />
-                                  </template>
-                                </a-button>
+                        <a-input-number v-model:value="field.data" @change="onChange" style="width: 100%;" :min="0"
+                          :readonly="readonlyRef" />
+                      </div>
+                    </div>
+                    <div class="field" v-else-if="field.value == 'status'">
+                      <div v-if="!readonlyRef">
+                        <a-select v-model:value="field.data" style="width: 100%"
+                          :getPopupContainer="triggerNode => triggerNode.parentNode" @change="onChangeStatus">
+                          <a-select-option v-for="option in conclusionRef?.data?.options" :key="option.value"
+                            :value="option.value">
+                            {{ option.label }}
+                          </a-select-option>
+                        </a-select>
+                      </div>
+                      <div v-else><a-tag :color="getStatusLabelColor(record)">{{
+                        conclusionRef?.data?.options?.find(o => o.value == field?.data)?.label }}</a-tag></div>
+                    </div>
+                    <div class="field" v-else-if="field.value == 'remark'">
+                      <div>
+                        <div v-if="conclusionItemRef?.isDefect">
+                          <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
+                            v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
+                            @search="handleSearchDefect" allowClear>
+                            <template #option="{ content_en: content_en, id: id, content: content }">
+                              <div style="display:flex" @click="onDefectSelect(id, field)"
+                                v-if="conclusionRef?.data?.languageType == 'single'">
+                                <span style="flex: 1">{{ i18n.global.locale == 'zh' ? content : content_en }}</span>
+                                <span style="font-weight: bold; width: 150px;">{{ i18n.global.locale == 'zh' ? content :
+                                  content_en }}</span>
                               </div>
+                              <div style="display:flex" @click="onDefectSelect(id, field)" v-else>
+                                <span style="flex: 1">{{ content }} / {{ content_en }}</span>
+                                <span style="font-weight: bold; width: 150px;">{{ content }} / {{ content_en }}</span>
+                              </div>
+                            </template>
+                            <a-textarea :auto-size="{ minRows: 2, maxRows: 5 }" @keydown.enter.prevent
+                              :placeholder="$t('base.pleaseEnterDefectKeywords')" />
+                          </a-auto-complete>
+                          <div class="mt-2">
+                            <div style="font-size: 85%">{{ field.defect_type_label }}</div>
+                            <a-select v-model:value="field.defect_types" style="width: 100%" mode="tags"
+                              v-if="!readonlyRef" :options="defectTypeOptions"
+                              :getPopupContainer="triggerNode => triggerNode.parentNode"></a-select>
+                            <div v-else>
+                              <a-tag v-for="type in field.defect_types" :key="type" style="margin-top: 5px;">{{ type
+                                }}</a-tag>
                             </div>
-                          </a-col>
-                        </a-row>
+                          </div>
+                        </div>
+
+                        <a-input v-model:value="field.data" allowClear @change="onChange" :readonly="readonlyRef"
+                          v-else></a-input>
                       </div>
+                    </div>
+                    <div class="field relative" v-else-if="field.value == 'images'">
                       <div>
-                        <a-button size="small" type="primary" @click="onClickUpload(field)" style="font-size: 80%">
-                          <template #icon>
-                            <camera-outlined />
-                          </template>
-                          {{ $t('base.Upload') }}
-                        </a-button>
+                        <div>
+                          <a-row type="flex" :gutter="[16, 16]">
+                            <a-col v-for="item in field.data" :key="item.url" :span="8">
+                              <div style="width: 100%; aspect-ratio: 1 / 1;">
+                                <a-image :src="item.url"
+                                  style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
+                                <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
+                                <div class="flex pt-2" style="justify-content: space-around;" v-if="!readonlyRef">
+                                  <a-button size="small" type="primary" @click="editImage(field, item)">
+                                    <template #icon>
+                                      <EditOutlined />
+                                    </template>
+                                  </a-button>
+                                  <a-button size="small" type="danger" @click="deleteImage(field, item)">
+                                    <template #icon>
+                                      <DeleteOutlined />
+                                    </template>
+                                  </a-button>
+                                  <a-button size="small" type="default" @click="remarkImage(field, item)">
+                                    <template #icon>
+                                      <FormOutlined />
+                                    </template>
+                                  </a-button>
+                                </div>
+                              </div>
+                            </a-col>
+                          </a-row>
+                        </div>
+                        <div v-if="!readonlyRef">
+                          <a-button size="small" type="primary" @click="onClickUpload(field, `${field.value}-${index}-${props.item.key}`)" style="font-size: 80%">
+                            <template #icon>
+                              <camera-outlined />
+                            </template>
+                            {{ props.item.data.take_photo_label }}
+                          </a-button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="field" v-else>
-                    <div class="label">
-                      {{ field.label }}
+                    <div class="field" v-else>
+                      <div>
+                        <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data"
+                          :readonly="readonlyRef" />
+                      </div>
                     </div>
-                    <div>
-                      <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data" />
-                    </div>
-                  </div>
+                  </a-form-item>
                 </div>
                 <div class="delete-record">
                   <a-button size="small" style="font-size: 80%;" type="text" @click="onClickDeleteRecord(index)"
@@ -123,12 +153,13 @@
               </div>
             </a-badge-ribbon>
           </div>
-          <div>
+          <div v-if="!readonlyRef">
             <a-button type="primary" size="small" style="font-size: 80%; margin-right: 10px;"
               @click="onClickAdd"><template #icon>
                 <plus-circle-outlined />
               </template>{{ $t('base.AddRecord') }}</a-button>
-            <a-button type="default" size="small" style="font-size: 80%" @click="onClickAddField">
+            <a-button type="default" size="small" style="font-size: 80%" @click="onClickAddField"
+              v-if="props?.item?.data?.has_fields_management">
               <template #icon>
                 <tags-outlined />
               </template>{{ $t('base.FieldManagement') }}
@@ -138,7 +169,7 @@
       </a-form-item>
       <div v-if="props?.item?.hasRemark" style="margin-top:10px;">
         <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="props.value.remark" @change="onChange"
-          :placeholder="$t('base.PleaseEnterRemark')" />
+          :readonly="readonlyRef" :placeholder="$t('base.PleaseEnterRemark')" />
       </div>
       <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
         :accept="props?.item?.data?.accept" :multiple="targetEditImageRef === null" />
@@ -176,11 +207,9 @@
                       <delete-outlined />
                     </template>
                   </a-button>
-
                 </div>
               </div>
             </div>
-
           </a-form-item>
         </a-form>
       </a-modal>
@@ -201,24 +230,25 @@ import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor } from "@/utils/helpers"
-const emits = defineEmits(["update:value", "updateCollector"])
+const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
 const reportTemplateStore = ReportTemplateStore()
+const readonlyRef = ref(route.path.includes('/customer_report/'))
 const defectOptions = ref([])
 // const dataSchema = ref([])
 // const dataRecords = ref([])
 const conclusionRef = ref(null)
 const conclusionItemRef = ref(null)
 const targetEditImageRef = ref(null)
+const currentUploadRecordKeyRef = ref(null)
 const fileBtnRef = ref(null);
 const currentUploadField = ref(null)
 const isShowRemarkDialog = ref(false)
 const isShowAddFieldDialog = ref(false)
 const imageRemarkRef = ref('')
-const remarkIsDefect = ref(false)
 const store = ReportFillStore()
-store.apiQueryDefectByReportId()
+// store.apiQueryDefectByReportId()
 const props = defineProps({
   item: {
     type: Object,
@@ -234,7 +264,10 @@ const itemData = reactive({
   dataExtraFields: [],
   fields: []
 })
-
+const statusForm = reactive({
+  status: '',
+  remark: ''
+})
 const fieldForm = reactive({
   label: '',
   value: '',
@@ -242,20 +275,69 @@ const fieldForm = reactive({
 
 
 const onChange = (e) => {
-  console.log('onChange:', toRaw(exportValue()))
+  console.log('onChange:', toRaw(e))
   emits('update:value', exportValue())
+  // emits('clearFieldError', e.target.id.replace('form_item_', ''))
 }
 
 const onChangeStatus = (e) => {
+  console.log('onChangeStatus:', toRaw(e))
   emits('update:value', exportValue())
   emits('updateCollector', props.item)
+  // emits('clearFieldError', e.target.id.replace('form_item_', ''))
 }
 
+const onConclusionChangeStatus = (e) => {
+  console.log('onConclusionChangeStatus:', toRaw(e))
+  if (conclusionItemRef.value) {
+    emits('updateConclusionInspectResult', props.item, statusForm.status, statusForm.remark)
+    // emits('clearFieldError', e.target.id.replace('form_item_', ''))
+  }
+}
+
+const validateImagesField = (imageFieldId) => {
+  emits('validateImagesField', imageFieldId)
+};
+
+const validateRequired = (rule, value, callback) => {
+  console.log('validateRequired rule:', toRaw(rule))
+  console.log('validateRequired value:', toRaw(value))
+  console.log('validateRequired callback:', toRaw(callback))
+  let [fieldType, index, key] = rule.field.split('-')
+  console.log('fieldType:', fieldType, ', index:', index, ', key:', key)
+  let result = true
+  if (index === 'null') {
+    if (statusForm.status === '') {
+      result = false
+    }
+  } else {
+
+    let field = itemData.dataRecords[index].find(c => c.value === fieldType)
+    if (field && fieldType == 'images' && field?.data?.length === 0) {
+      result = false
+    } else {
+      if (field && (field.data === '' || field.data === undefined || field.data === null)) {
+        result = false
+      }
+    }
+  }
+  console.log('result:', result)
+  return new Promise((resolve, reject) => {
+    if (result) {
+      resolve(true)
+    } else {
+      reject(false)
+    }
+  });
+}
+
+const defectTypeOptions = [
+  { label: 'critical', value: 'critical' }, { label: 'major', value: 'major' }, { label: 'minor', value: 'minor' }
+]
 
 const onClickAdd = () => {
   console.log('props.value?.data?.dataSchema:', toRaw(props.value?.data?.dataSchema))
   if (props.value?.data?.dataSchema) {
-    console.log('1111')
     let dataSchema = []
     for (let item of props.value?.data?.dataSchema) {
       console.log('item:', typeof (item?.data))
@@ -280,9 +362,10 @@ const onClickAdd = () => {
 }
 
 
-const onClickUpload = (field: any) => {
+const onClickUpload = (field: any, key: string) => {
   currentUploadField.value = field
   targetEditImageRef.value = null
+  currentUploadRecordKeyRef.value = key
   setTimeout(() => {
     fileBtnRef.value.click()
   }, 500)
@@ -291,7 +374,6 @@ const onClickUpload = (field: any) => {
 
 const onUploadInputChange = async (e: Event) => {
   let images = await ossUploadFiles(e)
-  console.log('images:', images, ', targetEditImageRef.value:', targetEditImageRef.value)
   if (targetEditImageRef.value !== null) {
     let targetImage = currentUploadField.value.data.find(item => item.url === targetEditImageRef.value.url)
     if (targetImage) {
@@ -303,7 +385,6 @@ const onUploadInputChange = async (e: Event) => {
       currentUploadField.value.data = []
     }
     for (let item of images) {
-
       currentUploadField.value.data.push({
         name: "",
         url: item,
@@ -314,6 +395,7 @@ const onUploadInputChange = async (e: Event) => {
     }
   }
   emits('update:value', exportValue())
+  validateImagesField(currentUploadRecordKeyRef.value)
 }
 
 
@@ -339,6 +421,9 @@ const deleteImage = (field: any, item: any) => {
     onOk() {
       field.data = field.data.filter(i => i.url !== item.url)
       emits('update:value', exportValue())
+      if (field.value == 'images') {
+        validateImagesField(`form-item-${field.value}-${itemData.dataRecords.indexOf(field)}`)
+      }
     },
     onCancel() {
     },
@@ -425,19 +510,21 @@ const onClickDeleteField = (fieldKey: string) => {
 }
 
 const handleSearchDefect = (value) => {
-  defectOptions.value = value ? store.defects.filter((s) => s.content_en.toLowerCase().includes(value.toLowerCase())) : []
+  console.log('handleSearchDefect:', value)
+  defectOptions.value = value ? store.defects.filter((s) => s?.content_en?.toLowerCase()?.includes(value.toLowerCase()) || s?.content?.toLowerCase()?.includes(value.toLowerCase())) : []
 }
 const onDefectSelect = (e, field) => {
   let defect = store.defects.find((s) => s.id == e)
-  field.data = defect.content_en
+  field.data = i18n.global.locale == 'en' ? defect.content_en : defect.content
   field.defect_id = defect.id
   if (defect.types && defect.types.length > 0) {
     field.defect_types = defect.types
   }
+  console.log('defect:', toRaw(defect))
+  if (defect.types && defect.types.length > 0) {
+    field.defect_types = defect.types
+  }
 }
-
-
-
 
 // const exportData = () => {
 //   let data = {
@@ -461,6 +548,7 @@ const refreshValue = (data: any) => {
 
 }
 
+
 const initialization = () => {
   itemData.conclusions = props.item?.data?.conclusions || []
   itemData.dataSchema = props.item?.data?.dataSchema || {}
@@ -471,6 +559,13 @@ const initialization = () => {
     conclusionRef.value = store.report.template?.items?.find(c => c.key === props?.item?.data?.conclusion_key)
     if (props?.item?.data?.conclusion_item_key) {
       conclusionItemRef.value = conclusionRef.value?.data?.conclusions?.find(c => c.key === props?.item?.data?.conclusion_item_key)
+      if(store.report?.values && [props?.item?.data?.conclusion_key]?.data?.conclusions && store.report?.values[props?.item?.data?.conclusion_key]?.data?.conclusions?.length != 0) {
+        let conclusionItemValue = store.report?.values[props?.item?.data?.conclusion_key]?.data?.conclusions?.find(c => c.key === props?.item?.data?.conclusion_item_key)
+        if(conclusionItemValue) {
+          statusForm.status = conclusionItemValue.status || ''
+          statusForm.remark = conclusionItemValue.remark || ''
+        }
+      }
     } else {
       conclusionItemRef.value = null
     }
@@ -494,32 +589,49 @@ const initialization = () => {
   }
 
   if (!props.value) {
-    console.log('props.value:', toRaw(props.value))
     let sourceItems = []
 
+    if (conclusionItemRef.value && conclusionItemRef.value?.hasItemNumber) {
+      sourceItems.push({
+        label: props.item?.data?.item_number_label || 'Item No.',
+        value: 'item_number',
+        data: []
+      },)
+    }
+    if (conclusionItemRef.value && conclusionItemRef.value?.hasSampleSize) {
+      sourceItems.push({
+        label: props.item?.data?.sample_size_label || 'Sample Size',
+        value: 'quantity',
+        data: ""
+      })
+    }
     if (conclusionItemRef.value && conclusionItemRef.value?.hasStatus) {
       sourceItems.push({
-        label: 'Status',
+        label: props.item?.data?.inspect_result_label || 'Inspect Result',
         value: 'status',
         data: ""
       })
     }
     if (conclusionItemRef.value && conclusionItemRef.value?.hasRemarks) {
-      sourceItems.push({
-        label: 'Remark',
+      let optionItem = {
+        label: props.item?.data?.remarks_label || 'Remarks',
         value: 'remark',
-        data: ""
-      })
+        data: "",
+        defect_type_label: "",
+        defect_types: []
+      }
+      if (conclusionItemRef.value?.isDefect) {
+        optionItem.defect_type_label = props.item?.data?.defect_type_label || 'Defect Type'
+        optionItem.defect_types = []
+      }
+      sourceItems.push(optionItem)
     }
     if (conclusionItemRef.value && conclusionItemRef.value?.hasImages) {
       sourceItems.push({
-        label: 'Images',
+        label: props.item?.data?.images_label || 'Images',
         value: 'images',
         data: []
       })
-    }
-    if (conclusionItemRef.value && conclusionItemRef.value?.IsDefect) {
-      remarkIsDefect.value = true
     }
     if (itemData?.fields && itemData?.fields.length > 0) {
       let nodes = findLeafNode(itemData?.fields)
@@ -529,10 +641,8 @@ const initialization = () => {
     } else {
       itemData.dataSchema = newJsonObject([...sourceItems])
       itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
-      console.log('itemData.dataRecords2:', toRaw(itemData.dataRecords))
     }
   } else {
-    console.log('props.value?.data?.dataRecords:', toRaw(props.value?.data?.dataRecords))
     if (props.value?.data?.dataRecords && props.value?.data?.dataRecords.length > 0) {
       itemData.dataRecords = props.value?.data?.dataRecords
       itemData.dataSchema = props.value?.data?.dataSchema
@@ -548,7 +658,7 @@ const initialization = () => {
       }
     }
   }
-  emits('updateCollector', props.item)
+  // emits('updateCollector', props.item)
 }
 
 initialization()
