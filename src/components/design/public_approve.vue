@@ -437,6 +437,8 @@ const datetimeKeys = [
 ]
 const insepctDetailsKeys = [
   "ReportNumber",
+  "OrderQuantity",
+  "SampleSizeTotal",
   "Applicant",
   "Supplier",
   "Factory",
@@ -449,6 +451,7 @@ const insepctDetailsKeys = [
   "Inspector",
   "InspectionStandard",
   "GeneralInspectionLevel",
+  "SpecialInspectionLevel"
   "SampleSize",
   "InspectionType",
   "ReInspectionType"

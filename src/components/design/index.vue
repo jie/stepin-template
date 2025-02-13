@@ -467,6 +467,8 @@ const onClickOpenReportSettingDrawer = () => {
   let mySettings = {
     allowSelectImageFromAlbum: reportTemplateStore.reportTemplate.settings?.allowSelectImageFromAlbum === undefined ? true: reportTemplateStore.reportTemplate.settings.allowSelectImageFromAlbum,
     ReportNumber: reportTemplateStore.reportTemplate.settings?.ReportNumber === undefined ? true: reportTemplateStore.reportTemplate.settings.ReportNumber,
+    OrderQuantity: reportTemplateStore.reportTemplate.settings?.OrderQuantity === undefined ? true: reportTemplateStore.reportTemplate.settings.OrderQuantity,
+    SampleSizeTotal: reportTemplateStore.reportTemplate.settings?.SampleSizeTotal === undefined ? true: reportTemplateStore.reportTemplate.settings.SampleSizeTotal,
     Applicant: reportTemplateStore.reportTemplate.settings?.Applicant === undefined ? true: reportTemplateStore.reportTemplate.settings.Applicant,
     Supplier: reportTemplateStore.reportTemplate.settings?.Supplier === undefined ? true: reportTemplateStore.reportTemplate.settings.Supplier,
     Factory: reportTemplateStore.reportTemplate.settings?.Factory === undefined ? true: reportTemplateStore.reportTemplate.settings.Factory,
@@ -483,6 +485,7 @@ const onClickOpenReportSettingDrawer = () => {
     AQL_MAJ: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ,
     AQL_MIN: reportTemplateStore.reportTemplate?.settings?.AQL_MIN === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_MIN,
     GeneralInspectionLevel: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel === undefined ? true: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel,
+    SpecialInspectionLevel: reportTemplateStore.reportTemplate?.settings?.SpecialInspectionLevel === undefined ? false: reportTemplateStore.reportTemplate?.settings?.SpecialInspectionLevel,
     InspectionType: reportTemplateStore.reportTemplate?.settings?.InspectionType === undefined ? true: reportTemplateStore.reportTemplate?.settings?.InspectionType,
     ReInspectionType: reportTemplateStore.reportTemplate?.settings?.ReInspectionType === undefined ? true: reportTemplateStore.reportTemplate?.settings?.ReInspectionType
   }

@@ -86,6 +86,8 @@ export const ReportFillStore = defineStore('report_fill', {
     formatReportformState(formState) {
       if (this?.report?.template?.settings) {
         formState["ReportNumber"] = this.report.values["ReportNumber"] || ""
+        formState["OrderQuantity"] = this.report.values["OrderQuantity"] || ""
+        formState["SampleSizeTotal"] = this.report.values["SampleSizeTotal"] || ""
         formState["Applicant"] = this.report.values["Applicant"] || ""
         formState["Supplier"] = this.report.values["Supplier"] || ""
         formState["Factory"] = this.report.values["Factory"] || ""
@@ -106,9 +108,9 @@ export const ReportFillStore = defineStore('report_fill', {
         }
         formState["Inspector"] = this.report.values["Inspector"] || ""
         if (this.report.order) {
-          if (!formState["ReportNumber"]) {
-            formState["ReportNumber"] = this.report?.order?.order_no
-          }
+          // if (!formState["ReportNumber"]) {
+          //   formState["ReportNumber"] = this.report?.order?.order_no
+          // }
           if (!formState["Factory"]) {
             formState["Factory"] = this.report?.order?.factory_name
           }

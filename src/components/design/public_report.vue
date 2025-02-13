@@ -185,12 +185,6 @@
               <a-input v-model:value="store.formState['Factory']" allowClear></a-input>
             </a-form-item>
           </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
-            <a-form-item name="ItemNumber" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ItemNumber')}), validator: validateRequired }]" :label="$t('base.ItemNumber')">
-              <!-- <a-textarea v-model:value="store.formState['ItemNumber']" allowClear></a-textarea> -->
-              <a-select v-model:value="store.formState['ItemNumber']" mode="tags" style="width: 100%"></a-select>
-            </a-form-item>
-          </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ProductDescription">
             <a-form-item name="ProductDescription" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ProductDescription')}), validator: validateRequired }]" :label="$t('base.ProductDescription')">
               <a-textarea v-model:value="store.formState['ProductDescription']" allowClear></a-textarea>
@@ -240,6 +234,32 @@
               </a-radio-group>
             </a-form-item>
           </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.SpecialInspectionLevel">
+            <a-form-item name="SpecialInspectionLevel" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SpecialInspectionLevel')}), validator: validateRequired }]" :label="$t('base.SpecialInspectionLevel')">
+              <a-radio-group v-model:value="store.formState['SpecialInspectionLevel']" allowClear>
+                <a-radio value="S-1">S-1</a-radio>
+                <a-radio value="S-2">S-2</a-radio>
+                <a-radio value="S-3">S-3</a-radio>
+                <a-radio value="S-4">S-4</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
+            <a-form-item name="ItemNumber" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ItemNumber')}), validator: validateRequired }]" :label="$t('base.ItemNumber')">
+              <!-- <a-textarea v-model:value="store.formState['ItemNumber']" allowClear></a-textarea> -->
+              <a-select v-model:value="store.formState['ItemNumber']" mode="tags" style="width: 100%"></a-select>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.OrderQuantity">
+            <a-form-item name="OrderQuantity" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.OrderQuantity')}), validator: validateRequired }]" :label="$t('base.OrderQuantity')">
+              <a-input v-model:value="store.formState['OrderQuantity']" allowClear></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.SampleSizeTotal">
+            <a-form-item name="SampleSizeTotal" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSizeTotal')}), validator: validateRequired }]" :label="$t('base.SampleSizeTotal')">
+              <a-input v-model:value="store.formState['SampleSizeTotal']" allowClear></a-input>
+            </a-form-item>
+          </div>
           <div class="component meta" v-if="store.report?.template?.settings?.SampleSize">
             <a-form-item name="SampleSize" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSize')}), validator: validateRequired }]" :label="$t('base.SampleSize')">
               <a-input-number v-model:value="store.formState['SampleSize']" style="width: 100%;"
@@ -250,17 +270,17 @@
             <a-row style="width: 100%" :gutter="[16, 16]">
               <a-col :span="8">
                 <a-form-item name="AQL_CR" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_CR')}), validator: validateRequired }]" :label="$t('base.AQL_CR')">
-                  <a-input v-model:value="store.formState['AQL_CR']" allowClear></a-input>
+                  <a-select v-model:value="store.formState['AQL_CR']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MAJ" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MAJ')}), validator: validateRequired }]" :label="$t('base.AQL_MAJ')">
-                  <a-input v-model:value="store.formState['AQL_MAJ']" allowClear></a-input>
+                  <a-select v-model:value="store.formState['AQL_MAJ']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MIN" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MIN')}), validator: validateRequired }]" :label="$t('base.AQL_MIN')">
-                  <a-input v-model:value="store.formState['AQL_MIN']" allowClear></a-input>
+                  <a-select v-model:value="store.formState['AQL_MIN']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -414,7 +434,7 @@ import { useAccountStore } from '@/store';
 import { Modal } from 'ant-design-vue';
 import { determineStatus } from "@/utils/helpers"
 import { message, Form } from 'ant-design-vue';
-
+import { aclList, batchSizeData, qualityLimitation } from '@/utils/sampling';
 const useForm = Form.useForm;
 import dayjs from 'dayjs';
 const route = useRoute()
@@ -433,7 +453,7 @@ const startedRef = ref(false)
 const currentEditComponentRef = ref(null)
 const currentEditComponentIndexRef = ref(-1)
 const isShowCatalogRef = ref(false)
-
+const documentRef = document
 const affixedChange = (affixed: boolean) => {
   isAffixedRef.value = affixed
 };

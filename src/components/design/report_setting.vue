@@ -49,6 +49,12 @@
             <a-form-item :label="$t('base.ReportNumber')" name="ReportNumber">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.ReportNumber" />
             </a-form-item>
+            <a-form-item :label="$t('base.OrderQuantity')" name="OrderQuantity">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.OrderQuantity" />
+            </a-form-item>
+            <a-form-item :label="$t('base.SampleSizeTotal')" name="SampleSizeTotal">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.SampleSizeTotal" />
+            </a-form-item>
             <a-form-item :label="$t('base.InspectStandard')" name="InspectStandard">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.InspectStandard" />
             </a-form-item>
@@ -66,6 +72,9 @@
             </a-form-item>
             <a-form-item :label="$t('base.GeneralInspectionLevel')" name="GeneralInspectionLevel">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.GeneralInspectionLevel" />
+            </a-form-item>
+            <a-form-item :label="$t('base.SpecialInspectionLevel')" name="SpecialInspectionLevel">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.SpecialInspectionLevel" />
             </a-form-item>
             <a-form-item :label="$t('base.InspectionType')" name="InspectionType">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.InspectionType" />
@@ -111,6 +120,8 @@ const exportData = () => {
         summary: reportTemplateStore.reportTemplate.summary,
         allowSelectImageFromAlbum: reportTemplateStore.reportTemplate?.settings?.allowSelectImageFromAlbum,
         ReportNumber: reportTemplateStore.reportTemplate?.settings?.ReportNumber,
+        OrderQuantity: reportTemplateStore.reportTemplate?.settings?.OrderQuantity,
+        SampleSizeTotal: reportTemplateStore.reportTemplate?.settings?.SampleSizeTotal,
         Applicant: reportTemplateStore.reportTemplate?.settings?.Applicant,
         Supplier: reportTemplateStore.reportTemplate?.settings?.Supplier,
         Factory: reportTemplateStore.reportTemplate?.settings?.Factory,
@@ -127,6 +138,7 @@ const exportData = () => {
         AQL_MAJ: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ,
         AQL_MIN: reportTemplateStore.reportTemplate?.settings?.AQL_MIN,
         GeneralInspectionLevel: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel,
+        SpecialInspectionLevel: reportTemplateStore.reportTemplate?.settings?.SpecialInspectionLevel,
         InspectionType: reportTemplateStore.reportTemplate?.settings?.InspectionType,
         ReInspectionType: reportTemplateStore.reportTemplate?.settings?.ReInspectionType,
     }
