@@ -480,7 +480,7 @@ const onClickOpenReportSettingDrawer = () => {
     DepartureTime: reportTemplateStore.reportTemplate.settings?.DepartureTime === undefined ? true: reportTemplateStore.reportTemplate.settings.DepartureTime,
     Inspector: reportTemplateStore.reportTemplate.settings?.Inspector === undefined ? true: reportTemplateStore.reportTemplate.settings.Inspector,
     InspectStandard: reportTemplateStore.reportTemplate?.settings?.InspectStandard === undefined ? true: reportTemplateStore.reportTemplate?.settings?.InspectStandard,
-    SampleSize: reportTemplateStore.reportTemplate?.settings?.SampleSize === undefined ? true: reportTemplateStore.reportTemplate?.settings?.SampleSize,
+    // SampleSize: reportTemplateStore.reportTemplate?.settings?.SampleSize === undefined ? true: reportTemplateStore.reportTemplate?.settings?.SampleSize,
     AQL_CR: reportTemplateStore.reportTemplate?.settings?.AQL_CR === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_CR,
     AQL_MAJ: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_MAJ,
     AQL_MIN: reportTemplateStore.reportTemplate?.settings?.AQL_MIN === undefined ? true: reportTemplateStore.reportTemplate?.settings?.AQL_MIN,

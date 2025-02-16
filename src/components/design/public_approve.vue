@@ -368,6 +368,7 @@ import { openNotification, successNotification } from '@/utils/notification';
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import { determineStatus } from "@/utils/helpers"
+import {getDefectiveLimitation} from "@/utils/sampling"
 import dayjs from 'dayjs';
 import { i18n } from '@/lang/i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -451,11 +452,10 @@ const insepctDetailsKeys = [
   "Inspector",
   "InspectionStandard",
   "GeneralInspectionLevel",
-  "SpecialInspectionLevel"
+  "SpecialInspectionLevel",
   "SampleSize",
   "InspectionType",
   "ReInspectionType"
-
 ]
 const itemRefs = ref([])
 
@@ -869,6 +869,64 @@ watchEffect(() => {
     isStaffReview.value = false
   } else {
     isStaffReview.value = true
+  }
+})
+// let SampleSizeTotal = store.report.values?.find(c => c.key === 'SampleSizeTotal')
+//   let OrderQuantity = store.report.values?.find(c => c.key === 'OrderQuantity')
+//   let AQL_CR = store.report.values?.find(c => c.key === 'AQL_CR')
+//   let AQL_MAJ = store.report.values?.find(c => c.key === 'AQL_MAJ')
+//   let AQL_MIN = store.report.values?.find(c => c.key === 'AQL_MIN')
+//   let InspectLevel = store.report.values?.find(c => c.key === 'SpecialInspectionLevel' || c.key === 'GeneralInspectionLevel')
+//   if (SampleSizeTotal === "" || SampleSizeTotal === undefined || SampleSizeTotal === null) {
+//     return
+//   }
+
+const updateDefectsAllowed = () => {
+  console.log('updateDefectsAllowed:', toRaw(1111))
+  let SampleSizeTotal = store.report?.values['SampleSizeTotal']
+  let OrderQuantity = store.report?.values['OrderQuantity']
+  let AQL_CR = store.report?.values['AQL_CR']
+  let AQL_MAJ = store.report?.values['AQL_MAJ']
+  let AQL_MIN = store.report?.values['AQL_MIN']
+  let InspectLevel = store.report?.values["SpecialInspectionLevel"] || store.report?.values["GeneralInspectionLevel"]
+  if (SampleSizeTotal === "" || SampleSizeTotal === undefined || SampleSizeTotal === null) {
+    return
+  }
+  if (OrderQuantity === "" || OrderQuantity === undefined || OrderQuantity === null) {
+    return
+  }
+  if (AQL_CR === "" || AQL_CR === undefined || AQL_CR === null) {
+    return
+  }
+  if (AQL_MAJ === "" || AQL_MAJ === undefined || AQL_MAJ === null) {
+    return
+  }
+  if (AQL_MIN === "" || AQL_MIN === undefined || AQL_MIN === null) {
+    return
+  }
+
+  let AQL_CR_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_CR", InspectLevel)
+  let AQL_MAJ_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_MAJ", InspectLevel)
+  let AQL_MIN_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_MIN", InspectLevel)
+  store.defectsAllowedMap = {
+    AQL_CR: AQL_CR_Allowed,
+    AQL_MAJ: AQL_MAJ_Allowed,
+    AQL_MIN: AQL_MIN_Allowed
+  }
+  console.log('store.defectsAllowedMap:', toRaw(store.defectsAllowedMap))
+}
+
+watchEffect(() => {
+
+//   SampleSizeTotal
+// OrderQuantity
+// AQL_CR
+// AQL_MAJ
+// AQL_MIN
+// GeneralInspectionLevel
+// SpecialInspectionLevel
+  if (store.report.values.SampleSizeTotal && store.report.values.OrderQuantity && store.report.values.AQL_CR && store.report.values.AQL_MAJ && store.report.values.AQL_MIN && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
+    updateDefectsAllowed()
   }
 })
 

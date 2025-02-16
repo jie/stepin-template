@@ -1,8 +1,10 @@
+import { sampleSize } from "lodash"
+
 export const batchSizeData = [
     {
         minSize: 2,
         maxSize: 8,
-        dispaly: '2 to 8',
+        label: '2 to 8',
         value: '1',
         special_level: {
             'S-1': 'A',
@@ -11,7 +13,7 @@ export const batchSizeData = [
             'S-4': 'A',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'A',
             'II': 'A',
             'III': 'B',
@@ -20,7 +22,7 @@ export const batchSizeData = [
     {
         minSize: 9,
         maxSize: 15,
-        dispaly: '9 to 15',
+        label: '9 to 15',
         value: '2',
         special_level: {
             'S-1': 'A',
@@ -29,7 +31,7 @@ export const batchSizeData = [
             'S-4': 'A',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'A',
             'II': 'B',
             'III': 'C',
@@ -38,16 +40,15 @@ export const batchSizeData = [
     {
         minSize: 16,
         maxSize: 25,
-        dispaly: '16 to 25',
+        label: '16 to 25',
         value: '3',
         special_level: {
             'S-1': 'A',
             'S-2': 'A',
             'S-3': 'B',
-            'S-4': 'B',
-            
+            'S-4': 'B',  
         },
-        generate_level: {
+        general_level: {
             'I': 'B',
             'II': 'C',
             'III': 'D',
@@ -56,7 +57,7 @@ export const batchSizeData = [
     {
         minSize: 26,
         maxSize: 50,
-        dispaly: '26 to 50',
+        label: '26 to 50',
         value: '4',
         special_level: {
             'S-1': 'A',
@@ -65,7 +66,7 @@ export const batchSizeData = [
             'S-4': 'C',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'C',
             'II': 'D',
             'III': 'E',
@@ -74,7 +75,7 @@ export const batchSizeData = [
     {
         minSize: 51,
         maxSize: 90,
-        dispaly: '51 to 90',
+        label: '51 to 90',
         value: '5',
         special_level: {
             'S-1': 'B',
@@ -83,7 +84,7 @@ export const batchSizeData = [
             'S-4': 'C',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'C',
             'II': 'E',
             'III': 'F',
@@ -92,7 +93,7 @@ export const batchSizeData = [
     {
         minSize: 91,
         maxSize: 150,
-        dispaly: '91 to 150',
+        label: '91 to 150',
         value: '6',
         special_level: {
             'S-1': 'B',
@@ -101,7 +102,7 @@ export const batchSizeData = [
             'S-4': 'D',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'D',
             'II': 'F',
             'III': 'G',
@@ -110,7 +111,7 @@ export const batchSizeData = [
     {
         minSize: 151,
         maxSize: 280,
-        dispaly: '151 to 280',
+        label: '151 to 280',
         value: '7',
         special_level: {
             'S-1': 'B',
@@ -119,7 +120,7 @@ export const batchSizeData = [
             'S-4': 'E',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'F',
             'II': 'H',
             'III': 'J',
@@ -128,7 +129,7 @@ export const batchSizeData = [
     {
         minSize: 281,
         maxSize: 500,
-        dispaly: '281 to 500',
+        label: '281 to 500',
         value: '8',
         special_level: {
             'S-1': 'B',
@@ -137,7 +138,7 @@ export const batchSizeData = [
             'S-4': 'E',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'F',
             'II': 'H',
             'III': 'J',
@@ -146,7 +147,7 @@ export const batchSizeData = [
     {
         minSize: 501,
         maxSize: 1200,
-        dispaly: '501 to 1200',
+        label: '501 to 1200',
         value: '9',
         special_level: {
             'S-1': 'C',
@@ -155,7 +156,7 @@ export const batchSizeData = [
             'S-4': 'F',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'G',
             'II': 'J',
             'III': 'K',
@@ -164,7 +165,7 @@ export const batchSizeData = [
     {
         minSize: 1201,
         maxSize: 3200,
-        dispaly: '1201 to 3200',
+        label: '1201 to 3200',
         value: '10',
         special_level: {
             'S-1': 'C',
@@ -173,7 +174,7 @@ export const batchSizeData = [
             'S-4': 'G',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'H',
             'II': 'K',
             'III': 'L',
@@ -182,7 +183,7 @@ export const batchSizeData = [
     {
         minSize: 3201,
         maxSize: 10000,
-        dispaly: '3201 to 10000',
+        label: '3201 to 10000',
         value: '11',
         special_level: {
             'S-1': 'C',
@@ -191,7 +192,7 @@ export const batchSizeData = [
             'S-4': 'G',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'J',
             'II': 'L',
             'III': 'M',
@@ -200,7 +201,7 @@ export const batchSizeData = [
     {
         minSize: 10001,
         maxSize: 35000,
-        dispaly: '10001 to 35000',
+        label: '10001 to 35000',
         value: '12',
         special_level: {
             'S-1': 'C',
@@ -209,7 +210,7 @@ export const batchSizeData = [
             'S-4': 'H',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'K',
             'II': 'M',
             'III': 'N',
@@ -218,7 +219,7 @@ export const batchSizeData = [
     {
         minSize: 35001,
         maxSize: 150000,
-        dispaly: '35001 to 150000',
+        label: '35001 to 150000',
         value: '13',
         special_level: {
             'S-1': 'D',
@@ -227,7 +228,7 @@ export const batchSizeData = [
             'S-4': 'J',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'L',
             'II': 'N',
             'III': 'P',
@@ -236,7 +237,7 @@ export const batchSizeData = [
     {
         minSize: 150001,
         maxSize: 500000,
-        dispaly: '150001 to 500000',
+        label: '150001 to 500000',
         value: '14',
         special_level: {
             'S-1': 'D',
@@ -245,7 +246,7 @@ export const batchSizeData = [
             'S-4': 'J',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'M',
             'II': 'P',
             'III': 'Q',
@@ -254,7 +255,7 @@ export const batchSizeData = [
     {
         minSize: 500001,
         maxSize: -1,
-        dispaly: '500001 to Over',
+        label: '500001 to Over',
         value: '15',
         special_level: {
             'S-1': 'D',
@@ -263,7 +264,7 @@ export const batchSizeData = [
             'S-4': 'K',
             
         },
-        generate_level: {
+        general_level: {
             'I': 'N',
             'II': 'Q',
             'III': 'R',
@@ -679,3 +680,40 @@ export const aclList = [
         value: '1000',
     },
 ]
+
+
+export const getDefectiveLimitation = (order_quantity: number, aql: string, InspectLevel: string) => {
+    let levelType = ""
+    if(InspectLevel.startsWith('S-')) {
+      levelType = 'special_level'
+    } else {
+      levelType = 'general_level'
+    }
+    console.log('levelType:', levelType)
+    let sampleItem = batchSizeData.find(c=>Number(c.maxSize) >= Number(order_quantity) && Number(c.minSize) <= Number(order_quantity))
+    console.log('sampleItem:', sampleItem)
+    let levelLetter = sampleItem[levelType][InspectLevel]
+    let limitation = qualityLimitation.find(c => c.letter === String(levelLetter))
+    console.log('limitation:', limitation, ', aql:', aql)
+    return {
+        sampleSize: limitation.sampleSize,
+        allowedSize: limitation.ac[aql]
+    }
+  }
+
+
+  export const getAqlOptions = (order_quantity: number, InspectLevel: string) => {
+    let levelType = ""
+    if(InspectLevel.startsWith('S-')) {
+      levelType = 'special_level'
+    } else {
+      levelType = 'general_level'
+    }
+    let sampleItem = batchSizeData.find(c=>Number(c.maxSize) >= Number(order_quantity) && Number(c.minSize) <= Number(order_quantity))
+    let levelLetter = sampleItem[levelType][InspectLevel]
+    let limitation = qualityLimitation.find(c => c.letter === String(levelLetter))
+    return {
+        options: limitation.ac,
+        sampleSize: limitation.sampleSize
+    }
+  }

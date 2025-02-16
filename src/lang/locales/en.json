@@ -341,6 +341,7 @@
         "languageType": "Language Type",
         "defect_types": "Defect Types",
         "HasFieldsManagement": "Has Fields Management",
+        "AutoGetResult": "Auto Get Inspection Result",
         "ItemNumberLabel": "Item Number Label",
         "SampleSizeLabel": "Sample Size Label",
         "InspectResultLabel": "Inspect Result Label",
@@ -350,6 +351,9 @@
         "DefectTypeLabel": "Defect Type Label",
         "InspectResult": "Inspect Result",
         "pleaseSelectInspectResult": "Please select inspect result",
-        "pleaseSetFieldValue": "Please enter {label} value"
+        "pleaseSetFieldValue": "Please enter {label} value",
+        "FoundDefects": "Found Defects",
+        "AllowDefects": "Allow Defects",
+        "DisplayAsTable": "Display As Table"
     }
 }

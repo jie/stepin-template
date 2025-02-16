@@ -6,9 +6,15 @@
     </div>
     <div style="padding-left: 40px">
       <div style="margin-top:10px;">
-        <a-form layout="vertical">
+        <a-form :labelCol="labelCol">
           <a-form-item :label="$t('base.HasFieldsManagement')" name="has_fields_management">
             <a-switch v-model:checked="itemData.has_fields_management" />
+          </a-form-item>
+          <a-form-item :label="$t('base.AutoGetResult')" name="auto_result">
+            <a-switch v-model:checked="itemData.auto_result" />
+          </a-form-item>
+          <a-form-item :label="$t('base.DisplayAsTable')" name="display_as_table">
+            <a-switch v-model:checked="itemData.display_as_table" />
           </a-form-item>
           <a-form-item :label="$t('base.ItemNumberLabel')" name="item_number_label">
             <a-input v-model:value="itemData.item_number_label" style="width: 100%;" allow-clear></a-input>
@@ -105,7 +111,7 @@ import { message, Modal } from "ant-design-vue";
 import { i18n } from '@/lang/i18n';
 import { CloseCircleFilled, EditFilled, PlusCircleFilled, PlusOutlined, VerticalAlignTopOutlined } from "@ant-design/icons-vue";
 import { newJsonObject, generateUUID } from "@/utils/helpers";
-
+const labelCol = { style: { width: '150px' } }
 const reportTemplateStore = ReportTemplateStore()
 const document = window.document
 const isShowFieldDialogRef = ref(false)
@@ -142,7 +148,9 @@ const itemData = ref({
   images_label: 'Images',
   take_photo_label: 'Upload / Take Photo',
   defect_type_label: 'Defect Type',
-  has_fields_management: true
+  has_fields_management: true,
+  auto_result: false,
+  display_as_table: false
 })
 
 const onChangeConclusionComponent = () => {
@@ -272,6 +280,8 @@ const initializeData = (item: any) => {
     itemData.value.defect_type_label = item.data.defect_type_label || 'Defect Type'
     itemData.value.take_photo_label = item.data.take_photo_label || 'Upload / Take Photo'
     itemData.value.has_fields_management = item.data.has_fields_management || true
+    itemData.value.auto_result = item.data.auto_result || false
+    itemData.value.display_as_table = item.data.display_as_table || false
   } else {
     itemData.value.conclusion_key = ''
     itemData.value.conclusion_item_key = ''
@@ -284,6 +294,7 @@ const initializeData = (item: any) => {
     itemData.value.defect_type_label = 'Defect Type'
     itemData.value.take_photo_label = 'Upload / Take Photo'
     itemData.value.has_fields_management = true
+    itemData.value.display_as_table = false
   }
 }
 const exportData = () => {

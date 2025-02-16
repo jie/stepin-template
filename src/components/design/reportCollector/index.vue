@@ -3,22 +3,54 @@
     <BaseSlot :item="props?.item">
 
       <a-form-item :label="props?.item?.data?.label" :name="props?.item?.key" :id="props?.item?.key"
-        :rules="[{ required: props?.item?.required, message: $t('base.pleaseSetFieldValue', {'label': props?.item?.title}), trigger: 'change' }]">
+        :rules="[{ required: props?.item?.required, message: $t('base.pleaseSetFieldValue', { 'label': props?.item?.title }), trigger: 'change' }]">
         <div>
           <div :id="`status-null-${props.item.key}`">
             <a-form-item :label="$t('base.InspectResult')" :name="`status-null-${props.item.key}`"
+              v-if="conclusionItemRef?.value?.hasRemarks || props?.item?.data?.auto_result"
               :rules="[{ required: true, message: $t('base.pleaseSelectInspectResult'), validator: validateRequired, trigger: 'change' }]">
               <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
-                @change="onConclusionChangeStatus">
+                @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
+                <a-radio-button style="font-size: 12px"
+                  v-for="option in [{ 'label': 'PASS', 'value': 'Conform' }, { 'label': 'FAIL', 'value': 'NotConform' }]"
+                  :value="option.value">{{
+                    option.label
+                  }}</a-radio-button>
+              </a-radio-group>
+              <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
+                @change="onConclusionChangeStatus" v-else>
                 <a-radio-button style="font-size: 12px" v-for="option in conclusionRef?.data?.options"
                   :value="option.value">{{
                     option.label
                   }}</a-radio-button>
               </a-radio-group>
+              <div v-if="itemData?.dataRecords?.length != 0 && Object.keys(itemData.defectsResult)?.length != 0"
+                style="margin-top: 10px;">
+                <a-table bordered :rowClassName="(r, index) => {
+                  if (r.found > r.allowed) {
+                    return 'table-row-warning custom-row'
+                  } else {
+                    return 'custom-row'
+                  }
+                }" :columns="[
+                  { title: $t('base.defect_types'), dataIndex: 'key', key: 'key' },
+                  { title: $t('base.FoundDefects'), dataIndex: 'found', key: 'found' },
+                  { title: $t('base.AllowDefects'), dataIndex: 'allowed', key: 'allowed' },
+                ]"
+                  :dataSource="Object.keys(itemData.defectsResult).map(c => ({ 'key': c, 'found': itemData.defectsResult[c].found, 'allowed': itemData.defectsResult[c].allowed }))"
+                  :pagination="false" />
+              </div>
             </a-form-item>
             <a-form-item :label="$t('base.Remark')" name="remark" v-if="conclusionItemRef?.value?.hasRemarks">
               <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
             </a-form-item>
+          </div>
+          <div v-if="props?.item?.data?.display_as_table && itemData?.dataRecords?.length != 0 && itemData?.dataRecords[0][0].data" style="margin-top: 10px; margin-bottom: 10px;">
+            <a-table bordered :columns="displayTableColumns"
+              :dataSource="displayTableSource"
+              :pagination="false" 
+              :scroll="{ x: 1024 }" 
+            />
           </div>
           <div class="records">
             <a-badge-ribbon placement="start" :text="index + 1" :color="getStatusLabelColor(record)"
@@ -26,7 +58,7 @@
               <div class="record">
                 <div class="record-fields" v-for="field in record" :id="`${field.value}-${index}-${props.item.key}`">
                   <a-form-item :label="field.label" :name="`${field.value}-${index}-${props.item.key}`"
-                    :rules="[{ required: true, message: $t('base.pleaseSetFieldValue', {'label': field.label}), validator: validateRequired, trigger: 'change' }]">
+                    :rules="[{ required: true, message: $t('base.pleaseSetFieldValue', { 'label': field.label }), validator: validateRequired, trigger: 'change' }]">
                     <div class="field" v-if="field.value == 'item_number'">
                       <div v-if="!readonlyRef">
                         <a-select v-model:value="field.data" style="width: 100%" mode="tags"
@@ -36,7 +68,6 @@
                       <div v-else>
                         <a-tag v-for="tag in field.data">{{ tag }}</a-tag>
                       </div>
-
                     </div>
                     <div class="field" v-else-if="field.value == 'quantity'">
                       <div>
@@ -60,36 +91,44 @@
                     <div class="field" v-else-if="field.value == 'remark'">
                       <div>
                         <div v-if="conclusionItemRef?.isDefect">
-                          <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
-                            v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
-                            @search="handleSearchDefect" allowClear>
-                            <template #option="{ content_en: content_en, id: id, content: content }">
-                              <div style="display:flex" @click="onDefectSelect(id, field)"
-                                v-if="conclusionRef?.data?.languageType == 'single'">
-                                <span style="flex: 1">{{ i18n.global.locale == 'zh' ? content : content_en }}</span>
-                                <span style="font-weight: bold; width: 150px;">{{ i18n.global.locale == 'zh' ? content :
-                                  content_en }}</span>
-                              </div>
-                              <div style="display:flex" @click="onDefectSelect(id, field)" v-else>
-                                <span style="flex: 1">{{ content }} / {{ content_en }}</span>
-                                <span style="font-weight: bold; width: 150px;">{{ content }} / {{ content_en }}</span>
-                              </div>
-                            </template>
-                            <a-textarea :auto-size="{ minRows: 2, maxRows: 5 }" @keydown.enter.prevent
-                              :placeholder="$t('base.pleaseEnterDefectKeywords')" />
-                          </a-auto-complete>
+                          <div>
+                            <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
+                              v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
+                              @search="handleSearchDefect" allowClear>
+                              <template #option="{ content_en: content_en, id: id, content: content }">
+                                <div style="display:flex" @click="onDefectSelect(id, field)"
+                                  v-if="conclusionRef?.data?.languageType == 'single'">
+                                  <span style="flex: 1">{{ i18n.global.locale == 'zh' ? content : content_en }}</span>
+                                  <span style="font-weight: bold; width: 150px;">{{ i18n.global.locale == 'zh' ? content
+                                    :
+                                    content_en }}</span>
+                                </div>
+                                <div style="display:flex" @click="onDefectSelect(id, field)" v-else>
+                                  <span style="flex: 1">{{ content }} / {{ content_en }}</span>
+                                  <span style="font-weight: bold; width: 150px;">{{ content }} / {{ content_en }}</span>
+                                </div>
+                              </template>
+                              <a-textarea :auto-size="{ minRows: 2, maxRows: 5 }" @keydown.enter.prevent
+                                :placeholder="$t('base.pleaseEnterDefectKeywords')" />
+                            </a-auto-complete>
+                          </div>
                           <div class="mt-2">
                             <div style="font-size: 85%">{{ field.defect_type_label }}</div>
-                            <a-select v-model:value="field.defect_types" style="width: 100%" mode="tags"
-                              v-if="!readonlyRef" :options="defectTypeOptions"
+                            <a-select v-model:value="field.defect_type" style="width: 100%" v-if="!readonlyRef"
+                              :options="defectTypeOptions" @change="onChangeDefectItem"
                               :getPopupContainer="triggerNode => triggerNode.parentNode"></a-select>
                             <div v-else>
-                              <a-tag v-for="type in field.defect_types" :key="type" style="margin-top: 5px;">{{ type
+                              <a-tag v-for="type in field.defect_type" :key="type" style="margin-top: 5px;">{{ type
                                 }}</a-tag>
                             </div>
                           </div>
+                          <div class="mt-2">
+                            <div style="font-size: 85%">{{ field.defect_count_label }}</div>
+                            <a-input-number v-model:value="field.defect_count" style="width: 100%;" :min="0"
+                              v-if="!readonlyRef" @change="onChangeDefectItem" />
+                            <div v-else> {{ field.defect_count }} </div>
+                          </div>
                         </div>
-
                         <a-input v-model:value="field.data" allowClear @change="onChange" :readonly="readonlyRef"
                           v-else></a-input>
                       </div>
@@ -125,7 +164,9 @@
                           </a-row>
                         </div>
                         <div v-if="!readonlyRef">
-                          <a-button size="small" type="primary" @click="onClickUpload(field, `${field.value}-${index}-${props.item.key}`)" style="font-size: 80%">
+                          <a-button size="small" type="primary"
+                            @click="onClickUpload(field, `${field.value}-${index}-${props.item.key}`)"
+                            style="font-size: 80%">
                             <template #icon>
                               <camera-outlined />
                             </template>
@@ -219,7 +260,7 @@
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
 import { ReportTemplateStore } from "@/store/reportTemplate"
-import { defineProps, ref, PropType, reactive, toRaw, watch, defineEmits } from 'vue'
+import { defineProps, ref, PropType, reactive, toRaw, watch, defineEmits, computed } from 'vue'
 import Icon, { CheckSquareOutlined, CloseCircleFilled, EditOutlined } from '@ant-design/icons-vue';
 import { MessageOutlined } from '@ant-design/icons-vue';
 import { MessageOutlinedIconType } from "@ant-design/icons-vue/lib/icons/MessageOutlined";
@@ -230,6 +271,7 @@ import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor } from "@/utils/helpers"
+import { batchSizeData, qualityLimitation, aclList } from "@/utils/sampling"
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -262,7 +304,8 @@ const itemData = reactive({
   dataSchema: {},
   dataRecords: [],
   dataExtraFields: [],
-  fields: []
+  fields: [],
+  defectsResult: {}
 })
 const statusForm = reactive({
   status: '',
@@ -273,6 +316,98 @@ const fieldForm = reactive({
   value: '',
 })
 
+
+const displayTableColumns = computed(() => {
+  let columns = []
+  if (itemData.dataSchema && itemData.dataSchema.length > 0) {
+    for (let field of itemData.dataSchema) {
+      columns.push({
+        title: field.label,
+        dataIndex: field.value,
+        key: field.value
+      })
+    }
+  }
+  return columns
+})
+
+const displayTableSource = computed(() => {
+  let source = []
+  if (itemData.dataRecords && itemData.dataRecords.length > 0) {
+    for (let record of itemData.dataRecords) {
+      let item = {}
+      for (let field of record) {
+        item[field.value] = field.data
+      }
+      source.push(item)
+    }
+  }
+  return source
+})
+
+const defectTypeMap = {
+  'critical': 'AQL_CR',
+  'major': 'AQL_MAJ',
+  'minor': 'AQL_MIN'
+}
+
+const onChangeDefectItem = () => {
+  autoUpdateDefectsResult()
+}
+
+const autoUpdateDefectsResult = () => {
+  console.log("autoUpdateDefectsResult:")
+  if (!conclusionItemRef.value?.isDefect) {
+    return
+  }
+  let defectsResult = {
+    'critical': {
+      'found': 0,
+      'allowed': store.defectsAllowedMap[defectTypeMap['critical']],
+      "status": "NotConform"
+    },
+    'major': {
+      'found': 0,
+      'allowed': store.defectsAllowedMap[defectTypeMap['major']],
+      "status": "NotConform"
+    },
+    'minor': {
+      'found': 0,
+      'allowed': store.defectsAllowedMap[defectTypeMap['minor']],
+      "status": "NotConform"
+    }
+  }
+  for (let record of itemData.dataRecords) {
+    console.log('record:', toRaw(record))
+    for (let field of record) {
+      if (field.value == 'remark') {
+        console.log('field:', toRaw(field))
+        if (field.defect_type && field.defect_count) {
+          defectsResult[field.defect_type]['found'] += field.defect_count
+        }
+        break
+      }
+
+    }
+  }
+  console.log('defectsResult:', toRaw(defectsResult))
+  for (let key in defectsResult) {
+    console.log('key:', key)
+    if (defectsResult[key]['found'] > defectsResult[key]['allowed']) {
+      defectsResult[key]['status'] = 'NotConform'
+    } else {
+      defectsResult[key]['status'] = 'Conform'
+    }
+  }
+  console.log('defectsResult:', defectsResult)
+  itemData.defectsResult = defectsResult
+  let allDefectStatus = Object.values(defectsResult).map(c => c.status)
+  if (allDefectStatus.includes('NotConform')) {
+    statusForm.status = 'NotConform'
+  } else {
+    statusForm.status = 'Conform'
+  }
+}
 
 const onChange = (e) => {
   console.log('onChange:', toRaw(e))
@@ -559,9 +694,9 @@ const initialization = () => {
     conclusionRef.value = store.report.template?.items?.find(c => c.key === props?.item?.data?.conclusion_key)
     if (props?.item?.data?.conclusion_item_key) {
       conclusionItemRef.value = conclusionRef.value?.data?.conclusions?.find(c => c.key === props?.item?.data?.conclusion_item_key)
-      if(store.report?.values && [props?.item?.data?.conclusion_key]?.data?.conclusions && store.report?.values[props?.item?.data?.conclusion_key]?.data?.conclusions?.length != 0) {
+      if (store.report?.values && [props?.item?.data?.conclusion_key]?.data?.conclusions && store.report?.values[props?.item?.data?.conclusion_key]?.data?.conclusions?.length != 0) {
         let conclusionItemValue = store.report?.values[props?.item?.data?.conclusion_key]?.data?.conclusions?.find(c => c.key === props?.item?.data?.conclusion_item_key)
-        if(conclusionItemValue) {
+        if (conclusionItemValue) {
           statusForm.status = conclusionItemValue.status || ''
           statusForm.remark = conclusionItemValue.remark || ''
         }
@@ -590,52 +725,63 @@ const initialization = () => {
 
   if (!props.value) {
     let sourceItems = []
+    if (conclusionItemRef.value) {
+      if (conclusionItemRef.value?.hasItemNumber) {
+        sourceItems.push({
+          label: props.item?.data?.item_number_label || 'Item No.',
+          value: 'item_number',
+          data: []
+        },)
+      }
+      if (conclusionItemRef.value?.hasSampleSize) {
+        sourceItems.push({
+          label: props.item?.data?.sample_size_label || 'Sample Size',
+          value: 'quantity',
+          data: ""
+        })
+      }
+      if (conclusionItemRef.value?.hasStatus) {
+        sourceItems.push({
+          label: props.item?.data?.inspect_result_label || 'Inspect Result',
+          value: 'status',
+          data: ""
+        })
+      }
+      if (conclusionItemRef.value?.hasRemarks) {
+        let optionItem = {
+          label: props.item?.data?.remarks_label || 'Remarks',
+          value: 'remark',
+          data: "",
+          defect_id: "",
+          defect_type: "",
+          defect_type_label: "",
+          defect_types: [],
+          defect_count_label: "",
+          defect_count: ""
+        }
+        if (conclusionItemRef.value?.isDefect) {
+          optionItem.defect_type_label = props.item?.data?.defect_type_label || 'Defect Type'
+          optionItem.defect_types = []
+          optionItem.defect_count_label = props.item?.data?.defect_count_label || 'Defects Count'
+          optionItem.defect_count = ""
+        }
+        sourceItems.push(optionItem)
+      }
+      if (conclusionItemRef.value?.hasImages) {
+        sourceItems.push({
+          label: props.item?.data?.images_label || 'Images',
+          value: 'images',
+          data: []
+        })
+      }
+    }
 
-    if (conclusionItemRef.value && conclusionItemRef.value?.hasItemNumber) {
-      sourceItems.push({
-        label: props.item?.data?.item_number_label || 'Item No.',
-        value: 'item_number',
-        data: []
-      },)
-    }
-    if (conclusionItemRef.value && conclusionItemRef.value?.hasSampleSize) {
-      sourceItems.push({
-        label: props.item?.data?.sample_size_label || 'Sample Size',
-        value: 'quantity',
-        data: ""
-      })
-    }
-    if (conclusionItemRef.value && conclusionItemRef.value?.hasStatus) {
-      sourceItems.push({
-        label: props.item?.data?.inspect_result_label || 'Inspect Result',
-        value: 'status',
-        data: ""
-      })
-    }
-    if (conclusionItemRef.value && conclusionItemRef.value?.hasRemarks) {
-      let optionItem = {
-        label: props.item?.data?.remarks_label || 'Remarks',
-        value: 'remark',
-        data: "",
-        defect_type_label: "",
-        defect_types: []
-      }
-      if (conclusionItemRef.value?.isDefect) {
-        optionItem.defect_type_label = props.item?.data?.defect_type_label || 'Defect Type'
-        optionItem.defect_types = []
-      }
-      sourceItems.push(optionItem)
-    }
-    if (conclusionItemRef.value && conclusionItemRef.value?.hasImages) {
-      sourceItems.push({
-        label: props.item?.data?.images_label || 'Images',
-        value: 'images',
-        data: []
-      })
-    }
     if (itemData?.fields && itemData?.fields.length > 0) {
+      console.log("itemData?.fields:", itemData?.fields)
       let nodes = findLeafNode(itemData?.fields)
+      console.log("itemData?.nodes:", nodes)
       itemData.dataSchema = newJsonObject([...sourceItems, ...nodes])
+      console.log("itemData?.dataSchema:", toRaw(itemData?.dataSchema))
       itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
       console.log('itemData.dataRecords1:', toRaw(itemData.dataRecords), toRaw(sourceItems))
     } else {
@@ -648,6 +794,7 @@ const initialization = () => {
       itemData.dataSchema = props.value?.data?.dataSchema
       itemData.dataExtraFields = props.value?.data?.dataExtraFields
     } else {
+      console.log('props.value?.data?.fields:', toRaw(props.value?.data?.fields))
       if (props.value?.data?.fields && props.value?.data?.fields.length > 0) {
         let nodes = findLeafNode(props.value?.data?.fields)
         itemData.dataSchema = newJsonObject([...nodes])
@@ -706,5 +853,19 @@ defineExpose({
   position: absolute;
   top: 0;
   right: 0;
+}
+</style>
+<style>
+.table-row-warning {
+  background-color: rgba(255, 242, 240, 0.85) !important;
+}
+
+.custom-row:hover {
+  background-color: transparent !important;
+  /* 使背景颜色透明，防止更改 */
+}
+
+.table-row-warning.custom-row:hover {
+  background-color: rgba(255, 242, 240, 0.85) !important;
 }
 </style>

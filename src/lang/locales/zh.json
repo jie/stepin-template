@@ -340,7 +340,8 @@
         "pending": "Pending",
         "languageType": "语言类型",
         "defect_types": "缺陷类型",
-        "HasFieldsManagement": "检验员是否可自定义字段",
+        "HasFieldsManagement": "填写时自定义字段",
+        "AutoGetResult": "自动计算检验结果",
         "ItemNumberLabel": "款号标签名称",
         "SampleSizeLabel": "数量标签名称",
         "InspectResultLabel": "检验结果标签名称",
@@ -350,6 +351,9 @@
         "DefectTypeLabel": "缺陷类型标签名称",
         "InspectResult": "检验结果",
         "pleaseSelectInspectResult": "请选择检验结果",
-        "pleaseSetFieldValue": "请填写{label}"
+        "pleaseSetFieldValue": "请填写{label}",
+        "FoundDefects": "发现缺陷",
+        "AllowDefects": "允许缺陷",
+        "DisplayAsTable": "显示为表格"
     }
 }

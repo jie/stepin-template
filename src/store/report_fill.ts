@@ -20,6 +20,8 @@ export const ReportFillStore = defineStore('report_fill', {
       defects: <any>[],
       formState: <any>{},
       isValidateForm: false,
+      defectsAllowedMap: {},
+      aqlOptions: []
     }
   },
   getters: {
