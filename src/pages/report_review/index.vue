@@ -1,6 +1,6 @@
 <template>
   <div v-if="!store.loading && store.report.id">
-    <Designer ref="designerRef" />
+    <Designer ref="designerRef" mode="review" />
   </div>
   <div v-if="store.loading" class="flex" style="justify-content: center; align-items:center; width: 100%; min-height: 600px;">
     <Spin font-size="60px" />
@@ -36,6 +36,8 @@ const initialize = async () => {
   //   console.log('**report:', toRaw(store.report))
   //   store.loading = false
   // }
+
+  await store.apiQueryDefectByReportId(route.params.reportId)
   await store.apiGet(route.params.reportId)
     console.log('**report:', toRaw(store.report))
     store.loading = false

@@ -4,7 +4,7 @@
       :title="currentEditComponentRef?.title" width="100%" wrap-class-name="full-modal"
       :cancelButtonProps="{ hidden: true, }">
       <div ref="editModeRef">
-        <a-form layout="vertical" v-if="currentEditComponentRef">
+        <a-form ref="editModeFormRef" layout="vertical" v-if="currentEditComponentRef">
           <div v-for="(item, index) in schemaRef" :key="item.key">
             <div class="component"
               v-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'text'">
@@ -48,7 +48,7 @@
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'container'">
               <reportContainer :item="currentEditComponentRef"></reportContainer>
             </div>
-            <div class="component"
+            <div class="component" v-show="false"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'conclusion'">
               <reportConclusion :item="currentEditComponentRef"
                 v-model:value="store.formState[currentEditComponentRef.key]"></reportConclusion>
@@ -56,7 +56,9 @@
             <div class="component"
               v-else-if="currentEditComponentRef.key == item.key && currentEditComponentRef.type == 'collector'">
               <reportCollector :item="currentEditComponentRef"
-                v-model:value="store.formState[currentEditComponentRef.key]" v-on:updateCollector="onUpdateCollector">
+                v-model:value="store.formState[currentEditComponentRef.key]" v-on:updateCollector="onUpdateCollector"
+                v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult"
+                v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError">
               </reportCollector>
             </div>
           </div>
@@ -145,11 +147,11 @@
       <div style="padding-left: 20px; padding-right: 20px" v-if="store.report?.review_status == '2'">
         <a-alert :message="$t('base.report_pass_review')" type="success" show-icon />
       </div>
-      <a-form layout="vertical" :model="store.formState" v-if="store.formState && store.report" @finish="onFinishSubmit"
-        @finishFailed="onFinishFailed">
+      <a-form layout="vertical" ref="formRef" :model="store.formState" v-if="store.formState && store.report"
+        @finish="onFinishSubmit" @submit.prevent @finishFailed="onFinishFailed">
         <div v-if="store.report">
           <div class="component meta">
-            <a-form-item required :label="$t('base.ReportResult')">
+            <a-form-item name="ReportResult" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReportResult')}), validator: validateRequired }]" :label="$t('base.ReportResult')">
               <a-radio-group v-model:value="store.formState['ReportResult']" :options="reportResultOptions">
                 <template #label="{ value }">
                   <span style="color: red">{{ value }}</span>
@@ -159,77 +161,78 @@
           </div>
           <div class="component meta"
             v-if="store.formState['ReportResult'] == '0' || store.formState['ReportResult'] == '1'">
-            <a-form-item required :label="$t('base.ReportResultRemark')">
+            <a-form-item name="ReportResultRemark" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReportResultRemark')}), validator: validateRequired }]" :label="$t('base.ReportResultRemark')">
               <a-textarea v-model:value="store.formState['ReportResultRemark']"></a-textarea>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
-            <a-form-item required :label="$t('base.ReportNumber')">
+            <a-form-item name="ReportNumber" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReportNumber')}), validator: validateRequired }]" :label="$t('base.ReportNumber')">
               <a-input v-model:value="store.formState['ReportNumber']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Applicant">
-            <a-form-item required :label="$t('base.Applicant')">
+            <a-form-item name="Applicant" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Applicant')}), validator: validateRequired }]" :label="$t('base.Applicant')">
               <a-input v-model:value="store.formState['Applicant']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Supplier">
-            <a-form-item required :label="$t('base.Supplier')">
+            <a-form-item name="Supplier" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Supplier')}), validator: validateRequired }]" :label="$t('base.Supplier')">
               <a-input v-model:value="store.formState['Supplier']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Factory">
-            <a-form-item required :label="$t('base.Factory')">
+            <a-form-item name="Factory" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Factory')}), validator: validateRequired }]" :label="$t('base.Factory')">
               <a-input v-model:value="store.formState['Factory']" allowClear></a-input>
             </a-form-item>
           </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
-            <a-form-item required :label="$t('base.ItemNumber')">
-              <a-textarea v-model:value="store.formState['ItemNumber']" allowClear></a-textarea>
-            </a-form-item>
-          </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ProductDescription">
-            <a-form-item required :label="$t('base.ProductDescription')">
+            <a-form-item name="ProductDescription" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ProductDescription')}), validator: validateRequired }]" :label="$t('base.ProductDescription')">
               <a-textarea v-model:value="store.formState['ProductDescription']" allowClear></a-textarea>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.AddressOfInspection">
-            <a-form-item required :label="$t('base.AddressOfInspection')">
+            <a-form-item name="AddressOfInspection" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AddressOfInspection')}), validator: validateRequired }]" :label="$t('base.AddressOfInspection')">
               <a-input v-model:value="store.formState['AddressOfInspection']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DateOfInspection">
-            <a-form-item required :label="$t('base.DateOfInspection')">
+            <a-form-item name="DateOfInspection" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.DateOfInspection')}), validator: validateRequired }]" :label="$t('base.DateOfInspection')">
               <a-date-picker style="width: 100%" v-model:value="store.formState['DateOfInspection']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
-            <a-form-item required :label="$t('base.ArrivalTime')">
+            <a-form-item name="ArrivalTime" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ArrivalTime')}), validator: validateRequired }]" :label="$t('base.ArrivalTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
                 v-model:value="store.formState['ArrivalTime']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
-            <a-form-item required :label="$t('base.DepartureTime')">
+            <a-form-item name="DepartureTime" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.DepartureTime')}), validator: validateRequired }]" :label="$t('base.DepartureTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
                 v-model:value="store.formState['DepartureTime']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Inspector">
-            <a-form-item required :label="$t('base.Inspector')">
+            <a-form-item name="Inspector" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Inspector')}), validator: validateRequired }]" :label="$t('base.Inspector')">
               <a-input v-model:value="store.formState['Inspector']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.InspectionStandard">
-            <a-form-item required :label="$t('base.InspectionStandard')">
+            <a-form-item name="InspectionStandard" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.InspectionStandard')}), validator: validateRequired }]" :label="$t('base.InspectionStandard')">
               <a-input v-model:value="store.formState['InspectionStandard']" allowClear></a-input>
             </a-form-item>
           </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
+            <a-form-item name="ItemNumber" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ItemNumber')}), validator: validateRequired }]" :label="$t('base.ItemNumber')">
+              <!-- <a-textarea v-model:value="store.formState['ItemNumber']" allowClear></a-textarea> -->
+              <a-select v-model:value="store.formState['ItemNumber']" mode="tags" style="width: 100%"></a-select>
+            </a-form-item>
+          </div>
           <div class="component meta" v-if="store.report?.template?.settings?.GeneralInspectionLevel">
-            <a-form-item required :label="$t('base.GeneralInspectionLevel')">
+            <a-form-item name="GeneralInspectionLevel" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.GeneralInspectionLevel')}), validator: validateRequired }]" :label="$t('base.GeneralInspectionLevel')">
               <a-radio-group v-model:value="store.formState['GeneralInspectionLevel']" allowClear>
                 <a-radio value="I">I</a-radio>
                 <a-radio value="II">II</a-radio>
@@ -237,8 +240,28 @@
               </a-radio-group>
             </a-form-item>
           </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.SpecialInspectionLevel">
+            <a-form-item name="SpecialInspectionLevel" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SpecialInspectionLevel')}), validator: validateRequired }]" :label="$t('base.SpecialInspectionLevel')">
+              <a-radio-group v-model:value="store.formState['SpecialInspectionLevel']" allowClear>
+                <a-radio value="S-1">S-1</a-radio>
+                <a-radio value="S-2">S-2</a-radio>
+                <a-radio value="S-3">S-3</a-radio>
+                <a-radio value="S-4">S-4</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.OrderQuantity">
+            <a-form-item name="OrderQuantity" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.OrderQuantity')}), validator: validateRequired }]" :label="$t('base.OrderQuantity')">
+              <a-input v-model:value="store.formState['OrderQuantity']" allowClear></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.SampleSizeTotal">
+            <a-form-item name="SampleSizeTotal" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSizeTotal')}), validator: validateRequired }]" :label="$t('base.SampleSizeTotal')">
+              <a-input v-model:value="store.formState['SampleSizeTotal']" allowClear></a-input>
+            </a-form-item>
+          </div>
           <div class="component meta" v-if="store.report?.template?.settings?.SampleSize">
-            <a-form-item required :label="$t('base.SampleSize')">
+            <a-form-item name="SampleSize" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSize')}), validator: validateRequired }]" :label="$t('base.SampleSize')">
               <a-input-number v-model:value="store.formState['SampleSize']" style="width: 100%;"
                 allowClear></a-input-number>
             </a-form-item>
@@ -246,25 +269,27 @@
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
             <a-row style="width: 100%" :gutter="[16, 16]">
               <a-col :span="8">
-                <a-form-item required :label="$t('base.AQL_CR')">
-                  <a-input v-model:value="store.formState['AQL_CR']" allowClear></a-input>
+                <a-form-item name="AQL_CR" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_CR')}), validator: validateRequired }]" :label="$t('base.AQL_CR')">
+                  <a-select v-model:value="store.formState['AQL_CR']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
+                <div>{{ store.defectsAllowedMap['AQL_CR'] }}</div>
               </a-col>
               <a-col :span="8">
-                <a-form-item required :label="$t('base.AQL_MAJ')">
-                  <a-input v-model:value="store.formState['AQL_MAJ']" allowClear></a-input>
+                <a-form-item name="AQL_MAJ" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MAJ')}), validator: validateRequired }]" :label="$t('base.AQL_MAJ')">
+                  <a-select v-model:value="store.formState['AQL_MAJ']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
+                <div>{{ store.defectsAllowedMap['AQL_MAJ'] }}</div>
               </a-col>
               <a-col :span="8">
-                <a-form-item required :label="$t('base.AQL_MIN')">
-                  <a-input v-model:value="store.formState['AQL_MIN']" allowClear></a-input>
+                <a-form-item name="AQL_MIN" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MIN')}), validator: validateRequired }]" :label="$t('base.AQL_MIN')">
+                  <a-select v-model:value="store.formState['AQL_MIN']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
+                <div>{{ store.defectsAllowedMap['AQL_MIN'] }}</div>
               </a-col>
             </a-row>
           </div>
-
           <div class="component meta" v-if="store.report?.template?.settings?.InspectionType">
-            <a-form-item required :label="$t('base.InspectionType')">
+            <a-form-item name="InspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.InspectionType')}), validator: validateRequired }]" :label="$t('base.InspectionType')">
               <a-radio-group v-model:value="store.formState['InspectionType']" allowClear>
                 <a-radio value="PPI">PPI</a-radio>
                 <a-radio value="DPI">DPI</a-radio>
@@ -274,7 +299,7 @@
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReInspectionType">
-            <a-form-item required :label="$t('base.ReInspectionType')">
+            <a-form-item name="ReInspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReInspectionType')}), validator: validateRequired }]" :label="$t('base.ReInspectionType')">
               <a-radio-group v-model:value="store.formState['ReInspectionType']" allowClear>
                 <a-radio value="1ST">1ST</a-radio>
                 <a-radio value="2ST">2ST</a-radio>
@@ -283,7 +308,8 @@
             </a-form-item>
           </div>
         </div>
-        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
+        <!-- <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper" -->
+        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper" v-show="item.type != 'conclusion'"
           :class="{ 'notpass': store.report?.review_comments[item.key]?.status == false, 'pass': store.report?.review_comments[item.key]?.status == true }">
           <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
@@ -317,7 +343,10 @@
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'collector'">
             <reportCollector :item="item" ref="itemRefs" v-model:value="store.formState[item.key]"
-              v-on:updateCollector="onUpdateCollector"></reportCollector>
+              v-on:updateCollector="onUpdateCollector"
+              v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult"
+              v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError">
+            </reportCollector>
           </div>
           <div class="component" :id="`com-${item.key}`" v-else>unsupported components: {{ item }}</div>
           <div v-if="store.report?.review_comments[item.key]?.comment">{{ $t('base.Comment') }}: {{
@@ -333,7 +362,7 @@
                 :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{
                   $t('base.Submit')
                 }}</a-button>
-              <a-button plain html-type="submit" style="width: 140px; margin-left: 10px;"
+              <a-button plain style="width: 140px; margin-left: 10px;" @click="onClickSave"
                 :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{ $t('base.Save')
                 }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
@@ -352,8 +381,8 @@
         </template>
       </a-button>
 
-      <div v-for="item in schemaRef" class="item">
-        <div @click="goAnchor(item.key)">{{ item.title }}</div>
+      <div v-for="item in schemaRef.filter(c=>c.type != 'conclusion')" class="item" >
+        <div @click="goAnchor(item.key)" >{{ item.title }}</div>
       </div>
     </div>
 
@@ -405,13 +434,18 @@ import { ReportFillStore } from '@/store/report_fill';
 import { approveStatusDisplayMsg, customerApproveStatusMsg } from "@/utils/constant"
 import { useAccountStore } from '@/store';
 import { Modal } from 'ant-design-vue';
-import { message } from 'ant-design-vue';
+import { determineStatus } from "@/utils/helpers"
+import { message, Form } from 'ant-design-vue';
+import { aclList, batchSizeData, qualityLimitation, getDefectiveLimitation, getAqlOptions } from '@/utils/sampling';
+const useForm = Form.useForm;
 import dayjs from 'dayjs';
 const route = useRoute()
 const document = window.document
 const store = ReportFillStore()
 const isAffixedRef = ref(false)
 const loadingRef = ref(false)
+const formRef = ref()
+const editModeFormRef = ref()
 const reportDataRef = ref()
 const itemRefs = ref([])
 const schemaRef = ref([])
@@ -421,7 +455,7 @@ const startedRef = ref(false)
 const currentEditComponentRef = ref(null)
 const currentEditComponentIndexRef = ref(-1)
 const isShowCatalogRef = ref(false)
-
+const documentRef = document
 const affixedChange = (affixed: boolean) => {
   isAffixedRef.value = affixed
 };
@@ -536,61 +570,6 @@ const loadLocalData = async () => {
 
 const loadRemoteData = async () => {
 
-  if (store?.report?.template?.settings) {
-    store.formState["ReportNumber"] = store.report.values["ReportNumber"] || ""
-    store.formState["Applicant"] = store.report.values["Applicant"] || ""
-    store.formState["Supplier"] = store.report.values["Supplier"] || ""
-    store.formState["Factory"] = store.report.values["Factory"] || ""
-    store.formState["ItemNumber"] = store.report.values["ItemNumber"] || ""
-    store.formState["ProductDescription"] = store.report.values["ProductDescription"] || ""
-    store.formState["AddressOfInspection"] = store.report.values["AddressOfInspection"] || ""
-    store.formState["DateOfInspection"] = ""
-    if (store.report.values["DateOfInspection"]) {
-      store.formState["DateOfInspection"] = dayjs(store.report.values["DateOfInspection"])
-    }
-    store.formState["ArrivalTime"] = ""
-    if (store.report.values["ArrivalTime"]) {
-      store.formState["ArrivalTime"] = dayjs(store.report.values["ArrivalTime"])
-    }
-    store.formState["DepartureTime"] = ""
-    if (store.report.values["DepartureTime"]) {
-      store.formState["DepartureTime"] = dayjs(store.report.values["DepartureTime"])
-    }
-    store.formState["Inspector"] = store.report.values["Inspector"] || ""
-    if (store.report.order) {
-      if (!store.formState["ReportNumber"]) {
-        store.formState["ReportNumber"] = store.report.order.order_no
-      }
-      if (!store.formState["Factory"]) {
-        store.formState["Factory"] = store.report.order.factory_name
-      }
-      if (!store.formState["Supplier"]) {
-        store.formState["Supplier"] = store.report.order.suppliers
-      }
-      if (!store.formState["ItemNumber"]) {
-        store.formState["ItemNumber"] = store.report.order.po_number
-      }
-      if (!store.formState["ProductDescription"]) {
-        store.formState["ProductDescription"] = store.report.order.product_name
-      }
-      if (!store.formState["AddressOfInspection"]) {
-        store.formState["AddressOfInspection"] = store.report.order.address?.country?.code == '1' ? `${store.report.order.address?.province?.name} ${store.report.order.address?.city?.name} ${store.report.order.address?.details}` : store.report.order.address?.country?.name
-      }
-      if (!store.formState["DateOfInspection"]) {
-        store.formState["DateOfInspection"] = dayjs(store.report.order.inspect_date)
-      }
-      if (!store.formState["ArrivalTime"]) {
-        store.formState["ArrivalTime"] = dayjs(`${store.report.order.inspect_date} 09:00:00`)
-      }
-      if (!store.formState["DepartureTime"]) {
-        store.formState["DepartureTime"] = dayjs(`${store.report.order.inspect_date} 18:00:00`)
-      }
-      if (!store.formState["Inspector"]) {
-        store.formState["Inspector"] = store.report.order.workers.map(c => c.worker.name).join(',')
-      }
-    }
-  }
-
 }
 
 const editableComponents = [
@@ -667,7 +646,6 @@ const onSubmitReport = async () => {
     message: "OK",
     description: i18n.global.t('base.ReportSubmitted')
   })
-
 }
 
 const onFinishSubmit = async () => {
@@ -678,7 +656,6 @@ const onFinishSubmit = async () => {
     return
   }
   try {
-
     await store.apiFill(fillSession.email, fillSession.password, store.formState, route?.query?.fill_token)
   } catch (e) {
     console.log(e)
@@ -699,7 +676,7 @@ const onFinishSubmit = async () => {
   })
 }
 const onFinishFailed = (e) => {
-  console.log('onFinishFailed:', e)
+  console.log('onFinishFailed:', e, e.errorFields)
   if (e.errorFields) {
     e.errorFields.map((item) => {
       if (item.errors) {
@@ -708,10 +685,41 @@ const onFinishFailed = (e) => {
           message: "Validate Fail",
           description: item.errors
         })
+    
       }
     })
+    console.log('errorFields:', toRaw(e.errorFields[0]))
   }
 }
+
+const validateRequired = (rule, value, callback) => {
+  // console.log('validateRequired-rule:', rule, ', value:', value)
+  let result = true
+  if(rule.required && (store.formState[rule.field] == null || store.formState[rule.field] == "" || store.formState[rule.field] == undefined)) {
+    result = false
+  }
+  return new Promise((resolve, reject) => {
+    if (result) {
+      resolve(true)
+    } else {
+      reject('Please enter ' + rule.field)
+    }
+  });
+}
+
+const onClearFieldError = (fieldName) => {
+  formRef.value.clearValidate([fieldName]);
+  if (isShowEditModeDialog.value == true) {
+    editModeFormRef.value.clearValidate([fieldName]);
+  }
+};
+
+const onValidateImagesField = (fieldName) => {
+  formRef.value.validateFields([fieldName]);
+  if (isShowEditModeDialog.value == true) {
+    editModeFormRef.value.validateFields([fieldName]);
+  }
+};
 
 const handleLoginOk = async () => {
   console.log('store.formState:', toRaw(store.formState))
@@ -854,6 +862,7 @@ const onClickConfirmSaveSingle = async () => {
       content: i18n.global.t('base.YouHaveCompleteAllItemsNeedSubmit'),
       getContainer: () => document.body,
       async onOk() {
+        store.isValidateForm = true
         await onSubmitReport()
         setTimeout(() => {
           window.location.reload()
@@ -868,15 +877,33 @@ const onClickConfirmSaveSingle = async () => {
   }
 }
 
+
+const focusOnField = (fieldName) => {
+      formRef.value.scrollToField(fieldName, { behavior: 'smooth'});
+    };
+
+
 const onClickSubmit = () => {
   Modal.confirm({
     content: i18n.global.t('base.ConfirmSubmitReport'),
     getContainer: () => document.body,
     async onOk() {
-      await onSubmitReport()
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
+      store.isValidateForm = true
+      formRef.value.validate().then(async () => {
+        await onSubmitReport()
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      }).catch((error) => {
+          console.log('Validation failed:', toRaw(error));
+          if(error?.errorFields?.length > 0 && error.errorFields[0]?.name?.length > 0) {
+            console.log('formFieldName-error.errorFields[0].name[0]:', error.errorFields[0].name[0])
+            // let formFieldNameArr = error.errorFields[0].name[0].split('-')
+            // let formFieldName = formFieldNameArr[formFieldNameArr.length - 1]
+            // console.log('formFieldName:', formFieldName, formFieldNameArr)
+            goCollectorAnchor(error.errorFields[0].name[0])
+          }
+        });
     },
     cancelText: i18n.global.t('base.Cancel'),
     okText: i18n.global.t('base.Submit'),
@@ -886,6 +913,11 @@ const onClickSubmit = () => {
   });
 }
 
+const onClickSave = async () => {
+  await onSubmitReport()
+}
+
+
 
 const onClickCancelEditMode = () => {
   isShowEditModeDialog.value = false
@@ -894,101 +926,87 @@ const onClickCancelEditMode = () => {
 }
 
 const onUpdateCollector = (collector: any) => {
-  console.log('onUpdateCollector:', toRaw(collector))
   let conclusionCom = store.report.template?.items.find(c => c.key == collector?.data?.conclusion_key)
   let conclusionItem
-  console.log('conclusionCom:', toRaw(conclusionCom))
   if (conclusionCom?.data?.conclusions) {
     conclusionItem = conclusionCom?.data?.conclusions.find(c => c.key == collector?.data?.conclusion_item_key)
-    console.log('conclusionItem:', toRaw(conclusionItem))
   }
-  // console.log('onUpdateCollector:', toRaw(collectorItem), toRaw(conclusionCom), toRaw(conclusionItem))
   let collectorValue = store.formState[collector.key]
-  console.log('collectorValue:', toRaw(collectorValue))
   if (collectorValue && collectorValue?.data?.dataRecords && collectorValue?.data?.dataRecords.length > 0) {
     let statuses = []
     for (let record of collectorValue?.data?.dataRecords) {
       for (let field of record) {
         if (field.value == 'status') {
-          statuses.push({status: field.data})
+          statuses.push({ status: field.data })
         }
       }
     }
 
-    console.log('store.formState[conclusionCom.key]:', toRaw(store.formState[conclusionCom.key]), conclusionCom.key)
-    store.formState[conclusionCom.key].data.conclusions.find(c=>c.key == conclusionItem.key).userStatus = determineStatus(statuses)
+    let conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+    if (!conclusionComItem) {
+      store.formState[conclusionCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == conclusionCom.key).data.conclusions } }
+      conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+    }
+    if(determineStatus(statuses)) {
+      conclusionComItem.status = determineStatus(statuses)
+    }
   }
-  console.log('parentItemKey:', toRaw(conclusionCom?.data?.parent_key), toRaw(store.report.template?.items))
-  if(conclusionCom?.data?.parent_com_key) {
+  if (conclusionCom?.data?.parent_com_key) {
     let parentCom = store.report.template?.items.find(c => c.key == conclusionCom?.data?.parent_com_key)
-    console.log('parentCom:', toRaw(parentCom))
-    if(parentCom) {
+    if (parentCom) {
       let parentItem = parentCom?.data?.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
-      if(parentItem) {
+      if (parentItem && store.formState[conclusionCom.key]?.data?.conclusions && store.formState[conclusionCom.key]?.data?.conclusions?.length != 0) {
         let parentStatuses = []
-        for(let item of store.formState[conclusionCom.key].data.conclusions) {
-          parentStatuses.push({status: item.status || item.userStatus})
+        for (let item of store.formState[conclusionCom.key]?.data?.conclusions) {
+          parentStatuses.push({ status: item.status })
         }
-        console.log('parentStatuses:', toRaw(parentStatuses))
-        if(!store.formState[parentCom.key]) {
-          store.formState[parentCom.key] = {"data": {"conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions}}
+        if (!store.formState[parentCom.key]) {
+          store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
         }
-        let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c=>c.key == conclusionCom?.data?.parent_key)
-        console.log('ParentConclusionItem:', toRaw(ParentConclusionItem), determineStatus(parentStatuses))
-        ParentConclusionItem.userStatus = determineStatus(parentStatuses)
-
+        let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+        if(determineStatus(parentStatuses)) {
+          ParentConclusionItem.status = determineStatus(parentStatuses)
+        }
       }
     }
   }
 }
 
 
-const determineStatus = (arr) => {
-  let hasNotConformed = false;
-  let hasPending = false;
-  let hasNotApplicable = false;
-  let allConformed = true;
+const onUpdateConclusionInspectResult = (collector: any, status: string, remark: string) => {
+  let conclusionCom = store.report.template?.items.find(c => c.key == collector?.data?.conclusion_key)
+  let conclusionItem
+  if (conclusionCom?.data?.conclusions) {
+    conclusionItem = conclusionCom?.data?.conclusions.find(c => c.key == collector?.data?.conclusion_item_key)
+  }
+  let conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+  if (!conclusionComItem) {
+    store.formState[conclusionCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == conclusionCom.key).data.conclusions } }
+    conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+  }
+  conclusionComItem.status = status
+  conclusionComItem.remark = remark
+  if (conclusionCom?.data?.parent_com_key) {
+    let parentCom = store.report.template?.items.find(c => c.key == conclusionCom?.data?.parent_com_key)
+    if (parentCom) {
+      let parentItem = parentCom?.data?.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+      if (parentItem && store.formState[conclusionCom.key]?.data?.conclusions && store.formState[conclusionCom.key]?.data?.conclusions?.length != 0) {
+        let parentStatuses = []
+        for (let item of store.formState[conclusionCom.key]?.data?.conclusions) {
+          parentStatuses.push({ status: item.status })
+        }
+        if (!store.formState[parentCom.key]) {
+          store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
+        }
+        let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+        if(determineStatus(parentStatuses)) {
+          ParentConclusionItem.status = determineStatus(parentStatuses)
+        }
 
-  for (const item of arr) {
-    switch (item.status) {
-      case 'not_conformed':
-        hasNotConformed = true;
-        break;
-      case 'pending':
-        hasPending = true;
-        break;
-      case 'not_applicable':
-        hasNotApplicable = true;
-        break;
-      case 'conformed':
-        break;
-      default:
-        break;
+      }
     }
-
-    if (item.status !== 'conformed') {
-      allConformed = false;
-    }
   }
-
-  if (hasNotConformed) {
-    return 'not_conformed';
-  }
-  if (hasPending) {
-    return 'pending';
-  }
-  if (hasNotApplicable) {
-    return 'not_applicable';
-  }
-  if (allConformed) {
-    return 'conformed';
-  }
-
-  return 'unknown';
 }
-
-
-
 
 
 const goAnchor = (key: string) => {
@@ -1000,6 +1018,16 @@ const goAnchor = (key: string) => {
   }
 }
 
+const goCollectorAnchor = (key: string) => {
+  let anchor = document.getElementById(`${key}`)
+  if (anchor) {
+    anchor.scrollIntoView({
+      behavior: "smooth"
+    })
+  }
+}
+
+
 watchEffect(() => {
   if (isShowEditModeDialog.value) {
     // add overflow hidden to <html> element to prevent scrolling
@@ -1008,6 +1036,70 @@ watchEffect(() => {
     document.documentElement.style.overflow = 'auto'
     currentEditComponentRef.value = null
     currentEditComponentIndexRef.value = -1
+  }
+})
+
+
+const updateDefectsAllowed = () => {
+  console.log('updateDefectsAllowed:', toRaw(1111))
+  let OrderQuantity = store.report?.values['OrderQuantity']
+  let AQL_CR = store.report?.values['AQL_CR']
+  let AQL_MAJ = store.report?.values['AQL_MAJ']
+  let AQL_MIN = store.report?.values['AQL_MIN']
+  let InspectLevel = store.report?.values["SpecialInspectionLevel"] || store.report?.values["GeneralInspectionLevel"]
+  if (OrderQuantity === "" || OrderQuantity === undefined || OrderQuantity === null) {
+    return
+  }
+  if (AQL_CR === "" || AQL_CR === undefined || AQL_CR === null) {
+    return
+  }
+  if (AQL_MAJ === "" || AQL_MAJ === undefined || AQL_MAJ === null) {
+    return
+  }
+  if (AQL_MIN === "" || AQL_MIN === undefined || AQL_MIN === null) {
+    return
+  }
+
+  let AQL_CR_result = getDefectiveLimitation(OrderQuantity, AQL_CR, InspectLevel)
+  let AQL_MAJ_result = getDefectiveLimitation(OrderQuantity, AQL_MAJ, InspectLevel)
+  let AQL_MIN_result = getDefectiveLimitation(OrderQuantity, AQL_MIN, InspectLevel)
+  store.defectsAllowedMap = {
+    AQL_CR: AQL_CR_result.allowedSize,
+    AQL_MAJ: AQL_MAJ_result.allowedSize,
+    AQL_MIN: AQL_MIN_result.allowedSize
+  }
+  console.log('store.defectsAllowedMap:', toRaw(store.defectsAllowedMap))
+}
+
+const updateAqlOptions = () => {
+  let OrderQuantity = store.report?.values['OrderQuantity']
+  if (OrderQuantity === "" || OrderQuantity === undefined || OrderQuantity === null) {
+    return
+  }
+  let InspectLevel = store.report?.values["SpecialInspectionLevel"] || store.report?.values["GeneralInspectionLevel"]
+  console.log('InspectLevel:', InspectLevel)
+  let result = getAqlOptions(OrderQuantity, InspectLevel)
+  let keys = Object.keys(result.options)
+  let options = []
+  for(let key of keys) {
+    options.push({
+      label: key,
+      value: key
+    })
+  }
+  store.aqlOptions = options
+  store.report.values.SampleSizeTotal = result.sampleSize
+}
+
+watchEffect(() => {
+  if (store.report.values.OrderQuantity && store.report.values.OrderQuantity >= 2 && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
+    updateAqlOptions()
+    store.report.values.AQL_CR = store.aqlOptions[0].value
+  }
+})
+watchEffect(() => {
+  if (store.report.values.OrderQuantity && store.report.values.OrderQuantity >= 2 && store.report.values.AQL_CR && store.report.values.AQL_MAJ && store.report.values.AQL_MIN && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
+    updateDefectsAllowed()
   }
 })
 

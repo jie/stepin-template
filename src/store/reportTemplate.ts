@@ -10,6 +10,8 @@ import { Pagination } from "@/types"
 interface ReportTemplateSettings {
   allowSelectImageFromAlbum?: boolean;
   ReportNumber?: boolean;
+  OrderQuantity?: boolean;
+  SampleSizeTotal?: boolean;
   Applicant?: boolean;
   Supplier?: boolean;
   Factory?: boolean;
@@ -26,6 +28,7 @@ interface ReportTemplateSettings {
   AQL_MAJ?: boolean;
   AQL_MIN?: boolean;
   GeneralInspectionLevel?: boolean;
+  SpecialInspectionLevel?: boolean;
   InspectionType?: boolean;
   ReInspectionType?: boolean;
   // GeneralInspectionLevel?: Array<string>;

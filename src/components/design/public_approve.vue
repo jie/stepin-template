@@ -6,7 +6,7 @@
     <a-modal :getContainer="() => document.body" v-model:visible="isShowReviewModeDialog" :title="$t('base.Review')"
       width="100%" wrap-class-name="full-modal" :cancelButtonProps="{ hidden: true, }">
       <div ref="ReviewModeRef">
-        <a-form layout="vertical" v-if="currentReviewComponentRef">
+        <a-form ref="editModeFormRef" layout="vertical" v-if="currentReviewComponentRef">
           <div v-for="(item, index) in store.report.schema" :key="item.key">
             <div class="component"
               v-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'text'">
@@ -15,22 +15,22 @@
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'input'">
               <reportEditInput :item="currentReviewComponentRef"
-                v-model:value="formState[currentReviewComponentRef.key]" />
+                v-model:value="store.formState[currentReviewComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'input_group'">
               <reportEditInputGroup :item="currentReviewComponentRef"
-                v-model:value="formState[currentReviewComponentRef.key]" />
+                v-model:value="store.formState[currentReviewComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'radio'">
               <reportEditRadio :item="currentReviewComponentRef"
-                v-model:value="formState[currentReviewComponentRef.key]" />
+                v-model:value="store.formState[currentReviewComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'checkbox'">
               <reportEditCheckbox :item="currentReviewComponentRef"
-                v-model:value="formState[currentReviewComponentRef.key]" />
+                v-model:value="store.formState[currentReviewComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'image'">
@@ -39,16 +39,27 @@
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'image_upload'">
               <reportEditImageUpload :item="currentReviewComponentRef"
-                v-model:value="formState[currentReviewComponentRef.key]" />
+                v-model:value="store.formState[currentReviewComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'table'">
               <reportEditTable :item="currentReviewComponentRef"
-                v-model:value="formState[currentReviewComponentRef.key]" />
+                v-model:value="store.formState[currentReviewComponentRef.key]" />
             </div>
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'container'">
               <reportContainer :item="currentReviewComponentRef"></reportContainer>
+            </div>
+            <div class="component"
+              v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'conclusion'">
+              <reportEditConclusion mode="review" :item="currentReviewComponentRef"
+                v-model:value="store.formState[currentReviewComponentRef.key]"></reportEditConclusion>
+            </div>
+            <div class="component"
+              v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'collector'">
+              <reportEditCollector mode="review" :item="currentReviewComponentRef"
+                v-model:value="store.formState[currentReviewComponentRef.key]" v-on:updateCollector="onUpdateCollector" v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult" v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError">
+              </reportEditCollector>
             </div>
           </div>
         </a-form>
@@ -117,8 +128,8 @@
     </a-modal>
     <div class="report-wrapper" :class="{ 'is-staff': isStaffReview }">
 
-      <div v-if="loadingRef"
-        style="display:flex; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 1000;position: absolute;left:0;top:0;right:0;bottom:0;background-color: rgba(255, 255, 255, 0.8);">
+      <!-- <div v-if="loadingRef" class="loading-ref"> -->
+      <div v-if="loadingRef" class="loading-ref">
         <Spin font-size="60px" />
       </div>
       <div class="flex">
@@ -197,13 +208,13 @@
         <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index"
           style="margin-bottom: 20px">
           <a-col :span="12" v-for="(item, index) in row" :key="index">
-            <div><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right">{{ item.value }}</span>
-            </div>
+            <div v-if="item.key != 'ItemNumber'"><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right">{{ item.value }}</span></div>
+            <div v-else><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right"><a-tag v-for="tag in item.value">{{ tag }}</a-tag></span></div>
           </a-col>
         </a-row>
       </div>
 
-      <a-form layout="vertical" :model="formState" v-if="store.report && !route.query.is_simple"
+      <a-form ref="formRef" layout="vertical" :model="store.formState" v-if="store.report && !route.query.is_simple"
         @finish="onFinishSubmit" @finishFailed="onFinishFailed">
         <div v-for="(item, index) in store.report.schema" :key="item.key" class="component-wrapper"
           :class="{ 'notpass': store.report?.review_comments[item.key].status == false, 'pass': store.report?.review_comments[item.key].status == true }">
@@ -211,28 +222,36 @@
             <reportText :item="item" ref="itemRefs" />
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'input'">
-            <reportInput :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
+            <reportInput :item="item" ref="itemRefs" v-model:value="store.formState[item.key]" />
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'input_group'">
-            <reportInputGroup :item="item" ref="itemRefs" v-model:value="formState[item.key]" />
+            <reportInputGroup :item="item" ref="itemRefs" v-model:value="store.formState[item.key]" />
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'radio'">
-            <reportRadio :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
+            <reportRadio :item="item" v-model:value="store.formState[item.key]" ref="itemRefs" />
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'checkbox'">
-            <reportCheckbox :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
+            <reportCheckbox :item="item" v-model:value="store.formState[item.key]" ref="itemRefs" />
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'image'">
             <reportImage :item="item" ref="itemRefs" />
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'image_upload'">
-            <reportImageUpload :item="item" v-model:value="formState[item.key]" ref="itemRefs" />
+            <reportImageUpload :item="item" v-model:value="store.formState[item.key]" ref="itemRefs" />
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'table'">
-            <reportTable :item="item" v-model:value="formState[item.key]" ref="itemRefs"></reportTable>
+            <reportTable :item="item" v-model:value="store.formState[item.key]" ref="itemRefs"></reportTable>
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'container'">
             <reportContainer :item="item" ref="itemRefs"></reportContainer>
+          </div>
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'conclusion'">
+            <reportConclusion mode="review" :item="item" v-model:value="store.formState[item.key]" ref="itemRefs">
+            </reportConclusion>
+          </div>
+          <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'collector'">
+            <reportCollector mode="review" :item="item" v-model:value="store.formState[item.key]" ref="itemRefs"
+              v-on:updateCollector="onUpdateCollector" v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult" v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError"></reportCollector>
           </div>
           <div v-else>unsupported components: {{ item }}</div>
           <div v-if="isStaffReview && store.report?.review_comments[item.key]?.comment">{{ $t('base.Comment') }}: {{
@@ -303,7 +322,8 @@
     </a-affix>
     <a-drawer placement="right" :visible="isShowHelpMenu" @close="onCloseHelpMenu" width="500">
       <template #extra>
-        <a-button style="margin-right: 8px" @click="onOpenHelpMenuInNewPage">{{ $t('base.open_in_new_page') }}</a-button>
+        <a-button style="margin-right: 8px" @click="onOpenHelpMenuInNewPage">{{ $t('base.open_in_new_page')
+          }}</a-button>
       </template>
       <div>
         <InspectRequirementBlock type="aql" fieldKey="inspection_standards" />
@@ -314,7 +334,7 @@
         <InspectRequirementBlock type="pdfs" fieldKey="inspection_requirement_pdfs" />
         <!-- <InspectRequirementBlock type="pdfs" fieldKey="requirement_pdfs" /> -->
       </div>
-  
+
     </a-drawer>
   </div>
 </template>
@@ -337,6 +357,8 @@ import reportEditInputGroup from "./reportInputGroup/index.vue"
 import reportEditRadio from "./reportRadio/index.vue"
 import reportEditCheckbox from "./reportCheckbox/index.vue"
 import reportEditImageUpload from "./reportImageUpload/index.vue"
+import reportEditConclusion from "./reportConclusion/index.vue"
+import reportEditCollector from "./reportCollector/index.vue"
 import { Modal } from 'ant-design-vue';
 import InspectRequirementBlock from "./inspect_require_block.vue"
 import { reportDatabase } from "@/hook/dexie_hook"
@@ -345,6 +367,8 @@ import { openNotification, successNotification } from '@/utils/notification';
 // import { copyObject } from "@/utils/objectUtils"
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
+import { determineStatus } from "@/utils/helpers"
+import {getDefectiveLimitation} from "@/utils/sampling"
 import dayjs from 'dayjs';
 import { i18n } from '@/lang/i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -354,10 +378,11 @@ const route = useRoute()
 const router = useRouter()
 const document = window.document
 const store = ReportFillStore()
+const formRef = ref()
+const editModeFormRef = ref()
 const isAffixedRef = ref(false)
 const startedRef = ref(false)
 const loadingRef = ref(false)
-const formState = reactive({})
 const isShowHelpMenu = ref(false)
 const isStaffReview = ref(false)
 const isShowReviewModeDialog = ref(false)
@@ -404,12 +429,6 @@ const updateReviewComments = () => {
   console.log('store.report.review_comments:', toRaw(store.report.review_comments))
 }
 
-const reportResultOptions = [
-  { label: i18n.global.t(`base.ResultPassed`), value: '3' },
-  { label: i18n.global.t(`base.ResultPending`), value: '1' },
-  { label: i18n.global.t(`base.ResultFailed`), value: '0' },
-];
-
 const dateKeys = [
   "DateOfInspection",
 ]
@@ -419,6 +438,8 @@ const datetimeKeys = [
 ]
 const insepctDetailsKeys = [
   "ReportNumber",
+  "OrderQuantity",
+  "SampleSizeTotal",
   "Applicant",
   "Supplier",
   "Factory",
@@ -431,10 +452,10 @@ const insepctDetailsKeys = [
   "Inspector",
   "InspectionStandard",
   "GeneralInspectionLevel",
+  "SpecialInspectionLevel",
   "SampleSize",
   "InspectionType",
   "ReInspectionType"
-
 ]
 const itemRefs = ref([])
 
@@ -445,7 +466,7 @@ const loadLocalData = async () => {
   }
   let values = JSON.parse(localRecord.values)
   for (let key of Object.keys(values)) {
-    formState[key] = values[key]
+    store.formState[key] = values[key]
   }
 }
 
@@ -459,7 +480,6 @@ const editableComponents = [
 ]
 
 const refresh = async (data: any) => {
-  console.log('refresh*******************:', data)
   loadingRef.value = true
   reportDataRef.value = data
   console.log('store.report:', toRaw(store.report.template))
@@ -483,19 +503,19 @@ const refresh = async (data: any) => {
       }
     })
     for (let key of Object.keys(store.report.values)) {
-      formState[key] = store.report.values[key]
+      store.formState[key] = store.report.values[key]
     }
 
     if (store.report.values["DateOfInspection"]) {
-      formState["DateOfInspection"] = dayjs(store.report.values["DateOfInspection"])
+      store.formState["DateOfInspection"] = dayjs(store.report.values["DateOfInspection"])
     }
-    formState["ArrivalTime"] = ""
+    store.formState["ArrivalTime"] = ""
     if (store.report.values["ArrivalTime"]) {
-      formState["ArrivalTime"] = dayjs(store.report.values["ArrivalTime"])
+      store.formState["ArrivalTime"] = dayjs(store.report.values["ArrivalTime"])
     }
-    formState["DepartureTime"] = ""
+    store.formState["DepartureTime"] = ""
     if (store.report.values["DepartureTime"]) {
-      formState["DepartureTime"] = dayjs(store.report.values["DepartureTime"])
+      store.formState["DepartureTime"] = dayjs(store.report.values["DepartureTime"])
     }
     reportInspectDetailRef.value = generateInspectDetailRows()
     loadingRef.value = false
@@ -518,7 +538,7 @@ const submitFormData = reactive({
   approve_reason: ""
 })
 const onFinishSubmit = () => {
-  console.log('onFinishSubmit:', toRaw(formState))
+  console.log('onFinishSubmit:', toRaw(store.formState))
   isShowSubmitDialog.value = true
   // submitFormData.approve_status = store.report?.approve_status
   // submitFormData.approve_reason = store.report?.approve_reason
@@ -566,24 +586,24 @@ const generateInspectDetailRows = () => {
   let rows = []
   // every 2 items in a row
   let row = []
-  for (let key of Object.keys(formState)) {
+  for (let key of Object.keys(store.formState)) {
     if (insepctDetailsKeys.includes(key) == false) {
       continue
     }
     if (dateKeys.includes(key)) {
       row.push({
         key: key,
-        value: formatDate(formState[key])
+        value: formatDate(store.formState[key])
       })
     } else if (datetimeKeys.includes(key)) {
       row.push({
         key: key,
-        value: formatDatetime(formState[key])
+        value: formatDatetime(store.formState[key])
       })
     } else {
       row.push({
         key: key,
-        value: formState[key]
+        value: store.formState[key]
       })
     }
 
@@ -593,12 +613,12 @@ const generateInspectDetailRows = () => {
     }
   }
 
-  if (formState["AQL_CR"] || formState["AQL_MAJ"] || formState["AQL_MIN"]) {
+  if (store.formState["AQL_CR"] || store.formState["AQL_MAJ"] || store.formState["AQL_MIN"]) {
 
     if (rows[rows.length - 1].length == 1) {
-      rows[rows.length - 1].push({ key: 'AQL', value: `Cr: ${formState["AQL_CR"]} Maj: ${formState["AQL_MAJ"]} Min: ${formState["AQL_MIN"]}` })
+      rows[rows.length - 1].push({ key: 'AQL', value: `Cr: ${store.formState["AQL_CR"]} Maj: ${store.formState["AQL_MAJ"]} Min: ${store.formState["AQL_MIN"]}` })
     } else {
-      rows.push([{ key: 'AQL', value: `Cr: ${formState["AQL_CR"]}, Maj: ${formState["AQL_MAJ"]}, Min: ${formState["AQL_MIN"]}` }])
+      rows.push([{ key: 'AQL', value: `Cr: ${store.formState["AQL_CR"]}, Maj: ${store.formState["AQL_MAJ"]}, Min: ${store.formState["AQL_MIN"]}` }])
     }
   }
   return rows
@@ -639,9 +659,9 @@ const goPrevItem = () => {
 }
 
 const onClickSaveItem = async () => {
-  console.log('onClickSaveItem:', toRaw(formState[currentReviewComponentRef.value.key]))
+  console.log('onClickSaveItem:', toRaw(store.formState[currentReviewComponentRef.value.key]))
   let values = {
-    [currentReviewComponentRef.value.key]: formState[currentReviewComponentRef.value.key]
+    [currentReviewComponentRef.value.key]: store.formState[currentReviewComponentRef.value.key]
   }
   await store.apiFillSingleByStaff({
     id: store.report.id,
@@ -722,6 +742,107 @@ const onClickCancelReviewMode = () => {
   currentReviwComponentIndexRef.value = null
 }
 
+
+const onClearFieldError = (fieldName) => {
+  formRef.value.clearValidate([fieldName]);
+  if (isShowEditModeDialog.value == true) {
+    editModeFormRef.value.clearValidate([fieldName]);
+  }
+};
+
+const onValidateImagesField = (fieldName) => {
+  formRef.value.validateFields([fieldName]);
+  if (isShowEditModeDialog.value == true) {
+    editModeFormRef.value.validateFields([fieldName]);
+  }
+};
+
+
+
+const onUpdateCollector = (collector: any) => {
+  let conclusionCom = store.report.template?.items.find(c => c.key == collector?.data?.conclusion_key)
+  let conclusionItem
+  if (conclusionCom?.data?.conclusions) {
+    conclusionItem = conclusionCom?.data?.conclusions.find(c => c.key == collector?.data?.conclusion_item_key)
+  }
+  let collectorValue = store.formState[collector.key]
+  if (collectorValue && collectorValue?.data?.dataRecords && collectorValue?.data?.dataRecords.length > 0) {
+    let statuses = []
+    for (let record of collectorValue?.data?.dataRecords) {
+      for (let field of record) {
+        if (field.value == 'status') {
+          statuses.push({ status: field.data })
+        }
+      }
+    }
+
+    let conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+    if (!conclusionComItem) {
+      store.formState[conclusionCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == conclusionCom.key).data.conclusions } }
+      conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+    }
+    if(determineStatus(statuses)) {
+      conclusionComItem.status = determineStatus(statuses)
+    }
+  }
+  if (conclusionCom?.data?.parent_com_key) {
+    let parentCom = store.report.template?.items.find(c => c.key == conclusionCom?.data?.parent_com_key)
+    if (parentCom) {
+      let parentItem = parentCom?.data?.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+      if (parentItem && store.formState[conclusionCom.key]?.data?.conclusions && store.formState[conclusionCom.key]?.data?.conclusions?.length != 0) {
+        let parentStatuses = []
+        for (let item of store.formState[conclusionCom.key]?.data?.conclusions) {
+          parentStatuses.push({ status: item.status })
+        }
+        if (!store.formState[parentCom.key]) {
+          store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
+        }
+        let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+        if(determineStatus(parentStatuses)) {
+          ParentConclusionItem.status = determineStatus(parentStatuses)
+        }
+      }
+    }
+  }
+}
+
+
+const onUpdateConclusionInspectResult = (collector: any, status: string, remark: string) => {
+  let conclusionCom = store.report.template?.items.find(c => c.key == collector?.data?.conclusion_key)
+  let conclusionItem
+  if (conclusionCom?.data?.conclusions) {
+    conclusionItem = conclusionCom?.data?.conclusions.find(c => c.key == collector?.data?.conclusion_item_key)
+  }
+  let conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+  if (!conclusionComItem) {
+    store.formState[conclusionCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == conclusionCom.key).data.conclusions } }
+    conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
+  }
+  conclusionComItem.status = status
+  conclusionComItem.remark = remark
+  if (conclusionCom?.data?.parent_com_key) {
+    let parentCom = store.report.template?.items.find(c => c.key == conclusionCom?.data?.parent_com_key)
+    if (parentCom) {
+      let parentItem = parentCom?.data?.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+      if (parentItem && store.formState[conclusionCom.key]?.data?.conclusions && store.formState[conclusionCom.key]?.data?.conclusions?.length != 0) {
+        let parentStatuses = []
+        for (let item of store.formState[conclusionCom.key]?.data?.conclusions) {
+          parentStatuses.push({ status: item.status })
+        }
+        if (!store.formState[parentCom.key]) {
+          store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
+        }
+        let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
+        if(determineStatus(parentStatuses)) {
+          ParentConclusionItem.status = determineStatus(parentStatuses)
+        }
+
+      }
+    }
+  }
+}
+
+
 watchEffect(() => {
   if (isShowReviewModeDialog.value) {
     // add overflow hidden to <html> element to prevent scrolling
@@ -748,6 +869,64 @@ watchEffect(() => {
     isStaffReview.value = false
   } else {
     isStaffReview.value = true
+  }
+})
+// let SampleSizeTotal = store.report.values?.find(c => c.key === 'SampleSizeTotal')
+//   let OrderQuantity = store.report.values?.find(c => c.key === 'OrderQuantity')
+//   let AQL_CR = store.report.values?.find(c => c.key === 'AQL_CR')
+//   let AQL_MAJ = store.report.values?.find(c => c.key === 'AQL_MAJ')
+//   let AQL_MIN = store.report.values?.find(c => c.key === 'AQL_MIN')
+//   let InspectLevel = store.report.values?.find(c => c.key === 'SpecialInspectionLevel' || c.key === 'GeneralInspectionLevel')
+//   if (SampleSizeTotal === "" || SampleSizeTotal === undefined || SampleSizeTotal === null) {
+//     return
+//   }
+
+const updateDefectsAllowed = () => {
+  console.log('updateDefectsAllowed:', toRaw(1111))
+  let SampleSizeTotal = store.report?.values['SampleSizeTotal']
+  let OrderQuantity = store.report?.values['OrderQuantity']
+  let AQL_CR = store.report?.values['AQL_CR']
+  let AQL_MAJ = store.report?.values['AQL_MAJ']
+  let AQL_MIN = store.report?.values['AQL_MIN']
+  let InspectLevel = store.report?.values["SpecialInspectionLevel"] || store.report?.values["GeneralInspectionLevel"]
+  if (SampleSizeTotal === "" || SampleSizeTotal === undefined || SampleSizeTotal === null) {
+    return
+  }
+  if (OrderQuantity === "" || OrderQuantity === undefined || OrderQuantity === null) {
+    return
+  }
+  if (AQL_CR === "" || AQL_CR === undefined || AQL_CR === null) {
+    return
+  }
+  if (AQL_MAJ === "" || AQL_MAJ === undefined || AQL_MAJ === null) {
+    return
+  }
+  if (AQL_MIN === "" || AQL_MIN === undefined || AQL_MIN === null) {
+    return
+  }
+
+  let AQL_CR_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_CR", InspectLevel)
+  let AQL_MAJ_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_MAJ", InspectLevel)
+  let AQL_MIN_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_MIN", InspectLevel)
+  store.defectsAllowedMap = {
+    AQL_CR: AQL_CR_Allowed,
+    AQL_MAJ: AQL_MAJ_Allowed,
+    AQL_MIN: AQL_MIN_Allowed
+  }
+  console.log('store.defectsAllowedMap:', toRaw(store.defectsAllowedMap))
+}
+
+watchEffect(() => {
+
+//   SampleSizeTotal
+// OrderQuantity
+// AQL_CR
+// AQL_MAJ
+// AQL_MIN
+// GeneralInspectionLevel
+// SpecialInspectionLevel
+  if (store.report.values.SampleSizeTotal && store.report.values.OrderQuantity && store.report.values.AQL_CR && store.report.values.AQL_MAJ && store.report.values.AQL_MIN && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
+    updateDefectsAllowed()
   }
 })
 
@@ -993,5 +1172,20 @@ defineExpose({
 
 .is-staff .skip-view {
   display: none;
+}
+
+.loading-ref {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
 }
 </style>

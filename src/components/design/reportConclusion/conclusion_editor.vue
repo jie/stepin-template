@@ -6,7 +6,7 @@
     </div>
     <div style="padding-left: 80px">
       <div style="margin-top:10px;">
-        <a-form-item :label="$t('base.Title')" name="title">
+        <a-form-item :label="$t('base.languageType')" name="languageType">
           <a-select v-model:value="itemData.languageType" style="width: 200px;">
             <a-select-option value="single">{{ $t('base.SingleLanguage') }}</a-select-option>
             <a-select-option value="multiple">{{ $t('base.MultipleLanguage') }}</a-select-option>
@@ -89,6 +89,12 @@
         <a-form-item :label="$t('base.hasCollector')" name="hasCollector">
           <a-switch v-model:checked="conclusionFormData.hasCollector"></a-switch>
         </a-form-item>
+        <a-form-item :label="$t('base.hasItemNumber')" name="hasItemNumber">
+          <a-switch v-model:checked="conclusionFormData.hasItemNumber"></a-switch>
+        </a-form-item>
+        <a-form-item :label="$t('base.hasSampleSize')" name="hasSampleSize">
+          <a-switch v-model:checked="conclusionFormData.hasSampleSize"></a-switch>
+        </a-form-item>
         <a-form-item :label="$t('base.hasStatus')" name="hasStatus">
           <a-switch v-model:checked="conclusionFormData.hasStatus"></a-switch>
         </a-form-item>
@@ -99,7 +105,7 @@
           <a-switch v-model:checked="conclusionFormData.hasRemarks"></a-switch>
         </a-form-item>
         <a-form-item :label="$t('base.IsDefect')" name="IsDefect">
-          <a-switch v-model:checked="conclusionFormData.IsDefect"></a-switch>
+          <a-switch v-model:checked="conclusionFormData.isDefect"></a-switch>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -141,7 +147,9 @@ const conclusionFormData = reactive({
   hasStatus: true,
   hasImages: true,
   hasRemarks: true,
-  isDefect: false
+  isDefect: false,
+  hasItemNumber: true,
+  hasSampleSize: true
 })
 
 const optionFormData = reactive({
@@ -228,6 +236,8 @@ const resetConclusionFormData = () => {
   conclusionFormData.hasImages = true
   conclusionFormData.hasRemarks = true
   conclusionFormData.isDefect = false
+  conclusionFormData.hasItemNumber = true
+  conclusionFormData.hasSampleSize = true
 }
 
 const onClickAction = (type: string, text: string, index) => {
@@ -273,6 +283,8 @@ const onClickEditConclusion = () => {
   conclusionFormData.hasImages = conclusion.hasImages
   conclusionFormData.hasRemarks = conclusion.hasRemarks
   conclusionFormData.isDefect = conclusion.isDefect
+  conclusionFormData.hasItemNumber = conclusion.hasItemNumber
+  conclusionFormData.hasSampleSize = conclusion.hasSampleSize
   conclusionFormData.key = conclusion.key
 }
 

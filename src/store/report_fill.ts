@@ -4,6 +4,7 @@ import { getSessionInfo } from '@/utils/session'
 import { useLoadingStore } from '@/store';
 import { Pagination, statusFormSchema } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
+import dayjs from 'dayjs';
 const permissionInfoKey = "reportPermissionInfo"
 
 export const ReportFillStore = defineStore('report_fill', {
@@ -18,6 +19,9 @@ export const ReportFillStore = defineStore('report_fill', {
       report: <any>{},
       defects: <any>[],
       formState: <any>{},
+      isValidateForm: false,
+      defectsAllowedMap: {},
+      aqlOptions: []
     }
   },
   getters: {
@@ -65,10 +69,14 @@ export const ReportFillStore = defineStore('report_fill', {
         .request('/platform/report_api/report/get', 'post_json', bodyJson, {})
         .then((response) => {
           if (response.data?.data) {
-            if(response.data?.data?.entity?.values) {
-              this.formState = response.data?.data?.entity?.values
-            }
+
             this.report = response.data?.data?.entity
+            if (response.data?.data?.entity?.values) {
+              let formState = response.data?.data?.entity?.values
+              this.formatReportformState(formState)
+              this.formState = formState
+            }
+
             return response.data?.data;
           } else {
             openNotification({ type: "error", message: "Fail to get report", description: response.data?.message || "Fail to get report" })
@@ -76,6 +84,68 @@ export const ReportFillStore = defineStore('report_fill', {
           }
         })
         .finally(() => setPageLoading(false));
+    },
+    formatReportformState(formState) {
+      if (this?.report?.template?.settings) {
+        formState["ReportNumber"] = this.report.values["ReportNumber"] || ""
+        formState["OrderQuantity"] = this.report.values["OrderQuantity"] || ""
+        formState["SampleSizeTotal"] = this.report.values["SampleSizeTotal"] || ""
+        formState["Applicant"] = this.report.values["Applicant"] || ""
+        formState["Supplier"] = this.report.values["Supplier"] || ""
+        formState["Factory"] = this.report.values["Factory"] || ""
+        formState["ItemNumber"] = this.report.values["ItemNumber"] || ""
+        formState["ProductDescription"] = this.report.values["ProductDescription"] || ""
+        formState["AddressOfInspection"] = this.report.values["AddressOfInspection"] || ""
+        formState["DateOfInspection"] = ""
+        if (this.report.values["DateOfInspection"]) {
+          formState["DateOfInspection"] = dayjs(this.report.values["DateOfInspection"])
+        }
+        formState["ArrivalTime"] = ""
+        if (this.report.values["ArrivalTime"]) {
+          formState["ArrivalTime"] = dayjs(this.report.values["ArrivalTime"])
+        }
+        formState["DepartureTime"] = ""
+        if (this.report.values["DepartureTime"]) {
+          formState["DepartureTime"] = dayjs(this.report.values["DepartureTime"])
+        }
+        formState["Inspector"] = this.report.values["Inspector"] || ""
+        if (this.report.order) {
+          // if (!formState["ReportNumber"]) {
+          //   formState["ReportNumber"] = this.report?.order?.order_no
+          // }
+          if (!formState["Factory"]) {
+            formState["Factory"] = this.report?.order?.factory_name
+          }
+          if (!formState["Supplier"]) {
+            formState["Supplier"] = this.report?.order?.suppliers
+          }
+          if (!formState["ItemNumber"]) {
+            if(this.report?.order?.po_number) {
+              formState["ItemNumber"] = this.report?.order?.po_number.split(';')
+            } else {
+              formState["ItemNumber"] = []
+            }
+          }
+          if (!formState["ProductDescription"]) {
+            formState["ProductDescription"] = this.report?.order?.product_name
+          }
+          if (!formState["AddressOfInspection"]) {
+            formState["AddressOfInspection"] = this.report?.order?.address?.country?.code == '1' ? `${this.report?.order?.address?.province?.name} ${this.report?.order?.address?.city?.name} ${this.report?.order?.address?.details}` : this.report?.order?.address?.country?.name
+          }
+          if (!formState["DateOfInspection"]) {
+            formState["DateOfInspection"] = dayjs(this.report?.order?.inspect_date)
+          }
+          if (!formState["ArrivalTime"]) {
+            formState["ArrivalTime"] = dayjs(`${this.report?.order?.inspect_date} 09:00:00`)
+          }
+          if (!formState["DepartureTime"]) {
+            formState["DepartureTime"] = dayjs(`${this.report?.order?.inspect_date} 18:00:00`)
+          }
+          if (!formState["Inspector"]) {
+            formState["Inspector"] = this.report?.order?.workers.map(c => c.worker.name).join(',')
+          }
+        }
+      }
     },
     async apiGetForView(id: string) {
       const { setPageLoading } = useLoadingStore();
@@ -207,7 +277,7 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
-    async apiQueryDefectByReportId(reportId:string | undefined) {
+    async apiQueryDefectByReportId(reportId: string | undefined) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let bodyJson = { report_id: reportId || this.report.id, pagesize: 10000, page: 1 }
