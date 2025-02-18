@@ -914,7 +914,8 @@ const onClickSubmit = () => {
 }
 
 const onClickSave = async () => {
-  await onSubmitReport()
+  // await onSubmitReport()
+  await onFinishSubmit()
 }
 
 
