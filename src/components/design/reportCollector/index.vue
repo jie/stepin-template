@@ -7,12 +7,12 @@
         <div>
           <div :id="`status-null-${props.item.key}`">
             <a-form-item :label="$t('base.InspectResult')" :name="`status-null-${props.item.key}`"
-              v-if="conclusionItemRef?.value?.hasRemarks || props?.item?.data?.auto_result"
+              v-if="conclusionItemRef?.hasRemarks || props?.item?.data?.auto_result"
               :rules="[{ required: true, message: $t('base.pleaseSelectInspectResult'), validator: validateRequired, trigger: 'change' }]">
               <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
                 <a-radio-button style="font-size: 12px"
-                  v-for="option in [{ 'label': 'PASS', 'value': 'Conform' }, { 'label': 'FAIL', 'value': 'NotConform' }]"
+                  v-for="option in [{ 'label': 'PASS', 'value': 'conformed' }, { 'label': 'FAIL', 'value': 'not_conformed' }]"
                   :value="option.value">{{
                     option.label
                   }}</a-radio-button>
@@ -41,7 +41,7 @@
                   :pagination="false" />
               </div>
             </a-form-item>
-            <a-form-item :label="$t('base.Remark')" name="remark" v-if="conclusionItemRef?.value?.hasRemarks">
+            <a-form-item :label="$t('base.Remark')" name="remark" v-if="conclusionItemRef?.hasRemarks">
               <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
             </a-form-item>
           </div>
@@ -270,7 +270,7 @@ import { message, Modal } from "ant-design-vue";
 import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
-import { getStatusLabelColor } from "@/utils/helpers"
+import { getStatusLabelColor, determineStatus } from "@/utils/helpers"
 import { batchSizeData, qualityLimitation, aclList } from "@/utils/sampling"
 import { find } from "lodash";
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
@@ -418,6 +418,13 @@ const onChange = (e) => {
 
 const onChangeStatus = (e) => {
   console.log('onChangeStatus:', toRaw(e))
+  let statuesRecords = itemData.dataRecords.map((item) => {
+    return {
+      status: item.find(c => c.value === 'status')?.data
+    }
+  })
+  statusForm.status = determineStatus(statuesRecords)
+  console.log('statusForm.status:', statusForm.status)
   emits('update:value', exportValue())
   emits('updateCollector', props.item)
   // emits('clearFieldError', e.target.id.replace('form_item_', ''))
