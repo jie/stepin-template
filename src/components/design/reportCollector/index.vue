@@ -272,6 +272,7 @@ import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor } from "@/utils/helpers"
 import { batchSizeData, qualityLimitation, aclList } from "@/utils/sampling"
+import { find } from "lodash";
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -740,7 +741,7 @@ const initialization = () => {
           data: ""
         })
       }
-      if (conclusionItemRef.value?.hasStatus) {
+      if (conclusionItemRef.value?.hasStatus && !props?.item?.data?.auto_result) {
         sourceItems.push({
           label: props.item?.data?.inspect_result_label || 'Inspect Result',
           value: 'status',
@@ -777,13 +778,12 @@ const initialization = () => {
     }
 
     if (itemData?.fields && itemData?.fields.length > 0) {
-      console.log("itemData?.fields:", itemData?.fields)
       let nodes = findLeafNode(itemData?.fields)
-      console.log("itemData?.nodes:", nodes)
+      // if(props?.item?.data?.auto_result) {
+      //   nodes = findLeafNode(itemData?.fields.filter(c => c.value !== 'status'))  
+      // }
       itemData.dataSchema = newJsonObject([...sourceItems, ...nodes])
-      console.log("itemData?.dataSchema:", toRaw(itemData?.dataSchema))
       itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
-      console.log('itemData.dataRecords1:', toRaw(itemData.dataRecords), toRaw(sourceItems))
     } else {
       itemData.dataSchema = newJsonObject([...sourceItems])
       itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
@@ -794,9 +794,11 @@ const initialization = () => {
       itemData.dataSchema = props.value?.data?.dataSchema
       itemData.dataExtraFields = props.value?.data?.dataExtraFields
     } else {
-      console.log('props.value?.data?.fields:', toRaw(props.value?.data?.fields))
       if (props.value?.data?.fields && props.value?.data?.fields.length > 0) {
         let nodes = findLeafNode(props.value?.data?.fields)
+        // if(props?.item?.data?.auto_result) {
+        //   nodes = findLeafNode(itemData?.fields.filter(c => c.value !== 'status'))  
+        // }
         itemData.dataSchema = newJsonObject([...nodes])
         itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
       } else {
