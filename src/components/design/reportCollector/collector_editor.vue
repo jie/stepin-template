@@ -22,6 +22,9 @@
           <a-form-item :label="$t('base.SampleSizeLabel')" name="sample_size_label">
             <a-input v-model:value="itemData.sample_size_label" style="width: 100%;" allow-clear></a-input>
           </a-form-item>
+          <a-form-item :label="$t('base.ColumnManageLabel')" name="column_manage_label">
+            <a-input v-model:value="itemData.column_manage_label"> style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
           <a-form-item :label="$t('base.InspectResultLabel')" name="inspect_result_label">
             <a-input v-model:value="itemData.inspect_result_label" style="width: 100%;" allow-clear></a-input>
           </a-form-item>
@@ -148,6 +151,7 @@ const itemData = ref({
   images_label: 'Images',
   take_photo_label: 'Upload / Take Photo',
   defect_type_label: 'Defect Type',
+  column_manage_label: "Columns Manage",
   has_fields_management: true,
   auto_result: false,
   display_as_table: false
@@ -272,6 +276,7 @@ const initializeData = (item: any) => {
     itemData.value.conclusion_key = item.data.conclusion_key || ''
     itemData.value.conclusion_item_key = item.data.conclusion_item_key || ''
     itemData.value.fields = item.data.fields || []
+    itemData.value.column_manage_label = "Columns Manage"
     itemData.value.item_number_label = item.data.item_number_label || 'Item No.'
     itemData.value.sample_size_label = item.data.sample_size_label || 'Sample Size'
     itemData.value.inspect_result_label = item.data.inspect_result_label || 'Inspect Result'
@@ -286,6 +291,7 @@ const initializeData = (item: any) => {
     itemData.value.conclusion_key = ''
     itemData.value.conclusion_item_key = ''
     itemData.value.fields = []
+    itemData.value.column_manage_label = "Columns Manage"
     itemData.value.item_number_label = 'Item No.'
     itemData.value.sample_size_label = 'Sample Size'
     itemData.value.inspect_result_label = 'Inspect Result'

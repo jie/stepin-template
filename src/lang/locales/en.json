@@ -354,6 +354,7 @@
         "pleaseSetFieldValue": "Please enter {label} value",
         "FoundDefects": "Found Defects",
         "AllowDefects": "Allow Defects",
-        "DisplayAsTable": "Display As Table"
+        "DisplayAsTable": "Display As Table",
+        "ColumnManageLabel": "Column Manage Label"
     }
 }
