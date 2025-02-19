@@ -45,12 +45,11 @@
               <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
             </a-form-item>
           </div>
-          <div v-if="props?.item?.data?.display_as_table && itemData?.dataRecords?.length != 0 && itemData?.dataRecords[0][0].data" style="margin-top: 10px; margin-bottom: 10px;">
-            <a-table bordered :columns="displayTableColumns"
-              :dataSource="displayTableSource"
-              :pagination="false" 
-              :scroll="{ x: 1024 }" 
-            />
+          <div
+            v-if="props?.item?.data?.display_as_table && itemData?.dataRecords?.length != 0 && itemData?.dataRecords[0][0].data"
+            style="margin-top: 10px; margin-bottom: 10px;">
+            <a-table bordered :columns="displayTableColumns" :dataSource="displayTableSource" :pagination="false"
+              :scroll="{ x: 1024 }" />
           </div>
           <div class="records">
             <a-badge-ribbon placement="start" :text="index + 1" :color="getStatusLabelColor(record)"
@@ -191,6 +190,12 @@
                     </template>
                   </a-button>
                 </div>
+                <a-button type="default" size="small" style="font-size: 80%" @click="onClickAddField"
+                  v-if="props?.item?.data?.has_fields_management">
+                  <template #icon>
+                    <tags-outlined />
+                  </template>{{ props.item?.data?.column_manage_label || $t('base.FieldManagement') }}
+                </a-button>
               </div>
             </a-badge-ribbon>
           </div>
@@ -199,12 +204,6 @@
               @click="onClickAdd"><template #icon>
                 <plus-circle-outlined />
               </template>{{ $t('base.AddRecord') }}</a-button>
-            <a-button type="default" size="small" style="font-size: 80%" @click="onClickAddField"
-              v-if="props?.item?.data?.has_fields_management">
-              <template #icon>
-                <tags-outlined />
-              </template>{{ $t('base.FieldManagement') }}
-            </a-button>
           </div>
         </div>
       </a-form-item>
@@ -485,11 +484,19 @@ const onClickAdd = () => {
     for (let item of props.value?.data?.dataSchema) {
       console.log('item:', typeof (item?.data))
       if (typeof item?.data === 'string') {
-        dataSchema.push({
+        let option = {
           label: item.label,
           value: item.value,
           data: ''
-        })
+        }
+        if (item.defect_type_label) {
+          option.defect_type_label = item.defect_type_label
+        }
+        if (item.defect_count_label) {
+          option.defect_count_label = item.defect_count_label
+        }
+
+        dataSchema.push(option)
       } else {
         dataSchema.push({
           label: item.label,

@@ -354,6 +354,7 @@
         "pleaseSetFieldValue": "请填写{label}",
         "FoundDefects": "发现缺陷",
         "AllowDefects": "允许缺陷",
-        "DisplayAsTable": "显示为表格"
+        "DisplayAsTable": "显示为表格",
+        "ColumnManageLabel": "字段管理标签名称"
     }
 }

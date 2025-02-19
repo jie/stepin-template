@@ -272,19 +272,19 @@
                 <a-form-item name="AQL_CR" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_CR')}), validator: validateRequired }]" :label="$t('base.AQL_CR')">
                   <a-select v-model:value="store.formState['AQL_CR']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <div>{{ store.defectsAllowedMap['AQL_CR'] }}</div>
+                <!-- <div>{{ store.defectsAllowedMap['AQL_CR'] }}</div> -->
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MAJ" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MAJ')}), validator: validateRequired }]" :label="$t('base.AQL_MAJ')">
                   <a-select v-model:value="store.formState['AQL_MAJ']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <div>{{ store.defectsAllowedMap['AQL_MAJ'] }}</div>
+                <!-- <div>{{ store.defectsAllowedMap['AQL_MAJ'] }}</div> -->
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MIN" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MIN')}), validator: validateRequired }]" :label="$t('base.AQL_MIN')">
                   <a-select v-model:value="store.formState['AQL_MIN']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <div>{{ store.defectsAllowedMap['AQL_MIN'] }}</div>
+                <!-- <div>{{ store.defectsAllowedMap['AQL_MIN'] }}</div> -->
               </a-col>
             </a-row>
           </div>
@@ -299,7 +299,8 @@
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReInspectionType">
-            <a-form-item name="ReInspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReInspectionType')}), validator: validateRequired }]" :label="$t('base.ReInspectionType')">
+            <!-- <a-form-item name="ReInspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReInspectionType')}), validator: validateRequired }]" :label="$t('base.ReInspectionType')"> -->
+            <a-form-item name="ReInspectionType" :label="$t('base.ReInspectionType')">
               <a-radio-group v-model:value="store.formState['ReInspectionType']" allowClear>
                 <a-radio value="1ST">1ST</a-radio>
                 <a-radio value="2ST">2ST</a-radio>
