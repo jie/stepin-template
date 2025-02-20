@@ -7,7 +7,7 @@
         <div>
           <div :id="`status-null-${props.item.key}`">
             <a-form-item :label="$t('base.InspectResult')" :name="`status-null-${props.item.key}`"
-              v-if="conclusionItemRef?.hasRemarks || props?.item?.data?.auto_result"
+              v-if="(conclusionItemRef?.hasRemarks || props?.item?.data?.auto_result) && props?.item?.data?.set_records_result"
               :rules="[{ required: true, message: $t('base.pleaseSelectInspectResult'), validator: validateRequired, trigger: 'change' }]">
               <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
@@ -41,7 +41,7 @@
                   :pagination="false" />
               </div>
             </a-form-item>
-            <a-form-item :label="$t('base.Remark')" name="remark" v-if="conclusionItemRef?.hasRemarks">
+            <a-form-item :label="$t('base.Remark')" name="remark" v-if="conclusionItemRef?.hasRemarks && props?.item?.data?.set_records_result">
               <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
             </a-form-item>
           </div>
@@ -378,10 +378,8 @@ const autoUpdateDefectsResult = () => {
     }
   }
   for (let record of itemData.dataRecords) {
-    console.log('record:', toRaw(record))
     for (let field of record) {
       if (field.value == 'remark') {
-        console.log('field:', toRaw(field))
         if (field.defect_type && field.defect_count) {
           defectsResult[field.defect_type]['found'] += field.defect_count
         }
@@ -390,16 +388,13 @@ const autoUpdateDefectsResult = () => {
 
     }
   }
-  console.log('defectsResult:', toRaw(defectsResult))
   for (let key in defectsResult) {
-    console.log('key:', key)
     if (defectsResult[key]['found'] > defectsResult[key]['allowed']) {
       defectsResult[key]['status'] = 'NotConform'
     } else {
       defectsResult[key]['status'] = 'Conform'
     }
   }
-  console.log('defectsResult:', defectsResult)
   itemData.defectsResult = defectsResult
   let allDefectStatus = Object.values(defectsResult).map(c => c.status)
   if (allDefectStatus.includes('NotConform')) {
@@ -442,11 +437,7 @@ const validateImagesField = (imageFieldId) => {
 };
 
 const validateRequired = (rule, value, callback) => {
-  console.log('validateRequired rule:', toRaw(rule))
-  console.log('validateRequired value:', toRaw(value))
-  console.log('validateRequired callback:', toRaw(callback))
   let [fieldType, index, key] = rule.field.split('-')
-  console.log('fieldType:', fieldType, ', index:', index, ', key:', key)
   let result = true
   if (index === 'null') {
     if (statusForm.status === '') {
@@ -594,12 +585,13 @@ const onClickDeleteRecord = (index: number) => {
     title: i18n.global.t('base.Delete'),
     content: i18n.global.t('base.Delete'),
     zIndex: 1001,
-    getContainer: () => document.body,
+    getContainer: () => document.body ,
     onOk() {
-      itemData.dataRecords.splice(index, 1)
-      emits('update:value', exportValue())
+      // itemData.dataRecords.splice(index, 1)
+      // emits('update:value', exportValue())
     },
     onCancel() {
+      console.log('Cancel  button clicked'); 
     },
   });
 }

@@ -13,6 +13,9 @@
           <a-form-item :label="$t('base.AutoGetResult')" name="auto_result">
             <a-switch v-model:checked="itemData.auto_result" />
           </a-form-item>
+          <a-form-item :label="$t('base.SetRecordsResult')" name="set_records_result">
+            <a-switch v-model:checked="itemData.set_records_result" />
+          </a-form-item>
           <a-form-item :label="$t('base.DisplayAsTable')" name="display_as_table">
             <a-switch v-model:checked="itemData.display_as_table" />
           </a-form-item>
@@ -23,7 +26,7 @@
             <a-input v-model:value="itemData.sample_size_label" style="width: 100%;" allow-clear></a-input>
           </a-form-item>
           <a-form-item :label="$t('base.ColumnManageLabel')" name="column_manage_label">
-            <a-input v-model:value="itemData.column_manage_label"> style="width: 100%;" allow-clear></a-input>
+            <a-input v-model:value="itemData.column_manage_label" style="width: 100%;" allow-clear></a-input>
           </a-form-item>
           <a-form-item :label="$t('base.InspectResultLabel')" name="inspect_result_label">
             <a-input v-model:value="itemData.inspect_result_label" style="width: 100%;" allow-clear></a-input>
@@ -154,6 +157,7 @@ const itemData = ref({
   column_manage_label: "Columns Manage",
   has_fields_management: true,
   auto_result: false,
+  set_records_result: true,
   display_as_table: false
 })
 
@@ -284,8 +288,9 @@ const initializeData = (item: any) => {
     itemData.value.images_label = item.data.images_label || 'Images'
     itemData.value.defect_type_label = item.data.defect_type_label || 'Defect Type'
     itemData.value.take_photo_label = item.data.take_photo_label || 'Upload / Take Photo'
-    itemData.value.has_fields_management = item.data.has_fields_management || true
+    itemData.value.has_fields_management = item.data.has_fields_management
     itemData.value.auto_result = item.data.auto_result || false
+    itemData.value.set_records_result = item.data.set_records_result
     itemData.value.display_as_table = item.data.display_as_table || false
   } else {
     itemData.value.conclusion_key = ''
@@ -300,6 +305,8 @@ const initializeData = (item: any) => {
     itemData.value.defect_type_label = 'Defect Type'
     itemData.value.take_photo_label = 'Upload / Take Photo'
     itemData.value.has_fields_management = true
+    itemData.value.auto_result = false
+    itemData.value.set_records_result = true
     itemData.value.display_as_table = false
   }
 }
