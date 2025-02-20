@@ -355,6 +355,7 @@
         "FoundDefects": "Found Defects",
         "AllowDefects": "Allow Defects",
         "DisplayAsTable": "Display As Table",
-        "ColumnManageLabel": "Column Manage Label"
+        "ColumnManageLabel": "Column Manage Label",
+        "SetRecordsResult": "Set Records Result"
     }
 }
