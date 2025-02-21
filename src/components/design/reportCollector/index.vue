@@ -587,8 +587,8 @@ const onClickDeleteRecord = (index: number) => {
     zIndex: 1001,
     getContainer: () => document.body ,
     onOk() {
-      // itemData.dataRecords.splice(index, 1)
-      // emits('update:value', exportValue())
+      itemData.dataRecords.splice(index, 1)
+      emits('update:value', exportValue())
     },
     onCancel() {
       console.log('Cancel  button clicked'); 
