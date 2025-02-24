@@ -138,7 +138,9 @@
                           <a-row type="flex" :gutter="[16, 16]">
                             <a-col v-for="item in field.data" :key="item.url" :span="8">
                               <div style="width: 100%; aspect-ratio: 1 / 1;">
-                                <a-image :src="item.url"
+                                <a-image :src="item.url" v-if="item.url && !item.url.endsWith('.mp4')"
+                                  style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
+                                <video :src="item.url" controls v-else
                                   style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
                                 <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
                                 <div class="flex pt-2" style="justify-content: space-around;" v-if="!readonlyRef">
