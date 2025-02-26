@@ -10,6 +10,32 @@
           <a-form-item :label="$t('base.HasFieldsManagement')" name="has_fields_management">
             <a-switch v-model:checked="itemData.has_fields_management" />
           </a-form-item>
+
+          <a-form-item :label="$t('base.hasStatus')" name="hasStatus">
+            <a-switch v-model:checked="itemData.hasStatus" />
+          </a-form-item>
+          <a-form-item :label="$t('base.hasRemarks')" name="hasRemarks">
+            <a-switch v-model:checked="itemData.hasRemarks" />
+          </a-form-item>
+          <a-form-item :label="$t('base.hasItemStatus')" name="hasItemStatus">
+            <a-switch v-model:checked="itemData.hasItemStatus" />
+          </a-form-item>
+          <a-form-item :label="$t('base.hasItemRemarks')" name="hasItemRemarks">
+            <a-switch v-model:checked="itemData.hasItemRemarks" />
+          </a-form-item>
+          <a-form-item :label="$t('base.hasImages')" name="hasImages">
+            <a-switch v-model:checked="itemData.hasImages" />
+          </a-form-item>
+          <a-form-item :label="$t('base.isDefect')" name="isDefect">
+            <a-switch v-model:checked="itemData.isDefect" />
+          </a-form-item>
+          <a-form-item :label="$t('base.hasItemNumber')" name="hasItemNumber">
+            <a-switch v-model:checked="itemData.hasItemNumber" />
+          </a-form-item>
+          <a-form-item :label="$t('base.hasSampleSize')" name="hasSampleSize">
+            <a-switch v-model:checked="itemData.hasSampleSize" />
+          </a-form-item>
+
           <a-form-item :label="$t('base.AutoGetResult')" name="auto_result">
             <a-switch v-model:checked="itemData.auto_result" />
           </a-form-item>
@@ -59,6 +85,22 @@
               </a-select-option>
             </a-select>
           </a-form-item>
+          <a-form-item :label="$t('base.SampleSizeItemKey')" name="sample_size_item_key">
+            <a-select v-model:value="itemData.sample_size_item_key" style="width: 100%;" allow-clear>
+              <a-select-option v-for="item in reportTemplateStore.reportTemplate.items.filter(c => c.type == 'collector')"
+                :key="item.key" :value="item.key">
+                {{ item.title }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item :label="$t('base.SampleSizeItemField')" name="sample_size_item_field"
+            v-if="itemData.sample_size_item_key">
+            <a-select v-model:value="itemData.sample_size_item_field" style="width: 100%;" allow-clear>
+              <a-select-option v-for="item in computedSampleSizeItemFields" :key="item.value" :value="item.value">
+                {{ item.label }} / {{ item.value }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
           <a-form-item :label="$t('base.CollectorFields')" name="fields">
             <div>
               <a-tree-select v-model:value="currentFieldValue" show-search style="width: 100%" @change="onChangeField"
@@ -104,12 +146,15 @@
         <a-form-item :label="$t('base.Value')" name="value">
           <a-input v-model:value="fieldFormData.value"></a-input>
         </a-form-item>
+        <a-form-item :label="$t('base.IsRequire')" name="required">
+          <a-switch v-model:checked="fieldFormData.required" />
+        </a-form-item>
       </a-form>
     </a-modal>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, toRaw } from "vue"
+import { computed, ref, toRaw } from "vue"
 import BaseForm from "../base_editor.vue"
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { updateNodeLabel, findNodeLabel, deleteNode, moveUpNode, moveDownNode } from "@/utils/helpers"
@@ -137,15 +182,22 @@ const conclustionComponentRecords = ref([])
 const fieldFormData = ref({
   label: '',
   value: '',
+  required: false,
   children: []
 })
 
+
+const computedSampleSizeItemFields = computed(() => {
+  return reportTemplateStore.reportTemplate.items?.find(c => c.key == itemData.value.sample_size_item_key)?.data?.fields || []
+})
 
 
 const baseForm = ref(null)
 const itemData = ref({
   conclusion_key: '',
   conclusion_item_key: '',
+  sample_size_item_key: '',
+  sample_size_item_field: '',
   fields: [],
   item_number_label: 'Item No.',
   sample_size_label: 'Sample Size',
@@ -158,7 +210,15 @@ const itemData = ref({
   has_fields_management: true,
   auto_result: false,
   set_records_result: true,
-  display_as_table: false
+  display_as_table: false,
+  hasStatus: true,
+  hasImages: true,
+  hasRemarks: true,
+  isDefect: false,
+  hasItemNumber: true,
+  hasSampleSize: true,
+  hasItemStatus: true,
+  hasItemRemarks: true
 })
 
 const onChangeConclusionComponent = () => {
@@ -197,6 +257,7 @@ const onClickAddField = () => {
   fieldFormData.value = {
     label: '',
     value: '',
+    required: false,
     children: []
   }
   isShowFieldDialogRef.value = true
@@ -210,6 +271,7 @@ const onClickAddChild = () => {
   fieldFormData.value = {
     label: '',
     value: '',
+    required: false,
     children: []
   }
 
@@ -225,6 +287,7 @@ const onClickEditField = () => {
   let targetNode = newJsonObject(node)
   fieldFormData.value.label = targetNode.label
   fieldFormData.value.value = targetNode.value
+  fieldFormData.value.required = targetNode.required
   isShowFieldDialogRef.value = true
 }
 
@@ -279,6 +342,8 @@ const initializeData = (item: any) => {
   if (item.data) {
     itemData.value.conclusion_key = item.data.conclusion_key || ''
     itemData.value.conclusion_item_key = item.data.conclusion_item_key || ''
+    itemData.value.sample_size_item_key = item.data.sample_size_item_key || ''
+    itemData.value.sample_size_item_field = item.data.sample_size_item_field || ''
     itemData.value.fields = item.data.fields || []
     itemData.value.column_manage_label = "Columns Manage"
     itemData.value.item_number_label = item.data.item_number_label || 'Item No.'
@@ -292,9 +357,19 @@ const initializeData = (item: any) => {
     itemData.value.auto_result = item.data.auto_result || false
     itemData.value.set_records_result = item.data.set_records_result
     itemData.value.display_as_table = item.data.display_as_table || false
+    itemData.value.hasStatus = item.data.hasStatus ? true : false
+    itemData.value.hasImages = item.data.hasImages ? true : false
+    itemData.value.hasRemarks = item.data.hasRemarks ? true : false
+    itemData.value.isDefect = item.data.isDefect ? true : false
+    itemData.value.hasItemNumber = item.data.hasItemNumber ? true : false
+    itemData.value.hasSampleSize = item.data.hasSampleSize ? true : false
+    itemData.value.hasItemStatus = item.data.hasItemStatus ? true : false
+    itemData.value.hasItemRemarks = item.data.hasItemRemarks ? true : false
   } else {
     itemData.value.conclusion_key = ''
     itemData.value.conclusion_item_key = ''
+    itemData.value.sample_size_item_key = ''
+    itemData.value.sample_size_item_field = ''
     itemData.value.fields = []
     itemData.value.column_manage_label = "Columns Manage"
     itemData.value.item_number_label = 'Item No.'
@@ -308,11 +383,19 @@ const initializeData = (item: any) => {
     itemData.value.auto_result = false
     itemData.value.set_records_result = true
     itemData.value.display_as_table = false
+    itemData.value.hasStatus = true
+    itemData.value.hasImages = true
+    itemData.value.hasRemarks = true
+    itemData.value.isDefect = false
+    itemData.value.hasItemNumber = true
+    itemData.value.hasSampleSize = true
+    itemData.value.hasItemStatus = true
+    itemData.value.hasItemRemarks = true
   }
 }
 const exportData = () => {
-    let baseData = baseForm.value.exportData()
-    return {...baseData, data: {...itemData.value}}
+  let baseData = baseForm.value.exportData()
+  return { ...baseData, data: { ...itemData.value } }
 }
 
 defineExpose({

@@ -227,7 +227,6 @@
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
             <a-form-item name="ItemNumber" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ItemNumber')}), validator: validateRequired }]" :label="$t('base.ItemNumber')">
-              <!-- <a-textarea v-model:value="store.formState['ItemNumber']" allowClear></a-textarea> -->
               <a-select v-model:value="store.formState['ItemNumber']" mode="tags" style="width: 100%"></a-select>
             </a-form-item>
           </div>
@@ -255,38 +254,32 @@
               <a-input v-model:value="store.formState['OrderQuantity']" allowClear></a-input>
             </a-form-item>
           </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.SampleSizeTotal">
-            <a-form-item name="SampleSizeTotal" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSizeTotal')}), validator: validateRequired }]" :label="$t('base.SampleSizeTotal')">
-              <a-input v-model:value="store.formState['SampleSizeTotal']" allowClear></a-input>
-            </a-form-item>
-          </div>
-          <div class="component meta" v-if="store.report?.template?.settings?.SampleSize">
-            <a-form-item name="SampleSize" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSize')}), validator: validateRequired }]" :label="$t('base.SampleSize')">
-              <a-input-number v-model:value="store.formState['SampleSize']" style="width: 100%;"
-                allowClear></a-input-number>
-            </a-form-item>
-          </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
             <a-row style="width: 100%" :gutter="[16, 16]">
               <a-col :span="8">
                 <a-form-item name="AQL_CR" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_CR')}), validator: validateRequired }]" :label="$t('base.AQL_CR')">
-                  <a-select v-model:value="store.formState['AQL_CR']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
+                  <a-select v-model:value="store.formState['AQL_CR']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <!-- <div>{{ store.defectsAllowedMap['AQL_CR'] }}</div> -->
+                <div>{{ store.defectsAllowedMap['AQL_CR'] }}</div>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MAJ" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MAJ')}), validator: validateRequired }]" :label="$t('base.AQL_MAJ')">
-                  <a-select v-model:value="store.formState['AQL_MAJ']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
+                  <a-select v-model:value="store.formState['AQL_MAJ']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <!-- <div>{{ store.defectsAllowedMap['AQL_MAJ'] }}</div> -->
+                <div>{{ store.defectsAllowedMap['AQL_MAJ'] }}</div>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MIN" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MIN')}), validator: validateRequired }]" :label="$t('base.AQL_MIN')">
-                  <a-select v-model:value="store.formState['AQL_MIN']" :options="store.aqlOptions"  allowClear :getPopupContainer="()=>document.body"></a-select>
+                  <a-select v-model:value="store.formState['AQL_MIN']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <!-- <div>{{ store.defectsAllowedMap['AQL_MIN'] }}</div> -->
+                <div>{{ store.defectsAllowedMap['AQL_MIN'] }}</div>
               </a-col>
             </a-row>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.SampleSizeTotal">
+            <a-form-item name="SampleSizeTotal" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSizeTotal')}), validator: validateRequired }]" :label="$t('base.SampleSizeTotal')">
+              <a-input v-model:value="store.formState['SampleSizeTotal']" allowClear></a-input>
+            </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.InspectionType">
             <a-form-item name="InspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.InspectionType')}), validator: validateRequired }]" :label="$t('base.InspectionType')">
@@ -437,9 +430,9 @@ import { useAccountStore } from '@/store';
 import { Modal } from 'ant-design-vue';
 import { determineStatus } from "@/utils/helpers"
 import { message, Form } from 'ant-design-vue';
-import { aclList, batchSizeData, qualityLimitation, getDefectiveLimitation, getAqlOptions } from '@/utils/sampling';
-const useForm = Form.useForm;
+import { aclList, batchSizeData, qualityLimitation, getDefectiveLimitation, getAqlOptions, getSampleSizeAndAqlLimitation } from '@/utils/sampling';
 import dayjs from 'dayjs';
+const useForm = Form.useForm;
 const route = useRoute()
 const document = window.document
 const store = ReportFillStore()
@@ -1042,66 +1035,28 @@ watchEffect(() => {
 })
 
 
-const updateDefectsAllowed = () => {
-  console.log('updateDefectsAllowed:', toRaw(1111))
-  let OrderQuantity = store.report?.values['OrderQuantity']
-  let AQL_CR = store.report?.values['AQL_CR']
-  let AQL_MAJ = store.report?.values['AQL_MAJ']
-  let AQL_MIN = store.report?.values['AQL_MIN']
-  let InspectLevel = store.report?.values["SpecialInspectionLevel"] || store.report?.values["GeneralInspectionLevel"]
-  if (OrderQuantity === "" || OrderQuantity === undefined || OrderQuantity === null) {
-    return
-  }
-  if (AQL_CR === "" || AQL_CR === undefined || AQL_CR === null) {
-    return
-  }
-  if (AQL_MAJ === "" || AQL_MAJ === undefined || AQL_MAJ === null) {
-    return
-  }
-  if (AQL_MIN === "" || AQL_MIN === undefined || AQL_MIN === null) {
-    return
-  }
-
-  let AQL_CR_result = getDefectiveLimitation(OrderQuantity, AQL_CR, InspectLevel)
-  let AQL_MAJ_result = getDefectiveLimitation(OrderQuantity, AQL_MAJ, InspectLevel)
-  let AQL_MIN_result = getDefectiveLimitation(OrderQuantity, AQL_MIN, InspectLevel)
+const updateAqlValues = () => {
+  let result = getSampleSizeAndAqlLimitation(store.report.values.OrderQuantity, store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel, store.report.values.AQL_CR, store.report.values.AQL_MAJ, store.report.values.AQL_MIN)
   store.defectsAllowedMap = {
-    AQL_CR: AQL_CR_result.allowedSize,
-    AQL_MAJ: AQL_MAJ_result.allowedSize,
-    AQL_MIN: AQL_MIN_result.allowedSize
   }
-  console.log('store.defectsAllowedMap:', toRaw(store.defectsAllowedMap))
-}
-
-const updateAqlOptions = () => {
-  let OrderQuantity = store.report?.values['OrderQuantity']
-  if (OrderQuantity === "" || OrderQuantity === undefined || OrderQuantity === null) {
-    return
-  }
-  let InspectLevel = store.report?.values["SpecialInspectionLevel"] || store.report?.values["GeneralInspectionLevel"]
-  console.log('InspectLevel:', InspectLevel)
-  let result = getAqlOptions(OrderQuantity, InspectLevel)
-  let keys = Object.keys(result.options)
-  let options = []
-  for(let key of keys) {
-    options.push({
-      label: key,
-      value: key
-    })
-  }
-  store.aqlOptions = options
-  store.report.values.SampleSizeTotal = result.sampleSize
+  console.log('updateAqlValues-result:', toRaw(result))
+  if(result.aqlMapping['aql_cr']) {
+    store.defectsAllowedMap.AQL_CR = result.aqlMapping['aql_cr']['aql']
+   }
+   if(result.aqlMapping['aql_maj']) {
+    store.defectsAllowedMap.AQL_MAJ = result.aqlMapping['aql_maj']['aql']
+   }
+   if(result.aqlMapping['aql_min']) {
+    store.defectsAllowedMap.AQL_MIN = result.aqlMapping['aql_min']['aql']
+   }
+   if(result.sampleSizeTotal) {
+    store.formState['SampleSizeTotal'] = result.sampleSizeTotal
+   }
 }
 
 watchEffect(() => {
   if (store.report.values.OrderQuantity && store.report.values.OrderQuantity >= 2 && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
-    updateAqlOptions()
-    store.report.values.AQL_CR = store.aqlOptions[0].value
-  }
-})
-watchEffect(() => {
-  if (store.report.values.OrderQuantity && store.report.values.OrderQuantity >= 2 && store.report.values.AQL_CR && store.report.values.AQL_MAJ && store.report.values.AQL_MIN && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
-    updateDefectsAllowed()
+    updateAqlValues()
   }
 })
 

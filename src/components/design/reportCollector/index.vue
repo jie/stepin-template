@@ -7,7 +7,7 @@
         <div>
           <div :id="`status-null-${props.item.key}`">
             <a-form-item :label="$t('base.InspectResult')" :name="`status-null-${props.item.key}`"
-              v-if="(conclusionItemRef?.hasRemarks || props?.item?.data?.auto_result) && props?.item?.data?.set_records_result"
+              v-if="props?.item?.data?.hasStatus || props?.item?.data?.auto_result"
               :rules="[{ required: true, message: $t('base.pleaseSelectInspectResult'), validator: validateRequired, trigger: 'change' }]">
               <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
@@ -41,7 +41,8 @@
                   :pagination="false" />
               </div>
             </a-form-item>
-            <a-form-item :label="$t('base.Remark')" name="remark" v-if="conclusionItemRef?.hasRemarks && props?.item?.data?.set_records_result">
+            <a-form-item :label="$t('base.Remark')" name="remark" v-if="props?.item?.data?.hasRemarks">
+              {{ props?.item?.data?.hasRemarks }}
               <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
             </a-form-item>
           </div>
@@ -62,6 +63,7 @@
                       <div v-if="!readonlyRef">
                         <a-select v-model:value="field.data" style="width: 100%" mode="tags"
                           :options="store.formState['ItemNumber']?.map(c => ({ 'label': c, 'value': c }))"
+                          @change="onChangeItemNumber(field.data, index)"
                           :getPopupContainer="triggerNode => triggerNode.parentNode" :disabled="readonlyRef"></a-select>
                       </div>
                       <div v-else>
@@ -89,7 +91,7 @@
                     </div>
                     <div class="field" v-else-if="field.value == 'remark'">
                       <div>
-                        <div v-if="conclusionItemRef?.isDefect">
+                        <div v-if="props?.item?.data?.isDefect">
                           <div>
                             <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
                               v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
@@ -316,6 +318,8 @@ const fieldForm = reactive({
   value: '',
 })
 
+const sampleSizeMapper = ref({})
+
 
 const displayTableColumns = computed(() => {
   let columns = []
@@ -356,7 +360,7 @@ const onChangeDefectItem = () => {
 }
 
 const autoUpdateDefectsResult = () => {
-  console.log("autoUpdateDefectsResult:")
+  console.log("autoUpdateDefectsResult:", toRaw(store.defectsAllowedMap))
   if (!conclusionItemRef.value?.isDefect) {
     return
   }
@@ -540,6 +544,27 @@ const onUploadInputChange = async (e: Event) => {
 }
 
 
+const onChangeItemNumber = (itemNumbers: string[], index: number) => {
+  emits('update:value', exportValue())
+  let targetCom = store.report.template?.items?.find(c => c.key === props?.item?.data?.sample_size_item_key)
+  let targetValue = store.formState[props?.item?.data?.sample_size_item_key]
+  sampleSizeMapper.value = {}
+  if (targetCom && targetValue) {
+    let sampleSize = 0
+    for (let itemNumber of itemNumbers) {
+      for (let record of targetValue.data.dataRecords) {
+        let recordItemNumbers = record.find(c => c.value === 'item_number')?.data
+        let recordSampleSize = record.find(c => c.value === 'quantity')?.data
+        if (itemNumber === recordItemNumbers[0] && recordSampleSize) {
+          sampleSize += parseInt(recordSampleSize)
+        }
+      }
+    }
+    itemData.dataRecords[index].find(c => c.value === 'quantity').data = sampleSize
+  }
+
+}
+
 const editImage = (field: any, item: any) => {
   targetEditImageRef.value = item
   setTimeout(() => {
@@ -585,13 +610,13 @@ const onClickDeleteRecord = (index: number) => {
     title: i18n.global.t('base.Delete'),
     content: i18n.global.t('base.Delete'),
     zIndex: 1001,
-    getContainer: () => document.body ,
+    getContainer: () => document.body,
     onOk() {
       itemData.dataRecords.splice(index, 1)
       emits('update:value', exportValue())
     },
     onCancel() {
-      console.log('Cancel  button clicked'); 
+      console.log('Cancel  button clicked');
     },
   });
 }
@@ -601,7 +626,6 @@ const onClickAddField = (index: number) => {
 }
 
 const handleAddFieldOK = () => {
-  console.log('handleAddFieldOK1:', toRaw(itemData))
   for (let record of itemData.dataRecords) {
     let needAdd = true
     for (let field of record) {
@@ -732,62 +756,57 @@ const initialization = () => {
 
   if (!props.value) {
     let sourceItems = []
-    if (conclusionItemRef.value) {
-      if (conclusionItemRef.value?.hasItemNumber) {
-        sourceItems.push({
-          label: props.item?.data?.item_number_label || 'Item No.',
-          value: 'item_number',
-          data: []
-        },)
+    if (props.item?.data?.hasItemNumber) {
+      sourceItems.push({
+        label: props.item?.data?.item_number_label || 'Item No.',
+        value: 'item_number',
+        data: []
+      },)
+    }
+    if (props.item?.data?.hasSampleSize) {
+      sourceItems.push({
+        label: props.item?.data?.sample_size_label || 'Sample Size',
+        value: 'quantity',
+        data: ""
+      })
+    }
+    if (props.item?.data?.hasItemStatus) {
+      sourceItems.push({
+        label: props.item?.data?.inspect_result_label || 'Inspect Result',
+        value: 'status',
+        data: ""
+      })
+    }
+    if (props.item?.data?.hasItemRemarks) {
+      let optionItem = {
+        label: props.item?.data?.remarks_label || 'Remarks',
+        value: 'remark',
+        data: "",
+        defect_id: "",
+        defect_type: "",
+        defect_type_label: "",
+        defect_types: [],
+        defect_count_label: "",
+        defect_count: ""
       }
-      if (conclusionItemRef.value?.hasSampleSize) {
-        sourceItems.push({
-          label: props.item?.data?.sample_size_label || 'Sample Size',
-          value: 'quantity',
-          data: ""
-        })
+      if (props.item?.data?.isDefect) {
+        optionItem.defect_type_label = props.item?.data?.defect_type_label || 'Defect Type'
+        optionItem.defect_types = []
+        optionItem.defect_count_label = props.item?.data?.defect_count_label || 'Defects Count'
+        optionItem.defect_count = ""
       }
-      if (conclusionItemRef.value?.hasStatus && !props?.item?.data?.auto_result) {
-        sourceItems.push({
-          label: props.item?.data?.inspect_result_label || 'Inspect Result',
-          value: 'status',
-          data: ""
-        })
-      }
-      if (conclusionItemRef.value?.hasRemarks) {
-        let optionItem = {
-          label: props.item?.data?.remarks_label || 'Remarks',
-          value: 'remark',
-          data: "",
-          defect_id: "",
-          defect_type: "",
-          defect_type_label: "",
-          defect_types: [],
-          defect_count_label: "",
-          defect_count: ""
-        }
-        if (conclusionItemRef.value?.isDefect) {
-          optionItem.defect_type_label = props.item?.data?.defect_type_label || 'Defect Type'
-          optionItem.defect_types = []
-          optionItem.defect_count_label = props.item?.data?.defect_count_label || 'Defects Count'
-          optionItem.defect_count = ""
-        }
-        sourceItems.push(optionItem)
-      }
-      if (conclusionItemRef.value?.hasImages) {
-        sourceItems.push({
-          label: props.item?.data?.images_label || 'Images',
-          value: 'images',
-          data: []
-        })
-      }
+      sourceItems.push(optionItem)
+    }
+    if (props.item?.data?.hasImages) {
+      sourceItems.push({
+        label: props.item?.data?.images_label || 'Images',
+        value: 'images',
+        data: []
+      })
     }
 
     if (itemData?.fields && itemData?.fields.length > 0) {
       let nodes = findLeafNode(itemData?.fields)
-      // if(props?.item?.data?.auto_result) {
-      //   nodes = findLeafNode(itemData?.fields.filter(c => c.value !== 'status'))  
-      // }
       itemData.dataSchema = newJsonObject([...sourceItems, ...nodes])
       itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
     } else {
@@ -802,9 +821,6 @@ const initialization = () => {
     } else {
       if (props.value?.data?.fields && props.value?.data?.fields.length > 0) {
         let nodes = findLeafNode(props.value?.data?.fields)
-        // if(props?.item?.data?.auto_result) {
-        //   nodes = findLeafNode(itemData?.fields.filter(c => c.value !== 'status'))  
-        // }
         itemData.dataSchema = newJsonObject([...nodes])
         itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
       } else {
@@ -813,7 +829,6 @@ const initialization = () => {
       }
     }
   }
-  // emits('updateCollector', props.item)
 }
 
 initialization()

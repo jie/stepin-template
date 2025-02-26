@@ -15,11 +15,20 @@ import Spin from "@/components/spin/index.vue"
 import { useRouter, useRoute } from "vue-router"
 import { reportDatabase } from "@/hook/dexie_hook"
 import dayjs from "dayjs"
+import { i18n } from '@/lang/i18n';
 const router = useRouter()
 const route = useRoute()
 const designerRef = ref(null)
 const store = ReportFillStore()
 const hasPermissionRef = ref(false)
+
+
+const changeLocale = (lang) => {
+    i18n.global.locale = lang
+    dayjs.locale(lang);
+    localStorage.setItem('locale', lang);
+}
+
 
 const initialize = async () => {
   store.loading = true
@@ -36,7 +45,9 @@ const initialize = async () => {
   //   console.log('**report:', toRaw(store.report))
   //   store.loading = false
   // }
-
+  if (route.query.lang) {
+        changeLocale(route.query.lang)
+    }
   await store.apiQueryDefectByReportId(route.params.reportId)
   await store.apiGet(route.params.reportId)
     console.log('**report:', toRaw(store.report))

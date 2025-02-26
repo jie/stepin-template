@@ -132,7 +132,7 @@
         "EditRow": "Edit Row",
         "ReportNumber": "Report Number",
         "OrderQuantity": "Order Quantity",
-        "SampleSizeTotal": "Sample Count",
+        "SampleSizeTotal": "Sample Size Total",
         "Applicant": "Applicant",
         "Supplier": "Supplier",
         "Factory": "Factory",
@@ -356,6 +356,10 @@
         "AllowDefects": "Allow Defects",
         "DisplayAsTable": "Display As Table",
         "ColumnManageLabel": "Column Manage Label",
-        "SetRecordsResult": "Set Records Result"
+        "SetRecordsResult": "Set Records Result",
+        "hasRemark": "Has Remarks",
+        "hasItemStatus": "Has Item Status",
+        "hasItemRemarks": "Has Item Remarks",
+        "isDefect": "Is Defect"
     }
 }
