@@ -360,6 +360,9 @@
         "hasRemark": "Has Remarks",
         "hasItemStatus": "Has Item Status",
         "hasItemRemarks": "Has Item Remarks",
-        "isDefect": "Is Defect"
+        "isDefect": "Is Defect",
+        "showFieldsAtStart": "Show Fields At Start",
+        "SampleSizeItemKey": "Sample Size Component Key",
+        "SampleSizeItemField": "Sample Size Component Field"
     }
 }

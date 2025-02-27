@@ -42,7 +42,6 @@
               </div>
             </a-form-item>
             <a-form-item :label="$t('base.Remark')" name="remark" v-if="props?.item?.data?.hasRemarks">
-              {{ props?.item?.data?.hasRemarks }}
               <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
             </a-form-item>
           </div>
@@ -52,13 +51,20 @@
             <a-table bordered :columns="displayTableColumns" :dataSource="displayTableSource" :pagination="false"
               :scroll="{ x: 1024 }" />
           </div>
+
           <div class="records">
+            <div v-if="!readonlyRef" class="mb-4">
+              <a-button type="primary" size="small" style="font-size: 80%; margin-right: 10px;"
+                @click="onClickAdd"><template #icon>
+                  <plus-circle-outlined />
+                </template>{{ $t('base.AddRecord') }}</a-button>
+            </div>
             <a-badge-ribbon placement="start" :text="index + 1" :color="getStatusLabelColor(record)"
               v-for="(record, index) in itemData.dataRecords">
               <div class="record">
                 <div class="record-fields" v-for="field in record" :id="`${field.value}-${index}-${props.item.key}`">
                   <a-form-item :label="field.label" :name="`${field.value}-${index}-${props.item.key}`"
-                    :rules="[{ required: true, message: $t('base.pleaseSetFieldValue', { 'label': field.label }), validator: validateRequired, trigger: 'change' }]">
+                    :rules="[{ required: isFieldRequire(field.value), message: $t('base.pleaseSetFieldValue', { 'label': field.label }), validator: validateRequired, trigger: 'change' }]">
                     <div class="field" v-if="field.value == 'item_number'">
                       <div v-if="!readonlyRef">
                         <a-select v-model:value="field.data" style="width: 100%" mode="tags"
@@ -201,12 +207,6 @@
               </div>
             </a-badge-ribbon>
           </div>
-          <div v-if="!readonlyRef">
-            <a-button type="primary" size="small" style="font-size: 80%; margin-right: 10px;"
-              @click="onClickAdd"><template #icon>
-                <plus-circle-outlined />
-              </template>{{ $t('base.AddRecord') }}</a-button>
-          </div>
         </div>
       </a-form-item>
       <div v-if="props?.item?.hasRemark" style="margin-top:10px;">
@@ -318,8 +318,15 @@ const fieldForm = reactive({
   value: '',
 })
 
-const sampleSizeMapper = ref({})
 
+const isFieldRequire = (fieldType) => {
+  if (fieldType === 'remark' || fieldType === 'images') {
+    return false
+  } else if (itemData.dataExtraFields.includes(fieldType)) {
+    return false
+  }
+  return true
+}
 
 const displayTableColumns = computed(() => {
   let columns = []
@@ -548,7 +555,6 @@ const onChangeItemNumber = (itemNumbers: string[], index: number) => {
   emits('update:value', exportValue())
   let targetCom = store.report.template?.items?.find(c => c.key === props?.item?.data?.sample_size_item_key)
   let targetValue = store.formState[props?.item?.data?.sample_size_item_key]
-  sampleSizeMapper.value = {}
   if (targetCom && targetValue) {
     let sampleSize = 0
     for (let itemNumber of itemNumbers) {
@@ -808,10 +814,14 @@ const initialization = () => {
     if (itemData?.fields && itemData?.fields.length > 0) {
       let nodes = findLeafNode(itemData?.fields)
       itemData.dataSchema = newJsonObject([...sourceItems, ...nodes])
-      itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      if (props?.item?.data?.showFieldsAtStart) {
+        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      }
     } else {
       itemData.dataSchema = newJsonObject([...sourceItems])
-      itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      if (props?.item?.data?.showFieldsAtStart) {
+        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+      }
     }
   } else {
     if (props.value?.data?.dataRecords && props.value?.data?.dataRecords.length > 0) {
