@@ -260,19 +260,16 @@
                 <a-form-item name="AQL_CR" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_CR')}), validator: validateRequired }]" :label="$t('base.AQL_CR')">
                   <a-select v-model:value="store.formState['AQL_CR']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <div>{{ store.defectsAllowedMap['AQL_CR'] }}</div>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MAJ" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MAJ')}), validator: validateRequired }]" :label="$t('base.AQL_MAJ')">
                   <a-select v-model:value="store.formState['AQL_MAJ']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <div>{{ store.defectsAllowedMap['AQL_MAJ'] }}</div>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MIN" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MIN')}), validator: validateRequired }]" :label="$t('base.AQL_MIN')">
                   <a-select v-model:value="store.formState['AQL_MIN']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
                 </a-form-item>
-                <div>{{ store.defectsAllowedMap['AQL_MIN'] }}</div>
               </a-col>
             </a-row>
           </div>
