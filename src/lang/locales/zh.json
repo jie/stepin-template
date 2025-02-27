@@ -356,6 +356,13 @@
         "AllowDefects": "允许缺陷",
         "DisplayAsTable": "显示为表格",
         "ColumnManageLabel": "字段管理标签名称",
-        "SetRecordsResult": "设置采集总结论"
+        "SetRecordsResult": "设置采集总结论",
+        "hasRemark": "需要备注",
+        "hasItemStatus": "需要记录状态",
+        "hasItemRemarks": "需要记录备注",
+        "isDefect": "是否为缺陷",
+        "showFieldsAtStart": "未填写时展示字段",
+        "SampleSizeItemKey": "样本数量关联组件",
+        "SampleSizeItemField": "样本数量关联字段"
     }
 }

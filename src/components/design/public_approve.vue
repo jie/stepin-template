@@ -193,7 +193,6 @@
                     </span><span class="result-opt-face">{{ $t('base.ResultFailed') }}</span>
                   </div>
                 </div>
-
               </span>
             </div>
           </a-col>
@@ -510,6 +509,7 @@ const refresh = async (data: any) => {
       store.formState["DateOfInspection"] = dayjs(store.report.values["DateOfInspection"])
     }
     store.formState["ArrivalTime"] = ""
+    console.log('ArrivalTime:', store.report.values["ArrivalTime"])
     if (store.report.values["ArrivalTime"]) {
       store.formState["ArrivalTime"] = dayjs(store.report.values["ArrivalTime"])
     }
@@ -595,7 +595,7 @@ const generateInspectDetailRows = () => {
         key: key,
         value: formatDate(store.formState[key])
       })
-    } else if (datetimeKeys.includes(key)) {
+    } else if (datetimeKeys.includes(key) && store.formState[key]) {
       row.push({
         key: key,
         value: formatDatetime(store.formState[key])
