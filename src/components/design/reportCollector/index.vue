@@ -9,7 +9,7 @@
             <a-form-item :label="$t('base.InspectResult')" :name="`status-null-${props.item.key}`"
               v-if="props?.item?.data?.hasStatus || props?.item?.data?.auto_result"
               :rules="[{ required: true, message: $t('base.pleaseSelectInspectResult'), validator: validateRequired, trigger: 'change' }]">
-              <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
+              <a-radio-group size="small" v-model:value="itemData.statusData.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
                 <a-radio-button style="font-size: 12px"
                   v-for="option in [{ 'label': 'PASS', 'value': 'conformed' }, { 'label': 'FAIL', 'value': 'not_conformed' }]"
@@ -17,7 +17,7 @@
                     option.label
                   }}</a-radio-button>
               </a-radio-group>
-              <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid"
+              <a-radio-group size="small" v-model:value="itemData.statusData.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-else>
                 <a-radio-button style="font-size: 12px" v-for="option in conclusionRef?.data?.options"
                   :value="option.value">{{
@@ -42,7 +42,8 @@
               </div>
             </a-form-item>
             <a-form-item :label="$t('base.Remark')" name="remark" v-if="props?.item?.data?.hasRemarks">
-              <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="statusForm.remark"></a-textarea>
+              <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="itemData.statusData.remark"
+                @change="onChange"></a-textarea>
             </a-form-item>
           </div>
           <div
@@ -194,7 +195,7 @@
                 </div>
                 <div class="delete-record">
                   <a-button size="small" style="font-size: 80%;" type="text" @click="onClickDeleteRecord(index)"
-                    v-if="index > 0">
+                    v-if="index != 0">
                     <template #icon>
                       <delete-outlined />
                     </template>
@@ -265,8 +266,8 @@ import BaseSlot from "../base_slot.vue"
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { defineProps, ref, PropType, reactive, toRaw, watch, defineEmits, computed } from 'vue'
 import Icon, { CheckSquareOutlined, CloseCircleFilled, EditOutlined } from '@ant-design/icons-vue';
-import { MessageOutlined } from '@ant-design/icons-vue';
-import { MessageOutlinedIconType } from "@ant-design/icons-vue/lib/icons/MessageOutlined";
+// import { MessageOutlined } from '@ant-design/icons-vue';
+// import { MessageOutlinedIconType } from "@ant-design/icons-vue/lib/icons/MessageOutlined";
 import { findLeafNode, newJsonObject } from '@/utils/helpers'
 import { ossUploadFiles } from "@/store/uploader"
 import { message, Modal } from "ant-design-vue";
@@ -274,8 +275,6 @@ import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor, determineStatus } from "@/utils/helpers"
-import { batchSizeData, qualityLimitation, aclList } from "@/utils/sampling"
-import { find } from "lodash";
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -309,11 +308,11 @@ const itemData = reactive({
   dataRecords: [],
   dataExtraFields: [],
   fields: [],
-  defectsResult: {}
-})
-const statusForm = reactive({
-  status: '',
-  remark: ''
+  defectsResult: {},
+  statusData: {
+    status: '',
+    remark: ''
+  }
 })
 const fieldForm = reactive({
   label: '',
@@ -326,7 +325,7 @@ const isFieldRequire = (field) => {
     return false
   } else if (itemData.dataExtraFields.includes(field.type)) {
     return false
-  } else if(field.required) {
+  } else if (field.required) {
     return true
   }
   return false
@@ -335,25 +334,25 @@ const isFieldRequire = (field) => {
 const regex = /\s*\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))*)\)\s*$/;
 
 function transformFields(items) {
-  return items.map(item  => {
+  return items.map(item => {
     const transformed = {
       title: item.label.replace(regex, ''),
-      dataIndex: item.value, 
-      key: item.value, 
-      required: item.required  
+      dataIndex: item.value,
+      key: item.value,
+      required: item.required
     };
- 
-    if (item.children?.length)  {
-      transformed.children  = transformFields(item.children); 
+
+    if (item.children?.length) {
+      transformed.children = transformFields(item.children);
     }
- 
-    return Object.fromEntries( 
-      Object.entries(transformed).filter(([_,  v]) => v !== undefined)
+
+    return Object.fromEntries(
+      Object.entries(transformed).filter(([_, v]) => v !== undefined)
     );
   });
 }
 const displayTableColumns = computed(() => {
-  return transformFields(props.item?.data?.fields);
+  return transformFields([...props.item?.data?.fields, ...itemData.dataExtraFields.map(c => ({ label: c, value: c, required: false }))]);
 })
 
 const displayTableSource = computed(() => {
@@ -423,9 +422,9 @@ const autoUpdateDefectsResult = () => {
   itemData.defectsResult = defectsResult
   let allDefectStatus = Object.values(defectsResult).map(c => c.status)
   if (allDefectStatus.includes('NotConform')) {
-    statusForm.status = 'NotConform'
+    itemData.statusData.status = 'NotConform'
   } else {
-    statusForm.status = 'Conform'
+    itemData.statusData.status = 'Conform'
   }
 }
 
@@ -442,8 +441,8 @@ const onChangeStatus = (e) => {
       status: item.find(c => c.value === 'status')?.data
     }
   })
-  statusForm.status = determineStatus(statuesRecords)
-  console.log('statusForm.status:', statusForm.status)
+  itemData.statusData.status = determineStatus(statuesRecords)
+  console.log('itemData.statusData.status:', itemData.statusData.status)
   emits('update:value', exportValue())
   emits('updateCollector', props.item)
   // emits('clearFieldError', e.target.id.replace('form_item_', ''))
@@ -452,7 +451,7 @@ const onChangeStatus = (e) => {
 const onConclusionChangeStatus = (e) => {
   console.log('onConclusionChangeStatus:', toRaw(e))
   if (conclusionItemRef.value) {
-    emits('updateConclusionInspectResult', props.item, statusForm.status, statusForm.remark)
+    emits('updateConclusionInspectResult', props.item, itemData.statusData.status, itemData.statusData.remark)
     // emits('clearFieldError', e.target.id.replace('form_item_', ''))
   }
 }
@@ -465,7 +464,7 @@ const validateRequired = (rule, value, callback) => {
   let [fieldType, index, key] = rule.field.split('-')
   let result = true
   if (index === 'null') {
-    if (statusForm.status === '') {
+    if (itemData.statusData.status === '') {
       result = false
     }
   } else {
@@ -741,6 +740,7 @@ const initialization = () => {
   itemData.dataRecords = props.item?.data?.dataRecords || []
   itemData.fields = props.item?.data?.fields || []
   itemData.dataExtraFields = props.item?.data?.dataExtraFields || []
+  itemData.statusData = props.item?.data?.statusData || { status: '', remark: '' }
   if (props?.item?.data?.conclusion_key) {
     conclusionRef.value = store.report.template?.items?.find(c => c.key === props?.item?.data?.conclusion_key)
     if (props?.item?.data?.conclusion_item_key) {
@@ -748,8 +748,8 @@ const initialization = () => {
       if (store.report?.values && [props?.item?.data?.conclusion_key]?.data?.conclusions && store.report?.values[props?.item?.data?.conclusion_key]?.data?.conclusions?.length != 0) {
         let conclusionItemValue = store.report?.values[props?.item?.data?.conclusion_key]?.data?.conclusions?.find(c => c.key === props?.item?.data?.conclusion_item_key)
         if (conclusionItemValue) {
-          statusForm.status = conclusionItemValue.status || ''
-          statusForm.remark = conclusionItemValue.remark || ''
+          itemData.statusData.status = conclusionItemValue.status || ''
+          itemData.statusData.remark = conclusionItemValue.remark || ''
         }
       }
     } else {
@@ -838,6 +838,7 @@ const initialization = () => {
       }
     }
   } else {
+    itemData.statusData = props.value?.data?.statusData || { status: '', remark: '' }
     if (props.value?.data?.dataRecords && props.value?.data?.dataRecords.length > 0) {
       itemData.dataRecords = props.value?.data?.dataRecords
       itemData.dataSchema = props.value?.data?.dataSchema
@@ -846,10 +847,14 @@ const initialization = () => {
       if (props.value?.data?.fields && props.value?.data?.fields.length > 0) {
         let nodes = findLeafNode(props.value?.data?.fields)
         itemData.dataSchema = newJsonObject([...nodes])
-        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+        if (props?.item?.data?.showFieldsAtStart) {
+          itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+        }
       } else {
         itemData.dataSchema = newJsonObject([])
-        itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+        if (props?.item?.data?.showFieldsAtStart) {
+          itemData.dataRecords = [newJsonObject(itemData.dataSchema)]
+        }
       }
     }
   }
