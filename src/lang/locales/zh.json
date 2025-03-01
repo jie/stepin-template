@@ -363,6 +363,7 @@
         "isDefect": "是否为缺陷",
         "showFieldsAtStart": "未填写时展示字段",
         "SampleSizeItemKey": "样本数量关联组件",
-        "SampleSizeItemField": "样本数量关联字段"
+        "SampleSizeItemField": "样本数量关联字段",
+        "hasAddRecordButton": "显示添加记录按钮"
     }
 }

@@ -363,6 +363,7 @@
         "isDefect": "Is Defect",
         "showFieldsAtStart": "Show Fields At Start",
         "SampleSizeItemKey": "Sample Size Component Key",
-        "SampleSizeItemField": "Sample Size Component Field"
+        "SampleSizeItemField": "Sample Size Component Field",
+        "hasAddRecordButton": "Has Add Record Button"
     }
 }

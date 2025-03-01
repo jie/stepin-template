@@ -13,6 +13,9 @@
           <a-form-item :label="$t('base.showFieldsAtStart')" name="showFieldsAtStart">
             <a-switch v-model:checked="itemData.showFieldsAtStart" />
           </a-form-item>
+          <a-form-item :label="$t('base.hasAddRecordButton')" name="hasAddRecordButton">
+            <a-switch v-model:checked="itemData.hasAddRecordButton" />
+          </a-form-item>
           <a-form-item :label="$t('base.hasStatus')" name="hasStatus">
             <a-switch v-model:checked="itemData.hasStatus" />
           </a-form-item>
@@ -221,7 +224,8 @@ const itemData = ref({
   hasSampleSize: true,
   hasItemStatus: true,
   hasItemRemarks: true,
-  showFieldsAtStart: false
+  showFieldsAtStart: false,
+  hasAddRecordButton: true
 })
 
 const onChangeConclusionComponent = () => {
@@ -369,6 +373,7 @@ const initializeData = (item: any) => {
     itemData.value.hasItemStatus = item.data.hasItemStatus ? true : false
     itemData.value.hasItemRemarks = item.data.hasItemRemarks ? true : false
     itemData.value.showFieldsAtStart = item.data.showFieldsAtStart ? true : false
+    itemData.value.hasAddRecordButton = itemData.value.hasAddRecordButton ? true: false
   } else {
     itemData.value.conclusion_key = ''
     itemData.value.conclusion_item_key = ''
@@ -396,6 +401,7 @@ const initializeData = (item: any) => {
     itemData.value.hasItemStatus = true
     itemData.value.hasItemRemarks = true
     itemData.value.showFieldsAtStart = false
+    itemData.value.hasAddRecordButton = true
   }
 }
 const exportData = () => {
