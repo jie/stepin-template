@@ -853,6 +853,7 @@ const onClickConfirmSaveSingle = async () => {
     return
   }
   try {
+    let values = { [currentEditComponentRef.value.key]: store.formState[currentEditComponentRef.value.key] }
     await store.apiFillSingle({
       id: store.report.id,
       values: { [currentEditComponentRef.value.key]: store.formState[currentEditComponentRef.value.key] },
