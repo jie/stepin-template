@@ -53,7 +53,7 @@
           </div>
 
           <div class="records">
-            <div v-if="!readonlyRef" class="mb-4">
+            <div v-if="!readonlyRef && props.item?.data?.hasAddRecordButton" class="mb-4">
               <a-button type="primary" size="small" style="font-size: 80%; margin-right: 10px;"
                 @click="onClickAdd"><template #icon>
                   <plus-circle-outlined />
@@ -64,7 +64,7 @@
               <div class="record">
                 <div class="record-fields" v-for="field in record" :id="`${field.value}-${index}-${props.item.key}`">
                   <a-form-item :label="field.label" :name="`${field.value}-${index}-${props.item.key}`"
-                    :rules="[{ required: isFieldRequire(field.value), message: $t('base.pleaseSetFieldValue', { 'label': field.label }), validator: validateRequired, trigger: 'change' }]">
+                    :rules="[{ required: isFieldRequire(field), message: $t('base.pleaseSetFieldValue', { 'label': field.label }), validator: validateRequired, trigger: 'change' }]">
                     <div class="field" v-if="field.value == 'item_number'">
                       <div v-if="!readonlyRef">
                         <a-select v-model:value="field.data" style="width: 100%" mode="tags"
@@ -321,27 +321,39 @@ const fieldForm = reactive({
 })
 
 
-const isFieldRequire = (fieldType) => {
-  if (fieldType === 'remark' || fieldType === 'images') {
+const isFieldRequire = (field) => {
+  if (field.type === 'remark' || field.type === 'images') {
     return false
-  } else if (itemData.dataExtraFields.includes(fieldType)) {
+  } else if (itemData.dataExtraFields.includes(field.type)) {
     return false
+  } else if(field.required) {
+    return true
   }
-  return true
+  return false
 }
 
-const displayTableColumns = computed(() => {
-  let columns = []
-  if (itemData.dataSchema && itemData.dataSchema.length > 0) {
-    for (let field of itemData.dataSchema) {
-      columns.push({
-        title: field.label,
-        dataIndex: field.value,
-        key: field.value
-      })
+const regex = /\s*\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))*)\)\s*$/;
+
+function transformFields(items) {
+  return items.map(item  => {
+    const transformed = {
+      title: item.label.replace(regex, ''),
+      dataIndex: item.value, 
+      key: item.value, 
+      required: item.required  
+    };
+ 
+    if (item.children?.length)  {
+      transformed.children  = transformFields(item.children); 
     }
-  }
-  return columns
+ 
+    return Object.fromEntries( 
+      Object.entries(transformed).filter(([_,  v]) => v !== undefined)
+    );
+  });
+}
+const displayTableColumns = computed(() => {
+  return transformFields(props.item?.data?.fields);
 })
 
 const displayTableSource = computed(() => {

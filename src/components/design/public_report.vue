@@ -151,7 +151,9 @@
         @finish="onFinishSubmit" @submit.prevent @finishFailed="onFinishFailed">
         <div v-if="store.report">
           <div class="component meta">
-            <a-form-item name="ReportResult" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReportResult')}), validator: validateRequired }]" :label="$t('base.ReportResult')">
+            <a-form-item name="ReportResult"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ReportResult') }), validator: validateRequired }]"
+              :label="$t('base.ReportResult')">
               <a-radio-group v-model:value="store.formState['ReportResult']" :options="reportResultOptions">
                 <template #label="{ value }">
                   <span style="color: red">{{ value }}</span>
@@ -161,77 +163,105 @@
           </div>
           <div class="component meta"
             v-if="store.formState['ReportResult'] == '0' || store.formState['ReportResult'] == '1'">
-            <a-form-item name="ReportResultRemark" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReportResultRemark')}), validator: validateRequired }]" :label="$t('base.ReportResultRemark')">
+            <a-form-item name="ReportResultRemark"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ReportResultRemark') }), validator: validateRequired }]"
+              :label="$t('base.ReportResultRemark')">
               <a-textarea v-model:value="store.formState['ReportResultRemark']"></a-textarea>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
-            <a-form-item name="ReportNumber" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReportNumber')}), validator: validateRequired }]" :label="$t('base.ReportNumber')">
+            <a-form-item name="ReportNumber"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ReportNumber') }), validator: validateRequired }]"
+              :label="$t('base.ReportNumber')">
               <a-input v-model:value="store.formState['ReportNumber']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Applicant">
-            <a-form-item name="Applicant" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Applicant')}), validator: validateRequired }]" :label="$t('base.Applicant')">
+            <a-form-item name="Applicant"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Applicant') }), validator: validateRequired }]"
+              :label="$t('base.Applicant')">
               <a-input v-model:value="store.formState['Applicant']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Supplier">
-            <a-form-item name="Supplier" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Supplier')}), validator: validateRequired }]" :label="$t('base.Supplier')">
+            <a-form-item name="Supplier"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Supplier') }), validator: validateRequired }]"
+              :label="$t('base.Supplier')">
               <a-input v-model:value="store.formState['Supplier']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Factory">
-            <a-form-item name="Factory" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Factory')}), validator: validateRequired }]" :label="$t('base.Factory')">
+            <a-form-item name="Factory"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Factory') }), validator: validateRequired }]"
+              :label="$t('base.Factory')">
               <a-input v-model:value="store.formState['Factory']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ProductDescription">
-            <a-form-item name="ProductDescription" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ProductDescription')}), validator: validateRequired }]" :label="$t('base.ProductDescription')">
+            <a-form-item name="ProductDescription"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ProductDescription') }), validator: validateRequired }]"
+              :label="$t('base.ProductDescription')">
               <a-textarea v-model:value="store.formState['ProductDescription']" allowClear></a-textarea>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.AddressOfInspection">
-            <a-form-item name="AddressOfInspection" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AddressOfInspection')}), validator: validateRequired }]" :label="$t('base.AddressOfInspection')">
+            <a-form-item name="AddressOfInspection"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AddressOfInspection') }), validator: validateRequired }]"
+              :label="$t('base.AddressOfInspection')">
               <a-input v-model:value="store.formState['AddressOfInspection']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DateOfInspection">
-            <a-form-item name="DateOfInspection" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.DateOfInspection')}), validator: validateRequired }]" :label="$t('base.DateOfInspection')">
+            <a-form-item name="DateOfInspection"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.DateOfInspection') }), validator: validateRequired }]"
+              :label="$t('base.DateOfInspection')">
               <a-date-picker style="width: 100%" v-model:value="store.formState['DateOfInspection']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
-            <a-form-item name="ArrivalTime" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ArrivalTime')}), validator: validateRequired }]" :label="$t('base.ArrivalTime')">
+            <a-form-item name="ArrivalTime"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ArrivalTime') }), validator: validateRequired }]"
+              :label="$t('base.ArrivalTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
                 v-model:value="store.formState['ArrivalTime']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
-            <a-form-item name="DepartureTime" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.DepartureTime')}), validator: validateRequired }]" :label="$t('base.DepartureTime')">
+            <a-form-item name="DepartureTime"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.DepartureTime') }), validator: validateRequired }]"
+              :label="$t('base.DepartureTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
                 v-model:value="store.formState['DepartureTime']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Inspector">
-            <a-form-item name="Inspector" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.Inspector')}), validator: validateRequired }]" :label="$t('base.Inspector')">
+            <a-form-item name="Inspector"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Inspector') }), validator: validateRequired }]"
+              :label="$t('base.Inspector')">
               <a-input v-model:value="store.formState['Inspector']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.InspectionStandard">
-            <a-form-item name="InspectionStandard" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.InspectionStandard')}), validator: validateRequired }]" :label="$t('base.InspectionStandard')">
+            <a-form-item name="InspectionStandard"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.InspectionStandard') }), validator: validateRequired }]"
+              :label="$t('base.InspectionStandard')">
               <a-input v-model:value="store.formState['InspectionStandard']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
-            <a-form-item name="ItemNumber" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ItemNumber')}), validator: validateRequired }]" :label="$t('base.ItemNumber')">
+            <a-form-item name="ItemNumber"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ItemNumber') }), validator: validateRequired }]"
+              :label="$t('base.ItemNumber')">
               <a-select v-model:value="store.formState['ItemNumber']" mode="tags" style="width: 100%"></a-select>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.GeneralInspectionLevel">
-            <a-form-item name="GeneralInspectionLevel" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.GeneralInspectionLevel')}), validator: validateRequired }]" :label="$t('base.GeneralInspectionLevel')">
+            <a-form-item name="GeneralInspectionLevel"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.GeneralInspectionLevel') }), validator: validateRequired }]"
+              :label="$t('base.GeneralInspectionLevel')">
               <a-radio-group v-model:value="store.formState['GeneralInspectionLevel']" allowClear>
                 <a-radio value="I">I</a-radio>
                 <a-radio value="II">II</a-radio>
@@ -240,7 +270,9 @@
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.SpecialInspectionLevel">
-            <a-form-item name="SpecialInspectionLevel" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SpecialInspectionLevel')}), validator: validateRequired }]" :label="$t('base.SpecialInspectionLevel')">
+            <a-form-item name="SpecialInspectionLevel"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.SpecialInspectionLevel') }), validator: validateRequired }]"
+              :label="$t('base.SpecialInspectionLevel')">
               <a-radio-group v-model:value="store.formState['SpecialInspectionLevel']" allowClear>
                 <a-radio value="S-1">S-1</a-radio>
                 <a-radio value="S-2">S-2</a-radio>
@@ -250,36 +282,51 @@
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.OrderQuantity">
-            <a-form-item name="OrderQuantity" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.OrderQuantity')}), validator: validateRequired }]" :label="$t('base.OrderQuantity')">
+            <a-form-item name="OrderQuantity"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.OrderQuantity') }), validator: validateRequired }]"
+              :label="$t('base.OrderQuantity')">
               <a-input v-model:value="store.formState['OrderQuantity']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
             <a-row style="width: 100%" :gutter="[16, 16]">
               <a-col :span="8">
-                <a-form-item name="AQL_CR" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_CR')}), validator: validateRequired }]" :label="$t('base.AQL_CR')">
-                  <a-select v-model:value="store.formState['AQL_CR']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
+                <a-form-item name="AQL_CR"
+                  :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AQL_CR') }), validator: validateRequired }]"
+                  :label="$t('base.AQL_CR')">
+                  <a-select v-model:value="store.formState['AQL_CR']" :options="aclList" allowClear
+                    :getPopupContainer="() => document.body"></a-select>
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item name="AQL_MAJ" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MAJ')}), validator: validateRequired }]" :label="$t('base.AQL_MAJ')">
-                  <a-select v-model:value="store.formState['AQL_MAJ']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
+                <a-form-item name="AQL_MAJ"
+                  :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AQL_MAJ') }), validator: validateRequired }]"
+                  :label="$t('base.AQL_MAJ')">
+                  <a-select v-model:value="store.formState['AQL_MAJ']" :options="aclList" allowClear
+                    :getPopupContainer="() => document.body"></a-select>
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item name="AQL_MIN" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.AQL_MIN')}), validator: validateRequired }]" :label="$t('base.AQL_MIN')">
-                  <a-select v-model:value="store.formState['AQL_MIN']" :options="aclList"  allowClear :getPopupContainer="()=>document.body"></a-select>
+                <a-form-item name="AQL_MIN"
+                  :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AQL_MIN') }), validator: validateRequired }]"
+                  :label="$t('base.AQL_MIN')">
+                  <a-select v-model:value="store.formState['AQL_MIN']" :options="aclList" allowClear
+                    :getPopupContainer="() => document.body"></a-select>
                 </a-form-item>
               </a-col>
             </a-row>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.SampleSizeTotal">
-            <a-form-item name="SampleSizeTotal" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.SampleSizeTotal')}), validator: validateRequired }]" :label="$t('base.SampleSizeTotal')">
+            <a-form-item name="SampleSizeTotal"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.SampleSizeTotal') }), validator: validateRequired }]"
+              :label="$t('base.SampleSizeTotal')">
               <a-input v-model:value="store.formState['SampleSizeTotal']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.InspectionType">
-            <a-form-item name="InspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.InspectionType')}), validator: validateRequired }]" :label="$t('base.InspectionType')">
+            <a-form-item name="InspectionType"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.InspectionType') }), validator: validateRequired }]"
+              :label="$t('base.InspectionType')">
               <a-radio-group v-model:value="store.formState['InspectionType']" allowClear>
                 <a-radio value="PPI">PPI</a-radio>
                 <a-radio value="DPI">DPI</a-radio>
@@ -300,7 +347,8 @@
           </div>
         </div>
         <!-- <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper" -->
-        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper" v-show="item.type != 'conclusion'"
+        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
+          v-show="item.type != 'conclusion'"
           :class="{ 'notpass': store.report?.review_comments[item.key]?.status == false, 'pass': store.report?.review_comments[item.key]?.status == true }">
           <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
@@ -358,7 +406,7 @@
                 }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
-                }}</a-button>
+              }}</a-button>
             </div>
             <div v-else>{{ $t('base.report_not_in_fill_status') }}: {{ store.report.review_status }}</div>
           </div>
@@ -372,8 +420,8 @@
         </template>
       </a-button>
 
-      <div v-for="item in schemaRef.filter(c=>c.type != 'conclusion')" class="item" >
-        <div @click="goAnchor(item.key)" >{{ item.title }}</div>
+      <div v-for="item in schemaRef.filter(c => c.type != 'conclusion')" class="item">
+        <div @click="goAnchor(item.key)">{{ item.title }}</div>
       </div>
     </div>
 
@@ -676,7 +724,7 @@ const onFinishFailed = (e) => {
           message: "Validate Fail",
           description: item.errors
         })
-    
+
       }
     })
     console.log('errorFields:', toRaw(e.errorFields[0]))
@@ -686,7 +734,7 @@ const onFinishFailed = (e) => {
 const validateRequired = (rule, value, callback) => {
   // console.log('validateRequired-rule:', rule, ', value:', value)
   let result = true
-  if(rule.required && (store.formState[rule.field] == null || store.formState[rule.field] == "" || store.formState[rule.field] == undefined)) {
+  if (rule.required && (store.formState[rule.field] == null || store.formState[rule.field] == "" || store.formState[rule.field] == undefined)) {
     result = false
   }
   return new Promise((resolve, reject) => {
@@ -870,8 +918,8 @@ const onClickConfirmSaveSingle = async () => {
 
 
 const focusOnField = (fieldName) => {
-      formRef.value.scrollToField(fieldName, { behavior: 'smooth'});
-    };
+  formRef.value.scrollToField(fieldName, { behavior: 'smooth' });
+};
 
 
 const onClickSubmit = () => {
@@ -886,15 +934,15 @@ const onClickSubmit = () => {
           window.location.reload()
         }, 1000)
       }).catch((error) => {
-          console.log('Validation failed:', toRaw(error));
-          if(error?.errorFields?.length > 0 && error.errorFields[0]?.name?.length > 0) {
-            console.log('formFieldName-error.errorFields[0].name[0]:', error.errorFields[0].name[0])
-            // let formFieldNameArr = error.errorFields[0].name[0].split('-')
-            // let formFieldName = formFieldNameArr[formFieldNameArr.length - 1]
-            // console.log('formFieldName:', formFieldName, formFieldNameArr)
-            goCollectorAnchor(error.errorFields[0].name[0])
-          }
-        });
+        console.log('Validation failed:', toRaw(error));
+        if (error?.errorFields?.length > 0 && error.errorFields[0]?.name?.length > 0) {
+          console.log('formFieldName-error.errorFields[0].name[0]:', error.errorFields[0].name[0])
+          // let formFieldNameArr = error.errorFields[0].name[0].split('-')
+          // let formFieldName = formFieldNameArr[formFieldNameArr.length - 1]
+          // console.log('formFieldName:', formFieldName, formFieldNameArr)
+          goCollectorAnchor(error.errorFields[0].name[0])
+        }
+      });
     },
     cancelText: i18n.global.t('base.Cancel'),
     okText: i18n.global.t('base.Submit'),
@@ -939,7 +987,7 @@ const onUpdateCollector = (collector: any) => {
       store.formState[conclusionCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == conclusionCom.key).data.conclusions } }
       conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
     }
-    if(determineStatus(statuses)) {
+    if (determineStatus(statuses)) {
       conclusionComItem.status = determineStatus(statuses)
     }
   }
@@ -956,7 +1004,7 @@ const onUpdateCollector = (collector: any) => {
           store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
         }
         let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
-        if(determineStatus(parentStatuses)) {
+        if (determineStatus(parentStatuses)) {
           ParentConclusionItem.status = determineStatus(parentStatuses)
         }
       }
@@ -991,7 +1039,7 @@ const onUpdateConclusionInspectResult = (collector: any, status: string, remark:
           store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
         }
         let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
-        if(determineStatus(parentStatuses)) {
+        if (determineStatus(parentStatuses)) {
           ParentConclusionItem.status = determineStatus(parentStatuses)
         }
 
@@ -1037,18 +1085,18 @@ const updateAqlValues = () => {
   store.defectsAllowedMap = {
   }
   console.log('updateAqlValues-result:', toRaw(result))
-  if(result.aqlMapping['aql_cr']) {
+  if (result.aqlMapping['aql_cr']) {
     store.defectsAllowedMap.AQL_CR = result.aqlMapping['aql_cr']['aql']
-   }
-   if(result.aqlMapping['aql_maj']) {
+  }
+  if (result.aqlMapping['aql_maj']) {
     store.defectsAllowedMap.AQL_MAJ = result.aqlMapping['aql_maj']['aql']
-   }
-   if(result.aqlMapping['aql_min']) {
+  }
+  if (result.aqlMapping['aql_min']) {
     store.defectsAllowedMap.AQL_MIN = result.aqlMapping['aql_min']['aql']
-   }
-   if(result.sampleSizeTotal) {
+  }
+  if (result.sampleSizeTotal) {
     store.formState['SampleSizeTotal'] = result.sampleSizeTotal
-   }
+  }
 }
 
 watchEffect(() => {
