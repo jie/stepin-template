@@ -12,7 +12,7 @@
               <a-radio-group size="small" v-model:value="itemData.statusData.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
                 <a-radio-button style="font-size: 12px"
-                  v-for="option in [{ 'label': 'PASS', 'value': 'conformed' }, { 'label': 'FAIL', 'value': 'not_conformed' }]"
+                  v-for="option in [{ 'label': 'PASS', 'value': 'Conform' }, { 'label': 'FAIL', 'value': 'NotConform' }]"
                   :value="option.value">{{
                     option.label
                   }}</a-radio-button>
@@ -26,6 +26,7 @@
               </a-radio-group>
               <div v-if="itemData?.dataRecords?.length != 0 && Object.keys(itemData.defectsResult)?.length != 0"
                 style="margin-top: 10px;">
+
                 <a-table bordered :rowClassName="(r, index) => {
                   if (r.found > r.allowed) {
                     return 'table-row-warning custom-row'
@@ -37,7 +38,7 @@
                   { title: $t('base.FoundDefects'), dataIndex: 'found', key: 'found' },
                   { title: $t('base.AllowDefects'), dataIndex: 'allowed', key: 'allowed' },
                 ]"
-                  :dataSource="Object.keys(itemData.defectsResult).map(c => ({ 'key': c, 'found': itemData.defectsResult[c].found, 'allowed': itemData.defectsResult[c].allowed }))"
+                  :dataSource="displayDefectColumns"
                   :pagination="false" />
               </div>
             </a-form-item>
@@ -349,6 +350,11 @@ function transformFields(items) {
     );
   });
 }
+
+const displayDefectColumns = computed(() => {
+  return Object.keys(itemData.defectsResult).map(c => ({ 'key': c, 'found': itemData.defectsResult[c].found, 'allowed': itemData.defectsResult[c].allowed }))
+})
+
 const displayTableColumns = computed(() => {
   return transformFields([...props.item?.data?.fields, ...itemData.dataExtraFields.map(c => ({ label: c, value: c, required: false }))]);
 })
@@ -841,6 +847,12 @@ const initialization = () => {
       itemData.dataRecords = props.value?.data?.dataRecords
       itemData.dataSchema = props.value?.data?.dataSchema
       itemData.dataExtraFields = props.value?.data?.dataExtraFields
+
+      if(props.item?.data?.auto_result){
+        autoUpdateDefectsResult()
+      }
+
+
     } else {
       if (props.value?.data?.fields && props.value?.data?.fields.length > 0) {
         let nodes = findLeafNode(props.value?.data?.fields)
