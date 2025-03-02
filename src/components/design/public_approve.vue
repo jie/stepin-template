@@ -146,20 +146,6 @@
           </div>
         </div>
       </div>
-      <!-- <div class="flex">
-        <div style="width: 200px;">
-          <img src="https://qcplatform.oss-cn-shanghai.aliyuncs.com/logo/report_logo.jpg" alt="">
-
-        </div>
-        <div style="flex: 1">
-          <div class="title">
-            <div>{{ store.report?.title }}</div>
-          </div>
-          <div class="summary">
-            <div>{{ store.report?.summary }}</div>
-          </div>
-        </div>
-      </div> -->
       <div class="component meta">
         <a-row :gutter="[20, 20]">
           <a-col :span="12">
@@ -215,7 +201,7 @@
 
       <a-form ref="formRef" layout="vertical" :model="store.formState" v-if="store.report && !route.query.is_simple"
         @finish="onFinishSubmit" @finishFailed="onFinishFailed">
-        <div v-for="(item, index) in store.report.schema" :key="item.key" class="component-wrapper"
+        <div v-for="(item, index) in store.report.template.items" :key="item.key" class="component-wrapper"
           :class="{ 'notpass': store.report?.review_comments[item.key].status == false, 'pass': store.report?.review_comments[item.key].status == true }">
           <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
@@ -367,7 +353,7 @@ import { openNotification, successNotification } from '@/utils/notification';
 import Spin from "@/components/spin/index.vue"
 import { ReportFillStore } from '@/store/report_fill';
 import { determineStatus } from "@/utils/helpers"
-import {getDefectiveLimitation} from "@/utils/sampling"
+import { getSampleSizeAndAqlLimitation } from '@/utils/sampling';
 import dayjs from 'dayjs';
 import { i18n } from '@/lang/i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -518,6 +504,7 @@ const refresh = async (data: any) => {
       store.formState["DepartureTime"] = dayjs(store.report.values["DepartureTime"])
     }
     reportInspectDetailRef.value = generateInspectDetailRows()
+    console.log('store.formState:', toRaw(store.formState))
     loadingRef.value = false
     startedRef.value = true
   }, 2000)
@@ -871,64 +858,33 @@ watchEffect(() => {
     isStaffReview.value = true
   }
 })
-// let SampleSizeTotal = store.report.values?.find(c => c.key === 'SampleSizeTotal')
-//   let OrderQuantity = store.report.values?.find(c => c.key === 'OrderQuantity')
-//   let AQL_CR = store.report.values?.find(c => c.key === 'AQL_CR')
-//   let AQL_MAJ = store.report.values?.find(c => c.key === 'AQL_MAJ')
-//   let AQL_MIN = store.report.values?.find(c => c.key === 'AQL_MIN')
-//   let InspectLevel = store.report.values?.find(c => c.key === 'SpecialInspectionLevel' || c.key === 'GeneralInspectionLevel')
-//   if (SampleSizeTotal === "" || SampleSizeTotal === undefined || SampleSizeTotal === null) {
-//     return
-//   }
 
-const updateDefectsAllowed = () => {
-  console.log('updateDefectsAllowed:', toRaw(1111))
-  let SampleSizeTotal = store.report?.values['SampleSizeTotal']
-  let OrderQuantity = store.report?.values['OrderQuantity']
-  let AQL_CR = store.report?.values['AQL_CR']
-  let AQL_MAJ = store.report?.values['AQL_MAJ']
-  let AQL_MIN = store.report?.values['AQL_MIN']
-  let InspectLevel = store.report?.values["SpecialInspectionLevel"] || store.report?.values["GeneralInspectionLevel"]
-  if (SampleSizeTotal === "" || SampleSizeTotal === undefined || SampleSizeTotal === null) {
-    return
-  }
-  if (OrderQuantity === "" || OrderQuantity === undefined || OrderQuantity === null) {
-    return
-  }
-  if (AQL_CR === "" || AQL_CR === undefined || AQL_CR === null) {
-    return
-  }
-  if (AQL_MAJ === "" || AQL_MAJ === undefined || AQL_MAJ === null) {
-    return
-  }
-  if (AQL_MIN === "" || AQL_MIN === undefined || AQL_MIN === null) {
-    return
-  }
 
-  let AQL_CR_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_CR", InspectLevel)
-  let AQL_MAJ_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_MAJ", InspectLevel)
-  let AQL_MIN_Allowed = getDefectiveLimitation(SampleSizeTotal, OrderQuantity, "AQL_MIN", InspectLevel)
+const updateAqlValues = () => {
+  let result = getSampleSizeAndAqlLimitation(store.report.values.OrderQuantity, store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel, store.report.values.AQL_CR, store.report.values.AQL_MAJ, store.report.values.AQL_MIN)
   store.defectsAllowedMap = {
-    AQL_CR: AQL_CR_Allowed,
-    AQL_MAJ: AQL_MAJ_Allowed,
-    AQL_MIN: AQL_MIN_Allowed
   }
-  console.log('store.defectsAllowedMap:', toRaw(store.defectsAllowedMap))
+  console.log('updateAqlValues-result:', toRaw(result))
+  if (result.aqlMapping['aql_cr']) {
+    store.defectsAllowedMap.AQL_CR = result.aqlMapping['aql_cr']['aql']
+  }
+  if (result.aqlMapping['aql_maj']) {
+    store.defectsAllowedMap.AQL_MAJ = result.aqlMapping['aql_maj']['aql']
+  }
+  if (result.aqlMapping['aql_min']) {
+    store.defectsAllowedMap.AQL_MIN = result.aqlMapping['aql_min']['aql']
+  }
+  if (result.sampleSizeTotal) {
+    store.formState['SampleSizeTotal'] = result.sampleSizeTotal
+  }
 }
 
 watchEffect(() => {
-
-//   SampleSizeTotal
-// OrderQuantity
-// AQL_CR
-// AQL_MAJ
-// AQL_MIN
-// GeneralInspectionLevel
-// SpecialInspectionLevel
-  if (store.report.values.SampleSizeTotal && store.report.values.OrderQuantity && store.report.values.AQL_CR && store.report.values.AQL_MAJ && store.report.values.AQL_MIN && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
-    updateDefectsAllowed()
+  if (store.report.values.OrderQuantity && store.report.values.OrderQuantity >= 2 && (store.report.values.GeneralInspectionLevel || store.report.values.SpecialInspectionLevel)) {
+    updateAqlValues()
   }
 })
+
 
 initialization()
 
