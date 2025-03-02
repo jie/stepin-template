@@ -450,8 +450,8 @@ const onConclusionChangeStatus = (e) => {
   console.log('onConclusionChangeStatus:', toRaw(e))
   if (conclusionItemRef.value) {
     emits('updateConclusionInspectResult', props.item, itemData.statusData.status, itemData.statusData.remark)
-    // emits('clearFieldError', e.target.id.replace('form_item_', ''))
   }
+  emits('update:value', exportValue())
 }
 
 const validateImagesField = (imageFieldId) => {
