@@ -983,35 +983,86 @@ export const getDefectiveLimitation = (order_quantity: number, aql: string, Insp
     console.log('letter:', levelLetter, ', limitation:', limitation)
     let aqlMapping = {}
     let sampleSizeTotal = 0
+    // if(aql_cr != undefined) {
+    //     let aql_cr_limit = limitation.ac[aql_cr]['aql']
+    //     let aql_cr_size = limitation.ac[aql_cr]['size']
+    //     aqlMapping['aql_cr'] = {
+    //         aql: aql_cr_limit,
+    //     }
+    //     if(aql_cr_size > sampleSizeTotal) {
+    //         sampleSizeTotal = aql_cr_size
+    //     }
+    // }
+    // if(aql_maj != undefined) {
+    //     let aql_maj_limit = limitation.ac[aql_maj]['aql']
+    //     let aql_maj_size = limitation.ac[aql_maj]['size']
+    //     aqlMapping['aql_maj'] = {
+    //         aql: aql_maj_limit,
+    //     }
+    //     if(aql_maj_size > sampleSizeTotal) {
+    //         sampleSizeTotal = aql_maj_size
+    //     }
+    // }
+    // if(aql_min != undefined) {
+    //     let aql_min_limit = limitation.ac[aql_min]['aql']
+    //     let aql_min_size = limitation.ac[aql_min]['size']
+    //     aqlMapping['aql_min'] = {
+    //         aql: aql_min_limit,
+    //     }
+    //     if(aql_min_size > sampleSizeTotal) {
+    //         sampleSizeTotal = aql_min_size
+    //     }
+    // }
     if(aql_cr != undefined) {
-        let aql_cr_limit = limitation.ac[aql_cr]['aql']
-        let aql_cr_size = limitation.ac[aql_cr]['size']
-        aqlMapping['aql_cr'] = {
-            aql: aql_cr_limit,
+        if(aql_cr != '0') {
+            let aql_cr_limit = limitation.ac[aql_cr]['aql']
+            let aql_cr_size = limitation.ac[aql_cr]['size']
+            aqlMapping['aql_cr'] = {
+                aql: aql_cr_limit,
+            }
+            if(aql_cr_size > sampleSizeTotal) {
+                sampleSizeTotal = aql_cr_size
+            }
+        } else {
+            aqlMapping['aql_cr'] = {
+                aql: 0,
+            }
         }
-        if(aql_cr_size > sampleSizeTotal) {
-            sampleSizeTotal = aql_cr_size
-        }
+
     }
     if(aql_maj != undefined) {
-        let aql_maj_limit = limitation.ac[aql_maj]['aql']
-        let aql_maj_size = limitation.ac[aql_maj]['size']
-        aqlMapping['aql_maj'] = {
-            aql: aql_maj_limit,
+        if(aql_maj != '0') {
+            let aql_maj_limit = limitation.ac[aql_maj]['aql']
+            let aql_maj_size = limitation.ac[aql_maj]['size']
+            aqlMapping['aql_maj'] = {
+                aql: aql_maj_limit,
+            }
+            if(aql_maj_size > sampleSizeTotal) {
+                sampleSizeTotal = aql_maj_size
+            }
+        } else {
+            aqlMapping['aql_maj'] = {
+                aql: 0,
+            }
         }
-        if(aql_maj_size > sampleSizeTotal) {
-            sampleSizeTotal = aql_maj_size
-        }
+
     }
-    if(aql_min != undefined) {
-        let aql_min_limit = limitation.ac[aql_min]['aql']
-        let aql_min_size = limitation.ac[aql_min]['size']
-        aqlMapping['aql_min'] = {
-            aql: aql_min_limit,
+    if(aql_min != undefined && limitation.ac[aql_min]) {
+        if(aql_min != '0') {
+            let aql_min_limit = limitation.ac[aql_min]['aql']
+            let aql_min_size = limitation.ac[aql_min]['size']
+            aqlMapping['aql_min'] = {
+                aql: aql_min_limit,
+            }
+            if(aql_min_size > sampleSizeTotal) {
+                sampleSizeTotal = aql_min_size
+            }
+        } else {
+            aqlMapping['aql_min'] = {
+                aql: 0,
+            }
         }
-        if(aql_min_size > sampleSizeTotal) {
-            sampleSizeTotal = aql_min_size
-        }
+
     }
     return {aqlMapping, sampleSizeTotal}
   }

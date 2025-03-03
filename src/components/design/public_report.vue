@@ -327,22 +327,22 @@
             <a-form-item name="InspectionType"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.InspectionType') }), validator: validateRequired }]"
               :label="$t('base.InspectionType')">
-              <a-radio-group v-model:value="store.formState['InspectionType']" allowClear>
-                <a-radio value="PPI">PPI</a-radio>
-                <a-radio value="DPI">DPI</a-radio>
-                <a-radio value="PSI">PSI</a-radio>
-                <a-radio value="Re-PSI">Re-PSI</a-radio>
-              </a-radio-group>
+              <a-select v-model:value="store.formState['InspectionType']" allowClear :getPopupContainer="() => document.body">
+                <a-select-option value="PPI">PPI</a-select-option>
+                <a-select-option value="DPI">DPI</a-select-option>
+                <a-select-option value="PSI">PSI</a-select-option>
+                <a-select-option value="Re-PSI">Re-PSI</a-select-option>
+              </a-select>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReInspectionType">
             <!-- <a-form-item name="ReInspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReInspectionType')}), validator: validateRequired }]" :label="$t('base.ReInspectionType')"> -->
             <a-form-item name="ReInspectionType" :label="$t('base.ReInspectionType')">
-              <a-radio-group v-model:value="store.formState['ReInspectionType']" allowClear>
-                <a-radio value="1ST">1ST</a-radio>
-                <a-radio value="2ST">2ST</a-radio>
-                <a-radio value="3ST">3ST</a-radio>
-              </a-radio-group>
+              <a-select v-model:value="store.formState['ReInspectionType']" allowClear :getPopupContainer="() => document.body">
+                <a-select-option value="1ST">1ST</a-select-option>
+                <a-select-option value="2ST">2ST</a-select-option>
+                <a-select-option value="3ST">3ST</a-select-option>
+              </a-select>
             </a-form-item>
           </div>
         </div>

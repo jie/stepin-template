@@ -37,9 +37,7 @@
                   { title: $t('base.defect_types'), dataIndex: 'key', key: 'key' },
                   { title: $t('base.FoundDefects'), dataIndex: 'found', key: 'found' },
                   { title: $t('base.AllowDefects'), dataIndex: 'allowed', key: 'allowed' },
-                ]"
-                  :dataSource="displayDefectColumns"
-                  :pagination="false" />
+                ]" :dataSource="displayDefectColumns" :pagination="false" />
               </div>
             </a-form-item>
             <a-form-item :label="$t('base.Remark')" name="remark" v-if="props?.item?.data?.hasRemarks">
@@ -206,6 +204,10 @@
                     <tags-outlined />
                   </template>{{ props.item?.data?.column_manage_label || $t('base.FieldManagement') }}
                 </a-button>
+                <a-button type="primary" size="small" style="font-size: 80%; margin-left: 10px;"
+                  v-if="!readonlyRef && props.item?.data?.hasAddRecordButton" @click="onClickAdd"><template #icon>
+                    <plus-circle-outlined />
+                  </template>{{ $t('base.AddRecord') }}</a-button>
               </div>
             </a-badge-ribbon>
           </div>
@@ -413,7 +415,6 @@ const autoUpdateDefectsResult = () => {
         }
         break
       }
-
     }
   }
   for (let key in defectsResult) {
@@ -848,7 +849,7 @@ const initialization = () => {
       itemData.dataSchema = props.value?.data?.dataSchema
       itemData.dataExtraFields = props.value?.data?.dataExtraFields
 
-      if(props.item?.data?.auto_result){
+      if (props.item?.data?.auto_result) {
         autoUpdateDefectsResult()
       }
 
