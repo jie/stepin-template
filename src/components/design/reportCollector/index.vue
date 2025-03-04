@@ -230,9 +230,9 @@
         </a-form>
       </a-modal>
       <a-modal :getContainer="() => document.body" v-model:visible="isShowAddFieldDialog"
-        :title="$t('base.FieldManagement')" @ok="handleAddFieldOK" :okText="$t('base.Close')" :footer="null">
+        :title="props.item?.data?.column_manage_label" @ok="handleAddFieldOK" :okText="$t('base.Close')" :footer="null">
         <a-form layout="vertical">
-          <a-form-item :label="$t('base.FieldName')" name="label">
+          <a-form-item :label="props.item?.data?.column_name_label" name="label">
             <a-input v-model:value="fieldForm.label" />
           </a-form-item>
           <a-form-item label="">
@@ -241,7 +241,7 @@
               <template #icon>
                 <plus-circle-outlined />
               </template>
-              {{ $t('base.AddField') }}
+              {{ props.item?.data?.column_add_field_label }}
             </a-button>
           </a-form-item>
           <a-form-item label="">

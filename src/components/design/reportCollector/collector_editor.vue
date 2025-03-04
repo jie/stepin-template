@@ -59,6 +59,12 @@
           <a-form-item :label="$t('base.ColumnManageLabel')" name="column_manage_label">
             <a-input v-model:value="itemData.column_manage_label" style="width: 100%;" allow-clear></a-input>
           </a-form-item>
+          <a-form-item :label="$t('base.ColumnNameLabel')" name="column_name_label">
+            <a-input v-model:value="itemData.column_name_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.ColumnAddFieldLabel')" name="column_add_field_label">
+            <a-input v-model:value="itemData.column_add_field_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
           <a-form-item :label="$t('base.InspectResultLabel')" name="inspect_result_label">
             <a-input v-model:value="itemData.inspect_result_label" style="width: 100%;" allow-clear></a-input>
           </a-form-item>
@@ -73,6 +79,9 @@
           </a-form-item>
           <a-form-item :label="$t('base.DefectTypeLabel')" name="defect_type_label">
             <a-input v-model:value="itemData.defect_type_label" style="width: 100%;" allow-clear></a-input>
+          </a-form-item>
+          <a-form-item :label="$t('base.AddRecordLabel')" name="add_record_label">
+            <a-input v-model:value="itemData.add_record_label" style="width: 100%;" allow-clear></a-input>
           </a-form-item>
           <a-form-item :label="$t('base.Conclusion')" name="conclusion_key">
             <a-select v-model:value="itemData.conclusion_key" style="width: 100%;" allow-clear
@@ -211,7 +220,10 @@ const itemData = ref({
   images_label: 'Images',
   take_photo_label: 'Upload / Take Photo',
   defect_type_label: 'Defect Type',
+  add_record_label: 'Add Record',
   column_manage_label: "Columns Manage",
+  column_name_label:'Column Name',
+  column_add_field_label:'Add Field',
   has_fields_management: true,
   auto_result: false,
   set_records_result: true,
@@ -352,7 +364,7 @@ const initializeData = (item: any) => {
     itemData.value.sample_size_item_key = item.data.sample_size_item_key || ''
     itemData.value.sample_size_item_field = item.data.sample_size_item_field || ''
     itemData.value.fields = item.data.fields || []
-    itemData.value.column_manage_label = "Columns Manage"
+    itemData.value.column_manage_label = item.data.column_manage_label || "Columns Manage"
     itemData.value.item_number_label = item.data.item_number_label || 'Item No.'
     itemData.value.sample_size_label = item.data.sample_size_label || 'Sample Size'
     itemData.value.inspect_result_label = item.data.inspect_result_label || 'Inspect Result'
@@ -360,6 +372,9 @@ const initializeData = (item: any) => {
     itemData.value.images_label = item.data.images_label || 'Images'
     itemData.value.defect_type_label = item.data.defect_type_label || 'Defect Type'
     itemData.value.take_photo_label = item.data.take_photo_label || 'Upload / Take Photo'
+    itemData.value.column_name_label = item.data.column_name_label || 'Column Name'
+    itemData.value.column_add_field_label = item.data.column_add_field_label || 'Add Field'
+    itemData.value.add_record_label = item.data.add_record_label || 'Add Record'
     itemData.value.has_fields_management = item.data.has_fields_management
     itemData.value.auto_result = item.data.auto_result || false
     itemData.value.set_records_result = item.data.set_records_result
@@ -373,7 +388,7 @@ const initializeData = (item: any) => {
     itemData.value.hasItemStatus = item.data.hasItemStatus ? true : false
     itemData.value.hasItemRemarks = item.data.hasItemRemarks ? true : false
     itemData.value.showFieldsAtStart = item.data.showFieldsAtStart ? true : false
-    itemData.value.hasAddRecordButton = itemData.value.hasAddRecordButton ? true: false
+    itemData.value.hasAddRecordButton = item.data.hasAddRecordButton ? true: false
   } else {
     itemData.value.conclusion_key = ''
     itemData.value.conclusion_item_key = ''
@@ -388,6 +403,9 @@ const initializeData = (item: any) => {
     itemData.value.images_label = 'Images'
     itemData.value.defect_type_label = 'Defect Type'
     itemData.value.take_photo_label = 'Upload / Take Photo'
+    itemData.value.column_name_label = 'Column Name'
+    itemData.value.column_add_field_label = 'Add Field'
+    itemData.value.add_record_label = 'Add Record'
     itemData.value.has_fields_management = true
     itemData.value.auto_result = false
     itemData.value.set_records_result = true
