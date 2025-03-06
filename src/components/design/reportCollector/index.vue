@@ -26,7 +26,6 @@
               </a-radio-group>
               <div v-if="itemData?.dataRecords?.length != 0 && Object.keys(itemData.defectsResult)?.length != 0"
                 style="margin-top: 10px;">
-
                 <a-table bordered :rowClassName="(r, index) => {
                   if (r.found > r.allowed) {
                     return 'table-row-warning custom-row'

@@ -869,11 +869,6 @@ export const aclList = [
         value: '6.5',
     },
     {
-        id: '6.5',
-        label: '6.5',
-        value: '6.5',
-    },
-    {
         id: '10',
         label: '10',
         value: '10',
