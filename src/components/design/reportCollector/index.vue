@@ -143,12 +143,13 @@
                       <div>
                         <div>
                           <a-row type="flex" :gutter="[16, 16]">
-                            <a-col v-for="item in field.data" :key="item.url" :span="8">
+                            <a-col v-for="(item, imageIndex) in field.data" :key="item.url" :span="8">
                               <div style="width: 100%; aspect-ratio: 1 / 1;">
                                 <a-image :src="item.url"
                                   style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
                                 <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
                                 <div class="flex pt-2" style="justify-content: space-around;" v-if="!readonlyRef">
+                                  <span><a-checkbox v-model:checked="item.checked"></a-checkbox> ({{ imageIndex + 1 }})</span>
                                   <a-button size="small" type="primary" @click="editImage(field, item)">
                                     <template #icon>
                                       <EditOutlined />
@@ -177,6 +178,12 @@
                               <camera-outlined />
                             </template>
                             {{ props.item.data.take_photo_label }}
+                          </a-button>
+                          <a-button size="small" style="font-size: 80%; margin-left: 10px;" v-if="hasOrderedItems(field.data)" @click="showOrderItemsDialog(field, index)">
+                            <template #icon>
+                              <OrderedListOutlined />
+                            </template>
+                            Ordered
                           </a-button>
                         </div>
                       </div>
@@ -226,6 +233,14 @@
           </a-form-item>
         </a-form>
       </a-modal>
+      <a-modal :getContainer="() => document.body" v-model:visible="isShowOrderedDialog" :title="$t('base.OrderedItems')"
+        @ok="handleConfirmOrderedItems">
+        <a-form layout="vertical">
+          <a-form-item :label="$t('base.WillInsertImageTo')" name="targetIndex">
+            <a-input-number v-model:value="orderedTargetIndexRef" :min="1"></a-input-number>
+          </a-form-item>
+        </a-form>
+      </a-modal>
       <a-modal :getContainer="() => document.body" v-model:visible="isShowAddFieldDialog"
         :title="props.item?.data?.column_manage_label" @ok="handleAddFieldOK" :okText="$t('base.Close')" :footer="null">
         <a-form layout="vertical">
@@ -265,7 +280,7 @@
 import BaseSlot from "../base_slot.vue"
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { defineProps, ref, PropType, reactive, toRaw, watch, defineEmits, computed } from 'vue'
-import Icon, { CheckSquareOutlined, CloseCircleFilled, EditOutlined } from '@ant-design/icons-vue';
+import Icon, { CheckSquareOutlined, CloseCircleFilled, EditOutlined, OrderedListOutlined } from '@ant-design/icons-vue';
 // import { MessageOutlined } from '@ant-design/icons-vue';
 // import { MessageOutlinedIconType } from "@ant-design/icons-vue/lib/icons/MessageOutlined";
 import { findLeafNode, newJsonObject } from '@/utils/helpers'
@@ -275,6 +290,7 @@ import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor, determineStatus } from "@/utils/helpers"
+import { has } from "lodash";
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -318,6 +334,46 @@ const fieldForm = reactive({
   label: '',
   value: '',
 })
+
+const orderedTargetIndexRef = ref(null)
+const orderedRecordIndexRef = ref(null)
+const isShowOrderedDialog = ref(false)
+
+
+const hasOrderedItems = (images: any) => {
+  return images.some((item: any) => item.checked)
+}
+
+const showOrderItemsDialog = (field: any, index: number) => {
+  orderedRecordIndexRef.value = index
+  isShowOrderedDialog.value = true
+}
+
+const handleConfirmOrderedItems = () => {
+  let record = itemData.dataRecords[orderedRecordIndexRef.value]
+  let item = record.find(c => c.value === 'images')
+  let orderedImages = item.data.filter((item: any) => item.checked)
+  // move orderImages to orderedTargetIndexRef
+  let targetIndex = orderedTargetIndexRef.value
+  if (targetIndex === null) {
+    message.error('Invalid target index')
+    return
+  }
+
+  // insert orderedImages to targetIndex
+  let images = item.data.filter((item: any) => !item.checked)
+  images.splice(targetIndex, 0, ...orderedImages)
+  images.forEach((item: any, index: number) => {
+    item.checked = false
+  })
+  item.data = images
+
+  emits('update:value', exportValue())
+  orderedTargetIndexRef.value = null
+  orderedRecordIndexRef.value = null
+
+  isShowOrderedDialog.value = false
+}
 
 
 const isFieldRequire = (field) => {

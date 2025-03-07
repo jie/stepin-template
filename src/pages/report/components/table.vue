@@ -237,6 +237,12 @@ function edit(record: any) {
   }, 1000)
 }
 
+const duplicate = async (record: Report) => {
+  await store.apiDuplicate({id: record.id})
+  initializeData(false)
+}
+
+
 const deleteRecord = async (record: Report) => {
   console.log('record:', record)
   await store.apiDelete(record.id)
@@ -374,7 +380,7 @@ const _submitThirdpartyReport = async () => {
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
     attachments: attachments.value,
-    send_email: editThirdpartyRecord.value?.is_thirdparty ? true: false, // TODO:暂时不给系统邮件发送客户报告
+    send_email: editThirdpartyRecord.value?.is_thirdparty ? true : false, // TODO:暂时不给系统邮件发送客户报告
     po_number: poNumberRef.value,
     inspect_remark: inspectRemarkRef.value,
     cc_emails: ccEmailsRef.value.split(';'),
@@ -1244,7 +1250,8 @@ initializeData(true)
             <a-col :span="6">
               <div class="flex" style="padding-top: 20px; align-items: center; justify-content: space-between;">
                 <div class="flex">
-                  <a-switch v-model:checked="store.isQueryThirdparty" @change="onToggleQueryThirdparty" /> {{ $t('base.QueryThirdpartyReport') }}
+                  <a-switch v-model:checked="store.isQueryThirdparty" @change="onToggleQueryThirdparty" /> {{
+                    $t('base.QueryThirdpartyReport') }}
                 </div>
                 <div class="flex space-x-2">
                   <a-button type="primary" @click="addNew" :loading="formLoading" style="float: right;">
@@ -1351,6 +1358,12 @@ initializeData(true)
                   <a @click="edit(record)" rel="noopener noreferrer">
                     <EditOutlined />
                     {{ $t('base.Edit') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="5">
+                  <a @click="duplicate(record)" rel="noopener noreferrer">
+                    <CopyOutlined />
+                    {{ $t('base.Duplicate') }}
                   </a>
                 </a-menu-item>
                 <a-menu-item key="1">
