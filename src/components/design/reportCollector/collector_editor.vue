@@ -16,6 +16,9 @@
           <a-form-item :label="$t('base.hasAddRecordButton')" name="hasAddRecordButton">
             <a-switch v-model:checked="itemData.hasAddRecordButton" />
           </a-form-item>
+          <a-form-item :label="$t('base.autoCreateFieldsByNumber')" name="autoCreateFieldsByNumber">
+            <a-switch v-model:checked="itemData.autoCreateFieldsByNumber" />
+          </a-form-item>
           <a-form-item :label="$t('base.hasStatus')" name="hasStatus">
             <a-switch v-model:checked="itemData.hasStatus" />
           </a-form-item>
@@ -237,7 +240,8 @@ const itemData = ref({
   hasItemStatus: true,
   hasItemRemarks: true,
   showFieldsAtStart: false,
-  hasAddRecordButton: true
+  hasAddRecordButton: true,
+  autoCreateFieldsByNumber: true
 })
 
 const onChangeConclusionComponent = () => {
@@ -389,6 +393,7 @@ const initializeData = (item: any) => {
     itemData.value.hasItemRemarks = item.data.hasItemRemarks ? true : false
     itemData.value.showFieldsAtStart = item.data.showFieldsAtStart ? true : false
     itemData.value.hasAddRecordButton = item.data.hasAddRecordButton ? true: false
+    itemData.value.autoCreateFieldsByNumber = item.data.autoCreateFieldsByNumber ? true: false
   } else {
     itemData.value.conclusion_key = ''
     itemData.value.conclusion_item_key = ''
@@ -420,6 +425,7 @@ const initializeData = (item: any) => {
     itemData.value.hasItemRemarks = true
     itemData.value.showFieldsAtStart = false
     itemData.value.hasAddRecordButton = true
+    itemData.value.autoCreateFieldsByNumber = true
   }
 }
 const exportData = () => {

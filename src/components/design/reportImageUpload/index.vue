@@ -200,6 +200,9 @@ const onClickEditImage = (image: any) => {
 }
 
 const onUploadInputChange = async (e: Event) => {
+  if(!e?.target?.files || e?.target?.files.length === 0) {
+    return
+  }
   let filelist = [...props.value]
   let images = await ossUploadFiles(e)
   console.log('images:', images, ', targetEditImageRef.value:', targetEditImageRef.value)
