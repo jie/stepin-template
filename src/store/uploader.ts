@@ -4,6 +4,7 @@ import type { AxiosRequestConfig } from 'axios'
 const oss_server_uri: string = import.meta.env.VITE_OSS_SERVER_URI as string
 const api_host: string = import.meta.env.VITE_QYWX_API_HOST as string
 import { useLoadingStore } from '@/store';
+import { toRaw } from 'vue';
 
 export function getOssPolicy(data) {
   return http
@@ -34,6 +35,7 @@ export function uploadFile(data) {
 }
 
 export const ossUploadFiles = async (e, options = {}) => {
+  console.log('options:', toRaw(options))
   const { setPageLoading } = useLoadingStore();
   setPageLoading(true)
   let images = []
@@ -45,17 +47,6 @@ export const ossUploadFiles = async (e, options = {}) => {
         name: appname,
         filename: targetFile.name,
       }
-
-      //get file's width and height
-      const image = new Image()
-      image.src = URL.createObjectURL(targetFile)
-      await new Promise((resolve, reject) => {
-        image.onload = () => {
-          targetFile.width = image.width
-          targetFile.height = image.height
-          resolve()
-        }
-      })
 
 
       // if targetFile's width large than options.max_width then resize to options.max_width
@@ -92,7 +83,7 @@ export const ossUploadFiles = async (e, options = {}) => {
       if (options.prefix) {
         policyParams['prefix'] = options.prefix
       }
-      console.log(policyParams)
+      console.log('policyParams:', policyParams)
       // 得到阿里云oss参数
       let policyResult = await getOssPolicy(policyParams)
       let upload_params = policyResult.data.upload_params
