@@ -145,6 +145,21 @@ export const ReportTemplateStore = defineStore('reportTemplate', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiDuplicate(record: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      return http
+        .request('/platform/report_api/report_template/duplicate', 'post_json', {"id": record.id}, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.data) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
     async apiQuery() {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)

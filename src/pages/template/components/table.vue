@@ -3,7 +3,7 @@ import { FormInstance } from 'ant-design-vue';
 import { reactive, ref, toRaw } from 'vue';
 import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
-import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined } from '@ant-design/icons-vue';
+import { EditOutlined, DeleteOutlined, ExperimentOutlined, SettingOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons-vue';
 import router from '@/router';
 import { ApproveStatusOptions, ApproveStatus } from "@/utils/constant"
 import { ReportTemplateStore, ReportTemplate } from "@/store/reportTemplate"
@@ -166,6 +166,11 @@ function view(record: ReportTemplate) {
   showModal.value = true;
 }
 
+const duplicate = async (record: ReportTemplate) => {
+  await store.apiDuplicate({id: record.id})
+  initializeData()
+}
+
 
 const goDesign = (record: ReportTemplate) => {
   router.push({
@@ -323,6 +328,12 @@ const getLanguage = (code: string) => {
                 <a @click="view(record)" rel="noopener noreferrer">
                   <ReadOutlined />
                   {{$t('base.View')}}
+                </a>
+              </a-menu-item>
+              <a-menu-item key="5">
+                <a @click="duplicate(record)" rel="noopener noreferrer">
+                  <CopyOutlined />
+                  {{$t('base.Duplicate')}}
                 </a>
               </a-menu-item>
               <a-menu-item key="0">

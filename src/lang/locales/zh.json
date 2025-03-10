@@ -367,6 +367,14 @@
         "showFieldsAtStart": "未填写时展示字段",
         "SampleSizeItemKey": "样本数量关联组件",
         "SampleSizeItemField": "样本数量关联字段",
-        "hasAddRecordButton": "显示添加记录按钮"
+        "hasAddRecordButton": "显示添加记录按钮",
+        "autoCreateFieldsByNumber": "自定义字段时自动生成数字名称字段",
+        "CustomFieldSizeNumber": "请输入数量",
+        "Generate": "生成",
+        "SwitchToCustomField": "切换为自定义字段模式",
+        "SwitchToAutoGenerateField": "切换为自动生成模式",
+        "OrderedItems": "排序项目",
+        "WillInsertImageTo": "排序位置",
+        "max_image_width": "图片最大宽度(px)"
     }
 }

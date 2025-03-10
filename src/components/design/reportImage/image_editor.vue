@@ -108,6 +108,9 @@ const onClickTriggerButton = async (url: string) => {
 
 
 const onUploadInputChange = async (e: Event) => {
+  if(!e?.target?.files || e?.target?.files.length === 0) {
+    return
+  }
   let images = await ossUploadFiles(e)
   console.log('currentItemUrl.value:', toRaw(currentItemUrl.value))
   if (currentItemUrl.value) {

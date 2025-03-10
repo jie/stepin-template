@@ -327,7 +327,8 @@
             <a-form-item name="InspectionType"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.InspectionType') }), validator: validateRequired }]"
               :label="$t('base.InspectionType')">
-              <a-select v-model:value="store.formState['InspectionType']" allowClear :getPopupContainer="() => document.body">
+              <a-select v-model:value="store.formState['InspectionType']" allowClear
+                :getPopupContainer="() => document.body">
                 <a-select-option value="PPI">PPI</a-select-option>
                 <a-select-option value="DPI">DPI</a-select-option>
                 <a-select-option value="PSI">PSI</a-select-option>
@@ -338,7 +339,8 @@
           <div class="component meta" v-if="store.report?.template?.settings?.ReInspectionType">
             <!-- <a-form-item name="ReInspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReInspectionType')}), validator: validateRequired }]" :label="$t('base.ReInspectionType')"> -->
             <a-form-item name="ReInspectionType" :label="$t('base.ReInspectionType')">
-              <a-select v-model:value="store.formState['ReInspectionType']" allowClear :getPopupContainer="() => document.body">
+              <a-select v-model:value="store.formState['ReInspectionType']" allowClear
+                :getPopupContainer="() => document.body">
                 <a-select-option value="1ST">1ST</a-select-option>
                 <a-select-option value="2ST">2ST</a-select-option>
                 <a-select-option value="3ST">3ST</a-select-option>
@@ -394,23 +396,32 @@
         </div>
 
         <a-affix :offset-bottom="20" @change="affixedChange">
-          <div class="controls border-t" :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef }"
+          <div class="controls border-t"
+            :class="{ 'affixed-style': isAffixedRef, 'unaffixed-style': !isAffixedRef, 'toggleSubmitControls': isToggleSubmitControlsRef }"
             style="">
-            <div v-if="['-1', '0'].includes(store.report.review_status)">
-              <a-button type="primary" style="width: 140px; margin-left: 10px;" @click="onClickSubmit"
+            <div class="controls-wrapper" v-if="['-1', '0'].includes(store.report.review_status)">
+              <a-button type="primary" class="submit-btn" @click="onClickSubmit"
                 :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{
                   $t('base.Submit')
                 }}</a-button>
-              <a-button plain style="width: 140px; margin-left: 10px;" @click="onClickSave"
+              <a-button plain class="save-btn" @click="onClickSave"
                 :disabled="store.report.review_status == '1' || store.report.review_status == '2'">{{ $t('base.Save')
                 }}</a-button>
               <a-button plain style="margin-left: 10px;" @click="showLocalDataDialog" v-if="localDataRecord">{{
                 $t('base.ViewLocalData')
-              }}</a-button>
+                }}</a-button>
             </div>
             <div v-else>{{ $t('base.report_not_in_fill_status') }}: {{ store.report.review_status }}</div>
           </div>
+          <a-button class="controls-switch" type="primary" shape="circle" size="large"
+            @click="openSubmitControls" v-if="isAffixedRef">
+            <template #icon>
+              <VerticalLeftOutlined v-if="isToggleSubmitControlsRef == true"/>
+              <VerticalRightOutlined v-else />
+            </template>
+          </a-button>
         </a-affix>
+
       </a-form>
     </div>
     <div class="catalog" v-if="isShowCatalogRef">
@@ -481,6 +492,7 @@ const useForm = Form.useForm;
 const route = useRoute()
 const document = window.document
 const store = ReportFillStore()
+const isToggleSubmitControlsRef = ref(true)
 const isAffixedRef = ref(false)
 const loadingRef = ref(false)
 const formRef = ref()
@@ -542,6 +554,10 @@ const initialization = async () => {
 
 const showLocalDataDialog = () => {
   loadLocalDataDialogRef.value = true
+}
+
+const openSubmitControls = () => {
+  isToggleSubmitControlsRef.value = !isToggleSubmitControlsRef.value
 }
 
 const onOpenForm = async () => {
@@ -1162,6 +1178,11 @@ defineExpose({
   background-color: #f9f9f9;
 }
 
+.submit-btn,
+.save-btn {
+  width: 140px;
+  margin-left: 10px;
+}
 
 .affixed-style {
   border: 2px solid #ccc;
@@ -1196,7 +1217,17 @@ defineExpose({
   width: 100%;
   padding: 20px;
   width: 100%;
+}
 
+
+.controls.affixed-style.toggleSubmitControls {
+  display: none;
+}
+
+.controls-switch {
+  position: fixed;
+  bottom: 40px;
+  left: -10px;
 }
 
 .report-items-wrapper {

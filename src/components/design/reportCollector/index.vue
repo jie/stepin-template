@@ -143,7 +143,7 @@
                       <div>
                         <div>
                           <a-row type="flex" :gutter="[16, 16]">
-                            <a-col v-for="item in field.data" :key="item.url" :span="8">
+                            <a-col v-for="(item, imageIndex) in field.data" :key="item.url" :span="8">
                               <div style="width: 100%; aspect-ratio: 1 / 1;">
                                 <a-image :src="item.url" v-if="item.url && !item.url.endsWith('.mp4')"
                                   style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
@@ -151,6 +151,8 @@
                                   style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
                                 <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
                                 <div class="flex pt-2" style="justify-content: space-around;" v-if="!readonlyRef">
+                                  <span><a-checkbox v-model:checked="item.checked"></a-checkbox> ({{ imageIndex + 1
+                                    }})</span>
                                   <a-button size="small" type="primary" @click="editImage(field, item)">
                                     <template #icon>
                                       <EditOutlined />
@@ -179,6 +181,13 @@
                               <camera-outlined />
                             </template>
                             {{ props.item.data.take_photo_label }}
+                          </a-button>
+                          <a-button size="small" style="font-size: 80%; margin-left: 10px;"
+                            v-if="hasOrderedItems(field.data)" @click="showOrderItemsDialog(field, index)">
+                            <template #icon>
+                              <OrderedListOutlined />
+                            </template>
+                            Ordered
                           </a-button>
                         </div>
                       </div>
@@ -228,21 +237,57 @@
           </a-form-item>
         </a-form>
       </a-modal>
+      <a-modal :getContainer="() => document.body" v-model:visible="isShowOrderedDialog"
+        :title="$t('base.OrderedItems')" @ok="handleConfirmOrderedItems">
+        <a-form layout="vertical">
+          <a-form-item :label="$t('base.WillInsertImageTo')" name="targetIndex">
+            <a-input-number v-model:value="orderedTargetIndexRef" :min="1"></a-input-number>
+          </a-form-item>
+        </a-form>
+      </a-modal>
       <a-modal :getContainer="() => document.body" v-model:visible="isShowAddFieldDialog"
         :title="props.item?.data?.column_manage_label" @ok="handleAddFieldOK" :okText="$t('base.Close')" :footer="null">
         <a-form layout="vertical">
-          <a-form-item :label="props.item?.data?.column_name_label" name="label">
-            <a-input v-model:value="fieldForm.label" />
-          </a-form-item>
-          <a-form-item label="">
-            <a-button size="small" type="primary" style="font-size: 80%" @click="handleAddFieldOK"
-              :disabled="!fieldForm.label">
-              <template #icon>
-                <plus-circle-outlined />
-              </template>
-              {{ props.item?.data?.column_add_field_label }}
-            </a-button>
-          </a-form-item>
+          <template v-if="isShowAutoGenerateNumnber">
+            <a-form-item :label="$t('base.CustomFieldSizeNumber')">
+              <a-input-number v-model:value="autoGenerateNumberSize" min="1" class="w-full"/>
+            </a-form-item>
+            <a-form-item label="">
+              <a-button size="small" type="primary" style="font-size: 80%" @click="handleGenerateCustomFieldBySize"
+                :disabled="!autoGenerateNumberSize">
+                <template #icon>
+                  <plus-circle-outlined />
+                </template>
+                {{ $t('base.Generate') }}
+              </a-button>
+              <a-button size="small" style="font-size: 80%; margin-left: 10px" @click="switchCutomFieldMode('custom_field')">
+                <template #icon>
+                  <SwitcherOutlined />
+                </template>
+                {{ $t('base.SwitchToCustomField') }}
+              </a-button>
+            </a-form-item>
+          </template>
+          <template v-else>
+            <a-form-item :label="props.item?.data?.column_name_label" name="label">
+              <a-input v-model:value="fieldForm.label" />
+            </a-form-item>
+            <a-form-item label="">
+              <a-button size="small" type="primary" style="font-size: 80%" @click="handleAddFieldOK"
+                :disabled="!fieldForm.label">
+                <template #icon>
+                  <plus-circle-outlined />
+                </template>
+                {{ props.item?.data?.column_add_field_label }}
+              </a-button>
+              <a-button size="small" style="font-size: 80%; margin-left: 10px" @click="switchCutomFieldMode('auto_generate')">
+                <template #icon>
+                  <SwitcherOutlined />
+                </template>
+                {{ $t('base.SwitchToAutoGenerateField') }}
+              </a-button>
+            </a-form-item>
+          </template>
           <a-form-item label="">
             <div>
               <div v-for="field in itemData.dataExtraFields" class="flex"
@@ -267,7 +312,7 @@
 import BaseSlot from "../base_slot.vue"
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { defineProps, ref, PropType, reactive, toRaw, watch, defineEmits, computed } from 'vue'
-import Icon, { CheckSquareOutlined, CloseCircleFilled, EditOutlined } from '@ant-design/icons-vue';
+import Icon, { CheckSquareOutlined, CloseCircleFilled, EditOutlined, OrderedListOutlined, SwitcherOutlined } from '@ant-design/icons-vue';
 // import { MessageOutlined } from '@ant-design/icons-vue';
 // import { MessageOutlinedIconType } from "@ant-design/icons-vue/lib/icons/MessageOutlined";
 import { findLeafNode, newJsonObject } from '@/utils/helpers'
@@ -277,6 +322,7 @@ import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor, determineStatus } from "@/utils/helpers"
+import { has } from "lodash";
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -320,6 +366,50 @@ const fieldForm = reactive({
   label: '',
   value: '',
 })
+
+
+const isShowAutoGenerateNumnber = ref(false)
+const autoGenerateNumberSize = ref(null)
+
+const orderedTargetIndexRef = ref(null)
+const orderedRecordIndexRef = ref(null)
+const isShowOrderedDialog = ref(false)
+
+
+const hasOrderedItems = (images: any) => {
+  return images?.some((item: any) => item?.checked)
+}
+
+const showOrderItemsDialog = (field: any, index: number) => {
+  orderedRecordIndexRef.value = index
+  isShowOrderedDialog.value = true
+}
+
+const handleConfirmOrderedItems = () => {
+  let record = itemData.dataRecords[orderedRecordIndexRef.value]
+  let item = record.find(c => c.value === 'images')
+  let orderedImages = item.data.filter((item: any) => item.checked)
+  // move orderImages to orderedTargetIndexRef
+  let targetIndex = orderedTargetIndexRef.value
+  if (targetIndex === null) {
+    message.error('Invalid target index')
+    return
+  }
+
+  // insert orderedImages to targetIndex
+  let images = item.data.filter((item: any) => !item.checked)
+  images.splice(targetIndex, 0, ...orderedImages)
+  images.forEach((item: any, index: number) => {
+    item.checked = false
+  })
+  item.data = images
+
+  emits('update:value', exportValue())
+  orderedTargetIndexRef.value = null
+  orderedRecordIndexRef.value = null
+
+  isShowOrderedDialog.value = false
+}
 
 
 const isFieldRequire = (field) => {
@@ -544,7 +634,13 @@ const onClickUpload = (field: any, key: string) => {
 
 
 const onUploadInputChange = async (e: Event) => {
-  let images = await ossUploadFiles(e)
+  console.log('onUploadInputChange:', toRaw(e))
+  if(!e?.target?.files || e?.target?.files.length === 0) {
+    return
+  }
+  let images = await ossUploadFiles(e, {
+    max_width: props.item?.data?.max_image_width || 1440
+  })
   if (targetEditImageRef.value !== null) {
     let targetImage = currentUploadField.value.data.find(item => item.url === targetEditImageRef.value.url)
     if (targetImage) {
@@ -649,6 +745,63 @@ const onClickDeleteRecord = (index: number) => {
 const onClickAddField = (index: number) => {
   isShowAddFieldDialog.value = true
 }
+const switchCutomFieldMode = (mode:string) => {
+  if(mode == 'auto_generate') {
+    isShowAutoGenerateNumnber.value = true
+  }
+  if(mode == 'custom_field') {
+    isShowAutoGenerateNumnber.value = false
+  }
+}
+
+const handleGenerateCustomFieldBySize = () => {
+  if(!autoGenerateNumberSize.value) {
+    message.error('Please enter a number')
+    return
+  }
+  let newFields = []
+  let i = 1;
+  while (i <= autoGenerateNumberSize.value) {
+    newFields.push({
+      label: `${i}`,
+      value: `${i}`,
+      data: ''
+    })
+    i++
+  }
+  console.log('newFields:', newFields)
+
+  for (let record of itemData.dataRecords) {
+    for (let newField of newFields) {
+      let needAdd = true
+      for (let field of record) {
+        if (field.label === newField.label || field.value === newField.value) {
+          needAdd = false
+          break
+        }
+      }
+      if (needAdd) {
+        if (!itemData.dataExtraFields.includes(newField.label)) {
+          itemData.dataExtraFields.push(newField.label)
+        }
+        record.push({
+          label: newField.label,
+          value: newField.label,
+          data: newField.data
+        })
+        if (!itemData.dataSchema.find(c => c.label === newField.label || c.value === newField.label)) {
+          itemData.dataSchema.push({
+            label: newField.label,
+            value: newField.label
+          })
+        }
+      }
+    }
+  }
+  console.log('itemData.dataSchema:', toRaw(itemData.dataSchema))
+  isShowAddFieldDialog.value = false
+  emits('update:value', exportValue())
+}
 
 const handleAddFieldOK = () => {
   for (let record of itemData.dataRecords) {
@@ -741,6 +894,13 @@ const refreshValue = (data: any) => {
 
 
 const initialization = () => {
+
+  if(props.item?.data?.autoCreateFieldsByNumber) {
+    isShowAutoGenerateNumnber.value = true
+  } else {
+    isShowAutoGenerateNumnber.value = false
+  }
+
   itemData.conclusions = props.item?.data?.conclusions || []
   itemData.dataSchema = props.item?.data?.dataSchema || {}
   itemData.dataRecords = props.item?.data?.dataRecords || []

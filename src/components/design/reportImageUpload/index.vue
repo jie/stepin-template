@@ -27,7 +27,7 @@
                   <a-textarea style="width: 100%;" :data-url="item.url" v-model:value="item.desc" v-else
                     @drop.prevent="onDropImage" />
                 </a-col>
-                <a-col flex="120px">
+                <a-col flex="160px">
                   <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body }"
                     @confirm="deleteImage(item)" :title="$t('base.ConfirmDelete')" :ok-text="$t('base.Yes')"
                     :cancel-text="$t('base.No')">
@@ -38,6 +38,8 @@
                     </a-button>
                   </a-popconfirm> -->
                   <div class="flex" style="justify-content: space-around;">
+                    <div style="margin-top: 10px"><a-checkbox v-model:checked="item.checked"></a-checkbox> ({{ showImageIndex(item.url)
+                      }})</div>
                     <a-button shape="circle" style="margin-top: 10px;" @click="onClickDeleteImage(item)">
                       <template #icon>
                         <DeleteOutlined />
@@ -58,11 +60,18 @@
         </a-row>
       </div>
       <div style="margin-top: 10px;">
-        <a-button type="primary" @click="onClickTriggerButton">
+        <a-button type="primary" size="small" @click="onClickTriggerButton" style="font-size: 80%;">
           <template #icon>
-            <plus-outlined />
+            <plus-circle-outlined />
           </template>
           {{ $t('base.Upload') }}
+        </a-button>
+        <a-button size="small" style="font-size: 80%; margin-left: 10px;" v-if="hasOrderedItems(props?.value)"
+          @click="showOrderItemsDialog()">
+          <template #icon>
+            <OrderedListOutlined />
+          </template>
+          Ordered
         </a-button>
       </div>
       <input type="file" ref="fileBtnRef" style="display: none" @change="onUploadInputChange"
@@ -72,7 +81,14 @@
       v-model:visible="showDeleteImageRef" :cancel-text="$t('base.No')">
       <div>{{ $t('base.ConfirmDelete') }}</div>
     </a-modal>
-
+    <a-modal :getContainer="() => documentRef.body" v-model:visible="isShowOrderedDialog" :title="$t('base.OrderedItems')"
+      @ok="handleConfirmOrderedItems">
+      <a-form layout="vertical">
+        <a-form-item :label="$t('base.WillInsertImageTo')" name="targetIndex">
+          <a-input-number v-model:value="orderedTargetIndexRef" :min="1"></a-input-number>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 <script lang="ts" setup>
@@ -101,6 +117,47 @@ const props = defineProps({
 const computedItems = computed(() => {
   return groupArrayWithPatch(props.value, 2)
 })
+
+const orderedTargetIndexRef = ref(null)
+const isShowOrderedDialog = ref(false)
+
+
+const hasOrderedItems = (images: any) => {
+  return images?.some((item: any) => item?.checked)
+}
+
+const showOrderItemsDialog = () => {
+  isShowOrderedDialog.value = true
+}
+
+const showImageIndex = (url: string) => {
+  let index = props.value.findIndex((item: any) => item.url === url)
+  return index + 1
+}
+
+const handleConfirmOrderedItems = () => {
+  let items = [...props.value]
+  let orderedImages = items.filter((item: any) => item.checked)
+  // move orderImages to orderedTargetIndexRef
+  let targetIndex = orderedTargetIndexRef.value
+  if (targetIndex === null) {
+    // message.error('Invalid target index')
+    return
+  }
+
+  // insert orderedImages to targetIndex
+  let images = items.filter((item: any) => !item.checked)
+  images.splice(targetIndex, 0, ...orderedImages)
+  images.forEach((item: any, index: number) => {
+    item.checked = false
+  })
+
+  emits('update:value', images)
+  orderedTargetIndexRef.value = null
+  isShowOrderedDialog.value = false
+}
+
+
 
 const fileBtnRef = ref(null);
 const previewVisible = ref(false);
@@ -143,6 +200,9 @@ const onClickEditImage = (image: any) => {
 }
 
 const onUploadInputChange = async (e: Event) => {
+  if(!e?.target?.files || e?.target?.files.length === 0) {
+    return
+  }
   let filelist = [...props.value]
   let images = await ossUploadFiles(e)
   console.log('images:', images, ', targetEditImageRef.value:', targetEditImageRef.value)
@@ -213,7 +273,7 @@ const onDropImage = (e: Event, originUrl: string) => {
       targetEditImageRef.value = targetImage
       if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
         // let file = e.dataTransfer.files[0]
-        onUploadInputChange({ target: { files: e.dataTransfer.files} })
+        onUploadInputChange({ target: { files: e.dataTransfer.files } })
       }
     }
 

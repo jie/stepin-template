@@ -367,6 +367,14 @@
         "showFieldsAtStart": "Show Fields At Start",
         "SampleSizeItemKey": "Sample Size Component Key",
         "SampleSizeItemField": "Sample Size Component Field",
-        "hasAddRecordButton": "Has Add Record Button"
+        "hasAddRecordButton": "Has Add Record Button",
+        "autoCreateFieldsByNumber": "Is Auto Create Custom Fields By Number",
+        "CustomFieldSizeNumber": "Custom Field Size Number",
+        "Generate": "Gererate",
+        "SwitchToCustomField": "Switch to Custom Field",
+        "SwitchToAutoGenerateField": "Switch to Auto Generate",
+        "OrderedItems": "Order Items",
+        "WillInsertImageTo": "Will insert item to index",
+        "max_image_width": "Max Image Width"
     }
 }
