@@ -374,6 +374,7 @@
         "SwitchToCustomField": "Switch to Custom Field",
         "SwitchToAutoGenerateField": "Switch to Auto Generate",
         "OrderedItems": "Order Items",
-        "WillInsertImageTo": "Will insert item to index"
+        "WillInsertImageTo": "Will insert item to index",
+        "max_image_width": "Max Image Width"
     }
 }

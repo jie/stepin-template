@@ -375,7 +375,7 @@ const isShowOrderedDialog = ref(false)
 
 
 const hasOrderedItems = (images: any) => {
-  return images.some((item: any) => item.checked)
+  return images?.some((item: any) => item?.checked)
 }
 
 const showOrderItemsDialog = (field: any, index: number) => {
@@ -636,7 +636,9 @@ const onUploadInputChange = async (e: Event) => {
   if(!e?.target?.files || e?.target?.files.length === 0) {
     return
   }
-  let images = await ossUploadFiles(e)
+  let images = await ossUploadFiles(e, {
+    max_width: props.item?.data?.max_image_width || 1440
+  })
   if (targetEditImageRef.value !== null) {
     let targetImage = currentUploadField.value.data.find(item => item.url === targetEditImageRef.value.url)
     if (targetImage) {
@@ -795,6 +797,7 @@ const handleGenerateCustomFieldBySize = () => {
     }
   }
   console.log('itemData.dataSchema:', toRaw(itemData.dataSchema))
+  isShowAddFieldDialog.value = false
   emits('update:value', exportValue())
 }
 

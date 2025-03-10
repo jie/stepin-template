@@ -34,6 +34,9 @@
           <a-form-item :label="$t('base.hasImages')" name="hasImages">
             <a-switch v-model:checked="itemData.hasImages" />
           </a-form-item>
+          <a-form-item :label="$t('base.max_image_width')" name="max_image_width">
+            <a-input-number v-model:value="itemData.max_image_width" />
+          </a-form-item>
           <a-form-item :label="$t('base.isDefect')" name="isDefect">
             <a-switch v-model:checked="itemData.isDefect" />
           </a-form-item>
@@ -227,6 +230,7 @@ const itemData = ref({
   column_manage_label: "Columns Manage",
   column_name_label:'Column Name',
   column_add_field_label:'Add Field',
+  max_image_width: 1440,
   has_fields_management: true,
   auto_result: false,
   set_records_result: true,
@@ -380,6 +384,7 @@ const initializeData = (item: any) => {
     itemData.value.column_add_field_label = item.data.column_add_field_label || 'Add Field'
     itemData.value.add_record_label = item.data.add_record_label || 'Add Record'
     itemData.value.has_fields_management = item.data.has_fields_management
+    itemData.value.max_image_width = item.data.max_image_width || 1440
     itemData.value.auto_result = item.data.auto_result || false
     itemData.value.set_records_result = item.data.set_records_result
     itemData.value.display_as_table = item.data.display_as_table || false
@@ -412,6 +417,7 @@ const initializeData = (item: any) => {
     itemData.value.column_add_field_label = 'Add Field'
     itemData.value.add_record_label = 'Add Record'
     itemData.value.has_fields_management = true
+    itemData.value.max_image_width = 1440
     itemData.value.auto_result = false
     itemData.value.set_records_result = true
     itemData.value.display_as_table = false

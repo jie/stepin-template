@@ -123,7 +123,7 @@ const isShowOrderedDialog = ref(false)
 
 
 const hasOrderedItems = (images: any) => {
-  return images.some((item: any) => item.checked)
+  return images?.some((item: any) => item?.checked)
 }
 
 const showOrderItemsDialog = () => {

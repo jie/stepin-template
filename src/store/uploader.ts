@@ -33,19 +33,64 @@ export function uploadFile(data) {
   )
 }
 
-export const ossUploadFiles = async (e, prefix="") => {
+export const ossUploadFiles = async (e, options = {}) => {
   const { setPageLoading } = useLoadingStore();
   setPageLoading(true)
   let images = []
   const appname: string = import.meta.env.VITE_APP_NAME as string
   try {
     for (let file of e.target.files) {
+      let targetFile = file
       let policyParams = {
         name: appname,
-        filename: file.name,
+        filename: targetFile.name,
       }
-      if(prefix) {
-        policyParams['prefix'] = prefix
+
+      //get file's width and height
+      const image = new Image()
+      image.src = URL.createObjectURL(targetFile)
+      await new Promise((resolve, reject) => {
+        image.onload = () => {
+          targetFile.width = image.width
+          targetFile.height = image.height
+          resolve()
+        }
+      })
+
+
+      // if targetFile's width large than options.max_width then resize to options.max_width
+      if (options.max_width) {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        const image = new Image()
+        image.src = URL.createObjectURL(targetFile)
+        await new Promise((resolve, reject) => {
+          image.onload = () => {
+            let width, height
+            if (image.width > image.height && image.width > options.max_width) {
+              width = options.max_width
+              height = width * image.height / image.width
+            } else if (image.height > image.width && image.height > options.max_width) {
+              height = options.max_width
+              width = height * image.width / image.height
+            }
+            if(width && height) {
+              canvas.width = width
+              canvas.height = height
+              ctx.drawImage(image, 0, 0, width, height)
+              canvas.toBlob((blob) => {
+                targetFile = new File([blob], targetFile.name, { type: targetFile.type })
+                resolve()
+              }, targetFile.type)
+            } else {
+              resolve()
+            }
+          }
+        })
+      }
+
+      if (options.prefix) {
+        policyParams['prefix'] = options.prefix
       }
       console.log(policyParams)
       // 得到阿里云oss参数
@@ -59,10 +104,10 @@ export const ossUploadFiles = async (e, prefix="") => {
       formData.append('OSSAccessKeyId', upload_params.OSSAccessKeyId)
       formData.append('signature', upload_params.signature)
       formData.append('success_action_status', '200')
-      formData.append('file', file)
+      formData.append('file', targetFile)
       let uploadResult = await uploadFile(formData)
       console.log("uploadResult:", uploadResult)
-      if(uploadResult?.data?.status && uploadResult?.data?.data?.url) {
+      if (uploadResult?.data?.status && uploadResult?.data?.data?.url) {
         images.push(uploadResult?.data?.data?.url)
       }
     }

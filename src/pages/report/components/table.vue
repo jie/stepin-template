@@ -428,7 +428,7 @@ const uploadFile = (index: number, kind: string, item: any) => {
     const fileSizeFormatted = fileSizeInMB.toFixed(2);
     console.log(fileSizeFormatted);
     let filename = file.name
-    let result = await ossUploadFiles(e, prefix)
+    let result = await ossUploadFiles(e, {prefix: prefix})
     console.log('upload-result:', result)
     if (kind === 'simple_url') {
       reportFiles.value[index].simple_url = result[0]
