@@ -11,7 +11,8 @@ import {
   ReportCheckbox,
   ReportContainer,
 } from "@/types/components"
-import { ref } from "vue"
+import { ref, toRaw } from "vue"
+import { i18n } from '@/lang/i18n';
 import { useRoute } from "vue-router";
 import router from "@/router";
 const route = useRoute()
@@ -43,8 +44,9 @@ const initializeData = async () => {
     // })
     
     let record = await store.apiGetTemplate(id)
-    console.log('record:', record)
+    console.log('initializeData=record:', record)
     record = record.entity
+    console.log('record.settings:', toRaw(record.settings))
     store.initReportTemplate({
       id: record.id,
       title: record.title,
@@ -62,7 +64,6 @@ const onSaveTemplate = async (data:any) => {
   router.back()
 }
 
-console.log('11111')
 initializeData()
 </script>
 <template>

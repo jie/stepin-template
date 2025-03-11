@@ -8,6 +8,7 @@ import { useLoadingStore } from '@/store';
 import { Pagination } from "@/types"
 
 interface ReportTemplateSettings {
+  AutoSave?: boolean;
   allowSelectImageFromAlbum?: boolean;
   ReportNumber?: boolean;
   OrderQuantity?: boolean;
@@ -31,9 +32,34 @@ interface ReportTemplateSettings {
   SpecialInspectionLevel?: boolean;
   InspectionType?: boolean;
   ReInspectionType?: boolean;
+  OrderNumber?: boolean;
   // GeneralInspectionLevel?: Array<string>;
   // InspectionType?: Array<string>;
   // ReInspectionType?: Array<string>;
+  ApplicantLabel?: string;
+  SupplierLabel?: string;
+  FactoryLabel?: string;
+  ItemNumberLabel?: string;
+  ProductDescriptionLabel?: string;
+  AddressOfInspectionLabel?: string;
+  DateOfInspectionLabel?: string;
+  ArrivalTimeLabel?: string;
+  DepartureTimeLabel?: string;
+  InspectorLabel?: string;
+  ReportNumberLabel?: string;
+  OrderQuantityLabel?: string;
+  SampleSizeTotalLabel?: string;
+  InspectStandardLabel?: string;
+  SampleSizeLabel?: string;
+  AQL_CRLabel?: string;
+  AQL_MAJLabel?: string;
+  AQL_MINLabel?: string;
+  GeneralInspectionLevelLabel?: string;
+  SpecialInspectionLevelLabel?: string;
+  InspectionTypeLabel?: string;
+  ReInspectionTypeLabel?: string;
+  OrderNumberLabel?: string;
+  ReportResultLabel?: string;
 }
 
 
@@ -150,7 +176,7 @@ export const ReportTemplateStore = defineStore('reportTemplate', {
       setPageLoading(true)
       let session = getSessionInfo()
       return http
-        .request('/platform/report_api/report_template/duplicate', 'post_json', {"id": record.id}, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report_template/duplicate', 'post_json', { "id": record.id }, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           if (response.data?.data) {
             return response.data?.data;

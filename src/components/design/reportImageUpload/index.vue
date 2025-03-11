@@ -98,10 +98,12 @@ import { ref, computed } from 'vue';
 import { groupArrayWithPatch } from "@/utils/objectUtils"
 import { getBase64 } from "@/utils/file"
 import type { UploadProps } from 'ant-design-vue';
+import { message, Modal } from "ant-design-vue";
 import { ossUploadFiles } from "@/store/uploader"
 import { ImageType } from "@/types/components/image"
 import { ReportFillStore } from "@/store/report_fill"
 import { toRaw } from "vue";
+import { i18n } from "@/lang/i18n";
 const store = ReportFillStore()
 const documentRef = document
 const props = defineProps({
@@ -153,6 +155,7 @@ const handleConfirmOrderedItems = () => {
   })
 
   emits('update:value', images)
+  autoSave(images)
   orderedTargetIndexRef.value = null
   isShowOrderedDialog.value = false
 }
@@ -224,6 +227,7 @@ const onUploadInputChange = async (e: Event) => {
     }
   }
   emits('update:value', filelist)
+  autoSave(filelist)
 
 }
 
@@ -244,15 +248,14 @@ const exportData = () => {
   }
 }
 
-const exportValue = () => {
-  return { "images": fileList.value }
-}
+
 
 const deleteImage = (image: ImageType) => {
   let filelist = [...props.value]
   filelist = filelist.filter(item => item.url !== image.url)
   console.log('props.value:', toRaw(props.value))
   emits('update:value', filelist || [])
+  autoSave(filelist)
 }
 
 const confirmDeleteImage = () => {
@@ -280,6 +283,48 @@ const onDropImage = (e: Event, originUrl: string) => {
   }
 }
 
+const getFillSession = () => {
+  let fillSession = localStorage.getItem("fill_session")
+  if (fillSession) {
+    return JSON.parse(fillSession)
+  } else {
+    return null
+  }
+}
+
+const autoSave = async (dataValue: any) => {
+  let fillSession = getFillSession()
+  if (!fillSession) {
+    message.error(i18n.global.t('base.PleaseLoginFirst'))
+    return
+  }
+  try {
+    await store.apiFillSingle({
+      id: store.report.id,
+      values: { [props?.item?.key]: dataValue },
+      email: fillSession.email,
+      password: fillSession.password
+    })
+
+  } catch (e) {
+    console.error(e)
+    message.error(i18n.global.t('base.LoginFailByFillToken'))
+    return
+  }
+}
+
+// const exportValue = () => {
+//   console.log('export-value-data:', toRaw(itemData),props?.item?.data?.AutoSave)
+//   let dataValue = { data: { ...itemData } }
+//   if(store?.report?.template?.settings?.AutoSave) {
+//     autoSave(dataValue)
+//   }
+//   return dataValue
+// }
+
+const exportValue = () => {
+  return { "images": fileList.value }
+}
 
 defineExpose({
   props,

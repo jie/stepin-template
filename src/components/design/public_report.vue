@@ -153,116 +153,123 @@
           <div class="component meta">
             <a-form-item name="ReportResult"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ReportResult') }), validator: validateRequired }]"
-              :label="$t('base.ReportResult')">
-              <a-radio-group v-model:value="store.formState['ReportResult']" :options="reportResultOptions">
+              :label="store.report?.template?.settings?.ReportResultLabel || $t('base.ReportResult')">
+              <a-radio-group @change="onChangeValue($event, 'ReportResult')" data-comkey="ReportResult" v-model:value="store.formState['ReportResult']" :options="reportResultOptions">
                 <template #label="{ value }">
                   <span style="color: red">{{ value }}</span>
                 </template>
               </a-radio-group>
             </a-form-item>
           </div>
-          <div class="component meta"
+          <!-- <div class="component meta"
             v-if="store.formState['ReportResult'] == '0' || store.formState['ReportResult'] == '1'">
             <a-form-item name="ReportResultRemark"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ReportResultRemark') }), validator: validateRequired }]"
               :label="$t('base.ReportResultRemark')">
-              <a-textarea v-model:value="store.formState['ReportResultRemark']"></a-textarea>
+              <a-textarea @change="onChangeValue($event, 'ReportResultRemark')" data-comkey="ReportResultRemark" v-model:value="store.formState['ReportResultRemark']"></a-textarea>
             </a-form-item>
-          </div>
+          </div> -->
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
             <a-form-item name="ReportNumber"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ReportNumber') }), validator: validateRequired }]"
-              :label="$t('base.ReportNumber')">
-              <a-input v-model:value="store.formState['ReportNumber']" allowClear></a-input>
+              :label="store.report?.template?.settings?.ReportNumberLabel || $t('base.ReportNumber')">
+              <a-input @blur="onChangeValue($event, 'ReportNumber')" data-comkey="ReportNumber" v-model:value="store.formState['ReportNumber']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Applicant">
             <a-form-item name="Applicant"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Applicant') }), validator: validateRequired }]"
-              :label="$t('base.Applicant')">
-              <a-input v-model:value="store.formState['Applicant']" allowClear></a-input>
+              :label="store.report?.template?.settings?.ApplicantLabel || $t('base.Applicant')">
+              <a-input @blur="onChangeValue($event, 'Applicant')" data-comkey="Applicant" v-model:value="store.formState['Applicant']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Supplier">
             <a-form-item name="Supplier"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Supplier') }), validator: validateRequired }]"
-              :label="$t('base.Supplier')">
-              <a-input v-model:value="store.formState['Supplier']" allowClear></a-input>
+              :label="store.report?.template?.settings?.SupplierLabel || $t('base.Supplier')">
+              <a-input @blur="onChangeValue($event, 'Supplier')" data-comkey="Supplier" v-model:value="store.formState['Supplier']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Factory">
             <a-form-item name="Factory"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Factory') }), validator: validateRequired }]"
-              :label="$t('base.Factory')">
-              <a-input v-model:value="store.formState['Factory']" allowClear></a-input>
+              :label="store.report?.template?.settings?.FactoryLabel || $t('base.Factory')">
+              <a-input @blur="onChangeValue($event, 'Factory')" data-comkey="Factory" v-model:value="store.formState['Factory']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ProductDescription">
             <a-form-item name="ProductDescription"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ProductDescription') }), validator: validateRequired }]"
-              :label="$t('base.ProductDescription')">
-              <a-textarea v-model:value="store.formState['ProductDescription']" allowClear></a-textarea>
+              :label="store.report?.template?.settings?.ProductDescriptionLabel || $t('base.ProductDescription')">
+              <a-textarea @change="onChangeValue($event, 'ProductDescription')" data-comkey="ProductDescription" v-model:value="store.formState['ProductDescription']" allowClear></a-textarea>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.AddressOfInspection">
             <a-form-item name="AddressOfInspection"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AddressOfInspection') }), validator: validateRequired }]"
-              :label="$t('base.AddressOfInspection')">
-              <a-input v-model:value="store.formState['AddressOfInspection']" allowClear></a-input>
+              :label="store.report?.template?.settings?.AddressOfInspectionLabel || $t('base.AddressOfInspection')">
+              <a-input @blur="onChangeValue($event, 'AddressOfInspection')" data-comkey="AddressOfInspection" v-model:value="store.formState['AddressOfInspection']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DateOfInspection">
             <a-form-item name="DateOfInspection"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.DateOfInspection') }), validator: validateRequired }]"
-              :label="$t('base.DateOfInspection')">
-              <a-date-picker style="width: 100%" v-model:value="store.formState['DateOfInspection']"
+              :label="store.report?.template?.settings?.DateOfInspectionLabel || $t('base.DateOfInspection')">
+              <a-date-picker style="width: 100%" @change="onChangeValue($event, 'DateOfInspection')" data-comkey="DateOfInspection" v-model:value="store.formState['DateOfInspection']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ArrivalTime">
             <a-form-item name="ArrivalTime"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ArrivalTime') }), validator: validateRequired }]"
-              :label="$t('base.ArrivalTime')">
+              :label="store.report?.template?.settings?.ArrivalTimeLabel || $t('base.ArrivalTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
-                v-model:value="store.formState['ArrivalTime']"
+                @change="onChangeValue($event, 'ArrivalTime')" data-comkey="ArrivalTime" v-model:value="store.formState['ArrivalTime']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.DepartureTime">
             <a-form-item name="DepartureTime"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.DepartureTime') }), validator: validateRequired }]"
-              :label="$t('base.DepartureTime')">
+              :label="store.report?.template?.settings?.DepartureTimeLabel || $t('base.DepartureTime')">
               <a-date-picker style="width: 100%" :show-time="{ format: 'HH:mm' }"
-                v-model:value="store.formState['DepartureTime']"
+                @change="onChangeValue($event, 'DepartureTime')" data-comkey="DepartureTime" v-model:value="store.formState['DepartureTime']"
                 :getPopupContainer="triggerNode => triggerNode.parentNode" />
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.Inspector">
             <a-form-item name="Inspector"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.Inspector') }), validator: validateRequired }]"
-              :label="$t('base.Inspector')">
-              <a-input v-model:value="store.formState['Inspector']" allowClear></a-input>
+              :label="store.report?.template?.settings?.InspectorLabel || $t('base.Inspector')">
+              <a-input @blur="onChangeValue($event, 'Inspector')" data-comkey="Inspector" v-model:value="store.formState['Inspector']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.InspectionStandard">
             <a-form-item name="InspectionStandard"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.InspectionStandard') }), validator: validateRequired }]"
-              :label="$t('base.InspectionStandard')">
-              <a-input v-model:value="store.formState['InspectionStandard']" allowClear></a-input>
+              :label="store.report?.template?.settings?.InspectionStandardLabel || $t('base.InspectionStandard')">
+              <a-input @blur="onChangeValue($event, 'InspectionStandard')" data-comkey="InspectionStandard" v-model:value="store.formState['InspectionStandard']" allowClear></a-input>
+            </a-form-item>
+          </div>
+          <div class="component meta" v-if="store.report?.template?.settings?.OrderNumber">
+            <a-form-item name="OrderNumber"
+              :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.OrderNumber') }), validator: validateRequired }]"
+              :label="store.report?.template?.settings?.OrderNumberLabel || $t('base.OrderNumber')">
+              <a-select @change="onChangeValue($event, 'OrderNumber')" data-comkey="OrderNumber" v-model:value="store.formState['OrderNumber']" mode="tags" style="width: 100%"></a-select>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ItemNumber">
             <a-form-item name="ItemNumber"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.ItemNumber') }), validator: validateRequired }]"
-              :label="$t('base.ItemNumber')">
-              <a-select v-model:value="store.formState['ItemNumber']" mode="tags" style="width: 100%"></a-select>
+              :label="store.report?.template?.settings?.ItemNumberLabel || $t('base.ItemNumber')">
+              <a-select @change="onChangeValue($event, 'ItemNumber')" data-comkey="ItemNumber" v-model:value="store.formState['ItemNumber']" mode="tags" style="width: 100%"></a-select>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.GeneralInspectionLevel">
             <a-form-item name="GeneralInspectionLevel"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.GeneralInspectionLevel') }), validator: validateRequired }]"
-              :label="$t('base.GeneralInspectionLevel')">
-              <a-radio-group v-model:value="store.formState['GeneralInspectionLevel']" allowClear>
+              :label="store.report?.template?.settings?.GeneralInspectionLevelLabel || $t('base.GeneralInspectionLevel')">
+              <a-radio-group @change="onChangeValue($event, 'GeneralInspectionLevel')" data-comkey="GeneralInspectionLevel" v-model:value="store.formState['GeneralInspectionLevel']" allowClear>
                 <a-radio value="I">I</a-radio>
                 <a-radio value="II">II</a-radio>
                 <a-radio value="III">III</a-radio>
@@ -272,8 +279,8 @@
           <div class="component meta" v-if="store.report?.template?.settings?.SpecialInspectionLevel">
             <a-form-item name="SpecialInspectionLevel"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.SpecialInspectionLevel') }), validator: validateRequired }]"
-              :label="$t('base.SpecialInspectionLevel')">
-              <a-radio-group v-model:value="store.formState['SpecialInspectionLevel']" allowClear>
+              :label="store.report?.template?.settings?.SpecialInspectionLevelLabel || $t('base.SpecialInspectionLevel')">
+              <a-radio-group @change="onChangeValue($event, 'SpecialInspectionLevel')" data-comkey="SpecialInspectionLevel" v-model:value="store.formState['SpecialInspectionLevel']" allowClear>
                 <a-radio value="S-1">S-1</a-radio>
                 <a-radio value="S-2">S-2</a-radio>
                 <a-radio value="S-3">S-3</a-radio>
@@ -284,8 +291,8 @@
           <div class="component meta" v-if="store.report?.template?.settings?.OrderQuantity">
             <a-form-item name="OrderQuantity"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.OrderQuantity') }), validator: validateRequired }]"
-              :label="$t('base.OrderQuantity')">
-              <a-input v-model:value="store.formState['OrderQuantity']" allowClear></a-input>
+              :label="store.report?.template?.settings?.OrderQuantityLabel || $t('base.OrderQuantity')">
+              <a-input @blur="onChangeValue($event, 'OrderQuantity')" data-comkey="OrderQuantity" v-model:value="store.formState['OrderQuantity']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReportNumber">
@@ -293,24 +300,24 @@
               <a-col :span="8">
                 <a-form-item name="AQL_CR"
                   :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AQL_CR') }), validator: validateRequired }]"
-                  :label="$t('base.AQL_CR')">
-                  <a-select v-model:value="store.formState['AQL_CR']" :options="aclList" allowClear
+                  :label="store.report?.template?.settings?.AQL_CRLabel || $t('base.AQL_CR')">
+                  <a-select @change="onChangeValue($event, 'AQL_CR')" data-comkey="AQL_CR" v-model:value="store.formState['AQL_CR']" :options="aclList" allowClear
                     :getPopupContainer="() => document.body"></a-select>
                 </a-form-item>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MAJ"
                   :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AQL_MAJ') }), validator: validateRequired }]"
-                  :label="$t('base.AQL_MAJ')">
-                  <a-select v-model:value="store.formState['AQL_MAJ']" :options="aclList" allowClear
+                  :label="store.report?.template?.settings?.AQL_MAJLabel || $t('base.AQL_MAJ')">
+                  <a-select @change="onChangeValue($event, 'AQL_MAJ')" data-comkey="AQL_MAJ" v-model:value="store.formState['AQL_MAJ']" :options="aclList" allowClear
                     :getPopupContainer="() => document.body"></a-select>
                 </a-form-item>
               </a-col>
               <a-col :span="8">
                 <a-form-item name="AQL_MIN"
                   :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.AQL_MIN') }), validator: validateRequired }]"
-                  :label="$t('base.AQL_MIN')">
-                  <a-select v-model:value="store.formState['AQL_MIN']" :options="aclList" allowClear
+                  :label="store.report?.template?.settings?.AQL_MINLabel || $t('base.AQL_MIN')">
+                  <a-select @change="onChangeValue($event, 'AQL_MIN')" data-comkey="AQL_MIN" v-model:value="store.formState['AQL_MIN']" :options="aclList" allowClear
                     :getPopupContainer="() => document.body"></a-select>
                 </a-form-item>
               </a-col>
@@ -319,15 +326,15 @@
           <div class="component meta" v-if="store.report?.template?.settings?.SampleSizeTotal">
             <a-form-item name="SampleSizeTotal"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.SampleSizeTotal') }), validator: validateRequired }]"
-              :label="$t('base.SampleSizeTotal')">
-              <a-input v-model:value="store.formState['SampleSizeTotal']" allowClear></a-input>
+              :label="store.report?.template?.settings?.SampleSizeTotalLabel || $t('base.SampleSizeTotal')">
+              <a-input @blur="onChangeValue($event, 'SampleSizeTotal')" data-comkey="SampleSizeTotal" v-model:value="store.formState['SampleSizeTotal']" allowClear></a-input>
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.InspectionType">
             <a-form-item name="InspectionType"
               :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', { 'label': $t('base.InspectionType') }), validator: validateRequired }]"
-              :label="$t('base.InspectionType')">
-              <a-select v-model:value="store.formState['InspectionType']" allowClear
+              :label="store.report?.template?.settings?.InspectionTypeLabel || $t('base.InspectionType')">
+              <a-select @change="onChangeValue($event, 'InspectionType')" data-comkey="InspectionType" v-model:value="store.formState['InspectionType']" allowClear
                 :getPopupContainer="() => document.body">
                 <a-select-option value="PPI">PPI</a-select-option>
                 <a-select-option value="DPI">DPI</a-select-option>
@@ -337,9 +344,8 @@
             </a-form-item>
           </div>
           <div class="component meta" v-if="store.report?.template?.settings?.ReInspectionType">
-            <!-- <a-form-item name="ReInspectionType" :rules="[{ required: true, trigger: 'change', message: $t('base.pleaseSetFieldValue', {'label': $t('base.ReInspectionType')}), validator: validateRequired }]" :label="$t('base.ReInspectionType')"> -->
-            <a-form-item name="ReInspectionType" :label="$t('base.ReInspectionType')">
-              <a-select v-model:value="store.formState['ReInspectionType']" allowClear
+            <a-form-item name="ReInspectionType" :label="store.report?.template?.settings?.ReInspectionTypeLabel || $t('base.ReInspectionType')">
+              <a-select @change="onChangeValue($event, 'ReInspectionType')" data-comkey="ReInspectionType" v-model:value="store.formState['ReInspectionType']" allowClear
                 :getPopupContainer="() => document.body">
                 <a-select-option value="1ST">1ST</a-select-option>
                 <a-select-option value="2ST">2ST</a-select-option>
@@ -974,7 +980,31 @@ const onClickSave = async () => {
   await onFinishSubmit()
 }
 
+const onChangeValue = (event: Event, comkey:string) => {
+  console.log('onChangeValue-event:', toRaw(event.target), comkey, store.formState[comkey])
+  autoSave(comkey, store.formState[comkey])
+}
 
+const autoSave = async (key:string, dataValue: any) => {
+  let fillSession = getFillSession()
+  if (!fillSession) {
+    message.error(i18n.global.t('base.PleaseLoginFirst'))
+    return
+  }
+  try {
+    await store.apiFillSingle({
+      id: store.report.id,
+      values: { [key]: dataValue },
+      email: fillSession.email,
+      password: fillSession.password
+    })
+
+  } catch (e) {
+    console.error(e)
+    message.error(i18n.global.t('base.LoginFailByFillToken'))
+    return
+  }
+}
 
 const onClickCancelEditMode = () => {
   isShowEditModeDialog.value = false
@@ -1095,6 +1125,12 @@ watchEffect(() => {
     currentEditComponentIndexRef.value = -1
   }
 })
+
+window.addEventListener('beforeunload', function (event) {
+  event.preventDefault();
+  event.returnValue = '';
+    return 'Do you confirm leave current page';
+});
 
 
 const updateAqlValues = () => {

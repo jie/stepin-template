@@ -58,9 +58,12 @@
             <div class="component"
               v-else-if="item.key == currentReviewComponentRef.key && currentReviewComponentRef.type == 'collector'">
               <reportEditCollector mode="review" :item="currentReviewComponentRef"
-                v-model:value="store.formState[currentReviewComponentRef.key]" v-on:updateCollector="onUpdateCollector" v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult" v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError">
+                v-model:value="store.formState[currentReviewComponentRef.key]" v-on:updateCollector="onUpdateCollector"
+                v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult"
+                v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError">
               </reportEditCollector>
             </div>
+            <div v-else>{{ item.key }} / {{ currentReviewComponentRef.key}} / {{ item.type }} / {{  item.title }}</div>
           </div>
         </a-form>
       </div>
@@ -183,9 +186,9 @@
             </div>
           </a-col>
           <a-col :span="12">
-            <div><strong>{{ $t('base.Reason') }}</strong>: <span style="float: right; word-break: break-all; ">{{
+            <!-- <div><strong>{{ $t('base.Reason') }}</strong>: <span style="float: right; word-break: break-all; ">{{
               store.report.values.ReportResultRemark }}</span>
-            </div>
+            </div> -->
           </a-col>
         </a-row>
       </div>
@@ -193,8 +196,10 @@
         <a-row :gutter="[20, 20]" v-for="(row, index) in reportInspectDetailRef" :key="index"
           style="margin-bottom: 20px">
           <a-col :span="12" v-for="(item, index) in row" :key="index">
-            <div v-if="item.key != 'ItemNumber'"><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right">{{ item.value }}</span></div>
-            <div v-else><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right"><a-tag v-for="tag in item.value">{{ tag }}</a-tag></span></div>
+            <div v-if="item.key != 'ItemNumber'"><strong>{{ $t(`base.${item.key}`) }}</strong>: <span
+                style="float: right">{{ item.value }}</span></div>
+            <div v-else><strong>{{ $t(`base.${item.key}`) }}</strong>: <span style="float: right"><a-tag
+                  v-for="tag in item.value">{{ tag }}</a-tag></span></div>
           </a-col>
         </a-row>
       </div>
@@ -236,7 +241,11 @@
           </div>
           <div class="component" :id="`com-${item.key}`" v-else-if="item.type == 'collector'">
             <reportCollector mode="review" :item="item" v-model:value="store.formState[item.key]" ref="itemRefs"
-              v-on:updateCollector="onUpdateCollector" v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult" v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError"></reportCollector>
+              v-on:updateCollector="onUpdateCollector"
+              v-on:updateConclusionInspectResult="onUpdateConclusionInspectResult"
+              v-on:validateImagesField="onValidateImagesField" 
+              v-on:clearFieldError="onClearFieldError">
+            </reportCollector>
           </div>
           <div v-else>unsupported components: {{ item }}</div>
           <div v-if="isStaffReview && store.report?.review_comments[item.key]?.comment">{{ $t('base.Comment') }}: {{
@@ -732,14 +741,14 @@ const onClickCancelReviewMode = () => {
 
 const onClearFieldError = (fieldName) => {
   formRef.value.clearValidate([fieldName]);
-  if (isShowEditModeDialog.value == true) {
+  if (isShowReviewModeDialog.value == true) {
     editModeFormRef.value.clearValidate([fieldName]);
   }
 };
 
 const onValidateImagesField = (fieldName) => {
   formRef.value.validateFields([fieldName]);
-  if (isShowEditModeDialog.value == true) {
+  if (isShowReviewModeDialog.value == true) {
     editModeFormRef.value.validateFields([fieldName]);
   }
 };
@@ -768,7 +777,7 @@ const onUpdateCollector = (collector: any) => {
       store.formState[conclusionCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == conclusionCom.key).data.conclusions } }
       conclusionComItem = store.formState[conclusionCom.key]?.data?.conclusions?.find(c => c.key == conclusionItem.key)
     }
-    if(determineStatus(statuses)) {
+    if (determineStatus(statuses)) {
       conclusionComItem.status = determineStatus(statuses)
     }
   }
@@ -785,14 +794,13 @@ const onUpdateCollector = (collector: any) => {
           store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
         }
         let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
-        if(determineStatus(parentStatuses)) {
+        if (determineStatus(parentStatuses)) {
           ParentConclusionItem.status = determineStatus(parentStatuses)
         }
       }
     }
   }
 }
-
 
 const onUpdateConclusionInspectResult = (collector: any, status: string, remark: string) => {
   let conclusionCom = store.report.template?.items.find(c => c.key == collector?.data?.conclusion_key)
@@ -820,7 +828,7 @@ const onUpdateConclusionInspectResult = (collector: any, status: string, remark:
           store.formState[parentCom.key] = { "data": { "conclusions": store.report.template?.items.find(c => c.key == parentCom.key).data.conclusions } }
         }
         let ParentConclusionItem = store.formState[parentCom.key].data.conclusions.find(c => c.key == conclusionCom?.data?.parent_key)
-        if(determineStatus(parentStatuses)) {
+        if (determineStatus(parentStatuses)) {
           ParentConclusionItem.status = determineStatus(parentStatuses)
         }
 
@@ -830,11 +838,14 @@ const onUpdateConclusionInspectResult = (collector: any, status: string, remark:
 }
 
 
+
 watchEffect(() => {
   if (isShowReviewModeDialog.value) {
     // add overflow hidden to <html> element to prevent scrolling
     document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
+    console.log('currentReviewComponentRef.value:', currentReviewComponentRef.value)
+    console.log('currentReviwComponentIndexRef.value:', currentReviwComponentIndexRef.value)
     console.log('document.documentElement.style.overflow:', document.documentElement.style.overflow)
   } else {
     document.documentElement.style.overflow = 'auto'
