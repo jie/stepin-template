@@ -494,6 +494,7 @@ import { determineStatus } from "@/utils/helpers"
 import { message, Form } from 'ant-design-vue';
 import { aclList, batchSizeData, qualityLimitation, getDefectiveLimitation, getAqlOptions, getSampleSizeAndAqlLimitation } from '@/utils/sampling';
 import dayjs from 'dayjs';
+import {reportResultOptions} from "@/utils/constant"
 const useForm = Form.useForm;
 const route = useRoute()
 const document = window.document
@@ -517,12 +518,6 @@ const affixedChange = (affixed: boolean) => {
   isAffixedRef.value = affixed
 };
 const isShowEditModeDialog = ref(false)
-
-const reportResultOptions = [
-  { label: i18n.global.t(`base.ResultPassed`), value: '3' },
-  { label: i18n.global.t(`base.ResultPending`), value: '1' },
-  { label: i18n.global.t(`base.ResultFailed`), value: '0' },
-];
 
 const accountStore = useAccountStore()
 const initialization = async () => {

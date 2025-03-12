@@ -467,6 +467,7 @@ const onClickOpenReportSettingDrawer = () => {
   console.log('reportTemplateStore.reportTemplate.settings:', toRaw(reportTemplateStore.reportTemplate))
   let mySettings = {
     AutoSave: reportTemplateStore.reportTemplate.settings?.AutoSave === undefined ? true: reportTemplateStore.reportTemplate.settings.AutoSave,
+    ConclusionOnTop: reportTemplateStore.reportTemplate.settings?.ConclusionOnTop === undefined ? true: reportTemplateStore.reportTemplate.settings.ConclusionOnTop,
     allowSelectImageFromAlbum: reportTemplateStore.reportTemplate.settings?.allowSelectImageFromAlbum === undefined ? true: reportTemplateStore.reportTemplate.settings.allowSelectImageFromAlbum,
     ReportNumber: reportTemplateStore.reportTemplate.settings?.ReportNumber === undefined ? true: reportTemplateStore.reportTemplate.settings.ReportNumber,
     OrderQuantity: reportTemplateStore.reportTemplate.settings?.OrderQuantity === undefined ? true: reportTemplateStore.reportTemplate.settings.OrderQuantity,

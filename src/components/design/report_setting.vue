@@ -11,6 +11,9 @@
                 <a-range-picker :show-time="{ format: 'HH:mm' }" format="YYYY-MM-DD HH:mm"
                     :placeholder="['Start Time', 'End Time']" @change="onRangeChange" @ok="onRangeOk" />
             </a-form-item> -->
+            <a-form-item :label="$t('base.ConclusionOnTop')" name="ConclusionOnTop">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.ConclusionOnTop" />
+            </a-form-item>
             <a-form-item :label="$t('base.AllowAlbumImage')" name="allowSelectImageFromAlbum">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.allowSelectImageFromAlbum" />
             </a-form-item>
@@ -226,6 +229,7 @@ const exportData = () => {
         summary: reportTemplateStore.reportTemplate.summary,
         allowSelectImageFromAlbum: reportTemplateStore.reportTemplate?.settings?.allowSelectImageFromAlbum,
         AutoSave: reportTemplateStore.reportTemplate?.settings?.AutoSave,
+        ConclusionOnTop: reportTemplateStore.reportTemplate?.settings?.ConclusionOnTop,
         ReportNumber: reportTemplateStore.reportTemplate?.settings?.ReportNumber,
         OrderQuantity: reportTemplateStore.reportTemplate?.settings?.OrderQuantity,
         SampleSizeTotal: reportTemplateStore.reportTemplate?.settings?.SampleSizeTotal,
