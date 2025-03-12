@@ -41,7 +41,7 @@
             </a-form-item>
             <a-form-item :label="$t('base.Remark')" name="remark" v-if="props?.item?.data?.hasRemarks">
               <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="itemData.statusData.remark"
-                @change="onChange"></a-textarea>
+                @change="onChange" @blur="onBlur"></a-textarea>
             </a-form-item>
           </div>
           <div
@@ -77,7 +77,7 @@
                     </div>
                     <div class="field" v-else-if="field.value == 'quantity'">
                       <div>
-                        <a-input-number v-model:value="field.data" @change="onChange" style="width: 100%;" :min="0"
+                        <a-input-number @blur="onBlur" v-model:value="field.data" @change="onChange" style="width: 100%;" :min="0"
                           :readonly="readonlyRef" />
                       </div>
                     </div>
@@ -98,7 +98,7 @@
                       <div>
                         <div v-if="props?.item?.data?.isDefect">
                           <div>
-                            <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode"
+                            <a-auto-complete @blur="onBlur" :getPopupContainer="triggerNode => triggerNode.parentNode"
                               v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
                               @search="handleSearchDefect" allowClear>
                               <template #option="{ content_en: content_en, id: id, content: content }">
@@ -114,7 +114,7 @@
                                   <span style="font-weight: bold; width: 150px;">{{ content }} / {{ content_en }}</span>
                                 </div>
                               </template>
-                              <a-textarea :auto-size="{ minRows: 2, maxRows: 5 }" @keydown.enter.prevent
+                              <a-textarea :auto-size="{ minRows: 2, maxRows: 5 }" @keydown.enter.prevent @blur="onBlur"
                                 :placeholder="$t('base.pleaseEnterDefectKeywords')" />
                             </a-auto-complete>
                           </div>
@@ -130,12 +130,12 @@
                           </div>
                           <div class="mt-2">
                             <div style="font-size: 85%">{{ field.defect_count_label }}</div>
-                            <a-input-number v-model:value="field.defect_count" style="width: 100%;" :min="0"
+                            <a-input-number @blur="onBlur" v-model:value="field.defect_count" style="width: 100%;" :min="0"
                               v-if="!readonlyRef" @change="onChangeDefectItem" />
                             <div v-else> {{ field.defect_count }} </div>
                           </div>
                         </div>
-                        <a-input v-model:value="field.data" allowClear @change="onChange" :readonly="readonlyRef"
+                        <a-input @blur="onBlur" v-model:value="field.data" allowClear @change="onChange" :readonly="readonlyRef"
                           v-else></a-input>
                       </div>
                     </div>
@@ -194,7 +194,7 @@
                     </div>
                     <div class="field" v-else>
                       <div>
-                        <a-textarea :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data"
+                        <a-textarea @blur="onBlur" :auto-size="{ minRows: 1, maxRows: 5 }" v-model:value="field.data"
                           :readonly="readonlyRef" />
                       </div>
                     </div>
@@ -322,7 +322,6 @@ import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor, determineStatus } from "@/utils/helpers"
-import { has } from "lodash";
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -348,6 +347,9 @@ const props = defineProps({
   },
   value: {
     type: Object as PropType<any>,
+  },
+  mode: {
+    type: String
   }
 })
 const itemData = reactive({
@@ -528,6 +530,10 @@ const onChange = (e) => {
   console.log('onChange:', toRaw(e))
   emits('update:value', exportValue())
   // emits('clearFieldError', e.target.id.replace('form_item_', ''))
+}
+
+const onBlur = (event: Event) => {
+  emits('update:value', exportValue())
 }
 
 const onChangeStatus = (e) => {
@@ -881,10 +887,47 @@ const onDefectSelect = (e, field) => {
 //   return data
 // }
 
+const getFillSession = () => {
+  let fillSession = localStorage.getItem("fill_session")
+  if (fillSession) {
+    return JSON.parse(fillSession)
+  } else {
+    return null
+  }
+}
+
+const autoSave = async (dataValue: any) => {
+  console.log('props?.mode:', props?.mode)
+  if(props?.mode == 'review') {
+    return
+  }
+  let fillSession = getFillSession()
+  if (!fillSession) {
+    message.error(i18n.global.t('base.PleaseLoginFirst'))
+    return
+  }
+  try {
+    await store.apiFillSingle({
+      id: store.report.id,
+      values: { [props?.item?.key]: dataValue },
+      email: fillSession.email,
+      password: fillSession.password
+    })
+
+  } catch (e) {
+    console.error(e)
+    message.error(i18n.global.t('base.LoginFailByFillToken'))
+    return
+  }
+}
 
 const exportValue = () => {
-  console.log('export-value-data:', toRaw(itemData))
-  return { data: { ...itemData } }
+  console.log('export-value-data:', toRaw(itemData),props?.item?.data?.AutoSave)
+  let dataValue = { data: { ...itemData } }
+  if(store?.report?.template?.settings?.AutoSave) {
+    autoSave(dataValue)
+  }
+  return dataValue
 }
 
 

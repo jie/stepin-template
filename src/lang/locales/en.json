@@ -140,6 +140,7 @@
         "inspect_remark": "Remark",
         "PurchaseOrder": "Purchase Order",
         "ItemNumber": "Item Number",
+        "OrderNumber": "Order Number",
         "ProductDescription": "Product Description",
         "AddressOfInspection": "Address Of Inspection",
         "DateOfInspection": "Date Of Inspection",
@@ -375,6 +376,8 @@
         "SwitchToAutoGenerateField": "Switch to Auto Generate",
         "OrderedItems": "Order Items",
         "WillInsertImageTo": "Will insert item to index",
-        "max_image_width": "Max Image Width"
+        "max_image_width": "Max Image Width",
+        "ReportResultLabel": "Report Result Label",
+        "AutoSave": "Auto Save"
     }
 }

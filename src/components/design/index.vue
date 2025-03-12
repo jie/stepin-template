@@ -211,6 +211,7 @@ import { ReportFillStore } from '@/store/report_fill';
 import { ReportTemplateStore } from "@/store/reportTemplate"
 import { useRoute, useRouter } from "vue-router";
 import { openNewUrl } from '@/utils/helpers';
+import { i18n } from '@/lang/i18n';
 import dayjs from 'dayjs';
 const reportTemplateStore = ReportTemplateStore()
 const router = useRouter()
@@ -465,6 +466,7 @@ const onClickOpenReportSettingDrawer = () => {
   reportSettingDrawerVisible.value = true
   console.log('reportTemplateStore.reportTemplate.settings:', toRaw(reportTemplateStore.reportTemplate))
   let mySettings = {
+    AutoSave: reportTemplateStore.reportTemplate.settings?.AutoSave === undefined ? true: reportTemplateStore.reportTemplate.settings.AutoSave,
     allowSelectImageFromAlbum: reportTemplateStore.reportTemplate.settings?.allowSelectImageFromAlbum === undefined ? true: reportTemplateStore.reportTemplate.settings.allowSelectImageFromAlbum,
     ReportNumber: reportTemplateStore.reportTemplate.settings?.ReportNumber === undefined ? true: reportTemplateStore.reportTemplate.settings.ReportNumber,
     OrderQuantity: reportTemplateStore.reportTemplate.settings?.OrderQuantity === undefined ? true: reportTemplateStore.reportTemplate.settings.OrderQuantity,
@@ -473,6 +475,7 @@ const onClickOpenReportSettingDrawer = () => {
     Supplier: reportTemplateStore.reportTemplate.settings?.Supplier === undefined ? true: reportTemplateStore.reportTemplate.settings.Supplier,
     Factory: reportTemplateStore.reportTemplate.settings?.Factory === undefined ? true: reportTemplateStore.reportTemplate.settings.Factory,
     ItemNumber: reportTemplateStore.reportTemplate.settings?.ItemNumber === undefined ? true: reportTemplateStore.reportTemplate.settings.ItemNumber,
+    OrderNumber: reportTemplateStore.reportTemplate.settings?.OrderNumber === undefined ? true: reportTemplateStore.reportTemplate.settings.OrderNumber,
     ProductDescription: reportTemplateStore.reportTemplate.settings?.ProductDescription === undefined ? true: reportTemplateStore.reportTemplate.settings.ProductDescription,
     AddressOfInspection: reportTemplateStore.reportTemplate.settings?.AddressOfInspection === undefined ? true: reportTemplateStore.reportTemplate.settings.AddressOfInspection,
     DateOfInspection: reportTemplateStore.reportTemplate.settings?.DateOfInspection === undefined ? true: reportTemplateStore.reportTemplate.settings.DateOfInspection,
@@ -487,7 +490,31 @@ const onClickOpenReportSettingDrawer = () => {
     GeneralInspectionLevel: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel === undefined ? true: reportTemplateStore.reportTemplate?.settings?.GeneralInspectionLevel,
     SpecialInspectionLevel: reportTemplateStore.reportTemplate?.settings?.SpecialInspectionLevel === undefined ? false: reportTemplateStore.reportTemplate?.settings?.SpecialInspectionLevel,
     InspectionType: reportTemplateStore.reportTemplate?.settings?.InspectionType === undefined ? true: reportTemplateStore.reportTemplate?.settings?.InspectionType,
-    ReInspectionType: reportTemplateStore.reportTemplate?.settings?.ReInspectionType === undefined ? true: reportTemplateStore.reportTemplate?.settings?.ReInspectionType
+    ReInspectionType: reportTemplateStore.reportTemplate?.settings?.ReInspectionType === undefined ? true: reportTemplateStore.reportTemplate?.settings?.ReInspectionType,
+    ApplicantLabel: reportTemplateStore?.reportTemplate?.settings?.ApplicantLabel ||  i18n.global.t('base.Applicant'),
+    SupplierLabel: reportTemplateStore?.reportTemplate?.settings?.SupplierLabel ||  i18n.global.t('base.Supplier'),
+    FactoryLabel: reportTemplateStore?.reportTemplate?.settings?.FactoryLabel ||  i18n.global.t('base.Factory'),
+    ItemNumberLabel: reportTemplateStore?.reportTemplate?.settings?.ItemNumberLabel ||  i18n.global.t('base.ItemNumber'),
+    ProductDescriptionLabel: reportTemplateStore?.reportTemplate?.settings?.ProductDescriptionLabel ||  i18n.global.t('base.ProductDescription'),
+    AddressOfInspectionLabel: reportTemplateStore?.reportTemplate?.settings?.AddressOfInspectionLabel ||  i18n.global.t('base.AddressOfInspection'),
+    DateOfInspectionLabel: reportTemplateStore?.reportTemplate?.settings?.DateOfInspectionLabel ||  i18n.global.t('base.DateOfInspection'),
+    ArrivalTimeLabel: reportTemplateStore?.reportTemplate?.settings?.ArrivalTimeLabel ||  i18n.global.t('base.ArrivalTime'),
+    DepartureTimeLabel: reportTemplateStore?.reportTemplate?.settings?.DepartureTimeLabel ||  i18n.global.t('base.DepartureTime'),
+    InspectorLabel: reportTemplateStore?.reportTemplate?.settings?.InspectorLabel ||  i18n.global.t('base.Inspector'),
+    ReportNumberLabel: reportTemplateStore?.reportTemplate?.settings?.ReportNumberLabel ||  i18n.global.t('base.ReportNumber'),
+    OrderQuantityLabel: reportTemplateStore?.reportTemplate?.settings?.OrderQuantityLabel ||  i18n.global.t('base.OrderQuantity'),
+    SampleSizeTotalLabel: reportTemplateStore?.reportTemplate?.settings?.SampleSizeTotalLabel ||  i18n.global.t('base.SampleSizeTotal'),
+    InspectStandardLabel: reportTemplateStore?.reportTemplate?.settings?.InspectStandardLabel ||  i18n.global.t('base.InspectStandard'),
+    SampleSizeLabel: reportTemplateStore?.reportTemplate?.settings?.SampleSizeLabel ||  i18n.global.t('base.SampleSize'),
+    AQL_CRLabel: reportTemplateStore?.reportTemplate?.settings?.AQL_CRLabel ||  i18n.global.t('base.AQL_CR'),
+    AQL_MAJLabel: reportTemplateStore?.reportTemplate?.settings?.AQL_MAJLabel ||  i18n.global.t('base.AQL_MAJ'),
+    AQL_MINLabel: reportTemplateStore?.reportTemplate?.settings?.AQL_MINLabel ||  i18n.global.t('base.AQL_MIN'),
+    GeneralInspectionLevelLabel: reportTemplateStore?.reportTemplate?.settings?.GeneralInspectionLevelLabel ||  i18n.global.t('base.GeneralInspectionLevel'),
+    SpecialInspectionLevelLabel: reportTemplateStore?.reportTemplate?.settings?.SpecialInspectionLevelLabel ||  i18n.global.t('base.SpecialInspectionLevel'),
+    InspectionTypeLabel: reportTemplateStore?.reportTemplate?.settings?.InspectionTypeLabel ||  i18n.global.t('base.InspectionType'),
+    ReInspectionTypeLabel: reportTemplateStore?.reportTemplate?.settings?.ReInspectionTypeLabel ||  i18n.global.t('base.ReInspectionType'),
+    OrderNumberLabel: reportTemplateStore?.reportTemplate?.settings?.OrderNumberLabel ||  i18n.global.t('base.OrderNumber'),
+    ReportResultLabel: reportTemplateStore?.reportTemplate?.settings?.ReportResultLabel ||  i18n.global.t('base.ReportResult'),
   }
   console.log('mySettings:', mySettings)
   reportTemplateStore.reportTemplate.settings = {...mySettings}
