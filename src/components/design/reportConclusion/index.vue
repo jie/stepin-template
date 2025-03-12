@@ -6,15 +6,19 @@
         <div v-for="(item, index) in itemData?.conclusions" class="conclusion-item flex">
           <div class="flex-1">
             <div>{{ item.title }}</div>
-            <a-tag v-if="statusColorMap[item?.status]" :color="statusColorMap[item?.status]">{{ $t(`base.${item?.status}`) }}</a-tag>
+            <a-tag v-if="statusColorMap[item?.status]" :color="statusColorMap[item?.status]">{{
+              $t(`base.${item?.status}`) }}</a-tag>
             <div v-if="item?.remark" class="item-remark">{{ item?.remark }}</div>
+            <div class="conclusion-item-remarkItems" v-if="props.mode=='review' && props.collectorData[props?.item?.key] && props.collectorData[props?.item?.key][item.key]">
+              <div v-for="remarkItem of props.collectorData[props?.item?.key][item.key]" class="conclusion-item-remarkItem" @click="goCollectorAnchor(remarkItem.collectorKey)">{{ remarkItem.remark }}</div>
+            </div>
           </div>
           <div class="buttons w-1/4 flex justify-end" v-if="!readonlyRef">
             <div>
               <a-button @click="onClickSetConclusion(index)" type="text">
                 <template #icon>
                   <EditOutlined />
-                  </template> 
+                </template>
               </a-button>
             </div>
           </div>
@@ -27,10 +31,11 @@
         @ok="handleStatusOK">
         <a-form layout="vertical">
           <a-form-item :label="$t('base.InspectResult')" name="status">
-            <a-radio-group size="small"  v-model:value="statusForm.status" button-style="solid">
-              <a-radio-button style="font-size: 12px" v-for="option in props.item?.data?.options" :value="option.value">{{
-                option.label
-              }}</a-radio-button>
+            <a-radio-group size="small" v-model:value="statusForm.status" button-style="solid">
+              <a-radio-button style="font-size: 12px" v-for="option in props.item?.data?.options"
+                :value="option.value">{{
+                  option.label
+                }}</a-radio-button>
             </a-radio-group>
           </a-form-item>
           <a-form-item :label="$t('base.Remark')" name="remark" v-if="targetSetConclusionRef?.hasRemarks">
@@ -53,7 +58,7 @@ const document = window.document
 const isShowStatusDialog = ref(false)
 const route = useRoute()
 const readonlyRef = ref(route.path.includes('/customer_report/'))
-
+const emits = defineEmits(["update:value", "updateParentConclusion", "goCollectorAnchor"])
 const props = defineProps({
   item: {
     type: Object,
@@ -61,6 +66,13 @@ const props = defineProps({
   value: {
     type: Array,
     default: []
+  },
+  collectorData: {
+    type: Object,
+    default: {}
+  },
+  mode: {
+    type: String
   }
 })
 
@@ -79,8 +91,10 @@ const statusForm = reactive({
   remark: ''
 })
 
-const emits = defineEmits(["update:value", "updateParentConclusion"])
 
+const goCollectorAnchor = (key: string)=>{
+  emits('goCollectorAnchor', key)
+}
 
 const onChange = (e) => {
   console.log('onChange:', e)
@@ -113,7 +127,7 @@ const refreshValue = (values: any) => {
 const onClickSetConclusion = (index) => {
   isShowStatusDialog.value = true
   console.log('props.value?.data?.conclusions[index]:', toRaw(props.value?.data?.conclusions[index]))
-  if(props.value?.data?.conclusions[index]) {
+  if (props.value?.data?.conclusions[index]) {
     targetSetConclusionRef.value = props.value?.data?.conclusions[index]
   } else {
     targetSetConclusionRef.value = itemData.conclusions[index]
@@ -139,7 +153,7 @@ const initialization = () => {
   itemData.languageType = props.item?.data?.languageType || "single"
   itemData.conclusions = props.item?.data?.conclusions || []
   itemData.options = props.item?.data?.options || []
-  if(props.value && props.value?.length !== 0) {
+  if (props.value && props.value?.length !== 0) {
     itemData.parent_com_key = props.value?.data?.parent_com_key || ""
     itemData.parent_key = props.value?.data?.parent_key || ""
     itemData.languageType = props.value?.data?.languageType || "single"
@@ -180,11 +194,20 @@ defineExpose({
 .status-conformed {
   color: green;
 }
-
-
+.conclusion-item-remarkItems {
+  font-size: 12px;
+  margin-top: 10px;
+}
+.conclusion-item-remarkItem {
+  margin-top: 10px;
+}
+.conclusion-item-remarkItem:hover {
+  text-decoration: underline;
+}
 </style>
 
 <style>
-.record .ant-form-item-label > label {
+.record .ant-form-item-label>label {
   font-size: 13px;
-}</style>
+}
+</style>

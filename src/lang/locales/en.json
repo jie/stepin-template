@@ -378,6 +378,7 @@
         "WillInsertImageTo": "Will insert item to index",
         "max_image_width": "Max Image Width",
         "ReportResultLabel": "Report Result Label",
-        "AutoSave": "Auto Save"
+        "AutoSave": "Auto Save",
+        "ConclusionOnTop": "Conclusion On Top"
     }
 }

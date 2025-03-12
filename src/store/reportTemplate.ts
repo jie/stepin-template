@@ -9,6 +9,7 @@ import { Pagination } from "@/types"
 
 interface ReportTemplateSettings {
   AutoSave?: boolean;
+  ConclusionOnTop?: boolean;
   allowSelectImageFromAlbum?: boolean;
   ReportNumber?: boolean;
   OrderQuantity?: boolean;
