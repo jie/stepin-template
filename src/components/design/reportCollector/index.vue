@@ -101,17 +101,21 @@
                             <a-auto-complete @blur="onBlur" :getPopupContainer="triggerNode => triggerNode.parentNode"
                               v-model:value="field.data" style="width: 100%" :options="defectOptions" @change="onChange"
                               @search="handleSearchDefect" allowClear>
-                              <template #option="{ content_en: content_en, id: id, content: content }">
+                              <template #option="{ content_en: content_en, id: id, content: content, product: product, product_en: product_en, types: types }">
                                 <div style="display:flex" @click="onDefectSelect(id, field)"
-                                  v-if="conclusionRef?.data?.languageType == 'single'">
+                                  v-if="!store.report?.template?.settings?.MultipleLanguage">
                                   <span style="flex: 1">{{ i18n.global.locale == 'zh' ? content : content_en }}</span>
-                                  <span style="font-weight: bold; width: 150px;">{{ i18n.global.locale == 'zh' ? content
-                                    :
-                                    content_en }}</span>
+                                  <span style="font-weight: bold; flex:1;">{{ i18n.global.locale == 'zh' ? product : product_en }}</span>
+                                  <span style="flex:1;" v-if="types && types.length > 0">
+                                    <a-tag v-for="defectType in types">{{defectType}}</a-tag>
+                                  </span>
                                 </div>
                                 <div style="display:flex" @click="onDefectSelect(id, field)" v-else>
                                   <span style="flex: 1">{{ content }} / {{ content_en }}</span>
-                                  <span style="font-weight: bold; width: 150px;">{{ content }} / {{ content_en }}</span>
+                                  <span style="font-weight: bold; flex:1;">{{ product }} / {{ product_en }}</span>
+                                  <span style="flex:1;" v-if="types && types.length > 0">
+                                    <a-tag v-for="defectType in types">{{defectType}}</a-tag>
+                                  </span>
                                 </div>
                               </template>
                               <a-textarea :auto-size="{ minRows: 2, maxRows: 5 }" @keydown.enter.prevent @blur="onBlur"
@@ -121,7 +125,7 @@
                           <div class="mt-2">
                             <div style="font-size: 85%">{{ field.defect_type_label }}</div>
                             <a-select v-model:value="field.defect_type" style="width: 100%" v-if="!readonlyRef"
-                              :options="defectTypeOptions" @change="onChangeDefectItem"
+                              :options="getDefectTypeOptions(field.defect_types)" @change="onChangeDefectItem"
                               :getPopupContainer="triggerNode => triggerNode.parentNode"></a-select>
                             <div v-else>
                               <a-tag v-for="type in field.defect_type" :key="type" style="margin-top: 5px;">{{ type
@@ -531,7 +535,9 @@ const onChange = (e) => {
 }
 
 const onBlur = (event: Event) => {
-  emits('update:value', exportValue())
+  let dataValue = exportValue()
+  emits('update:value', dataValue)
+  autoSave(dataValue)
 }
 
 const onChangeStatus = (e) => {
@@ -591,6 +597,23 @@ const validateRequired = (rule, value, callback) => {
 const defectTypeOptions = [
   { label: 'critical', value: 'critical' }, { label: 'major', value: 'major' }, { label: 'minor', value: 'minor' }
 ]
+
+
+const getDefectTypeOptions = (defect_types) => {
+  let options = []
+  for (let item of defectTypeOptions) {
+    let defectOption = {
+      label: item.label,
+      value: item.value,
+      disabled: false
+    }
+    if(!defect_types.includes(item.value)) {
+      defectOption.disabled = true
+    }
+    options.push(defectOption)
+  }
+  return options
+}
 
 const onClickAdd = () => {
   console.log('props.value?.data?.dataSchema:', toRaw(props.value?.data?.dataSchema))
@@ -671,7 +694,8 @@ const onUploadInputChange = async (e: Event) => {
 
 
 const onChangeItemNumber = (itemNumbers: string[], index: number) => {
-  emits('update:value', exportValue())
+  let dataValue = exportValue()
+  emits('update:value', dataValue)
   let targetCom = store.report.template?.items?.find(c => c.key === props?.item?.data?.sample_size_item_key)
   let targetValue = store.formState[props?.item?.data?.sample_size_item_key]
   if (targetCom && targetValue) {
@@ -687,7 +711,7 @@ const onChangeItemNumber = (itemNumbers: string[], index: number) => {
     }
     itemData.dataRecords[index].find(c => c.value === 'quantity').data = sampleSize
   }
-
+  autoSave(dataValue)
 }
 
 const editImage = (field: any, item: any) => {
@@ -859,11 +883,15 @@ const onClickDeleteField = (fieldKey: string) => {
 
 const handleSearchDefect = (value) => {
   console.log('handleSearchDefect:', value)
-  defectOptions.value = value ? store.defects.filter((s) => s?.content_en?.toLowerCase()?.includes(value.toLowerCase()) || s?.content?.toLowerCase()?.includes(value.toLowerCase())) : []
+  defectOptions.value = value ? store.defects.filter((s) => s?.content_en?.toLowerCase()?.includes(value.toLowerCase()) || s?.content?.toLowerCase()?.includes(value.toLowerCase()) || s?.product?.toLowerCase()?.includes(value.toLowerCase()) || s?.product_en?.toLowerCase()?.includes(value.toLowerCase())) : []
 }
 const onDefectSelect = (e, field) => {
   let defect = store.defects.find((s) => s.id == e)
-  field.data = i18n.global.locale == 'en' ? defect.content_en : defect.content
+  if(store.report?.template?.settings?.MultipleLanguage) {
+    field.data = `${defect.content_en} ${defect.content}`
+  } else {
+    field.data = i18n.global.locale == 'en' ? defect.content_en : defect.content
+  }
   field.defect_id = defect.id
   if (defect.types && defect.types.length > 0) {
     field.defect_types = defect.types
@@ -922,9 +950,9 @@ const autoSave = async (dataValue: any) => {
 const exportValue = () => {
   console.log('export-value-data:', toRaw(itemData),props?.item?.data?.AutoSave)
   let dataValue = { data: { ...itemData } }
-  if(store?.report?.template?.settings?.AutoSave) {
-    autoSave(dataValue)
-  }
+  // if(store?.report?.template?.settings?.AutoSave) {
+  //   autoSave(dataValue)
+  // }
   return dataValue
 }
 

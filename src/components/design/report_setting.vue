@@ -20,6 +20,9 @@
             <a-form-item :label="$t('base.AutoSave')" name="AutoSave">
                 <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.AutoSave" />
             </a-form-item>
+            <a-form-item :label="$t('base.MultipleLanguage')" name="MultipleLanguage">
+                <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.MultipleLanguage" />
+            </a-form-item>
 
             <div class="flex">
                 <a-form-item  :label="$t('base.ReportResultLabel')" name="ReportResultLabel" style="margin-left: 10px;">
@@ -229,6 +232,7 @@ const exportData = () => {
         summary: reportTemplateStore.reportTemplate.summary,
         allowSelectImageFromAlbum: reportTemplateStore.reportTemplate?.settings?.allowSelectImageFromAlbum,
         AutoSave: reportTemplateStore.reportTemplate?.settings?.AutoSave,
+        MultipleLanguage: reportTemplateStore.reportTemplate?.settings?.MultipleLanguage,
         ConclusionOnTop: reportTemplateStore.reportTemplate?.settings?.ConclusionOnTop,
         ReportNumber: reportTemplateStore.reportTemplate?.settings?.ReportNumber,
         OrderQuantity: reportTemplateStore.reportTemplate?.settings?.OrderQuantity,

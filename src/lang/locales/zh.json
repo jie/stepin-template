@@ -379,6 +379,7 @@
         "max_image_width": "图片最大宽度(px)",
         "ReportResultLabel": "报告结论名称",
         "AutoSave": "自动保存",
-        "ConclusionOnTop": "在顶部汇总结论"
+        "ConclusionOnTop": "在顶部汇总结论",
+        "MultipleLanguage": "多语言"
     }
 }

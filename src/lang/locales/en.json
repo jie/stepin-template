@@ -379,6 +379,7 @@
         "max_image_width": "Max Image Width",
         "ReportResultLabel": "Report Result Label",
         "AutoSave": "Auto Save",
-        "ConclusionOnTop": "Conclusion On Top"
+        "ConclusionOnTop": "Conclusion On Top",
+        "MultipleLanguage": "Multiple Language"
     }
 }
