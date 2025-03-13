@@ -380,6 +380,6 @@
         "ReportResultLabel": "报告结论名称",
         "AutoSave": "自动保存",
         "ConclusionOnTop": "在顶部汇总结论",
-        "MultipleLanguage": "多语言"
+        "please_set_worker_email_on_order_system": "请先在订单系统设置检验员邮箱"
     }
 }
