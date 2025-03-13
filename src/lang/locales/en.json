@@ -380,6 +380,6 @@
         "ReportResultLabel": "Report Result Label",
         "AutoSave": "Auto Save",
         "ConclusionOnTop": "Conclusion On Top",
-        "MultipleLanguage": "Multiple Language"
+        "please_set_worker_email_on_order_system": "Please set the inspector's E-smail on the order system"
     }
 }

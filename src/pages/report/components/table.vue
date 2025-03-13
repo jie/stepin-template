@@ -569,17 +569,22 @@ const onClickSetReviewResult = (record: Report) => {
 const onClickShowSendToWorkerModal = async (record: Report) => {
   console.log('record:', toRaw(record))
   sendReportToWorkerRecord.value = record
-  sendReportToWorkerModal.value = true
+
   if (record?.order?.workers) {
     let emails = []
     for (let worker of record.order.workers) {
-      console.log('worker:', worker)
+      console.log('worker:', toRaw(worker.worker))
       if (worker?.worker?.mail) {
         emails.push(worker.worker.mail)
       }
     }
     sendToWorkerForm.email = emails.join(';')
   }
+  if(!sendToWorkerForm.email) {
+    message.error(i18n.global.t('base.please_set_worker_email_on_order_system'))
+    return
+  }
+  sendReportToWorkerModal.value = true
   sendToWorkerForm.email_title = record.title || record.name
   sendToWorkerForm.cc_emails = record._create_by.email
   sendToWorkerForm.url = `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/fill/${record.id}`
@@ -616,13 +621,16 @@ const sendReportToWorker = async () => {
   for (let worker of sendToWorkerForm.email.split(';')) {
     if (worker) {
       let name;
+      let worker_id;
       for (let item of sendReportToWorkerRecord.value?.order?.workers) {
         if (item?.worker?.mail.toLowerCase() === worker.toLowerCase()) {
           name = item.worker.name || worker.split('@')[0]
+          worker_id = item.worker.id
           break
         }
       }
       worker_emails.push({
+        id: worker_id,
         email: worker,
         name: name
       })
@@ -630,7 +638,7 @@ const sendReportToWorker = async () => {
   }
   console.log('worker_emails:', toRaw(worker_emails))
 
-  worker_emails = [{ email: "zhouyangme@foxmail.com", name: "zy" }]
+  // worker_emails = [{ email: "zhouyangme@foxmail.com", name: "zy" }]
 
   await store.apiSendReportToWorker({
     id: sendReportToWorkerRecord.value.id,
@@ -648,6 +656,7 @@ const sendReportToWorker = async () => {
   sendToWorkerForm.email = ''
   sendToWorkerForm.url = ''
   sendToWorkerForm.worker_remark = ''
+  initializeData(false)
 }
 
 
