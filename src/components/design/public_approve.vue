@@ -63,7 +63,6 @@
                 v-on:validateImagesField="onValidateImagesField" v-on:clearFieldError="onClearFieldError">
               </reportEditCollector>
             </div>
-            <div v-else>{{ item.key }} / {{ currentReviewComponentRef.key }} / {{ item.type }} / {{ item.title }}</div>
           </div>
         </a-form>
       </div>
@@ -1122,24 +1121,35 @@ watchEffect(() => {
 
 
 const conclusionResultOnTop = computed(() => {
-  let result = {}
+  let remarkResult = {}
+  let statusResult = {}
   for (let item of store.report.template?.items) {
-    if (item.type == 'collector' && store.formState[item.key] && store.formState[item.key]?.data?.status != 'Conform') {
+    if (item.type == 'collector' && store.formState[item.key]) {
       if (item?.data?.conclusion_key && item?.data?.conclusion_item_key) {
+        if(store.formState[item.key]?.data?.statusData?.status) {
+          if(!statusResult[item?.data?.conclusion_key]){
+            statusResult[item?.data?.conclusion_key] = {}
+          }
+          if(!statusResult[item?.data?.conclusion_key][item?.data?.conclusion_item_key]){
+            statusResult[item?.data?.conclusion_key][item?.data?.conclusion_item_key] = {}
+          }
+          statusResult[item?.data?.conclusion_key][item?.data?.conclusion_item_key] = store.formState[item.key]?.data?.statusData?.status
+        }
+
         store.formState[item.key]?.data?.dataRecords?.map((record: any) => {
           for (let field of record) {
             if (field.value == 'remark') {
               if (field.data) {
-                if (!result[item?.data?.conclusion_key]) {
-                  result[item?.data?.conclusion_key] = {}
+                if (!remarkResult[item?.data?.conclusion_key]) {
+                  remarkResult[item?.data?.conclusion_key] = {}
                 }
-                if(!result[item?.data?.conclusion_key][item?.data?.conclusion_item_key]){
-                  result[item?.data?.conclusion_key][item?.data?.conclusion_item_key] = []
+                if(!remarkResult[item?.data?.conclusion_key][item?.data?.conclusion_item_key]){
+                  remarkResult[item?.data?.conclusion_key][item?.data?.conclusion_item_key] = []
                 }
-                result[item?.data?.conclusion_key][item?.data?.conclusion_item_key].push({
+                remarkResult[item?.data?.conclusion_key][item?.data?.conclusion_item_key].push({
                   collectorKey: item.key,
                   title: item.title,
-                  remark: field.data
+                  remark: field.data,
                 })
               }
             }
@@ -1148,7 +1158,10 @@ const conclusionResultOnTop = computed(() => {
       }
     }
   }
-  return result
+  return {
+    remarkResult: remarkResult,
+    statusResult: statusResult
+  }
 })
 
 
@@ -1171,6 +1184,7 @@ defineExpose({
   background-color: #fff;
   margin: 0 auto;
   position: relative;
+  padding-bottom: 100px;
 }
 
 .report-wrapper.is-staff {

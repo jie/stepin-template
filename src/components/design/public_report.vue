@@ -354,9 +354,10 @@
             </a-form-item>
           </div>
         </div>
-        <!-- <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper" -->
+                <!-- <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
+          v-show="item.type != 'conclusion'" -->
         <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
-          v-show="item.type != 'conclusion'"
+
           :class="{ 'notpass': store.report?.review_comments[item.key]?.status == false, 'pass': store.report?.review_comments[item.key]?.status == true }">
           <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
             <reportText :item="item" ref="itemRefs" />
@@ -711,6 +712,53 @@ const onFinishSubmit = async () => {
     isShowSubmitDialog.value = true
     return
   }
+
+  for(let key of Object.keys(store.formState)) {
+    let formItemValue = store.formState[key]
+    if(formItemValue?.data?.statusData?.status) {
+      let formItem = schemaRef.value.find((item) => item.key == key)
+      if(!formItem) {
+        continue
+      }
+      if(formItem?.data?.conclusion_key && formItem?.data?.conclusion_item_key) {
+        let conclusionItem = store.formState[formItem.data.conclusion_key]?.data?.conclusions?.find((item) => item.key == formItem.data.conclusion_item_key)
+        console.log('conclusionItem:', toRaw(conclusionItem))
+        if(conclusionItem) {
+          conclusionItem.status = formItemValue?.data?.statusData?.status
+        }
+      }
+    }
+  }
+
+  for(let key of Object.keys(store.formState)) {
+    let formItemValue = store.formState[key]
+    if(formItemValue?.data?.conclusions) {
+      let formItem = schemaRef.value.find((item) => item.key == key)
+      if(!formItem || formItem.type != 'conclusion') {
+        continue
+      }
+
+      if(formItem?.data?.parent_com_key && formItem?.data?.parent_key) {
+        let parentConclusionItem = store.formState[formItem.data.parent_com_key]?.data?.conclusions?.find((item) => item.key == formItem.data.parent_key)
+        console.log('parentConclusionItem:', toRaw(parentConclusionItem))
+        if(!parentConclusionItem) {
+          continue
+        }
+
+        let parentStatuses = []
+        for (let item of formItemValue?.data?.conclusions) {
+          parentStatuses.push({ status: item.status })
+        }
+
+        if (determineStatus(parentStatuses)) {
+          parentConclusionItem.status = determineStatus(parentStatuses)
+        }
+      }
+    }
+  }
+
+
+  
   try {
     await store.apiFill(fillSession.email, fillSession.password, store.formState, route?.query?.fill_token)
   } catch (e) {
@@ -1084,7 +1132,6 @@ const onUpdateConclusionInspectResult = (collector: any, status: string, remark:
         if (determineStatus(parentStatuses)) {
           ParentConclusionItem.status = determineStatus(parentStatuses)
         }
-
       }
     }
   }
@@ -1152,6 +1199,7 @@ watchEffect(() => {
     updateAqlValues()
   }
 })
+
 
 onOpenForm()
 

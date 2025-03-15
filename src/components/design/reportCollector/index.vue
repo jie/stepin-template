@@ -12,7 +12,7 @@
               <a-radio-group size="small" v-model:value="itemData.statusData.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
                 <a-radio-button style="font-size: 12px"
-                  v-for="option in [{ 'label': 'PASS', 'value': 'Conform' }, { 'label': 'FAIL', 'value': 'NotConform' }]"
+                  v-for="option in [{ 'label': 'PASS', 'value': 'conformed' }, { 'label': 'FAIL', 'value': 'not_conformed' }]"
                   :value="option.value">{{
                     option.label
                   }}</a-radio-button>
@@ -203,8 +203,7 @@
                   </a-form-item>
                 </div>
                 <div class="delete-record">
-                  <a-button size="small" style="font-size: 80%;" type="text" @click="onClickDeleteRecord(index)"
-                    v-if="index != 0">
+                  <a-button size="small" style="font-size: 80%;" type="text" @click="onClickDeleteRecord(index)">
                     <template #icon>
                       <delete-outlined />
                     </template>
@@ -324,6 +323,7 @@ import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
 import { getStatusLabelColor, determineStatus } from "@/utils/helpers"
+import { autoSaveAPI } from "@/utils/autoSave"
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -489,17 +489,17 @@ const autoUpdateDefectsResult = () => {
     'critical': {
       'found': 0,
       'allowed': store.defectsAllowedMap[defectTypeMap['critical']],
-      "status": "NotConform"
+      "status": "not_conformed"
     },
     'major': {
       'found': 0,
       'allowed': store.defectsAllowedMap[defectTypeMap['major']],
-      "status": "NotConform"
+      "status": "not_conformed"
     },
     'minor': {
       'found': 0,
       'allowed': store.defectsAllowedMap[defectTypeMap['minor']],
-      "status": "NotConform"
+      "status": "not_conformed"
     }
   }
   for (let record of itemData.dataRecords) {
@@ -514,17 +514,17 @@ const autoUpdateDefectsResult = () => {
   }
   for (let key in defectsResult) {
     if (defectsResult[key]['found'] > defectsResult[key]['allowed']) {
-      defectsResult[key]['status'] = 'NotConform'
+      defectsResult[key]['status'] = 'not_conformed'
     } else {
-      defectsResult[key]['status'] = 'Conform'
+      defectsResult[key]['status'] = 'conformed'
     }
   }
   itemData.defectsResult = defectsResult
   let allDefectStatus = Object.values(defectsResult).map(c => c.status)
-  if (allDefectStatus.includes('NotConform')) {
-    itemData.statusData.status = 'NotConform'
+  if (allDefectStatus.includes('not_conformed')) {
+    itemData.statusData.status = 'not_conformed'
   } else {
-    itemData.statusData.status = 'Conform'
+    itemData.statusData.status = 'conformed'
   }
 }
 
@@ -559,7 +559,9 @@ const onConclusionChangeStatus = (e) => {
   if (conclusionItemRef.value) {
     emits('updateConclusionInspectResult', props.item, itemData.statusData.status, itemData.statusData.remark)
   }
-  emits('update:value', exportValue())
+  let dataValue = exportValue()
+  emits('update:value', dataValue)
+  autoSave(dataValue)
 }
 
 const validateImagesField = (imageFieldId) => {
@@ -607,7 +609,7 @@ const getDefectTypeOptions = (defect_types) => {
       value: item.value,
       disabled: false
     }
-    if(!defect_types.includes(item.value)) {
+    if(defect_types && !defect_types.includes(item.value)) {
       defectOption.disabled = true
     }
     options.push(defectOption)
@@ -735,10 +737,12 @@ const deleteImage = (field: any, item: any) => {
     zIndex: 1001,
     onOk() {
       field.data = field.data.filter(i => i.url !== item.url)
-      emits('update:value', exportValue())
+      let dataValue = exportValue()
+      emits('update:value', dataValue)
       if (field.value == 'images') {
         validateImagesField(`form-item-${field.value}-${itemData.dataRecords.indexOf(field)}`)
       }
+      autoSave(dataValue)
     },
     onCancel() {
     },
@@ -750,7 +754,9 @@ const handleRemarkOK = () => {
   targetEditImageRef.value.desc = imageRemarkRef.value
   targetEditImageRef.value = null
   imageRemarkRef.value = ''
-  emits('update:value', exportValue())
+  let dataValue = exportValue()
+  emits('update:value', dataValue)
+  autoSave(dataValue)
 }
 
 
@@ -762,7 +768,9 @@ const onClickDeleteRecord = (index: number) => {
     getContainer: () => document.body,
     onOk() {
       itemData.dataRecords.splice(index, 1)
-      emits('update:value', exportValue())
+      let dataValue = exportValue()
+      emits('update:value', dataValue)
+      autoSave(dataValue)
     },
     onCancel() {
       console.log('Cancel  button clicked');
@@ -913,38 +921,13 @@ const onDefectSelect = (e, field) => {
 //   return data
 // }
 
-const getFillSession = () => {
-  let fillSession = localStorage.getItem("fill_session")
-  if (fillSession) {
-    return JSON.parse(fillSession)
-  } else {
-    return null
-  }
-}
 
-const autoSave = async (dataValue: any) => {
+const autoSave = async (dataValue: any, targetItemKey: string = "") => {
   console.log('props?.mode:', props?.mode)
   if(props?.mode == 'review') {
     return
   }
-  let fillSession = getFillSession()
-  if (!fillSession) {
-    message.error(i18n.global.t('base.PleaseLoginFirst'))
-    return
-  }
-  try {
-    await store.apiFillSingle({
-      id: store.report.id,
-      values: { [props?.item?.key]: dataValue },
-      email: fillSession.email,
-      password: fillSession.password
-    })
-
-  } catch (e) {
-    console.error(e)
-    message.error(i18n.global.t('base.LoginFailByFillToken'))
-    return
-  }
+  autoSaveAPI(props?.item?.key, dataValue)
 }
 
 const exportValue = () => {

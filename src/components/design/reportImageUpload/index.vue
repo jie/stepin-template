@@ -13,7 +13,7 @@
                 <a-col flex="auto">
                   <a-auto-complete :getPopupContainer="triggerNode => triggerNode.parentNode" v-model:value="item.desc"
                     v-if="props.item?.is_defect" style="width: 100%" :options="defectOptions"
-                    @search="handleSearchDefect" allowClear>
+                    @search="handleSearchDefect" allowClear @blur="onBlur">
                     <a-textarea style="width: 100%;" :data-url="item.url" @drop.prevent="onDropImage" />
                     <template
                       #option="{ content_en: content_en, id: id, content: content, types: types, product: product, product_en: product_en }">
@@ -25,7 +25,7 @@
                     </template>
                   </a-auto-complete>
                   <a-textarea style="width: 100%;" :data-url="item.url" v-model:value="item.desc" v-else
-                    @drop.prevent="onDropImage" />
+                    @drop.prevent="onDropImage" @blur="onBlur" />
                 </a-col>
                 <a-col flex="160px">
                   <!-- <a-popconfirm :getPopupContainer="triggerNode => { return triggerNode.parentNode || document.body }"
@@ -96,8 +96,6 @@ import BaseSlot from "../base_slot.vue"
 import { EditOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ref, computed } from 'vue';
 import { groupArrayWithPatch } from "@/utils/objectUtils"
-import { getBase64 } from "@/utils/file"
-import type { UploadProps } from 'ant-design-vue';
 import { message, Modal } from "ant-design-vue";
 import { ossUploadFiles } from "@/store/uploader"
 import { ImageType } from "@/types/components/image"
@@ -229,6 +227,13 @@ const onUploadInputChange = async (e: Event) => {
   emits('update:value', filelist)
   autoSave(filelist)
 
+}
+
+const onBlur = () => {
+  console.log('onBlur')
+  let images = [...props.value]
+  emits('update:value', images)
+  autoSave(images)
 }
 
 

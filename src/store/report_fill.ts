@@ -232,7 +232,7 @@ export const ReportFillStore = defineStore('report_fill', {
       let session = getSessionInfo()
       let bodyJson = { ...data }
       return http
-        .request('/platform/report_api/report/fill_single', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report/fill_single2', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response.data)
           if (response.data?.status) {
