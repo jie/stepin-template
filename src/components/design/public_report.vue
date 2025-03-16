@@ -354,9 +354,8 @@
             </a-form-item>
           </div>
         </div>
-                <!-- <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
-          v-show="item.type != 'conclusion'" -->
-        <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper"
+        <!-- <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper" -->
+          <div v-for="(item, index) in schemaRef" :key="item.key" class="component-wrapper" v-show="item.type != 'conclusion'"
 
           :class="{ 'notpass': store.report?.review_comments[item.key]?.status == false, 'pass': store.report?.review_comments[item.key]?.status == true }">
           <div class="component" :id="`com-${item.key}`" v-if="item.type == 'text'">
@@ -660,7 +659,7 @@ const refresh = (data: any) => {
           }
         }
 
-        console.log('item.key:', item.key, ', data:', toRaw(item.data))
+        console.log('refresh-item.key:', item.key, ', data:', toRaw(item.data))
       }
     })
     loadingRef.value = false

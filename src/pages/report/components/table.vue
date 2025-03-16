@@ -380,7 +380,7 @@ const _submitThirdpartyReport = async () => {
     id: editThirdpartyRecord.value?.id,
     report_files: reportFiles.value,
     attachments: attachments.value,
-    send_email: editThirdpartyRecord.value?.is_thirdparty ? true : false, // TODO:暂时不给系统邮件发送客户报告
+    send_email: true, // TODO:暂时不给系统邮件发送客户报告
     po_number: poNumberRef.value,
     inspect_remark: inspectRemarkRef.value,
     cc_emails: ccEmailsRef.value.split(';'),
