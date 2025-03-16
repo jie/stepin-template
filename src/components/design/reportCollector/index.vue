@@ -5,14 +5,14 @@
       <a-form-item :label="props?.item?.data?.label" :name="props?.item?.key" :id="props?.item?.key"
         :rules="[{ required: props?.item?.required, message: $t('base.pleaseSetFieldValue', { 'label': props?.item?.title }), trigger: 'change' }]">
         <div>
-          <div :id="`status-null-${props.item.key}`">
+          <div :id="`status-null-${props.item.key}`" v-if="!readonlyRef">
             <a-form-item :label="$t('base.InspectResult')" :name="`status-null-${props.item.key}`"
               v-if="props?.item?.data?.hasStatus || props?.item?.data?.auto_result"
               :rules="[{ required: true, message: $t('base.pleaseSelectInspectResult'), validator: validateRequired, trigger: 'change' }]">
               <a-radio-group size="small" v-model:value="itemData.statusData.status" button-style="solid"
                 @change="onConclusionChangeStatus" v-if="props?.item?.data?.auto_result">
                 <a-radio-button style="font-size: 12px"
-                  v-for="option in [{ 'label': 'PASS', 'value': 'Conform' }, { 'label': 'FAIL', 'value': 'NotConform' }]"
+                  v-for="option in [{ 'label': 'PASS', 'value': 'conformed' }, { 'label': 'FAIL', 'value': 'not_conformed' }]"
                   :value="option.value">{{
                     option.label
                   }}</a-radio-button>
@@ -44,11 +44,16 @@
                 @change="onChange" @blur="onBlur"></a-textarea>
             </a-form-item>
           </div>
+          <div v-else>
+            <div style="font-weight: bold;">{{ ResulStatusesMap[itemData.statusData.status] }}</div>
+            <div>{{ itemData.statusData.remark }}</div>
+          </div>
           <div
             v-if="props?.item?.data?.display_as_table && itemData?.dataRecords?.length != 0 && itemData?.dataRecords[0][0].data"
             style="margin-top: 10px; margin-bottom: 10px;">
             <a-table bordered :columns="displayTableColumns" :dataSource="displayTableSource" :pagination="false"
-              :scroll="{ x: 1024 }" />
+              :scroll="{ x: 1024 }" v-if="!readonlyRef"/>
+              <a-table bordered :columns="displayTableColumns" :dataSource="displayTableSource" :pagination="false" v-else/>
           </div>
 
           <div class="records">
@@ -58,11 +63,11 @@
                   <plus-circle-outlined />
                 </template>{{ $t('base.AddRecord') }}</a-button>
             </div>
-            <a-badge-ribbon placement="start" :text="index + 1" :color="getStatusLabelColor(record)"
-              v-for="(record, index) in itemData.dataRecords">
-              <div class="record">
+            <!-- <a-badge-ribbon placement="start" :text="index + 1" :color="getStatusLabelColor(record)"
+              v-for="(record, index) in itemData.dataRecords"> -->
+              <div class="record" v-for="(record, index) in itemData.dataRecords">
                 <div class="record-fields" v-for="field in record" :id="`${field.value}-${index}-${props.item.key}`">
-                  <a-form-item :label="field.label" :name="`${field.value}-${index}-${props.item.key}`"
+                  <a-form-item :label="formatLabelName(field)" :name="`${field.value}-${index}-${props.item.key}`"
                     :rules="[{ required: isFieldRequire(field), message: $t('base.pleaseSetFieldValue', { 'label': field.label }), validator: validateRequired, trigger: 'change' }]">
                     <div class="field" v-if="field.value == 'item_number'">
                       <div v-if="!readonlyRef">
@@ -128,7 +133,7 @@
                               :options="getDefectTypeOptions(field.defect_types)" @change="onChangeDefectItem"
                               :getPopupContainer="triggerNode => triggerNode.parentNode"></a-select>
                             <div v-else>
-                              <a-tag v-for="type in field.defect_type" :key="type" style="margin-top: 5px;">{{ type
+                              <a-tag v-for="type in field.defect_types" :key="type" style="margin-top: 5px;">{{ type
                                 }}</a-tag>
                             </div>
                           </div>
@@ -145,13 +150,11 @@
                     </div>
                     <div class="field relative" v-else-if="field.value == 'images'">
                       <div>
-                        <div>
+                        <div style="">
                           <a-row type="flex" :gutter="[16, 16]">
                             <a-col v-for="(item, imageIndex) in field.data" :key="item.url" :span="8">
-                              <div style="width: 100%; aspect-ratio: 1 / 1;">
-                                <a-image :src="item.url" v-if="item.url && !item.url.endsWith('.mp4')"
-                                  style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
-                                <video :src="item.url" controls v-else
+                              <div :style="{width: '100%', 'aspect-ratio': readonlyRef ? 'auto': '1 / 1'}" >
+                                <a-image :src="item.url"
                                   style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
                                 <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
                                 <div class="flex pt-2" style="justify-content: space-around;" v-if="!readonlyRef">
@@ -175,6 +178,13 @@
                                 </div>
                               </div>
                             </a-col>
+                            <a-col v-for="(item, imageIndex) in field.data" :key="item.url" :span="8" v-if="field.data && field.data.length < 3 && field.data.length != 0">
+                              <div style="width: 100%; height: 60px;" >
+                                <img :src="item.url"
+                                style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover; visibility: hidden;"/>
+                              </div>
+                            </a-col>
+                            
                           </a-row>
                         </div>
                         <div v-if="!readonlyRef">
@@ -204,16 +214,15 @@
                     </div>
                   </a-form-item>
                 </div>
-                <div class="delete-record">
-                  <a-button size="small" style="font-size: 80%;" type="text" @click="onClickDeleteRecord(index)"
-                    v-if="index != 0">
+                <div class="delete-record" v-if="!readonlyRef">
+                  <a-button size="small" style="font-size: 80%;" type="text" @click="onClickDeleteRecord(index)">
                     <template #icon>
                       <delete-outlined />
                     </template>
                   </a-button>
                 </div>
                 <a-button type="default" size="small" style="font-size: 80%" @click="onClickAddField"
-                  v-if="props?.item?.data?.has_fields_management">
+                  v-if="!readonlyRef && props?.item?.data?.has_fields_management">
                   <template #icon>
                     <tags-outlined />
                   </template>{{ props.item?.data?.column_manage_label || $t('base.FieldManagement') }}
@@ -223,7 +232,7 @@
                     <plus-circle-outlined />
                   </template>{{ $t('base.AddRecord') }}</a-button>
               </div>
-            </a-badge-ribbon>
+            <!-- </a-badge-ribbon> -->
           </div>
         </div>
       </a-form-item>
@@ -325,7 +334,8 @@ import { message, Modal } from "ant-design-vue";
 import { i18n } from "@/lang/i18n";
 import { ReportFillStore } from "@/store/report_fill"
 import { useRoute } from 'vue-router'
-import { getStatusLabelColor, determineStatus } from "@/utils/helpers"
+import { getStatusLabelColor, determineStatus, ResulStatusesMap } from "@/utils/helpers"
+import { autoSaveAPI } from "@/utils/autoSave"
 const emits = defineEmits(["update:value", "updateCollector", "updateConclusionInspectResult", "clearFieldError", "validateImagesField"])
 const document = window.document
 const route = useRoute()
@@ -381,6 +391,18 @@ const orderedTargetIndexRef = ref(null)
 const orderedRecordIndexRef = ref(null)
 const isShowOrderedDialog = ref(false)
 
+
+const formatLabelName = (item:any) => {
+  if(!item.value == 'images') {
+    return item.label
+  } else {
+    if(item?.data?.length > 0) {
+      return `${item.label}`
+    } else {
+      return ""
+    }
+  }
+}
 
 const hasOrderedItems = (images: any) => {
   return images?.some((item: any) => item?.checked)
@@ -491,17 +513,17 @@ const autoUpdateDefectsResult = () => {
     'critical': {
       'found': 0,
       'allowed': store.defectsAllowedMap[defectTypeMap['critical']],
-      "status": "NotConform"
+      "status": "not_conformed"
     },
     'major': {
       'found': 0,
       'allowed': store.defectsAllowedMap[defectTypeMap['major']],
-      "status": "NotConform"
+      "status": "not_conformed"
     },
     'minor': {
       'found': 0,
       'allowed': store.defectsAllowedMap[defectTypeMap['minor']],
-      "status": "NotConform"
+      "status": "not_conformed"
     }
   }
   for (let record of itemData.dataRecords) {
@@ -516,17 +538,17 @@ const autoUpdateDefectsResult = () => {
   }
   for (let key in defectsResult) {
     if (defectsResult[key]['found'] > defectsResult[key]['allowed']) {
-      defectsResult[key]['status'] = 'NotConform'
+      defectsResult[key]['status'] = 'not_conformed'
     } else {
-      defectsResult[key]['status'] = 'Conform'
+      defectsResult[key]['status'] = 'conformed'
     }
   }
   itemData.defectsResult = defectsResult
   let allDefectStatus = Object.values(defectsResult).map(c => c.status)
-  if (allDefectStatus.includes('NotConform')) {
-    itemData.statusData.status = 'NotConform'
+  if (allDefectStatus.includes('not_conformed')) {
+    itemData.statusData.status = 'not_conformed'
   } else {
-    itemData.statusData.status = 'Conform'
+    itemData.statusData.status = 'conformed'
   }
 }
 
@@ -561,7 +583,9 @@ const onConclusionChangeStatus = (e) => {
   if (conclusionItemRef.value) {
     emits('updateConclusionInspectResult', props.item, itemData.statusData.status, itemData.statusData.remark)
   }
-  emits('update:value', exportValue())
+  let dataValue = exportValue()
+  emits('update:value', dataValue)
+  autoSave(dataValue)
 }
 
 const validateImagesField = (imageFieldId) => {
@@ -578,15 +602,15 @@ const validateRequired = (rule, value, callback) => {
   } else {
 
     let field = itemData.dataRecords[index].find(c => c.value === fieldType)
-    if (field && fieldType == 'images' && field?.data?.length === 0) {
-      result = false
+    if (field && fieldType == 'images') {
+      result = true
     } else {
       if (field && (field.data === '' || field.data === undefined || field.data === null)) {
         result = false
       }
     }
   }
-  console.log('result:', result)
+  console.log('validateRequired-result:', result)
   return new Promise((resolve, reject) => {
     if (result) {
       resolve(true)
@@ -609,7 +633,7 @@ const getDefectTypeOptions = (defect_types) => {
       value: item.value,
       disabled: false
     }
-    if(!defect_types.includes(item.value)) {
+    if(defect_types && !defect_types.includes(item.value)) {
       defectOption.disabled = true
     }
     options.push(defectOption)
@@ -737,10 +761,12 @@ const deleteImage = (field: any, item: any) => {
     zIndex: 1001,
     onOk() {
       field.data = field.data.filter(i => i.url !== item.url)
-      emits('update:value', exportValue())
+      let dataValue = exportValue()
+      emits('update:value', dataValue)
       if (field.value == 'images') {
         validateImagesField(`form-item-${field.value}-${itemData.dataRecords.indexOf(field)}`)
       }
+      autoSave(dataValue)
     },
     onCancel() {
     },
@@ -752,7 +778,9 @@ const handleRemarkOK = () => {
   targetEditImageRef.value.desc = imageRemarkRef.value
   targetEditImageRef.value = null
   imageRemarkRef.value = ''
-  emits('update:value', exportValue())
+  let dataValue = exportValue()
+  emits('update:value', dataValue)
+  autoSave(dataValue)
 }
 
 
@@ -764,7 +792,9 @@ const onClickDeleteRecord = (index: number) => {
     getContainer: () => document.body,
     onOk() {
       itemData.dataRecords.splice(index, 1)
-      emits('update:value', exportValue())
+      let dataValue = exportValue()
+      emits('update:value', dataValue)
+      autoSave(dataValue)
     },
     onCancel() {
       console.log('Cancel  button clicked');
@@ -915,38 +945,13 @@ const onDefectSelect = (e, field) => {
 //   return data
 // }
 
-const getFillSession = () => {
-  let fillSession = localStorage.getItem("fill_session")
-  if (fillSession) {
-    return JSON.parse(fillSession)
-  } else {
-    return null
-  }
-}
 
-const autoSave = async (dataValue: any) => {
+const autoSave = async (dataValue: any, targetItemKey: string = "") => {
   console.log('props?.mode:', props?.mode)
   if(props?.mode == 'review') {
     return
   }
-  let fillSession = getFillSession()
-  if (!fillSession) {
-    message.error(i18n.global.t('base.PleaseLoginFirst'))
-    return
-  }
-  try {
-    await store.apiFillSingle({
-      id: store.report.id,
-      values: { [props?.item?.key]: dataValue },
-      email: fillSession.email,
-      password: fillSession.password
-    })
-
-  } catch (e) {
-    console.error(e)
-    message.error(i18n.global.t('base.LoginFailByFillToken'))
-    return
-  }
+  autoSaveAPI(props?.item?.key, dataValue)
 }
 
 const exportValue = () => {

@@ -7,6 +7,86 @@ import { openNotification, successNotification } from '@/utils/notification';
 import dayjs from 'dayjs';
 const permissionInfoKey = "reportPermissionInfo"
 
+
+const formatDate = (date: any) => {
+  return dayjs(date).format('YYYY-MM-DD')
+}
+const formatDatetime = (date: any) => {
+  return dayjs(date).format('YYYY-MM-DD HH:mm')
+}
+const dateKeys = [
+  "DateOfInspection",
+]
+const datetimeKeys = [
+  "ArrivalTime",
+  "DepartureTime",
+]
+const insepctDetailsKeys = [
+  "ReportNumber",
+  "OrderQuantity",
+  "SampleSizeTotal",
+  "Applicant",
+  "Supplier",
+  "Factory",
+  "ItemNumber",
+  "ProductDescription",
+  "AddressOfInspection",
+  "DateOfInspection",
+  "ArrivalTime",
+  "DepartureTime",
+  "Inspector",
+  "InspectionStandard",
+  "GeneralInspectionLevel",
+  "SpecialInspectionLevel",
+  "SampleSize",
+  "InspectionType",
+  "ReInspectionType"
+]
+
+
+const generateInspectDetailRows = (formState: any) => {
+  let rows = []
+  // every 2 items in a row
+  let row = []
+  for (let key of Object.keys(formState)) {
+    if (insepctDetailsKeys.includes(key) == false) {
+      continue
+    }
+    if (dateKeys.includes(key)) {
+      row.push({
+        key: key,
+        value: formatDate(formState[key])
+      })
+    } else if (datetimeKeys.includes(key) && formState[key]) {
+      row.push({
+        key: key,
+        value: formatDatetime(formState[key])
+      })
+    } else {
+      row.push({
+        key: key,
+        value: formState[key]
+      })
+    }
+
+    if (row && row.length == 2) {
+      rows.push(row)
+      row = []
+    }
+  }
+
+  if (formState["AQL_CR"] || formState["AQL_MAJ"] || formState["AQL_MIN"]) {
+
+    if (rows[rows.length - 1]?.length == 1) {
+      rows[rows.length - 1].push({ key: 'AQL', value: `Cr: ${formState["AQL_CR"]} Maj: ${formState["AQL_MAJ"]} Min: ${formState["AQL_MIN"]}` })
+    } else {
+      rows.push([{ key: 'AQL', value: `Cr: ${formState["AQL_CR"]}, Maj: ${formState["AQL_MAJ"]}, Min: ${formState["AQL_MIN"]}` }])
+    }
+  }
+  return rows
+}
+
+
 export const ReportFillStore = defineStore('report_fill', {
   state: () => {
     return {
@@ -21,7 +101,8 @@ export const ReportFillStore = defineStore('report_fill', {
       formState: <any>{},
       isValidateForm: false,
       defectsAllowedMap: {},
-      aqlOptions: []
+      aqlOptions: [],
+      InspectDetailRows: []
     }
   },
   getters: {
@@ -73,6 +154,7 @@ export const ReportFillStore = defineStore('report_fill', {
             this.report = response.data?.data?.entity
             if (response.data?.data?.entity?.values) {
               let formState = response.data?.data?.entity?.values
+              console.log('formState****:', formState)
               this.formatReportformState(formState)
               this.formState = formState
             }
@@ -145,6 +227,8 @@ export const ReportFillStore = defineStore('report_fill', {
             formState["Inspector"] = this.report?.order?.workers.map(c => c.worker.name).join(',')
           }
         }
+        // this.InspectDetailRows = generateInspectDetailRows(formState)
+        console.log('this.InspectDetailRows:', this.InspectDetailRows)
       }
     },
     async apiGetForView(id: string) {
@@ -226,13 +310,29 @@ export const ReportFillStore = defineStore('report_fill', {
         })
         .finally(() => setPageLoading(false));
     },
+    async apiStaffSave(values: any) {
+      const { setPageLoading } = useLoadingStore();
+      setPageLoading(true)
+      let session = getSessionInfo()
+      let bodyJson: { id: any; values: any} = { id: this.report.id, values: values }
+      return http
+        .request('/platform/report_api/report/fill_by_staff', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .then((response) => {
+          if (response.data?.status) {
+            return response.data?.data;
+          } else {
+            return Promise.reject(response);
+          }
+        })
+        .finally(() => setPageLoading(false));
+    },
     async apiFillSingle(data: any) {
       const { setPageLoading } = useLoadingStore();
       setPageLoading(true)
       let session = getSessionInfo()
       let bodyJson = { ...data }
       return http
-        .request('/platform/report_api/report/fill_single', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
+        .request('/platform/report_api/report/fill_single2', 'post_json', bodyJson, { headers: { rsessionid: session.sessionid } })
         .then((response) => {
           console.log('response:', response.data)
           if (response.data?.status) {

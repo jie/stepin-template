@@ -6,11 +6,23 @@
         <div v-for="(item, index) in itemData?.conclusions" class="conclusion-item flex">
           <div class="flex-1">
             <div>{{ item.title }}</div>
-            <a-tag v-if="statusColorMap[item?.status]" :color="statusColorMap[item?.status]">{{
-              $t(`base.${item?.status}`) }}</a-tag>
+            <div v-if="readonlyRef" style="font-weight: bold;">{{ $t(`base.${item?.status}`) }}</div>
+            <div v-else> <a-tag v-if="statusColorMap[item?.status]" :color="statusColorMap[item?.status]">{{
+              $t(`base.${item?.status}`) }} </a-tag></div>
             <div v-if="item?.remark" class="item-remark">{{ item?.remark }}</div>
-            <div class="conclusion-item-remarkItems" v-if="props.mode=='review' && props.collectorData[props?.item?.key] && props.collectorData[props?.item?.key][item.key]">
-              <div v-for="remarkItem of props.collectorData[props?.item?.key][item.key]" class="conclusion-item-remarkItem" @click="goCollectorAnchor(remarkItem.collectorKey)">{{ remarkItem.remark }}</div>
+            <!-- <div class="conclusion-item-remarkItems" v-if="props.mode=='review' && props.collectorData['statusResult'][props?.item?.key] && props.collectorData['statusResult'][props?.item?.key][item.key]">
+              <div class="conclusion-item-remarkItem">{{ props.collectorData['statusResult'][props?.item?.key][item.key] }}
+
+                <a-tag v-if="statusColorMap[props.collectorData['statusResult'][props?.item?.key][item.key]]" :color="statusColorMap[props.collectorData['statusResult'][props?.item?.key][item.key]]">{{
+              $t(`base.${props.collectorData['statusResult'][props?.item?.key][item.key]}`) }}</a-tag>
+
+              </div>
+            </div> -->
+            <div class="conclusion-item-remarkItems"
+              v-if="props.mode == 'review' && props.collectorData && props?.collectorData['remarkResult'][props?.item?.key] && props?.collectorData['remarkResult'][props?.item?.key][item.key]">
+              <div v-for="remarkItem of props.collectorData['remarkResult'][props?.item?.key][item.key]"
+                class="conclusion-item-remarkItem" @click="goCollectorAnchor(remarkItem.collectorKey)">{{
+                remarkItem.remark }}</div>
             </div>
           </div>
           <div class="buttons w-1/4 flex justify-end" v-if="!readonlyRef">
@@ -48,11 +60,12 @@
 </template>
 <script lang="ts" setup>
 import BaseSlot from "../base_slot.vue"
-import { defineProps, ref, PropType, reactive, toRaw, readonly } from 'vue'
+import { defineProps, ref, PropType, reactive, toRaw, readonly, watchEffect, watch } from 'vue'
 import Icon, { CheckSquareOutlined, CloseCircleFilled } from '@ant-design/icons-vue';
 import { MessageOutlined } from '@ant-design/icons-vue';
 import { MessageOutlinedIconType } from "@ant-design/icons-vue/lib/icons/MessageOutlined";
 import { getStatusLabelColor, statusColorMap } from "@/utils/helpers"
+import { autoSaveAPI } from "@/utils/autoSave"
 import { useRoute } from "vue-router";
 const document = window.document
 const isShowStatusDialog = ref(false)
@@ -92,7 +105,7 @@ const statusForm = reactive({
 })
 
 
-const goCollectorAnchor = (key: string)=>{
+const goCollectorAnchor = (key: string) => {
   emits('goCollectorAnchor', key)
 }
 
@@ -162,6 +175,7 @@ const initialization = () => {
   }
 }
 
+
 initialization()
 defineExpose({
   props,
@@ -194,13 +208,16 @@ defineExpose({
 .status-conformed {
   color: green;
 }
+
 .conclusion-item-remarkItems {
   font-size: 12px;
   margin-top: 10px;
 }
+
 .conclusion-item-remarkItem {
   margin-top: 10px;
 }
+
 .conclusion-item-remarkItem:hover {
   text-decoration: underline;
 }

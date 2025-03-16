@@ -236,3 +236,11 @@ export const determineStatus = (arr) => {
   return 'unknown';
 }
 
+
+
+export const ResulStatusesMap = {
+  "conformed": "Conformed",
+  "not_conformed": "Not Conformed",
+  "pending": "Pending",
+  "not_applicable": "Not Applicable",
+}
