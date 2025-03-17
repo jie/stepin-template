@@ -67,7 +67,7 @@
               v-for="(record, index) in itemData.dataRecords"> -->
               <div class="record" v-for="(record, index) in itemData.dataRecords">
                 <div class="record-fields" v-for="field in record" :id="`${field.value}-${index}-${props.item.key}`">
-                  <a-form-item :label="formatLabelName(field)" :name="`${field.value}-${index}-${props.item.key}`"
+                  <a-form-item :label="field.label" :name="`${field.value}-${index}-${props.item.key}`"
                     :rules="[{ required: isFieldRequire(field), message: $t('base.pleaseSetFieldValue', { 'label': field.label }), validator: validateRequired, trigger: 'change' }]">
                     <div class="field" v-if="field.value == 'item_number'">
                       <div v-if="!readonlyRef">
