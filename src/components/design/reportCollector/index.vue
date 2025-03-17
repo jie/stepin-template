@@ -90,14 +90,14 @@
                       <div v-if="!readonlyRef">
                         <a-select v-model:value="field.data" style="width: 100%"
                           :getPopupContainer="triggerNode => triggerNode.parentNode" @change="onChangeStatus">
-                          <a-select-option v-for="option in conclusionRef?.data?.options" :key="option.value"
+                          <a-select-option v-for="option in statusOptions" :key="option.value"
                             :value="option.value">
                             {{ option.label }}
                           </a-select-option>
                         </a-select>
                       </div>
                       <div v-else><a-tag :color="getStatusLabelColor(record)">{{
-                        conclusionRef?.data?.options?.find(o => o.value == field?.data)?.label }}</a-tag></div>
+                        statusOptions?.find(o => o.value == field?.data)?.label }}</a-tag></div>
                     </div>
                     <div class="field" v-else-if="field.value == 'remark'">
                       <div>
@@ -390,6 +390,11 @@ const autoGenerateNumberSize = ref(null)
 const orderedTargetIndexRef = ref(null)
 const orderedRecordIndexRef = ref(null)
 const isShowOrderedDialog = ref(false)
+
+const statusOptions = computed(() => {
+  return conclusionRef?.data?.options || [
+    {'label': 'Conformed', 'value':'conformed'}, {'label': 'Not Conformed', 'value':'not_conformed'}, {'label':'Pending', 'value':'pending'}, {'label': 'Not Applicable', 'value':'not_applicable'}]
+})
 
 
 const formatLabelName = (item:any) => {
