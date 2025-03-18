@@ -6,6 +6,7 @@ import { Pagination, statusFormSchema } from "@/types"
 import { openNotification, successNotification } from '@/utils/notification';
 import dayjs from 'dayjs';
 const permissionInfoKey = "reportPermissionInfo"
+import { toRaw } from 'vue';
 
 
 const formatDate = (date: any) => {
@@ -182,14 +183,19 @@ export const ReportFillStore = defineStore('report_fill', {
         if (this.report.values["DateOfInspection"]) {
           formState["DateOfInspection"] = dayjs(this.report.values["DateOfInspection"])
         }
-        formState["ArrivalTime"] = ""
-        if (this.report.values["ArrivalTime"]) {
-          formState["ArrivalTime"] = dayjs(this.report.values["ArrivalTime"])
-        }
-        formState["DepartureTime"] = ""
-        if (this.report.values["DepartureTime"]) {
-          formState["DepartureTime"] = dayjs(this.report.values["DepartureTime"])
-        }
+        // formState["ArrivalTime"] = ""
+        // console.log('this.report.values:', toRaw(this.report.values))
+        // console.log('this.report.values["ArrivalTime"]:', this.report.values["ArrivalTime"])
+        // console.log('this.report.values["DepartureTime"]:', this.report.values["DepartureTime"])
+        // if (this.report.values["ArrivalTime"]) {
+        //   formState["ArrivalTime"] = dayjs(this.report.values["ArrivalTime"])
+        // }
+        // formState["DepartureTime"] = ""
+        // if (this.report.values["DepartureTime"]) {
+        //   formState["DepartureTime"] = dayjs(this.report.values["DepartureTime"])
+        // }
+        formState["ArrivalTime"] = this.report.values["ArrivalTime"] ? dayjs(this.report.values["ArrivalTime"]) : ''
+        formState["DepartureTime"] = this.report.values["DepartureTime"] ? dayjs(this.report.values["DepartureTime"]) : ''
         formState["Inspector"] = this.report.values["Inspector"] || ""
         if (this.report.order) {
           // if (!formState["ReportNumber"]) {

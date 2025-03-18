@@ -154,7 +154,9 @@
                           <a-row type="flex" :gutter="[16, 16]">
                             <a-col v-for="(item, imageIndex) in field.data" :key="item.url" :span="8">
                               <div :style="{width: '100%', 'aspect-ratio': readonlyRef ? 'auto': '1 / 1'}" >
-                                <a-image :src="item.url"
+                                <a-image v-if="pdfmodeRef" :src="`${item.url}?x-oss-process=image/resize,w_300`"
+                                  style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
+                                <a-image v-else :src="item.url"
                                   style="width: 100%; aspect-ratio: 1 / 0.6; object-fit: cover;" />
                                 <div v-if="item.desc" style="font-size: 12px">{{ item.desc }}</div>
                                 <div class="flex pt-2" style="justify-content: space-around;" v-if="!readonlyRef">
@@ -341,6 +343,7 @@ const document = window.document
 const route = useRoute()
 const reportTemplateStore = ReportTemplateStore()
 const readonlyRef = ref(route.path.includes('/customer_report/'))
+const pdfmodeRef = ref(route.query.mode === 'pdf')
 const defectOptions = ref([])
 // const dataSchema = ref([])
 // const dataRecords = ref([])

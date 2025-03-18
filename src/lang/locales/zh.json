@@ -382,6 +382,7 @@
         "AutoSave": "自动保存",
         "ConclusionOnTop": "在顶部汇总结论",
         "please_set_worker_email_on_order_system": "请先在订单系统设置检验员邮箱",
-        "IsHideDetails": "是否隐藏明细"
+        "IsHideDetails": "是否隐藏明细",
+        "open_pdf_mode": "打开打印模式"
     }
 }

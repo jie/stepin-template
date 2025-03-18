@@ -590,6 +590,10 @@ const onClickShowSendToWorkerModal = async (record: Report) => {
   sendToWorkerForm.url = `${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/fill/${record.id}`
 }
 
+const onPdfPrintMode = (record: Report) => {
+  window.open(`${import.meta.env.VITE_QYWX_API_HOST}/report_system/public/report/customer_report/${record.id}?mode=pdf`)
+}
+
 const onClickReloadSchema = async (record: any) => {
   Modal.confirm({
     content: i18n.global.t('base.confirm_reload_schema'),
@@ -1418,6 +1422,12 @@ initializeData(true)
                   <a @click="goCustomerReviewReport(record)" rel="noopener noreferrer">
                     <LinkOutlined />
                     {{ $t('base.CustomerViewReport') }}
+                  </a>
+                </a-menu-item>
+                <a-menu-item key="9" v-if="!record.is_thirdparty">
+                  <a @click="onPdfPrintMode(record)" rel="noopener noreferrer">
+                    <LinkOutlined />
+                    {{ $t('base.open_pdf_mode') }}
                   </a>
                 </a-menu-item>
                 <a-menu-item key="7">

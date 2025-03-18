@@ -382,6 +382,7 @@
         "AutoSave": "Auto Save",
         "ConclusionOnTop": "Conclusion On Top",
         "please_set_worker_email_on_order_system": "Please set the inspector's E-smail on the order system",
-        "IsHideDetails": "Is Hide Details"
+        "IsHideDetails": "Is Hide Details",
+        "open_pdf_mode": "Open Print Mode"
     }
 }

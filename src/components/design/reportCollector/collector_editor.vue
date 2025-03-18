@@ -46,7 +46,6 @@
           <a-form-item :label="$t('base.hasSampleSize')" name="hasSampleSize">
             <a-switch v-model:checked="itemData.hasSampleSize" />
           </a-form-item>
-
           <a-form-item :label="$t('base.AutoGetResult')" name="auto_result">
             <a-switch v-model:checked="itemData.auto_result" />
           </a-form-item>
