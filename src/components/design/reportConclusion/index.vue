@@ -19,7 +19,7 @@
               </div>
             </div> -->
             <div class="conclusion-item-remarkItems"
-              v-if="props.mode == 'review' && props.collectorData && props?.collectorData['remarkResult'][props?.item?.key] && props?.collectorData['remarkResult'][props?.item?.key][item.key]">
+              v-if="!props?.item?.data?.conclusions?.find(c=>c?.key == item?.key)?.isHideDetails && props.mode == 'review' && props.collectorData && props?.collectorData['remarkResult'][props?.item?.key] && props?.collectorData['remarkResult'][props?.item?.key][item.key]">
               <div v-for="remarkItem of props.collectorData['remarkResult'][props?.item?.key][item.key]"
                 class="conclusion-item-remarkItem" @click="goCollectorAnchor(remarkItem.collectorKey)">{{
                 remarkItem.remark }}</div>

@@ -98,6 +98,9 @@
         <a-form-item :label="$t('base.hasStatus')" name="hasStatus">
           <a-switch v-model:checked="conclusionFormData.hasStatus"></a-switch>
         </a-form-item>
+        <a-form-item :label="$t('base.IsHideDetails')" name="isHideDetails">
+          <a-switch v-model:checked="conclusionFormData.isHideDetails"></a-switch>
+        </a-form-item>
         <a-form-item :label="$t('base.hasImages')" name="hasImages">
           <a-switch v-model:checked="conclusionFormData.hasImages"></a-switch>
         </a-form-item>
@@ -149,7 +152,8 @@ const conclusionFormData = reactive({
   hasRemarks: true,
   isDefect: false,
   hasItemNumber: true,
-  hasSampleSize: true
+  hasSampleSize: true,
+  isHideDetails: false
 })
 
 const optionFormData = reactive({
@@ -238,6 +242,7 @@ const resetConclusionFormData = () => {
   conclusionFormData.isDefect = false
   conclusionFormData.hasItemNumber = true
   conclusionFormData.hasSampleSize = true
+  conclusionFormData.isHideDetails = false
 }
 
 const onClickAction = (type: string, text: string, index) => {
@@ -285,6 +290,7 @@ const onClickEditConclusion = () => {
   conclusionFormData.isDefect = conclusion.isDefect
   conclusionFormData.hasItemNumber = conclusion.hasItemNumber
   conclusionFormData.hasSampleSize = conclusion.hasSampleSize
+  conclusionFormData.isHideDetails = conclusion.isHideDetails
   conclusionFormData.key = conclusion.key
 }
 
