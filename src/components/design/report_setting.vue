@@ -29,7 +29,6 @@
                     <a-input v-model:value="reportTemplateStore.reportTemplate.settings.ReportResultLabel" />
                 </a-form-item>
             </div>
-
             <div class="flex">
                 <a-form-item :label="$t('base.Applicant')" name="Applicant">
                     <a-switch v-model:checked="reportTemplateStore.reportTemplate.settings.Applicant" />

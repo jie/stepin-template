@@ -59,3 +59,8 @@ export class ReportCollector extends BaseComponent {
     defaultData = ""
 }
 
+export class ReportSignature extends BaseComponent {
+    type = "signature"
+    defaultData = ""
+}
+

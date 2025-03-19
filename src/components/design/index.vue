@@ -122,6 +122,14 @@
           </div>
           <reportContainer :item="item" ref="itemRefs"></reportContainer>
         </div>
+        <div class="component" :class="{ current: currentEditItem && currentEditItem.key == item.key }"
+          @click="onSetCurrentCom(item)" v-else-if="item.type == 'signature'">
+          <div class="options">
+            <ComMenu :item="item" v-on:on-edit-component="onEditCom(item)"
+              v-on:on-add-component="onAddAfterComponent(item)" v-on:on-del-component="onDelComponent(item)" v-on:on-move-down-component="onMoveDownComponent" v-on:on-move-up-component="onMoveUpComponent" />
+          </div>
+          <reportSignature :item="item" ref="itemRefs"></reportSignature>
+        </div>
 
         <div v-else>unsupported components</div>
       </div>
@@ -148,6 +156,7 @@
         <ContainerEditor ref="containerEditor" v-else-if="currentEditItem?.type == 'container'" />
         <ConclusionEditor ref="conclusionEditor" v-else-if="currentEditItem?.type == 'conclusion'" />
         <CollectorEditor ref="collectorEditor" v-else-if="currentEditItem?.type == 'collector'" />
+        <SignatureEditor ref="signatureEditor" v-else-if="currentEditItem?.type == 'signature'" />
       </div>
     </a-spin>
 
@@ -183,6 +192,7 @@ import ImageUploadEditor from "./reportImageUpload/image_upload_editor.vue"
 import ContainerEditor from "./reportContainer/container_editor.vue"
 import CollectorEditor from "./reportCollector/collector_editor.vue"
 import ConclusionEditor from "./reportConclusion/conclusion_editor.vue"
+import SignatureEditor from "./signature/signature_editor.vue"
 import reportTable from "./reportTable/index.vue"
 import reportText from "./reportText/index.vue"
 import reportInput from "./reportInput/index.vue"
@@ -194,6 +204,7 @@ import reportImageUpload from "./reportImageUpload/index.vue"
 import reportConclusion from "./reportConclusion/index.vue"
 import reportCollector from "./reportCollector/index.vue"
 import reportContainer from "./container.vue"
+import reportSignature from "./signature/index.vue"
 import {
   ReportTitle,
   ReportInput,
@@ -205,7 +216,8 @@ import {
   ReportCheckbox,
   ReportContainer,
   ReportConclusion,
-  ReportCollector
+  ReportCollector,
+  ReportSignature
 } from "@/types/components"
 import { ReportFillStore } from '@/store/report_fill';
 import { ReportTemplateStore } from "@/store/reportTemplate"
@@ -236,6 +248,7 @@ const imageEditor = ref(null)
 const imageUploadEditor = ref(null)
 const conclusionEditor = ref(null)
 const collectorEditor = ref(null)
+const signatureEditor = ref(null)
 const itemRefs = ref([])
 const store = ReportFillStore()
 const currentEditItem = ref(null)
@@ -291,6 +304,10 @@ const onOpenEditor = (item: any) => {
       case 'collector':
         currentEditRef.value = collectorEditor.value
         collectorEditor.value.initializeData(item)
+        break;
+      case 'signature':
+        currentEditRef.value = signatureEditor.value
+        signatureEditor.value.initializeData(item)
         break;
       case 'container':
         break;
@@ -366,6 +383,9 @@ const onAddComponent = (com: any) => {
     case "collector":
       newItem = new ReportCollector(com.com.defaultData)
       break
+    case "signature":
+      newItem = new ReportSignature(com.com.defaultData)
+      break
     default:
       break
   }
@@ -419,6 +439,9 @@ const onAddAfterComponent = (item: any) => {
       break
     case "collector":
       newItem = new ReportCollector(item)
+      break
+    case "signature":
+      newItem = new ReportSignature(item)
       break
     default:
       break

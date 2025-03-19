@@ -12,7 +12,7 @@
 
 <script lang="ts" setup>
 import { defineEmits, defineProps, ref, h } from 'vue';
-import { BorderOutlined, GoldOutlined, FileDoneOutlined, FieldStringOutlined, TableOutlined, ExpandOutlined, CheckSquareOutlined, CheckCircleOutlined, FileImageOutlined, UploadOutlined } from '@ant-design/icons-vue';
+import { BorderOutlined, GoldOutlined, FileDoneOutlined, FieldStringOutlined, TableOutlined, ExpandOutlined, CheckSquareOutlined, CheckCircleOutlined, FileImageOutlined, UploadOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { i18n } from '@/lang/i18n';
 // const item = {
 //     icon: BorderOutlined
@@ -24,14 +24,14 @@ const items = ref([
     type: 'input',
     icon: h(BorderOutlined, {
     }),
-    defaultData: { title: "Here is the title", sort: "0", desc: "Here is the description", type: "input", data: {value: ""} }
+    defaultData: { title: "Here is the title", sort: "0", desc: "", type: "input", data: {value: ""} }
   },
   {
     name: i18n.global.t('base.InputGroup'),
     type: 'input_group',
     icon: h(BorderOutlined, {
     }),
-    defaultData: { title: "Here is the title", sort: "0", desc: "Here is the description", type: "input_group", data: {value: [], hasAddRowButton: false} }
+    defaultData: { title: "Here is the title", sort: "0", desc: "", type: "input_group", data: {value: [], hasAddRowButton: false} }
   },
   {
     name: 'Text',
@@ -46,7 +46,7 @@ const items = ref([
     icon: h(CheckCircleOutlined, {
     }),
     defaultData: {
-      title: "Here is the radio", sort: "0", desc: "Here is the description", type: "radio", data: {
+      title: "Here is the radio", sort: "0", desc: "", type: "radio", data: {
         options: [
           { label: 'Option 1', value: '1' },
           { label: 'Option 2', value: '2' },
@@ -65,7 +65,7 @@ const items = ref([
     icon: h(CheckSquareOutlined, {
     }),
     defaultData: {
-      title: "Here is the checkbox", sort: "0", desc: "Here is the description", type: "checkbox", data: {
+      title: "Here is the checkbox", sort: "0", desc: "", type: "checkbox", data: {
         options: [
           { label: 'Option 1', value: '1' },
           { label: 'Option 2', value: '2' },
@@ -84,7 +84,7 @@ const items = ref([
     icon: h(TableOutlined, {
     }),
     defaultData: {
-      title: "Here is the table", sort: "0", desc: "Here is the description", type: "table", data: {
+      title: "Here is the table", sort: "0", desc: "", type: "table", data: {
         pageSize: 0,
         addRowCount: 1,
         columns: [{
@@ -115,7 +115,7 @@ const items = ref([
     }),
     defaultData: {
 
-      title: "Here is the image", sort: "0", desc: "Here is the description", type: "image", data: {
+      title: "Here is the image", sort: "0", desc: "", type: "image", data: {
         images: [
           // {
           //   width: 240,
@@ -138,28 +138,35 @@ const items = ref([
     type: 'upload',
     icon: h(UploadOutlined, {
     }),
-    defaultData: { title: "Here is the image upload", sort: "0", desc: "Here is the description", type: "image_upload" }
+    defaultData: { title: "Here is the image upload", sort: "0", desc: "", type: "image_upload" }
   },
   {
     name: i18n.global.t('base.Conclusion'),
     type: 'Conclusion',
     icon: h(FileDoneOutlined, {
     }),
-    defaultData: { title: "Here is the Conclusion", sort: "0", desc: "Here is the description", type: "conclusion" }
+    defaultData: { title: "Here is the Conclusion", sort: "0", desc: "", type: "conclusion" }
   },
   {
     name: i18n.global.t('base.Collector'),
     type: 'Collector',
     icon: h(GoldOutlined, {
     }),
-    defaultData: { title: "Here is the Collector", sort: "0", desc: "Here is the description", type: "collector" }
+    defaultData: { title: "Here is the Collector", sort: "0", desc: "", type: "collector" }
+  },
+  {
+    name: i18n.global.t('base.Signature'),
+    type: 'Signature',
+    icon: h(EditOutlined, {
+    }),
+    defaultData: { title: "Here is the Signature", sort: "0", desc: "", type: "signature" }
   },
   // {
   //   name: 'Container',
   //   type: 'container',
   //   icon: h(ExpandOutlined, {
   //   }),
-  //   defaultData: { title: "Here is the Container", sort: "0", desc: "Here is the description", type: "container" }
+  //   defaultData: { title: "Here is the Container", sort: "0", desc: "", type: "container" }
   // }
 ])
 
